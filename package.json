@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "postinstall": "prisma generate",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "node --env-file=.env --import tsx prisma/seed.ts",
     "prisma:check": "node --env-file=.env --import tsx prisma/sanity-check.ts",
     "prisma:check:bundle-payment": "node --env-file=.env --import tsx prisma/verify-bundle-payment.ts"

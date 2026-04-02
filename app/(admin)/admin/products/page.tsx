@@ -1,0 +1,140 @@
+import Link from "next/link";
+import { prisma } from "@/lib/db/prisma";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { Card } from "@/components/ui/card";
+
+export const dynamic = "force-dynamic";
+
+type ProductRow = {
+  id: string;
+  type: "Course" | "Bundle";
+  title: string;
+  owner: string;
+  status: string;
+  price: string;
+  updatedAt: Date;
+  editHref: string;
+  viewHref: string;
+};
+
+export default async function AdminProductsPage() {
+  const [courses, bundles] = await Promise.all([
+    prisma.course.findMany({
+      include: {
+        instructor: true,
+        offers: {
+          where: { isPublished: true },
+          take: 1,
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    }),
+    prisma.bundle.findMany({
+      include: {
+        offers: {
+          where: { isPublished: true },
+          take: 1,
+        },
+        courses: {
+          include: {
+            course: {
+              include: {
+                instructor: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    }),
+  ]);
+
+  const products: ProductRow[] = [
+    ...courses.map((course) => ({
+      id: course.id,
+      type: "Course" as const,
+      title: course.title,
+      owner: course.instructor.name,
+      status: course.status,
+      price: course.offers[0]?.price?.toString() ?? "-",
+      updatedAt: course.updatedAt,
+      editHref: `/admin/courses/${course.id}`,
+      viewHref: course.publicPath ?? `/course/${course.slug}`,
+    })),
+    ...bundles.map((bundle) => ({
+      id: bundle.id,
+      type: "Bundle" as const,
+      title: bundle.title,
+      owner:
+        bundle.courses.length > 0
+          ? `${bundle.courses.length} course${bundle.courses.length === 1 ? "" : "s"}`
+          : "No courses yet",
+      status: bundle.status,
+      price: bundle.offers[0]?.price?.toString() ?? "-",
+      updatedAt: bundle.updatedAt,
+      editHref: `/admin/bundles/${bundle.id}`,
+      viewHref: bundle.publicPath ?? `/bundle/${bundle.slug}`,
+    })),
+  ].sort((left, right) => right.updatedAt.getTime() - left.updatedAt.getTime());
+
+  return (
+    <AdminShell
+      title="Products"
+      description="Manage the sellable catalog from one place while keeping course and bundle editing distinct."
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-3 text-sm text-stone-600">
+          <span className="rounded-full border border-[var(--border)] bg-[rgba(255,252,247,0.78)] px-4 py-2">
+            {courses.length} course{courses.length === 1 ? "" : "s"}
+          </span>
+          <span className="rounded-full border border-[var(--border)] bg-[rgba(255,252,247,0.78)] px-4 py-2">
+            {bundles.length} bundle{bundles.length === 1 ? "" : "s"}
+          </span>
+        </div>
+        <Link href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+          Add new product
+        </Link>
+      </div>
+
+      <Card className="overflow-hidden p-0">
+        <table>
+          <thead className="bg-stone-50 text-stone-500">
+            <tr>
+              <th>Type</th>
+              <th>Title</th>
+              <th>Owner / Contents</th>
+              <th>Status</th>
+              <th>Price</th>
+              <th>Updated</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product) => (
+              <tr key={`${product.type}-${product.id}`}>
+                <td>
+                  <span className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-600">
+                    {product.type}
+                  </span>
+                </td>
+                <td>{product.title}</td>
+                <td>{product.owner}</td>
+                <td>{product.status}</td>
+                <td>{product.price}</td>
+                <td>{product.updatedAt.toLocaleDateString()}</td>
+                <td className="space-x-3">
+                  <Link href={product.viewHref} className="underline">
+                    View
+                  </Link>
+                  <Link href={product.editHref} className="underline">
+                    Edit
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+    </AdminShell>
+  );
+}

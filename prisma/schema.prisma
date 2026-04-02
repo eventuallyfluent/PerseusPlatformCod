@@ -1,0 +1,424 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LessonStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum LessonType {
+  VIDEO
+  TEXT
+  DOWNLOAD
+  MIXED
+}
+
+enum OfferType {
+  ONE_TIME
+  SUBSCRIPTION
+  PAYMENT_PLAN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  CANCELED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum ImportType {
+  INSTRUCTORS
+  COURSES
+  LESSONS
+  OFFERS
+}
+
+enum ImportStatus {
+  DRAFT
+  DRY_RUN
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id             String        @id @default(cuid())
+  email          String        @unique
+  name           String?
+  passwordHash   String?
+  emailVerified  DateTime?
+  image          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  enrollments    Enrollment[]
+  orders         Order[]
+  accounts       Account[]
+  sessions       Session[]
+}
+
+model Instructor {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  imageUrl     String?
+  shortBio     String?
+  longBio      String?
+  websiteUrl   String?
+  youtubeUrl   String?
+  instagramUrl String?
+  xUrl         String?
+  facebookUrl  String?
+  discordUrl   String?
+  telegramUrl  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  courses      Course[]
+}
+
+model Course {
+  id               String         @id @default(cuid())
+  slug             String         @unique
+  title            String
+  subtitle         String?
+  shortDescription String?
+  longDescription  String?
+  learningOutcomes Json?
+  whoItsFor        Json?
+  includes         Json?
+  heroImageUrl     String?
+  salesVideoUrl    String?
+  status           CourseStatus   @default(DRAFT)
+  legacyCourseId   String?        @unique
+  legacySlug       String?
+  legacyUrl        String?        @unique
+  publicPath       String?        @unique
+  seoTitle         String?
+  seoDescription   String?
+  instructorId     String
+  instructor       Instructor     @relation(fields: [instructorId], references: [id])
+  modules          Module[]
+  offers           Offer[]
+  faqs             FAQ[]
+  testimonials     Testimonial[]
+  enrollments      Enrollment[]
+  pages            GeneratedPage[]
+  bundleCourses    BundleCourse[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model Bundle {
+  id               String         @id @default(cuid())
+  slug             String         @unique
+  title            String
+  subtitle         String?
+  shortDescription String?
+  longDescription  String?
+  learningOutcomes Json?
+  whoItsFor        Json?
+  includes         Json?
+  heroImageUrl     String?
+  salesVideoUrl    String?
+  status           CourseStatus   @default(DRAFT)
+  legacyUrl        String?        @unique
+  publicPath       String?        @unique
+  seoTitle         String?
+  seoDescription   String?
+  courses          BundleCourse[]
+  offers           Offer[]
+  faqs             FAQ[]
+  testimonials     Testimonial[]
+  pages            GeneratedPage[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model BundleCourse {
+  id       String @id @default(cuid())
+  bundleId String
+  courseId String
+  position Int
+  bundle   Bundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([bundleId, courseId])
+  @@unique([bundleId, position])
+}
+
+model Module {
+  id       String   @id @default(cuid())
+  courseId String
+  title    String
+  position Int
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons  Lesson[]
+
+  @@unique([courseId, position])
+}
+
+model Lesson {
+  id            String       @id @default(cuid())
+  moduleId      String
+  slug          String
+  title         String
+  position      Int
+  status        LessonStatus @default(DRAFT)
+  type          LessonType
+  content       String?
+  videoUrl      String?
+  downloadUrl   String?
+  isPreview     Boolean      @default(false)
+  dripDays      Int?
+  durationLabel String?
+  module        Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([moduleId, position])
+  @@unique([moduleId, slug])
+}
+
+model Offer {
+  id             String      @id @default(cuid())
+  courseId       String?
+  bundleId       String?
+  name           String
+  type           OfferType
+  price          Decimal     @db.Decimal(10, 2)
+  currency       String
+  compareAtPrice Decimal?    @db.Decimal(10, 2)
+  isPublished    Boolean     @default(false)
+  checkoutPath   String?     @unique
+  course         Course?     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  bundle         Bundle?     @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  prices         Price[]
+  orders         Order[]
+}
+
+model Price {
+  id              String   @id @default(cuid())
+  offerId         String
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String
+  billingInterval String?
+  billingCount    Int?
+  isDefault       Boolean  @default(true)
+  offer           Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+}
+
+model Enrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  enrolledAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model Order {
+  id              String       @id @default(cuid())
+  userId          String?
+  offerId         String
+  status          OrderStatus  @default(PENDING)
+  totalAmount     Decimal      @db.Decimal(10, 2)
+  currency        String
+  externalOrderId String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  user            User?        @relation(fields: [userId], references: [id])
+  offer           Offer        @relation(fields: [offerId], references: [id])
+  payments        Payment[]
+  subscription    Subscription?
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String
+  gatewayId         String
+  status            PaymentStatus @default(PENDING)
+  amount            Decimal       @db.Decimal(10, 2)
+  currency          String
+  externalPaymentId String?
+  rawEvent          Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  order             Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  gateway           Gateway       @relation(fields: [gatewayId], references: [id])
+}
+
+model Subscription {
+  id                     String             @id @default(cuid())
+  orderId                String             @unique
+  gatewayId              String
+  status                 SubscriptionStatus @default(ACTIVE)
+  externalSubscriptionId String?
+  startedAt              DateTime           @default(now())
+  endedAt                DateTime?
+  order                  Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  gateway                Gateway            @relation(fields: [gatewayId], references: [id])
+}
+
+model Coupon {
+  id         String   @id @default(cuid())
+  code       String   @unique
+  amountOff  Decimal? @db.Decimal(10, 2)
+  percentOff Int?
+  isActive   Boolean  @default(true)
+  expiresAt  DateTime?
+}
+
+model FAQ {
+  id       String  @id @default(cuid())
+  courseId String?
+  bundleId String?
+  question String
+  answer   String
+  position Int
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  bundle   Bundle? @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+}
+
+model Testimonial {
+  id       String  @id @default(cuid())
+  courseId String?
+  bundleId String?
+  name     String?
+  quote    String
+  position Int
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  bundle   Bundle? @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+}
+
+model GeneratedPage {
+  id               String   @id @default(cuid())
+  courseId         String?
+  bundleId         String?
+  pageType         String
+  path             String   @unique
+  templateVersion  String
+  generatedPayload Json
+  isOverrideActive Boolean  @default(false)
+  overridePayload  Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  course           Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  bundle           Bundle?  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+}
+
+model Gateway {
+  id            String              @id @default(cuid())
+  provider      String              @unique
+  displayName   String
+  isActive      Boolean             @default(false)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  credentials   GatewayCredential[]
+  webhookEvents WebhookEvent[]
+  payments      Payment[]
+  subscriptions Subscription[]
+}
+
+model GatewayCredential {
+  id             String   @id @default(cuid())
+  gatewayId      String
+  key            String
+  valueEncrypted String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  gateway        Gateway  @relation(fields: [gatewayId], references: [id], onDelete: Cascade)
+
+  @@unique([gatewayId, key])
+}
+
+model WebhookEvent {
+  id              String   @id @default(cuid())
+  gatewayId       String
+  eventType       String
+  externalEventId String?
+  canonicalEvent  String?
+  payload         Json
+  processedAt     DateTime?
+  createdAt       DateTime @default(now())
+  gateway         Gateway  @relation(fields: [gatewayId], references: [id], onDelete: Cascade)
+}
+
+model Redirect {
+  id         String   @id @default(cuid())
+  fromPath   String   @unique
+  toPath     String
+  statusCode Int      @default(301)
+  createdAt  DateTime @default(now())
+}
+
+model ImportBatch {
+  id               String       @id @default(cuid())
+  type             ImportType
+  status           ImportStatus @default(DRAFT)
+  filename         String
+  sourceContent    String?
+  dryRunSummary    Json?
+  executionSummary Json?
+  errorReport      Json?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionToken])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@id([identifier, token])
+}

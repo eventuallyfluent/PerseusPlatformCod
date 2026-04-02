@@ -1,0 +1,415 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/db/prisma";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { Card } from "@/components/ui/card";
+import { ProductFormSection } from "@/components/admin/product-form-shell";
+import {
+  deleteBundleAction,
+  deleteFaqAction,
+  deleteOfferAction,
+  deleteTestimonialAction,
+  saveBundleAction,
+  saveBundleCoursesAction,
+  saveFaqAction,
+  saveOfferAction,
+  saveTestimonialAction,
+} from "@/app/(admin)/admin/actions";
+
+export const dynamic = "force-dynamic";
+
+export default async function BundleDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const [bundle, allCourses] = await Promise.all([
+    prisma.bundle.findUnique({
+      where: { id },
+      include: {
+        courses: {
+          include: {
+            course: true,
+          },
+          orderBy: { position: "asc" },
+        },
+        offers: true,
+        faqs: { orderBy: { position: "asc" } },
+        testimonials: { orderBy: { position: "asc" } },
+      },
+    }),
+    prisma.course.findMany({
+      orderBy: { title: "asc" },
+    }),
+  ]);
+
+  if (!bundle) {
+    notFound();
+  }
+
+  const selectedCourseIds = new Set(bundle.courses.map((item) => item.courseId));
+  const previewOffer = bundle.offers.find((offer) => offer.isPublished) ?? bundle.offers[0] ?? null;
+
+  return (
+    <AdminShell title={bundle.title} description="Bundle info, included courses, offers, and public page controls.">
+      <div className="grid gap-6 xl:grid-cols-[1.08fr_0.52fr]">
+        <Card className="space-y-8 p-8">
+          <div className="space-y-4 border-b border-[var(--border)] pb-6">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Bundle editor</p>
+            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Shape one sales container for multiple courses.</h2>
+            <p className="max-w-2xl text-sm leading-7 text-stone-600">
+              Bundles keep fulfillment course-based underneath. This record defines the promise, metadata, preserved path, and
+              public bundle presentation.
+            </p>
+          </div>
+
+          <form action={saveBundleAction} className="space-y-8">
+            <input type="hidden" name="id" value={bundle.id} />
+
+            <ProductFormSection
+              title="Core identity"
+              description="Edit the bundle name, route slug, and publish state before adjusting included courses."
+            >
+              <label>
+                Title
+                <input name="title" defaultValue={bundle.title} required />
+              </label>
+              <label>
+                Slug
+                <input name="slug" defaultValue={bundle.slug} required />
+              </label>
+              <label>
+                Subtitle
+                <input name="subtitle" defaultValue={bundle.subtitle ?? ""} />
+              </label>
+              <label>
+                Status
+                <select name="status" defaultValue={bundle.status}>
+                  <option value="DRAFT">DRAFT</option>
+                  <option value="PUBLISHED">PUBLISHED</option>
+                  <option value="ARCHIVED">ARCHIVED</option>
+                </select>
+              </label>
+            </ProductFormSection>
+
+            <ProductFormSection
+              title="Sales copy"
+              description="These fields define the bundle landing page and explain why a combined purchase is worthwhile."
+            >
+              <label className="md:col-span-2">
+                Short description
+                <textarea name="shortDescription" rows={4} defaultValue={bundle.shortDescription ?? ""} />
+              </label>
+              <label className="md:col-span-2">
+                Long description
+                <textarea name="longDescription" rows={6} defaultValue={bundle.longDescription ?? ""} />
+              </label>
+              <label>
+                Outcomes
+                <textarea name="learningOutcomes" rows={4} defaultValue={(bundle.learningOutcomes as string[] | null)?.join("\n") ?? ""} />
+              </label>
+              <label>
+                Who it&apos;s for
+                <textarea name="whoItsFor" rows={4} defaultValue={(bundle.whoItsFor as string[] | null)?.join("\n") ?? ""} />
+              </label>
+              <label>
+                Includes
+                <textarea name="includes" rows={4} defaultValue={(bundle.includes as string[] | null)?.join("\n") ?? ""} />
+              </label>
+              <div className="hidden md:block" />
+            </ProductFormSection>
+
+            <ProductFormSection
+              title="Media and SEO"
+              description="Bundle media should reinforce the package promise, while metadata controls search and sharing."
+            >
+              <label>
+                Hero image URL
+                <input name="heroImageUrl" defaultValue={bundle.heroImageUrl ?? ""} />
+              </label>
+              <label>
+                Sales video URL
+                <input name="salesVideoUrl" defaultValue={bundle.salesVideoUrl ?? ""} />
+              </label>
+              <label>
+                SEO title
+                <input name="seoTitle" defaultValue={bundle.seoTitle ?? ""} />
+              </label>
+              <label className="md:col-span-2">
+                SEO description
+                <textarea name="seoDescription" rows={3} defaultValue={bundle.seoDescription ?? ""} />
+              </label>
+            </ProductFormSection>
+
+            <ProductFormSection
+              title="Preserved URLs"
+              description="Only use a preserved path when the bundle is replacing an existing public route."
+            >
+              <label className="md:col-span-2">
+                Legacy URL
+                <input name="legacyUrl" defaultValue={bundle.legacyUrl ?? ""} />
+              </label>
+            </ProductFormSection>
+
+            <div className="border-t border-[var(--border)] pt-6">
+              <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">Save bundle</button>
+            </div>
+          </form>
+        </Card>
+
+        <div className="space-y-4">
+          <Card className="space-y-4 p-6">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Bundle status</p>
+            <div className="grid gap-3 text-sm text-stone-600">
+              <div className="rounded-[22px] border border-[var(--border)] bg-stone-50/80 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Current status</span>
+                <span className="mt-1 block text-base font-semibold text-stone-950">{bundle.status}</span>
+              </div>
+              <div className="rounded-[22px] border border-[var(--border)] bg-stone-50/80 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Public path</span>
+                <span className="mt-1 block break-all text-base text-stone-950">{bundle.publicPath ?? `/bundle/${bundle.slug}`}</span>
+              </div>
+              <div className="rounded-[22px] border border-[var(--border)] bg-stone-50/80 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Included courses</span>
+                <span className="mt-1 block text-base text-stone-950">
+                  {bundle.courses.length} course{bundle.courses.length === 1 ? "" : "s"}
+                </span>
+              </div>
+              <div className="rounded-[22px] border border-[var(--border)] bg-stone-50/80 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Published offers</span>
+                <span className="mt-1 block text-base text-stone-950">{bundle.offers.filter((offer) => offer.isPublished).length}</span>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="space-y-3 p-6">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Actions</p>
+            <div className="grid gap-3">
+              <Link href={bundle.publicPath ?? `/bundle/${bundle.slug}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
+                View public page
+              </Link>
+              {previewOffer ? (
+                <Link href={`/checkout/${previewOffer.id}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
+                  Preview checkout
+                </Link>
+              ) : null}
+              <button
+                className="rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700"
+                type="submit"
+                formAction={deleteBundleAction}
+                form="bundle-editor-actions"
+                name="bundleId"
+                value={bundle.id}
+              >
+                Delete bundle
+              </button>
+            </div>
+          </Card>
+          <form id="bundle-editor-actions">
+            <input type="hidden" name="bundleId" value={bundle.id} />
+          </form>
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="space-y-4">
+          <h2 className="text-lg font-semibold text-stone-950">Included courses</h2>
+          <form action={saveBundleCoursesAction} className="space-y-3">
+            <input type="hidden" name="bundleId" value={bundle.id} />
+            {allCourses.map((course) => (
+              <label key={course.id} className="flex items-start gap-3 rounded-[20px] border border-stone-200 bg-white px-4 py-4 text-stone-700">
+                <input className="mt-1 w-auto" type="checkbox" name="courseIds" value={course.id} defaultChecked={selectedCourseIds.has(course.id)} />
+                <span>
+                  <span className="block font-semibold text-stone-950">{course.title}</span>
+                  {course.subtitle ? <span className="block text-sm text-stone-600">{course.subtitle}</span> : null}
+                </span>
+              </label>
+            ))}
+            <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save included courses</button>
+          </form>
+        </Card>
+
+        <Card className="space-y-4">
+          <h2 className="text-lg font-semibold text-stone-950">Offers and social proof</h2>
+          <div className="space-y-3 text-sm text-stone-600">
+            <form action={saveOfferAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
+              <input type="hidden" name="bundleId" value={bundle.id} />
+              <label>
+                Offer name
+                <input name="name" />
+              </label>
+              <div className="grid gap-3 md:grid-cols-2">
+                <label>
+                  Offer type
+                  <select name="type" defaultValue="ONE_TIME">
+                    <option value="ONE_TIME">ONE_TIME</option>
+                    <option value="SUBSCRIPTION">SUBSCRIPTION</option>
+                    <option value="PAYMENT_PLAN">PAYMENT_PLAN</option>
+                  </select>
+                </label>
+                <label>
+                  Price
+                  <input name="price" type="number" step="0.01" />
+                </label>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <label>
+                  Currency
+                  <input name="currency" defaultValue="USD" />
+                </label>
+                <label>
+                  Checkout path
+                  <input name="checkoutPath" />
+                </label>
+              </div>
+              <label className="flex items-center gap-3 text-stone-700">
+                <input className="w-auto" type="checkbox" name="isPublished" value="true" defaultChecked />
+                Published
+              </label>
+              <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Add offer</button>
+            </form>
+            {bundle.offers.map((offer) => (
+              <form key={offer.id} action={saveOfferAction} className="grid gap-3 rounded-[20px] border border-stone-200 p-4">
+                <input type="hidden" name="id" value={offer.id} />
+                <input type="hidden" name="bundleId" value={bundle.id} />
+                <label>
+                  Offer name
+                  <input name="name" defaultValue={offer.name} />
+                </label>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <label>
+                    Offer type
+                    <select name="type" defaultValue={offer.type}>
+                      <option value="ONE_TIME">ONE_TIME</option>
+                      <option value="SUBSCRIPTION">SUBSCRIPTION</option>
+                      <option value="PAYMENT_PLAN">PAYMENT_PLAN</option>
+                    </select>
+                  </label>
+                  <label>
+                    Price
+                    <input name="price" type="number" step="0.01" defaultValue={offer.price.toString()} />
+                  </label>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <label>
+                    Currency
+                    <input name="currency" defaultValue={offer.currency} />
+                  </label>
+                  <label>
+                    Checkout path
+                    <input name="checkoutPath" defaultValue={offer.checkoutPath ?? ""} />
+                  </label>
+                </div>
+                <label className="flex items-center gap-3 text-stone-700">
+                  <input className="w-auto" type="checkbox" name="isPublished" value="true" defaultChecked={offer.isPublished} />
+                  Published
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save offer</button>
+                  <button
+                    className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700"
+                    type="submit"
+                    formAction={deleteOfferAction}
+                    name="offerId"
+                    value={offer.id}
+                  >
+                    Delete offer
+                  </button>
+                </div>
+              </form>
+            ))}
+            <form action={saveFaqAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
+              <input type="hidden" name="bundleId" value={bundle.id} />
+              <label>
+                Question
+                <input name="question" />
+              </label>
+              <label>
+                Answer
+                <textarea name="answer" rows={3} />
+              </label>
+              <label>
+                Position
+                <input name="position" type="number" min="1" defaultValue={bundle.faqs.length + 1} />
+              </label>
+              <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Add FAQ</button>
+            </form>
+            {bundle.faqs.map((faq) => (
+              <form key={faq.id} action={saveFaqAction} className="grid gap-3 rounded-[20px] border border-stone-200 p-4">
+                <input type="hidden" name="faqId" value={faq.id} />
+                <input type="hidden" name="bundleId" value={bundle.id} />
+                <label>
+                  Question
+                  <input name="question" defaultValue={faq.question} />
+                </label>
+                <label>
+                  Answer
+                  <textarea name="answer" rows={3} defaultValue={faq.answer} />
+                </label>
+                <label>
+                  Position
+                  <input name="position" type="number" min="1" defaultValue={faq.position} />
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save FAQ</button>
+                  <button
+                    className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700"
+                    type="submit"
+                    formAction={deleteFaqAction}
+                    name="faqId"
+                    value={faq.id}
+                  >
+                    Delete FAQ
+                  </button>
+                </div>
+              </form>
+            ))}
+            <form action={saveTestimonialAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
+              <input type="hidden" name="bundleId" value={bundle.id} />
+              <label>
+                Name
+                <input name="name" />
+              </label>
+              <label>
+                Quote
+                <textarea name="quote" rows={3} />
+              </label>
+              <label>
+                Position
+                <input name="position" type="number" min="1" defaultValue={bundle.testimonials.length + 1} />
+              </label>
+              <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Add testimonial</button>
+            </form>
+            {bundle.testimonials.map((testimonial) => (
+              <form key={testimonial.id} action={saveTestimonialAction} className="grid gap-3 rounded-[20px] border border-stone-200 p-4">
+                <input type="hidden" name="testimonialId" value={testimonial.id} />
+                <input type="hidden" name="bundleId" value={bundle.id} />
+                <label>
+                  Name
+                  <input name="name" defaultValue={testimonial.name ?? ""} />
+                </label>
+                <label>
+                  Quote
+                  <textarea name="quote" rows={3} defaultValue={testimonial.quote} />
+                </label>
+                <label>
+                  Position
+                  <input name="position" type="number" min="1" defaultValue={testimonial.position} />
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save testimonial</button>
+                  <button
+                    className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700"
+                    type="submit"
+                    formAction={deleteTestimonialAction}
+                    name="testimonialId"
+                    value={testimonial.id}
+                  >
+                    Delete testimonial
+                  </button>
+                </div>
+              </form>
+            ))}
+          </div>
+        </Card>
+      </div>
+    </AdminShell>
+  );
+}

@@ -1,0 +1,40 @@
+import Link from "next/link";
+import type { PropsWithChildren } from "react";
+
+const links = [
+  { href: "/admin", label: "Overview" },
+  { href: "/admin/products", label: "Products" },
+  { href: "/admin/courses", label: "Courses" },
+  { href: "/admin/bundles", label: "Bundles" },
+  { href: "/admin/instructors", label: "Instructors" },
+  { href: "/admin/offers", label: "Offers" },
+  { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/students", label: "Students" },
+  { href: "/admin/imports", label: "Imports" },
+  { href: "/admin/gateways", label: "Gateways" },
+  { href: "/admin/settings", label: "Settings" },
+];
+
+export function AdminShell({ children, title, description }: PropsWithChildren<{ title: string; description?: string }>) {
+  return (
+    <div className="mx-auto grid max-w-7xl gap-6 px-6 py-10 lg:grid-cols-[240px_1fr]">
+      <aside className="rounded-[28px] border border-stone-200 bg-white p-5">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-stone-500">Admin</h2>
+        <nav className="space-y-2">
+          {links.map((link) => (
+            <Link key={link.href} href={link.href} className="block rounded-2xl px-3 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-950">
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      </aside>
+      <div className="space-y-6">
+        <header className="space-y-2">
+          <h1 className="text-3xl font-semibold tracking-tight text-stone-950">{title}</h1>
+          {description ? <p className="text-sm leading-7 text-stone-600">{description}</p> : null}
+        </header>
+        {children}
+      </div>
+    </div>
+  );
+}

@@ -1,37 +1,47 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8f5f2;
-  --background-soft: #f4f1ee;
-  --background-elevated: rgba(255, 255, 255, 0.76);
-  --background-deep: #0f1020;
-  --background-deep-soft: #191a30;
-  --foreground: #141a2d;
-  --foreground-soft: #4f5a70;
-  --muted: #69748b;
-  --card: rgba(255, 255, 255, 0.78);
-  --card-strong: rgba(255, 255, 255, 0.92);
-  --border: rgba(88, 97, 130, 0.16);
-  --border-strong: rgba(88, 97, 130, 0.28);
-  --accent: #8f2cff;
-  --accent-strong: #7a1cff;
-  --accent-soft: rgba(143, 44, 255, 0.12);
-  --accent-glow: rgba(143, 44, 255, 0.26);
-  --premium: #d4a846;
-  --premium-soft: rgba(212, 168, 70, 0.16);
-  --success: #0ca678;
-  --success-soft: rgba(12, 166, 120, 0.16);
-  --warning: #d19417;
-  --warning-soft: rgba(209, 148, 23, 0.16);
-  --danger: #da5c67;
-  --danger-soft: rgba(218, 92, 103, 0.16);
-  --shadow-soft: 0 26px 70px rgba(21, 26, 45, 0.08);
-  --shadow-glow: 0 18px 44px rgba(143, 44, 255, 0.18);
+  --background: #0d0d1a;
+  --background-soft: #141426;
+  --background-elevated: rgba(26, 26, 46, 0.92);
+  --background-deep: #0d0d1a;
+  --background-deep-soft: #1a1a2e;
+  --foreground: #f0eaf8;
+  --foreground-soft: #b78bca;
+  --muted: #8a63a4;
+  --card: rgba(26, 26, 46, 0.96);
+  --card-strong: rgba(37, 37, 64, 0.96);
+  --border: #2e2e4e;
+  --border-strong: #3e3f67;
+  --accent: #7b2fbe;
+  --accent-strong: #9b3fde;
+  --accent-soft: rgba(123, 47, 190, 0.14);
+  --accent-glow: rgba(123, 47, 190, 0.28);
+  --accent-lavender: #c084fc;
+  --premium: #d4a855;
+  --premium-soft: rgba(212, 168, 85, 0.16);
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.16);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.16);
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.16);
+  --shadow-soft: 0 26px 70px rgba(8, 8, 20, 0.35);
+  --shadow-glow: 0 18px 44px rgba(123, 47, 190, 0.2);
   --portal-border: rgba(173, 181, 226, 0.14);
-  --portal-panel: rgba(19, 20, 40, 0.86);
-  --portal-panel-strong: rgba(24, 26, 49, 0.96);
-  --portal-text: #f4f2fb;
-  --portal-muted: #a69ec8;
+  --portal-panel: rgba(26, 26, 46, 0.96);
+  --portal-panel-strong: rgba(37, 37, 64, 0.96);
+  --portal-text: #f0eaf8;
+  --portal-muted: #a78bca;
+  --perseus-logo-primary: #f0eaf8;
+  --perseus-logo-accent: #c084fc;
+  --perseus-logo-gold: #d4a855;
+  --perseus-collection-panel: rgba(26, 26, 46, 0.96);
+  --perseus-collection-elevated: rgba(37, 37, 64, 0.96);
+  --perseus-hero-glow: rgba(123, 47, 190, 0.22);
+  --collection-arcane: linear-gradient(135deg, #34105f, #5e2da1);
+  --collection-discipline: linear-gradient(135deg, #17396f, #2758a5);
+  --collection-gateway: linear-gradient(135deg, #0c5f45, #158f6b);
 }
 
 * {
@@ -50,9 +60,9 @@ html {
 body {
   margin: 0;
   background:
-    radial-gradient(circle at top, rgba(143, 44, 255, 0.14), transparent 22%),
-    radial-gradient(circle at 70% 30%, rgba(212, 168, 70, 0.14), transparent 24%),
-    linear-gradient(180deg, #fbfaf8 0%, #f6f3ef 48%, #f8f5f2 100%);
+    radial-gradient(circle at top, var(--perseus-hero-glow), transparent 22%),
+    radial-gradient(circle at 70% 30%, rgba(212, 168, 85, 0.12), transparent 24%),
+    linear-gradient(180deg, var(--background-deep) 0%, var(--background-deep-soft) 48%, var(--background) 100%);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
   text-rendering: optimizeLegibility;
@@ -64,9 +74,9 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.18)),
-    linear-gradient(90deg, rgba(88, 97, 130, 0.025) 1px, transparent 1px),
-    linear-gradient(rgba(88, 97, 130, 0.025) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02)),
+    linear-gradient(90deg, rgba(173, 181, 226, 0.025) 1px, transparent 1px),
+    linear-gradient(rgba(173, 181, 226, 0.025) 1px, transparent 1px);
   background-size: auto, 60px 60px, 60px 60px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.24), transparent 72%);
 }
@@ -92,8 +102,8 @@ textarea,
 select {
   width: 100%;
   border-radius: 20px;
-  border: 1px solid rgba(126, 137, 173, 0.18);
-  background: rgba(241, 237, 249, 0.82);
+  border: 1px solid var(--border);
+  background: rgba(37, 37, 64, 0.92);
   padding: 1rem 1.1rem;
   color: var(--foreground);
   font: inherit;
@@ -104,9 +114,9 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: rgba(143, 44, 255, 0.7);
-  box-shadow: 0 0 0 4px rgba(143, 44, 255, 0.14), 0 10px 24px rgba(143, 44, 255, 0.08);
-  background: rgba(246, 243, 253, 0.98);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(123, 47, 190, 0.14), 0 10px 24px rgba(123, 47, 190, 0.08);
+  background: rgba(46, 46, 78, 0.98);
 }
 
 label {

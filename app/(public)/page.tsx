@@ -90,10 +90,7 @@ function CollectionPanel({
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] shadow-[var(--shadow-soft)]">
-      <div
-        className="min-h-[220px] border-b border-[var(--border)] px-7 py-7"
-        style={{ backgroundImage: toneVar }}
-      >
+      <div className="min-h-[220px] border-b border-[var(--border)] px-7 py-7" style={{ backgroundImage: toneVar }}>
         <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[rgba(240,234,248,0.76)]">{eyebrow}</p>
         <h2 className="mt-5 font-serif text-4xl leading-none tracking-[-0.04em] text-[var(--portal-text)]">{title}</h2>
         <p className="mt-5 max-w-sm text-base leading-8 text-[rgba(240,234,248,0.76)]">{description}</p>
@@ -247,16 +244,14 @@ export default async function HomePage() {
               <Button className="min-w-[220px]">Explore Courses</Button>
             </Link>
             <Link href={featuredBundleHref}>
-              <Button variant="secondary" className="min-w-[220px]">
-                View Curriculum
-              </Button>
+              <Button variant="secondary" className="min-w-[220px]">View Curriculum</Button>
             </Link>
           </div>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="mb-10 max-w-3xl space-y-4">
+        <div className="mx-auto mb-10 max-w-4xl space-y-4 text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--accent-lavender)]">Collections</p>
           <h2 className="font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">Perseus study collections</h2>
           <p className="text-lg leading-8 text-[var(--foreground-soft)]">
@@ -279,16 +274,13 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="mb-10 max-w-3xl space-y-4">
+        <div className="mx-auto mb-10 max-w-4xl space-y-4 text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--premium)]">Testimonies</p>
           <h2 className="font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">What students say after entering the work</h2>
         </div>
         <div className="grid gap-6 xl:grid-cols-3">
           {testimonials.map((testimonial) => (
-            <figure
-              key={testimonial.id}
-              className="rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-7 shadow-[var(--shadow-soft)]"
-            >
+            <figure key={testimonial.id} className="rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-7 shadow-[var(--shadow-soft)]">
               <blockquote className="text-lg leading-9 text-[var(--portal-text)]">&ldquo;{testimonial.quote}&rdquo;</blockquote>
               <figcaption className="mt-6 space-y-1">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--accent-lavender)]">{testimonial.name}</p>
@@ -299,52 +291,30 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <footer className="mx-auto max-w-7xl px-6 pb-10 pt-4">
-        <div className="grid gap-10 rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-10 shadow-[var(--shadow-soft)] lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
-          <div className="space-y-5">
+      <footer className="border-t border-[var(--border)]">
+        <div className="mx-auto max-w-7xl px-6 py-12">
+          <div className="space-y-8 text-center">
             <div className="space-y-2">
-              <p className="text-xl font-semibold uppercase tracking-[0.24em] text-[var(--portal-text)]">Perseus Arcane Academy</p>
+              <p className="text-xl font-semibold uppercase tracking-[0.24em] text-[var(--portal-text)] sm:text-2xl">Perseus Arcane Academy</p>
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Structured magical training</p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Link href={featuredCourseHref}>
-                <Button className="min-w-[180px]">Explore courses</Button>
-              </Link>
-              <Link href={featuredBundleHref}>
-                <Button variant="secondary" className="min-w-[180px]">View curriculum</Button>
-              </Link>
-            </div>
-          </div>
 
-          <div className="space-y-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Study</p>
-            <div className="space-y-3 text-sm text-[var(--foreground-soft)]">
-              <Link href={featuredCourseHref} className="block transition hover:text-[var(--portal-text)]">
-                Featured course
+            <nav className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-[var(--foreground-soft)]">
+              <Link href={featuredCourseHref} className="transition hover:text-[var(--portal-text)]">
+                Courses
               </Link>
-              <Link href={featuredBundleHref} className="block transition hover:text-[var(--portal-text)]">
-                Curriculum bundle
+              <Link href={featuredBundleHref} className="transition hover:text-[var(--portal-text)]">
+                Curriculum
               </Link>
-              <Link href="/faq" className="block transition hover:text-[var(--portal-text)]">
+              <Link href="/faq" className="transition hover:text-[var(--portal-text)]">
                 FAQ
               </Link>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Portal</p>
-            <div className="space-y-3 text-sm text-[var(--foreground-soft)]">
-              <Link href="/login" className="block transition hover:text-[var(--portal-text)]">
-                Student login
+              <Link href="/login" className="transition hover:text-[var(--portal-text)]">
+                Login
               </Link>
-              <Link href="/dashboard" className="block transition hover:text-[var(--portal-text)]">
-                Dashboard
-              </Link>
-            </div>
-          </div>
+            </nav>
 
-          <div className="border-t border-[var(--border)] pt-6 text-sm text-[var(--foreground-soft)] lg:col-span-3">
-            © 2026 Perseus Arcane Academy. All rights reserved.
+            <div className="text-sm text-[var(--foreground-soft)]">© 2026 Perseus Arcane Academy</div>
           </div>
         </div>
       </footer>

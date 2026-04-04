@@ -28,6 +28,16 @@ function PerseusHeroMark() {
   );
 }
 
+function PerseusFooterMark() {
+  return (
+    <svg viewBox="0 0 84 84" aria-hidden="true" className="h-14 w-14">
+      <path d="M42 4 L64 40 H20 Z" fill="var(--perseus-logo-primary)" />
+      <path d="M42 20 L74 78 H10 Z" fill="var(--perseus-logo-accent)" opacity="0.9" />
+      <path d="M42 10 L56 34 H28 Z" fill="var(--perseus-logo-gold)" opacity="0.85" />
+    </svg>
+  );
+}
+
 type HomepageCourse = {
   id: string;
   title: string;
@@ -298,6 +308,58 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      <footer className="border-t border-[var(--border)]">
+        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
+          <div className="space-y-5">
+            <div className="flex items-center gap-4">
+              <PerseusFooterMark />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--portal-text)]">Perseus Arcane Academy</p>
+                <p className="text-[11px] uppercase tracking-[0.34em] text-[var(--foreground-soft)]">Tarot, ritual, symbolism</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link href={featuredCourseHref}>
+                <Button className="min-w-[180px]">Explore courses</Button>
+              </Link>
+              <Link href={featuredBundleHref}>
+                <Button variant="secondary" className="min-w-[180px]">View curriculum</Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Study</p>
+            <div className="space-y-3 text-sm text-[var(--foreground-soft)]">
+              <Link href={featuredCourseHref} className="block transition hover:text-[var(--portal-text)]">
+                Featured course
+              </Link>
+              <Link href={featuredBundleHref} className="block transition hover:text-[var(--portal-text)]">
+                Curriculum bundle
+              </Link>
+              <Link href="/faq" className="block transition hover:text-[var(--portal-text)]">
+                FAQ
+              </Link>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Portal</p>
+            <div className="space-y-3 text-sm text-[var(--foreground-soft)]">
+              <Link href="/login" className="block transition hover:text-[var(--portal-text)]">
+                Student login
+              </Link>
+              <Link href="/dashboard" className="block transition hover:text-[var(--portal-text)]">
+                Dashboard
+              </Link>
+              <Link href="/admin" className="block transition hover:text-[var(--portal-text)]">
+                Admin
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

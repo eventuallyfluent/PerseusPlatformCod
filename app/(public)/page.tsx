@@ -28,16 +28,6 @@ function PerseusHeroMark() {
   );
 }
 
-function PerseusFooterMark() {
-  return (
-    <svg viewBox="0 0 84 84" aria-hidden="true" className="h-14 w-14">
-      <path d="M42 4 L64 40 H20 Z" fill="var(--perseus-logo-primary)" />
-      <path d="M42 20 L74 78 H10 Z" fill="var(--perseus-logo-accent)" opacity="0.9" />
-      <path d="M42 10 L56 34 H28 Z" fill="var(--perseus-logo-gold)" opacity="0.85" />
-    </svg>
-  );
-}
-
 type HomepageCourse = {
   id: string;
   title: string;
@@ -309,15 +299,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <footer className="border-t border-[var(--border)]">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
+      <footer className="mx-auto max-w-7xl px-6 pb-10 pt-4">
+        <div className="grid gap-10 rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-10 shadow-[var(--shadow-soft)] lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
           <div className="space-y-5">
-            <div className="flex items-center gap-4">
-              <PerseusFooterMark />
-              <div className="space-y-1">
-                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--portal-text)]">Perseus Arcane Academy</p>
-                <p className="text-[11px] uppercase tracking-[0.34em] text-[var(--foreground-soft)]">Tarot, ritual, symbolism</p>
-              </div>
+            <div className="space-y-2">
+              <p className="text-xl font-semibold uppercase tracking-[0.24em] text-[var(--portal-text)]">Perseus Arcane Academy</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Structured magical training</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href={featuredCourseHref}>
@@ -353,10 +340,11 @@ export default async function HomePage() {
               <Link href="/dashboard" className="block transition hover:text-[var(--portal-text)]">
                 Dashboard
               </Link>
-              <Link href="/admin" className="block transition hover:text-[var(--portal-text)]">
-                Admin
-              </Link>
             </div>
+          </div>
+
+          <div className="border-t border-[var(--border)] pt-6 text-sm text-[var(--foreground-soft)] lg:col-span-3">
+            © 2026 Perseus Arcane Academy. All rights reserved.
           </div>
         </div>
       </footer>

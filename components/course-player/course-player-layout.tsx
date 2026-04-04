@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CourseWithRelations } from "@/types";
-import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { StreamableEmbed } from "@/components/ui/streamable-embed";
 import { isLessonUnlocked } from "@/lib/courses/lesson-availability";
 
@@ -29,40 +29,40 @@ export function CoursePlayerLayout({ course, activeLessonSlug, enrolledAt }: Cou
   const progressPercent = lessons.length > 0 ? Math.round(((activeIndex + 1) / lessons.length) * 100) : 0;
 
   if (!activeLesson) {
-    return <Card>Lesson not found.</Card>;
+    return <div className="rounded-[28px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-6 text-[var(--portal-text)]">Lesson not found.</div>;
   }
 
   if (!activeLesson.isUnlocked) {
-    return <Card>This lesson is not unlocked yet.</Card>;
+    return <div className="rounded-[28px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-6 text-[var(--portal-text)]">This lesson is not unlocked yet.</div>;
   }
 
   return (
     <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
       <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-        <Card className="space-y-4 bg-[linear-gradient(135deg,#171412,#2b2018)] text-stone-50">
-          <p className="text-[11px] uppercase tracking-[0.34em] text-[rgba(255,237,208,0.68)]">Course player</p>
+        <div className="space-y-4 rounded-[30px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-6 text-[var(--portal-text)] shadow-[0_20px_40px_rgba(10,11,24,0.24)]">
+          <Badge variant="portal">Course player</Badge>
           <h2 className="text-4xl leading-none tracking-[-0.04em]">{course.title}</h2>
-          <p className="text-sm leading-7 text-[rgba(255,245,232,0.76)]">{course.shortDescription}</p>
-          <div className="rounded-[22px] border border-[rgba(255,245,232,0.12)] bg-[rgba(255,255,255,0.06)] px-4 py-3 text-sm text-[rgba(255,245,232,0.78)]">
+          <p className="text-sm leading-7 text-[var(--portal-muted)]">{course.shortDescription}</p>
+          <div className="rounded-[22px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.04)] px-4 py-3 text-sm text-[#d7cff1]">
             Lesson {activeIndex + 1} of {lessons.length}
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.28em] text-[rgba(255,237,208,0.68)]">
+            <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.28em] text-[var(--portal-muted)]">
               <span>Path progress</span>
               <span>{progressPercent}%</span>
             </div>
-            <div className="h-2 rounded-full bg-[rgba(255,255,255,0.12)]">
+            <div className="h-2 rounded-full bg-[rgba(255,255,255,0.08)]">
               <div className="h-2 rounded-full bg-[var(--accent)]" style={{ width: `${progressPercent}%` }} />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="space-y-5">
+        <div className="space-y-5 rounded-[30px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-6 text-[var(--portal-text)] shadow-[0_20px_40px_rgba(10,11,24,0.24)]">
           {course.modules.map((module, moduleIndex) => (
             <div key={module.id} className="space-y-3">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.34em] text-stone-500">Module {moduleIndex + 1}</p>
-                <h3 className="mt-2 text-2xl leading-none tracking-[-0.03em] text-stone-950">{module.title}</h3>
+                <p className="text-[11px] uppercase tracking-[0.34em] text-[var(--portal-muted)]">Module {moduleIndex + 1}</p>
+                <h3 className="mt-2 text-2xl leading-none tracking-[-0.03em]">{module.title}</h3>
               </div>
               <div className="space-y-2">
                 {module.lessons.map((lesson, lessonIndex) => {
@@ -74,18 +74,18 @@ export function CoursePlayerLayout({ course, activeLessonSlug, enrolledAt }: Cou
                       href={`/learn/${course.slug}/${lesson.slug}`}
                       className={`block rounded-[22px] border px-4 py-3 text-sm transition ${
                         lesson.slug === activeLessonSlug
-                          ? "border-stone-950 bg-stone-950 text-stone-50 shadow-[0_14px_30px_rgba(28,25,23,0.16)]"
-                          : "border-[var(--border)] bg-white/65 text-stone-700 hover:bg-white"
+                          ? "border-[rgba(143,44,255,0.45)] bg-[rgba(143,44,255,0.14)] text-white shadow-[0_14px_30px_rgba(28,25,23,0.16)]"
+                          : "border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] text-[#d9d1f2] hover:bg-[rgba(255,255,255,0.06)]"
                       }`}
                     >
-                      <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] opacity-60">
+                      <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] opacity-70">
                         <span>Lesson {lessonIndex + 1}</span>
                         <span>{lesson.durationLabel ?? "Open"}</span>
                       </span>
                       <span className="mt-1 block font-semibold">{lesson.title}</span>
                     </Link>
                   ) : (
-                    <div key={lesson.id} className="rounded-[22px] border border-dashed border-[var(--border)] bg-stone-100/70 px-4 py-3 text-sm text-stone-400">
+                    <div key={lesson.id} className="rounded-[22px] border border-dashed border-[var(--portal-border)] bg-[rgba(255,255,255,0.02)] px-4 py-3 text-sm text-[#877ca7]">
                       <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em]">
                         <span>Locked</span>
                         <span>{lesson.dripDays ?? 0} day drip</span>
@@ -97,48 +97,48 @@ export function CoursePlayerLayout({ course, activeLessonSlug, enrolledAt }: Cou
               </div>
             </div>
           ))}
-        </Card>
+        </div>
       </aside>
 
       <div className="space-y-6">
-        <Card className="space-y-6 p-8">
+        <div className="space-y-6 rounded-[30px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-8 text-[var(--portal-text)] shadow-[0_20px_40px_rgba(10,11,24,0.24)]">
           <div className="space-y-3">
-            <p className="text-[11px] uppercase tracking-[0.34em] text-stone-500">{activeLesson.moduleTitle}</p>
-            <h1 className="text-5xl leading-none tracking-[-0.04em] text-stone-950">{activeLesson.title}</h1>
-            {activeLesson.durationLabel ? <p className="text-sm font-semibold uppercase tracking-[0.2em] text-stone-500">{activeLesson.durationLabel}</p> : null}
+            <Badge variant="portal">{activeLesson.moduleTitle}</Badge>
+            <h1 className="text-5xl leading-none tracking-[-0.04em]">{activeLesson.title}</h1>
+            {activeLesson.durationLabel ? <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--portal-muted)]">{activeLesson.durationLabel}</p> : null}
           </div>
           {activeLesson.videoUrl ? <StreamableEmbed url={activeLesson.videoUrl} title={activeLesson.title} /> : null}
-          {activeLesson.content ? <div className="max-w-3xl text-base leading-8 text-stone-700">{activeLesson.content}</div> : null}
+          {activeLesson.content ? <div className="max-w-3xl text-base leading-8 text-[#ddd5f5]">{activeLesson.content}</div> : null}
           {activeLesson.downloadUrl ? (
-            <a className="inline-flex rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-stone-700 transition hover:bg-white/70" href={activeLesson.downloadUrl} target="_blank" rel="noreferrer">
+            <a className="inline-flex rounded-full border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-5 py-3 text-sm font-semibold text-[#d9d1f2] transition hover:bg-[rgba(255,255,255,0.08)]" href={activeLesson.downloadUrl} target="_blank" rel="noreferrer">
               Download lesson resource
             </a>
           ) : null}
-        </Card>
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Card className="space-y-3">
-            <p className="text-[11px] uppercase tracking-[0.34em] text-stone-500">Previous lesson</p>
+          <div className="space-y-3 rounded-[28px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-6 text-[var(--portal-text)]">
+            <p className="text-[11px] uppercase tracking-[0.34em] text-[var(--portal-muted)]">Previous lesson</p>
             {previousLesson ? (
-              <Link href={`/learn/${course.slug}/${previousLesson.slug}`} className="text-2xl leading-none tracking-[-0.03em] text-stone-950 underline-offset-4 hover:underline">
+              <Link href={`/learn/${course.slug}/${previousLesson.slug}`} className="text-2xl leading-none tracking-[-0.03em] underline-offset-4 hover:underline">
                 {previousLesson.title}
               </Link>
             ) : (
-              <p className="text-sm leading-7 text-stone-500">You are at the beginning of the course.</p>
+              <p className="text-sm leading-7 text-[var(--portal-muted)]">You are at the beginning of the course.</p>
             )}
-          </Card>
-          <Card className="space-y-3">
-            <p className="text-[11px] uppercase tracking-[0.34em] text-stone-500">Next lesson</p>
+          </div>
+          <div className="space-y-3 rounded-[28px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-6 text-[var(--portal-text)]">
+            <p className="text-[11px] uppercase tracking-[0.34em] text-[var(--portal-muted)]">Next lesson</p>
             {nextLesson && nextLesson.isUnlocked ? (
-              <Link href={`/learn/${course.slug}/${nextLesson.slug}`} className="text-2xl leading-none tracking-[-0.03em] text-stone-950 underline-offset-4 hover:underline">
+              <Link href={`/learn/${course.slug}/${nextLesson.slug}`} className="text-2xl leading-none tracking-[-0.03em] underline-offset-4 hover:underline">
                 {nextLesson.title}
               </Link>
             ) : nextLesson ? (
-              <p className="text-sm leading-7 text-stone-500">Locked for now. The course drip will open it when its release window arrives.</p>
+              <p className="text-sm leading-7 text-[var(--portal-muted)]">Locked for now. The course drip will open it when its release window arrives.</p>
             ) : (
-              <p className="text-sm leading-7 text-stone-500">You have reached the end of the current curriculum path.</p>
+              <p className="text-sm leading-7 text-[var(--portal-muted)]">You have reached the end of the current curriculum path.</p>
             )}
-          </Card>
+          </div>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { AuthEntryShell } from "@/components/public/auth-entry-shell";
 
@@ -12,26 +13,26 @@ export default function LoginPage() {
 
   return (
     <AuthEntryShell
-      eyebrow="Magic link"
-      title="Return to your study space without a password."
-      description="Perseus keeps sign-in quiet: one email field, one link, and the same route for students and admins. Admin access is still restricted by allowlist."
+      eyebrow="Returning students"
+      title="Return to your study space."
+      description="Access begins from a free or paid course. Once you have joined, this page is only for returning through a quiet magic-link flow."
       successMessage={sent ? "Check your email for the sign-in link." : null}
       aside={
         <>
           <Card className="space-y-3 p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">How it works</p>
-            <p className="text-sm leading-7 text-stone-600">Enter your email, open the link, and land directly in the learner dashboard.</p>
+            <Badge variant="accent">How entry works</Badge>
+            <p className="text-sm leading-7 text-[var(--foreground-soft)]">Join through a free course or complete paid checkout, then return here whenever you need to re-enter.</p>
           </Card>
           <Card className="space-y-3 p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Why this flow</p>
-            <p className="text-sm leading-7 text-stone-600">The same low-friction access works for students, instructors, and admins without introducing password clutter.</p>
+            <Badge variant="premium">No separate membership page</Badge>
+            <p className="text-sm leading-7 text-[var(--foreground-soft)]">Perseus creates access as part of enrollment, not through a generic register screen that sits outside the course flow.</p>
           </Card>
         </>
       }
     >
       <div className="space-y-2">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-stone-400">Sign in</p>
-        <p className="text-sm leading-7 text-stone-600">Use the email address connected to your learner or admin account.</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">Sign in</p>
+        <p className="text-sm leading-7 text-[var(--foreground-soft)]">Use the email address connected to your learner or admin access.</p>
       </div>
       <label>
         Email address
@@ -39,12 +40,13 @@ export default function LoginPage() {
       </label>
       <Button
         type="button"
+        className="w-full justify-center"
         onClick={async () => {
           await signIn("resend", { email, redirectTo: "/dashboard" });
           setSent(true);
         }}
       >
-        Send magic link
+        Send access link
       </Button>
     </AuthEntryShell>
   );

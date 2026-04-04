@@ -1,26 +1,47 @@
 import Link from "next/link";
 import type { Course } from "@prisma/client";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
+import { Badge } from "@/components/ui/badge";
 
-export function CourseCard({ course }: { course: Pick<Course, "title" | "slug" | "subtitle" | "heroImageUrl" | "publicPath" | "legacyUrl"> }) {
+type CourseCardProps = {
+  course: Pick<Course, "title" | "slug" | "subtitle" | "heroImageUrl" | "publicPath" | "legacyUrl"> & {
+    priceLabel?: string | null;
+    statusLabel?: string | null;
+    ctaLabel?: string | null;
+  };
+};
+
+export function CourseCard({ course }: CourseCardProps) {
   return (
     <Link href={resolveCoursePublicPath(course)} className="group block">
-      <article className="h-full overflow-hidden rounded-[34px] border border-[var(--border)] bg-[rgba(255,252,247,0.7)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(23,20,18,0.12)]">
+      <article className="h-full overflow-hidden rounded-[34px] border border-[var(--border)] bg-[rgba(20,18,39,0.96)] text-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(21,26,45,0.16)]">
         <div
-          className="h-80 bg-cover bg-center transition duration-500 group-hover:scale-[1.02]"
+          className="h-72 bg-cover bg-center transition duration-500 group-hover:scale-[1.02]"
           style={{
             backgroundImage: course.heroImageUrl
-              ? `linear-gradient(135deg, rgba(17, 24, 39, 0.4), rgba(120, 53, 15, 0.15)), url(${course.heroImageUrl})`
-              : "linear-gradient(135deg, #1c1917, #f59e0b)",
+              ? `linear-gradient(180deg, rgba(15, 16, 32, 0.22), rgba(15, 16, 32, 0.58)), url(${course.heroImageUrl})`
+              : "linear-gradient(135deg, #29104a, #1f4ab8)",
           }}
         />
-        <div className="space-y-4 p-7">
+        <div className="space-y-5 p-7">
           <div className="flex items-center justify-between gap-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Generated sales page</p>
-            <span className="text-sm font-semibold text-stone-700 transition group-hover:translate-x-1">Open</span>
+            <Badge variant="portal">{course.statusLabel ?? "Featured"}</Badge>
+            <Badge variant="premium">{course.priceLabel?.toLowerCase() === "free" ? "Free" : "Premium"}</Badge>
           </div>
-          <h3 className="max-w-sm text-4xl leading-none tracking-[-0.04em] text-stone-950">{course.title}</h3>
-          {course.subtitle ? <p className="max-w-sm text-sm leading-7 text-stone-600">{course.subtitle}</p> : null}
+          <div className="space-y-3">
+            <p className="text-sm text-[var(--portal-muted)]">Perseus course</p>
+            <h3 className="max-w-sm text-4xl leading-none tracking-[-0.04em]">{course.title}</h3>
+            {course.subtitle ? <p className="max-w-sm text-base leading-8 text-[#bdb3da]">{course.subtitle}</p> : null}
+          </div>
+          <div className="flex items-center justify-between gap-4 border-t border-[var(--portal-border)] pt-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-[var(--portal-muted)]">Access path</p>
+              <p className="mt-2 text-3xl font-semibold">{course.priceLabel ?? "View offer"}</p>
+            </div>
+            <span className="rounded-full border border-[rgba(143,44,255,0.55)] px-5 py-3 text-sm font-semibold text-[#c18cff] transition group-hover:bg-[rgba(143,44,255,0.1)]">
+              {course.ctaLabel ?? "Enroll now"}
+            </span>
+          </div>
         </div>
       </article>
     </Link>

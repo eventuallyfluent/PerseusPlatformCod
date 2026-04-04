@@ -8,7 +8,7 @@ export function CourseSalesPage({ course, payload }: { course: CourseWithRelatio
   const faqJsonLd = payload.faqs.length > 0 ? buildFaqStructuredData(payload) : null;
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8 sm:py-12">
+    <div className="py-8 sm:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       {faqJsonLd ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} /> : null}

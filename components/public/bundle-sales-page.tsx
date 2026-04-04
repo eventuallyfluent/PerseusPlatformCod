@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { buildBundleProductStructuredData, buildFaqStructuredData } from "@/lib/seo/structured-data";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { StreamableEmbed } from "@/components/ui/streamable-embed";
 import type { BundleSalesPagePayload, BundleWithRelations } from "@/types";
 
@@ -9,75 +11,74 @@ export function BundleSalesPage({ bundle, payload }: { bundle: BundleWithRelatio
   const faqJsonLd = payload.faqs.length > 0 ? buildFaqStructuredData(payload) : null;
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10 sm:py-14">
+    <div className="px-6 py-10 sm:py-14">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       {faqJsonLd ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} /> : null}
 
       <div className="space-y-18">
-        <section className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+        <section className="mx-auto grid max-w-7xl gap-8 rounded-[40px] border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-8 py-10 shadow-[var(--shadow-soft)] lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div className="space-y-7">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-stone-500">Perseus bundle</p>
+            <div className="flex flex-wrap gap-3">
+              <Badge variant="accent">Perseus bundle</Badge>
+              <Badge variant="premium">Multiple enrollments</Badge>
+            </div>
             <div className="space-y-5">
-              <h1 className="max-w-4xl text-6xl leading-[0.95] tracking-[-0.05em] text-stone-950 sm:text-7xl">{payload.hero.title}</h1>
-              {payload.hero.subtitle ? <p className="max-w-2xl text-lg leading-8 text-stone-600">{payload.hero.subtitle}</p> : null}
+              <h1 className="max-w-4xl text-6xl leading-[0.92] tracking-[-0.05em] text-[var(--foreground)] sm:text-7xl">{payload.hero.title}</h1>
+              {payload.hero.subtitle ? <p className="max-w-2xl text-lg leading-9 text-[var(--foreground-soft)]">{payload.hero.subtitle}</p> : null}
             </div>
             <div className="flex flex-wrap gap-3">
               {payload.pricing.map((price) => (
-                <Link
-                  key={price.offerId}
-                  href={price.checkoutUrl}
-                  className="rounded-full bg-stone-950 px-6 py-3 text-sm font-semibold text-stone-50 transition hover:bg-stone-800"
-                >
-                  {payload.hero.ctaLabel} - {price.price} {price.currency}
+                <Link key={price.offerId} href={price.checkoutUrl}>
+                  <Button className="min-w-[260px]">{payload.hero.ctaLabel} - {price.price} {price.currency}</Button>
                 </Link>
               ))}
             </div>
           </div>
           <div
-            className="min-h-[420px] rounded-[34px] border border-[var(--border)] bg-cover bg-center shadow-[var(--shadow-soft)]"
+            className="min-h-[420px] rounded-[34px] border border-[var(--border)] bg-cover bg-center"
             style={{
               backgroundImage: payload.hero.imageUrl
-                ? `linear-gradient(180deg, rgba(15, 13, 11, 0.12), rgba(15, 13, 11, 0.5)), url(${payload.hero.imageUrl})`
-                : "linear-gradient(135deg, #1c1917, #d8ab56)",
+                ? `linear-gradient(180deg, rgba(15, 16, 32, 0.18), rgba(15, 16, 32, 0.46)), url(${payload.hero.imageUrl})`
+                : "linear-gradient(135deg, #1b0c34, #2e175f)",
             }}
           />
         </section>
 
-        <section className="grid gap-10 border-y border-[var(--border)] py-10 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="mx-auto grid max-w-7xl gap-10 border-y border-[var(--border)] py-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-5">
             <SectionHeading eyebrow="Bundle overview" title="What this unlocks in one step." />
-            {payload.description.shortDescription ? <p className="max-w-2xl text-lg leading-8 text-stone-700">{payload.description.shortDescription}</p> : null}
-            {payload.description.longDescription ? <p className="max-w-2xl text-base leading-8 text-stone-600">{payload.description.longDescription}</p> : null}
+            {payload.description.shortDescription ? <p className="max-w-2xl text-lg leading-8 text-[var(--foreground-soft)]">{payload.description.shortDescription}</p> : null}
+            {payload.description.longDescription ? <p className="max-w-2xl text-base leading-8 text-[var(--foreground-soft)]">{payload.description.longDescription}</p> : null}
           </div>
           <div className="rounded-[30px] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-soft)]">
             {payload.video.salesVideoUrl ? (
               <StreamableEmbed url={payload.video.salesVideoUrl} title={`${payload.hero.title} bundle video`} />
             ) : (
-              <p className="text-sm text-stone-500">No bundle video configured.</p>
+              <p className="text-sm text-[var(--muted)]">No bundle video configured.</p>
             )}
           </div>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-3">
-          <div className="rounded-[30px] border border-[var(--border)] bg-[rgba(255,252,247,0.68)] p-6 shadow-[var(--shadow-soft)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Outcomes</p>
-            <ul className="mt-5 space-y-3 text-sm leading-7 text-stone-600">
+        <section className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-3">
+          <div className="rounded-[30px] border border-[var(--border)] bg-[rgba(255,255,255,0.78)] p-6 shadow-[var(--shadow-soft)]">
+            <Badge variant="accent">Outcomes</Badge>
+            <ul className="mt-5 space-y-3 text-sm leading-7 text-[var(--foreground-soft)]">
               {payload.outcomes.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
           </div>
-          <div className="rounded-[30px] border border-[var(--border)] bg-[rgba(255,252,247,0.68)] p-6 shadow-[var(--shadow-soft)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Who it is for</p>
-            <ul className="mt-5 space-y-3 text-sm leading-7 text-stone-600">
+          <div className="rounded-[30px] border border-[var(--border)] bg-[rgba(255,255,255,0.78)] p-6 shadow-[var(--shadow-soft)]">
+            <Badge variant="premium">Who it is for</Badge>
+            <ul className="mt-5 space-y-3 text-sm leading-7 text-[var(--foreground-soft)]">
               {payload.audience.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
           </div>
-          <div className="rounded-[30px] border border-[var(--border)] bg-[rgba(255,252,247,0.68)] p-6 shadow-[var(--shadow-soft)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Bundle includes</p>
-            <ul className="mt-5 space-y-3 text-sm leading-7 text-stone-600">
+          <div className="rounded-[30px] border border-[var(--border)] bg-[rgba(255,255,255,0.78)] p-6 shadow-[var(--shadow-soft)]">
+            <Badge variant="success">Bundle includes</Badge>
+            <ul className="mt-5 space-y-3 text-sm leading-7 text-[var(--foreground-soft)]">
               {payload.includes.map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -85,7 +86,7 @@ export function BundleSalesPage({ bundle, payload }: { bundle: BundleWithRelatio
           </div>
         </section>
 
-        <section className="space-y-8">
+        <section className="mx-auto max-w-7xl space-y-8">
           <SectionHeading
             eyebrow="Included courses"
             title="Each course stays distinct. The purchase path becomes simpler."
@@ -106,11 +107,11 @@ export function BundleSalesPage({ bundle, payload }: { bundle: BundleWithRelatio
           </div>
         </section>
 
-        <section className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+        <section className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="rounded-[34px] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-soft)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Purchase logic</p>
-            <h3 className="mt-4 text-4xl leading-none tracking-[-0.04em] text-stone-950">One checkout. Multiple course enrollments.</h3>
-            <p className="mt-5 text-sm leading-8 text-stone-600">
+            <Badge variant="muted">Purchase logic</Badge>
+            <h3 className="mt-4 text-4xl leading-none tracking-[-0.04em] text-[var(--foreground)]">One checkout. Multiple course enrollments.</h3>
+            <p className="mt-5 text-sm leading-8 text-[var(--foreground-soft)]">
               Bundle purchases keep commerce simple while preserving the same learner model underneath. Every included course unlocks as a normal enrollment.
             </p>
           </div>
@@ -140,12 +141,12 @@ export function BundleSalesPage({ bundle, payload }: { bundle: BundleWithRelatio
           </div>
         </section>
 
-        <section className="rounded-[38px] border border-[var(--border)] bg-[linear-gradient(135deg,#1b1714,#3a2b1d)] px-8 py-10 text-stone-50 shadow-[0_30px_70px_rgba(23,20,18,0.18)]">
+        <section className="mx-auto max-w-7xl rounded-[38px] bg-[rgba(19,20,40,0.98)] px-8 py-10 text-white shadow-[0_30px_70px_rgba(18,20,41,0.18)]">
           <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-end">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.36em] text-[rgba(255,237,208,0.68)]">Pricing</p>
+              <Badge variant="premium">Pricing</Badge>
               <h2 className="mt-4 max-w-2xl text-5xl leading-none tracking-[-0.04em]">{payload.finalCta.label}</h2>
-              <p className="mt-4 max-w-xl text-base leading-8 text-[rgba(255,245,232,0.76)]">
+              <p className="mt-4 max-w-xl text-base leading-8 text-[#bdb3da]">
                 A bundle should feel as clear as a single product: one decisive CTA, one purchase flow, and a clean transition into study.
               </p>
             </div>
@@ -154,7 +155,7 @@ export function BundleSalesPage({ bundle, payload }: { bundle: BundleWithRelatio
                 <Link
                   key={price.offerId}
                   href={price.checkoutUrl}
-                  className="flex items-center justify-between rounded-[24px] border border-[rgba(255,245,232,0.14)] bg-[rgba(255,255,255,0.06)] px-5 py-4 text-sm font-semibold text-stone-50 transition hover:bg-[rgba(255,255,255,0.1)]"
+                  className="flex items-center justify-between rounded-[24px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.04)] px-5 py-4 text-sm font-semibold text-white transition hover:bg-[rgba(255,255,255,0.1)]"
                 >
                   <span>{price.currency}</span>
                   <span>{price.price}</span>

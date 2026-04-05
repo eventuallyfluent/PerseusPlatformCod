@@ -24,6 +24,28 @@ function toArray(value: FormDataEntryValue | null) {
     .filter(Boolean);
 }
 
+function toStructuredArray(value: FormDataEntryValue | null) {
+  return String(value ?? "")
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parseSalesPageConfig(formData: FormData) {
+  return {
+    heroMetadataLine: String(formData.get("salesPage.heroMetadataLine") ?? ""),
+    primaryCtaLabel: String(formData.get("salesPage.primaryCtaLabel") ?? ""),
+    secondaryCtaLabel: String(formData.get("salesPage.secondaryCtaLabel") ?? ""),
+    sectionOrder: toStructuredArray(formData.get("salesPage.sectionOrder")),
+    hiddenSections: toStructuredArray(formData.get("salesPage.hiddenSections")),
+    pricingBadge: String(formData.get("salesPage.pricingBadge") ?? ""),
+    pricingHeadline: String(formData.get("salesPage.pricingHeadline") ?? ""),
+    pricingBody: String(formData.get("salesPage.pricingBody") ?? ""),
+    finalCtaLabel: String(formData.get("salesPage.finalCtaLabel") ?? ""),
+    finalCtaBody: String(formData.get("salesPage.finalCtaBody") ?? ""),
+  };
+}
+
 function getDefaultHomepagePayload(type: HomepageSectionType) {
   return defaultHomepageSections().find((section) => section.type === type)!.payload;
 }
@@ -132,6 +154,7 @@ export async function saveCourseAction(formData: FormData) {
     includes: toArray(formData.get("includes")),
     heroImageUrl: String(formData.get("heroImageUrl") ?? ""),
     salesVideoUrl: String(formData.get("salesVideoUrl") ?? ""),
+    salesPageConfig: parseSalesPageConfig(formData),
     instructorId: String(formData.get("instructorId") ?? ""),
     seoTitle: String(formData.get("seoTitle") ?? ""),
     seoDescription: String(formData.get("seoDescription") ?? ""),
@@ -160,6 +183,7 @@ export async function saveBundleAction(formData: FormData) {
     includes: toArray(formData.get("includes")),
     heroImageUrl: String(formData.get("heroImageUrl") ?? ""),
     salesVideoUrl: String(formData.get("salesVideoUrl") ?? ""),
+    salesPageConfig: parseSalesPageConfig(formData),
     seoTitle: String(formData.get("seoTitle") ?? ""),
     seoDescription: String(formData.get("seoDescription") ?? ""),
     status: String(formData.get("status") ?? "DRAFT"),

@@ -68,92 +68,139 @@ export type BundleWithRelations = Prisma.BundleGetPayload<{
   };
 }>;
 
-export type GeneratedSalesPagePayload = {
+export type SalesPageSectionKey =
+  | "description"
+  | "highlights"
+  | "curriculum"
+  | "included-courses"
+  | "instructor"
+  | "testimonials"
+  | "faqs"
+  | "pricing";
+
+export type SalesPageConfig = {
+  heroMetadataLine?: string | null;
+  primaryCtaLabel?: string | null;
+  secondaryCtaLabel?: string | null;
+  sectionOrder?: SalesPageSectionKey[];
+  hiddenSections?: SalesPageSectionKey[];
+  pricingBadge?: string | null;
+  pricingHeadline?: string | null;
+  pricingBody?: string | null;
+  finalCtaLabel?: string | null;
+  finalCtaBody?: string | null;
+};
+
+export type SalesPageOfferSummary = {
+  offerId: string;
+  name: string;
+  price: string;
+  currency: string;
+  checkoutUrl: string;
+  compareAtPrice?: string | null;
+  savingsLabel?: string | null;
+};
+
+type SalesPageBasePayload = {
+  version: "v2";
+  productType: "course" | "bundle";
   hero: {
+    eyebrow: string;
+    metadataLine?: string | null;
     title: string;
     subtitle?: string | null;
     imageUrl?: string | null;
-    ctaLabel: string;
+    primaryCtaLabel: string;
+    primaryCtaHref: string;
+    secondaryCtaLabel: string;
+    secondaryCtaHref: string;
+    primaryOffer?: SalesPageOfferSummary | null;
   };
-  video: {
+  media: {
     salesVideoUrl?: string | null;
   };
-  description: {
+  sections: {
+    order: SalesPageSectionKey[];
+    hidden: SalesPageSectionKey[];
+  };
+  descriptionSection: {
+    eyebrow: string;
+    title: string;
     shortDescription?: string | null;
     longDescription?: string | null;
   };
-  outcomes: string[];
-  audience: string[];
-  includes: string[];
-  curriculum: {
-    moduleTitle: string;
-    lessons: { title: string; isPreview: boolean }[];
-  }[];
-  instructor: {
+  highlightsSection: {
+    eyebrow: string;
+    cards: Array<{
+      id: "outcomes" | "audience" | "includes";
+      title: string;
+      items: string[];
+    }>;
+  };
+  testimonialsSection: {
+    eyebrow: string;
+    title: string;
+    items: {
+      name?: string | null;
+      quote: string;
+      source?: string | null;
+    }[];
+  };
+  faqSection: {
+    eyebrow: string;
+    title: string;
+    items: {
+      question: string;
+      answer: string;
+    }[];
+  };
+  pricingSection: {
+    eyebrow: string;
+    badge: string;
+    headline: string;
+    body: string;
+    offers: SalesPageOfferSummary[];
+  };
+  finalCta: {
+    label: string;
+    body: string;
+  };
+  offers: SalesPageOfferSummary[];
+};
+
+export type GeneratedSalesPagePayload = SalesPageBasePayload & {
+  productType: "course";
+  curriculumSection: {
+    eyebrow: string;
+    title: string;
+    modules: {
+      moduleTitle: string;
+      lessons: { title: string; isPreview: boolean }[];
+    }[];
+  };
+  instructorSection: {
+    eyebrow: string;
+    title: string;
     name: string;
     imageUrl?: string | null;
     shortBio?: string | null;
     socialLinks: { label: string; url: string }[];
     pageUrl: string;
   };
-  testimonials: {
-    name?: string | null;
-    quote: string;
-  }[];
-  faqs: {
-    question: string;
-    answer: string;
-  }[];
-  pricing: {
-    offerId: string;
-    price: string;
-    currency: string;
-    checkoutUrl: string;
-  }[];
-  finalCta: {
-    label: string;
-  };
 };
 
-export type BundleSalesPagePayload = {
-  hero: {
+export type BundleSalesPagePayload = SalesPageBasePayload & {
+  productType: "bundle";
+  includedCoursesSection: {
+    eyebrow: string;
     title: string;
-    subtitle?: string | null;
-    imageUrl?: string | null;
-    ctaLabel: string;
-  };
-  video: {
-    salesVideoUrl?: string | null;
-  };
-  description: {
-    shortDescription?: string | null;
-    longDescription?: string | null;
-  };
-  outcomes: string[];
-  audience: string[];
-  includes: string[];
-  includedCourses: {
-    title: string;
-    subtitle?: string | null;
-    instructorName?: string | null;
-    courseUrl: string;
-  }[];
-  testimonials: {
-    name?: string | null;
-    quote: string;
-  }[];
-  faqs: {
-    question: string;
-    answer: string;
-  }[];
-  pricing: {
-    offerId: string;
-    price: string;
-    currency: string;
-    checkoutUrl: string;
-  }[];
-  finalCta: {
-    label: string;
+    body: string;
+    courses: {
+      title: string;
+      subtitle?: string | null;
+      instructorName?: string | null;
+      courseUrl: string;
+    }[];
   };
 };
 

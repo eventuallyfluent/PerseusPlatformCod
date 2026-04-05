@@ -15,7 +15,7 @@ export async function persistGeneratedBundlePage(bundle: BundleWithRelations, fo
       where: { id: existing.id },
       data: {
         generatedPayload: generateBundleSalesPagePayload(bundle),
-        templateVersion: "v1",
+        templateVersion: "v2",
         pageType: "bundle-sales",
         path: nextPath,
       },
@@ -27,7 +27,7 @@ export async function persistGeneratedBundlePage(bundle: BundleWithRelations, fo
       bundleId: bundle.id,
       pageType: "bundle-sales",
       path: nextPath,
-      templateVersion: "v1",
+      templateVersion: "v2",
       generatedPayload: generateBundleSalesPagePayload(bundle),
     },
   });

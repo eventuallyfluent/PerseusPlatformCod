@@ -124,6 +124,7 @@ model Course {
   includes         Json?
   heroImageUrl     String?
   salesVideoUrl    String?
+  salesPageConfig  Json?
   status           CourseStatus   @default(DRAFT)
   legacyCourseId   String?        @unique
   legacySlug       String?
@@ -156,6 +157,7 @@ model Bundle {
   includes         Json?
   heroImageUrl     String?
   salesVideoUrl    String?
+  salesPageConfig  Json?
   status           CourseStatus   @default(DRAFT)
   legacyUrl        String?        @unique
   publicPath       String?        @unique

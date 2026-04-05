@@ -1,6 +1,7 @@
 import { currencyFormatter } from "@/lib/utils";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
-import type { CourseWithRelations, GeneratedSalesPagePayload } from "@/types";
+import { normalizeSectionOrder, parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
+import type { CourseWithRelations, GeneratedSalesPagePayload, SalesPageOfferSummary } from "@/types";
 
 function readStringArray(value: unknown) {
   if (Array.isArray(value)) {
@@ -10,34 +11,99 @@ function readStringArray(value: unknown) {
   return [];
 }
 
+function buildOffers(course: CourseWithRelations): SalesPageOfferSummary[] {
+  return course.offers
+    .filter((offer) => offer.isPublished)
+    .map((offer) => {
+      const price = currencyFormatter(offer.price.toString(), offer.currency);
+      const compareAtPrice = offer.compareAtPrice ? currencyFormatter(offer.compareAtPrice.toString(), offer.currency) : null;
+      const savingsLabel =
+        offer.compareAtPrice && Number(offer.compareAtPrice) > Number(offer.price)
+          ? `Save ${Math.round(((Number(offer.compareAtPrice) - Number(offer.price)) / Number(offer.compareAtPrice)) * 100)}%`
+          : null;
+
+      return {
+        offerId: offer.id,
+        name: offer.name,
+        price,
+        currency: offer.currency,
+        checkoutUrl: `/checkout/${offer.id}`,
+        compareAtPrice,
+        savingsLabel,
+      };
+    });
+}
+
 export function generateSalesPagePayload(course: CourseWithRelations): GeneratedSalesPagePayload {
+  const config = parseSalesPageConfig(course.salesPageConfig);
+  const offers = buildOffers(course);
+  const sectionOrder = normalizeSectionOrder(config.sectionOrder, [
+    "description",
+    "highlights",
+    "curriculum",
+    "instructor",
+    "testimonials",
+    "faqs",
+    "pricing",
+  ]);
+  const outcomes = readStringArray(course.learningOutcomes);
+  const audience = readStringArray(course.whoItsFor);
+  const includes = readStringArray(course.includes);
+
   return {
+    version: "v2",
+    productType: "course",
     hero: {
+      eyebrow: "Perseus course",
+      metadataLine:
+        config.heroMetadataLine ??
+        `${course.instructor.name} • ${course.modules.reduce((count, module) => count + module.lessons.length, 0)} lessons`,
       title: course.title,
       subtitle: course.subtitle,
       imageUrl: course.heroImageUrl,
-      ctaLabel: "Enroll now",
+      primaryCtaLabel: config.primaryCtaLabel || "Enroll now — get instant access",
+      primaryCtaHref: offers[0]?.checkoutUrl ?? resolveCoursePublicPath(course),
+      secondaryCtaLabel: config.secondaryCtaLabel || "View curriculum",
+      secondaryCtaHref: "#curriculum",
+      primaryOffer: offers[0] ?? null,
     },
-    video: {
+    media: {
       salesVideoUrl: course.salesVideoUrl,
     },
-    description: {
+    sections: {
+      order: sectionOrder,
+      hidden: config.hiddenSections ?? [],
+    },
+    descriptionSection: {
+      eyebrow: "Course overview",
+      title: "What this course opens up.",
       shortDescription: course.shortDescription,
       longDescription: course.longDescription,
     },
-    outcomes: readStringArray(course.learningOutcomes),
-    audience: readStringArray(course.whoItsFor),
-    includes: readStringArray(course.includes),
-    curriculum: course.modules.map((module) => ({
-      moduleTitle: module.title,
-      lessons: module.lessons
-        .sort((left, right) => left.position - right.position)
-        .map((lesson) => ({
-          title: lesson.title,
-          isPreview: lesson.isPreview,
-        })),
-    })),
-    instructor: {
+    highlightsSection: {
+      eyebrow: "At a glance",
+      cards: [
+        { id: "outcomes", title: "Outcomes", items: outcomes },
+        { id: "audience", title: "Who it is for", items: audience },
+        { id: "includes", title: "Included", items: includes },
+      ],
+    },
+    curriculumSection: {
+      eyebrow: "Curriculum",
+      title: "Preview the path before you enter.",
+      modules: course.modules.map((module) => ({
+        moduleTitle: module.title,
+        lessons: module.lessons
+          .sort((left, right) => left.position - right.position)
+          .map((lesson) => ({
+            title: lesson.title,
+            isPreview: lesson.isPreview,
+          })),
+      })),
+    },
+    instructorSection: {
+      eyebrow: "Instructor",
+      title: "Learn from a named guide, not an anonymous content feed.",
       name: course.instructor.name,
       imageUrl: course.instructor.imageUrl,
       shortBio: course.instructor.shortBio,
@@ -54,25 +120,39 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
         .map(([label, url]) => ({ label, url })),
       pageUrl: `/instructors/${course.instructor.slug}`,
     },
-    testimonials: course.testimonials.map((testimonial) => ({
-      name: testimonial.name,
-      quote: testimonial.quote,
-    })),
-    faqs: course.faqs.map((faq) => ({
-      question: faq.question,
-      answer: faq.answer,
-    })),
-    pricing: course.offers
-      .filter((offer) => offer.isPublished)
-      .map((offer) => ({
-        offerId: offer.id,
-        price: currencyFormatter(offer.price.toString(), offer.currency),
-        currency: offer.currency,
-        checkoutUrl: `/checkout/${offer.id}`,
+    testimonialsSection: {
+      eyebrow: "Testimonies",
+      title: "What students say after entering the work",
+      items: course.testimonials.map((testimonial) => ({
+        name: testimonial.name,
+        quote: testimonial.quote,
+        source: course.title,
       })),
-    finalCta: {
-      label: course.offers.some((offer) => offer.isPublished) ? "Start learning today" : "Join the waitlist",
     },
+    faqSection: {
+      eyebrow: "FAQ",
+      title: "What you should know before buying",
+      items: course.faqs.map((faq) => ({
+        question: faq.question,
+        answer: faq.answer,
+      })),
+    },
+    pricingSection: {
+      eyebrow: "Pricing",
+      badge: config.pricingBadge || "Instant access",
+      headline: config.pricingHeadline || "A single clear offer, then straight into study.",
+      body:
+        config.pricingBody ||
+        "Use the sales page to understand the promise. Use checkout only when you are ready to enter the course.",
+      offers,
+    },
+    finalCta: {
+      label: config.finalCtaLabel || (offers.length > 0 ? "Enroll now — get instant access" : "Join the waitlist"),
+      body:
+        config.finalCtaBody ||
+        "One dominant action, one clean buying path, and a clear move into the learner portal after enrollment.",
+    },
+    offers,
   };
 }
 

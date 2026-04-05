@@ -5,11 +5,19 @@ export function getCourseSalesPage(course: CourseWithRelations): GeneratedSalesP
   const salesPage = course.pages.find((page) => page.pageType === "sales");
 
   if (salesPage?.isOverrideActive && salesPage.overridePayload) {
-    return salesPage.overridePayload as GeneratedSalesPagePayload;
+    const overridePayload = salesPage.overridePayload as Partial<GeneratedSalesPagePayload>;
+
+    if (overridePayload.version === "v2") {
+      return overridePayload as GeneratedSalesPagePayload;
+    }
   }
 
   if (salesPage?.generatedPayload) {
-    return salesPage.generatedPayload as GeneratedSalesPagePayload;
+    const generatedPayload = salesPage.generatedPayload as Partial<GeneratedSalesPagePayload>;
+
+    if (generatedPayload.version === "v2") {
+      return generatedPayload as GeneratedSalesPagePayload;
+    }
   }
 
   return generateSalesPagePayload(course);

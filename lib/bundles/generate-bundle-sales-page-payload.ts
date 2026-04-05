@@ -1,6 +1,7 @@
 import { currencyFormatter } from "@/lib/utils";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
-import type { BundleSalesPagePayload, BundleWithRelations } from "@/types";
+import { normalizeSectionOrder, parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
+import type { BundleSalesPagePayload, BundleWithRelations, SalesPageOfferSummary } from "@/types";
 
 function readStringArray(value: unknown) {
   if (Array.isArray(value)) {
@@ -10,49 +11,121 @@ function readStringArray(value: unknown) {
   return [];
 }
 
+function buildOffers(bundle: BundleWithRelations): SalesPageOfferSummary[] {
+  return bundle.offers
+    .filter((offer) => offer.isPublished)
+    .map((offer) => {
+      const price = currencyFormatter(offer.price.toString(), offer.currency);
+      const compareAtPrice = offer.compareAtPrice ? currencyFormatter(offer.compareAtPrice.toString(), offer.currency) : null;
+      const savingsLabel =
+        offer.compareAtPrice && Number(offer.compareAtPrice) > Number(offer.price)
+          ? `Save ${Math.round(((Number(offer.compareAtPrice) - Number(offer.price)) / Number(offer.compareAtPrice)) * 100)}%`
+          : null;
+
+      return {
+        offerId: offer.id,
+        name: offer.name,
+        price,
+        currency: offer.currency,
+        checkoutUrl: `/checkout/${offer.id}`,
+        compareAtPrice,
+        savingsLabel,
+      };
+    });
+}
+
 export function generateBundleSalesPagePayload(bundle: BundleWithRelations): BundleSalesPagePayload {
+  const config = parseSalesPageConfig(bundle.salesPageConfig);
+  const offers = buildOffers(bundle);
+  const sectionOrder = normalizeSectionOrder(config.sectionOrder, [
+    "description",
+    "highlights",
+    "included-courses",
+    "testimonials",
+    "faqs",
+    "pricing",
+  ]);
+
   return {
+    version: "v2",
+    productType: "bundle",
     hero: {
+      eyebrow: "Perseus bundle",
+      metadataLine: config.heroMetadataLine ?? `${bundle.courses.length} included courses • one checkout path`,
       title: bundle.title,
       subtitle: bundle.subtitle,
       imageUrl: bundle.heroImageUrl,
-      ctaLabel: "Get the bundle",
+      primaryCtaLabel: config.primaryCtaLabel || "Get the bundle",
+      primaryCtaHref: offers[0]?.checkoutUrl ?? resolveBundlePublicPath(bundle),
+      secondaryCtaLabel: config.secondaryCtaLabel || "See included courses",
+      secondaryCtaHref: "#included-courses",
+      primaryOffer: offers[0] ?? null,
     },
-    video: {
+    media: {
       salesVideoUrl: bundle.salesVideoUrl,
     },
-    description: {
+    sections: {
+      order: sectionOrder,
+      hidden: config.hiddenSections ?? [],
+    },
+    descriptionSection: {
+      eyebrow: "Bundle overview",
+      title: "What this unlocks in one step.",
       shortDescription: bundle.shortDescription,
       longDescription: bundle.longDescription,
     },
-    outcomes: readStringArray(bundle.learningOutcomes),
-    audience: readStringArray(bundle.whoItsFor),
-    includes: readStringArray(bundle.includes),
-    includedCourses: bundle.courses.map((item) => ({
-      title: item.course.title,
-      subtitle: item.course.subtitle,
-      instructorName: item.course.instructor.name,
-      courseUrl: item.course.publicPath ?? item.course.legacyUrl ?? `/course/${item.course.slug}`,
-    })),
-    testimonials: bundle.testimonials.map((testimonial) => ({
-      name: testimonial.name,
-      quote: testimonial.quote,
-    })),
-    faqs: bundle.faqs.map((faq) => ({
-      question: faq.question,
-      answer: faq.answer,
-    })),
-    pricing: bundle.offers
-      .filter((offer) => offer.isPublished)
-      .map((offer) => ({
-        offerId: offer.id,
-        price: currencyFormatter(offer.price.toString(), offer.currency),
-        currency: offer.currency,
-        checkoutUrl: `/checkout/${offer.id}`,
-      })),
-    finalCta: {
-      label: bundle.offers.some((offer) => offer.isPublished) ? "Unlock the full bundle" : "Bundle coming soon",
+    highlightsSection: {
+      eyebrow: "At a glance",
+      cards: [
+        { id: "outcomes", title: "Outcomes", items: readStringArray(bundle.learningOutcomes) },
+        { id: "audience", title: "Who it is for", items: readStringArray(bundle.whoItsFor) },
+        { id: "includes", title: "Bundle includes", items: readStringArray(bundle.includes) },
+      ],
     },
+    includedCoursesSection: {
+      eyebrow: "Included courses",
+      title: "Each course stays distinct. The purchase path becomes simpler.",
+      body: "Buy once, then enter each included course through the normal learner dashboard and lesson flow.",
+      courses: bundle.courses.map((item) => ({
+        title: item.course.title,
+        subtitle: item.course.subtitle,
+        instructorName: item.course.instructor.name,
+        courseUrl: item.course.publicPath ?? item.course.legacyUrl ?? `/course/${item.course.slug}`,
+      })),
+    },
+    testimonialsSection: {
+      eyebrow: "Testimonies",
+      title: "What students say after entering the bundle",
+      items: bundle.testimonials.map((testimonial) => ({
+        name: testimonial.name,
+        quote: testimonial.quote,
+        source: bundle.title,
+      })),
+    },
+    faqSection: {
+      eyebrow: "FAQ",
+      title: "What you should know before buying",
+      items: bundle.faqs.map((faq) => ({
+        question: faq.question,
+        answer: faq.answer,
+      })),
+    },
+    pricingSection: {
+      eyebrow: "Pricing",
+      badge: config.pricingBadge || "Multiple enrollments",
+      headline: config.pricingHeadline || "One checkout. Multiple course enrollments.",
+      body:
+        config.pricingBody ||
+        "Bundle purchases keep commerce simple while preserving the same learner model underneath. Every included course unlocks as a normal enrollment.",
+      offers,
+    },
+    finalCta: {
+      label: config.finalCtaLabel || (offers.length > 0 ? "Unlock the full bundle" : "Bundle coming soon"),
+      body:
+        config.finalCtaBody ||
+        "A bundle should feel as clear as a single product: one decisive CTA, one purchase flow, and a clean transition into study.",
+    },
+    offers,
   };
 }
 

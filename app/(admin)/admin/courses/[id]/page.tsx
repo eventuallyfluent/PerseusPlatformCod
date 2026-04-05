@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { ProductFormSection } from "@/components/admin/product-form-shell";
+import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import {
   addLessonAction,
   addModuleAction,
@@ -52,6 +53,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   }
 
   const previewOffer = course.offers.find((offer) => offer.isPublished) ?? course.offers[0] ?? null;
+  const salesPageConfig = parseSalesPageConfig(course.salesPageConfig);
 
   return (
     <AdminShell title={course.title} description="Basic info, curriculum, offers, SEO, and generated page controls.">
@@ -151,6 +153,60 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <label className="md:col-span-2">
                 SEO description
                 <textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} />
+              </label>
+            </ProductFormSection>
+
+            <ProductFormSection
+              title="Sales page"
+              description="These settings shape the generated sales page without creating a separate hand-built page."
+            >
+              <label>
+                Hero metadata line
+                <input name="salesPage.heroMetadataLine" defaultValue={salesPageConfig.heroMetadataLine ?? ""} />
+              </label>
+              <label>
+                Primary CTA label
+                <input name="salesPage.primaryCtaLabel" defaultValue={salesPageConfig.primaryCtaLabel ?? ""} />
+              </label>
+              <label>
+                Secondary CTA label
+                <input name="salesPage.secondaryCtaLabel" defaultValue={salesPageConfig.secondaryCtaLabel ?? ""} />
+              </label>
+              <label>
+                Pricing badge
+                <input name="salesPage.pricingBadge" defaultValue={salesPageConfig.pricingBadge ?? ""} />
+              </label>
+              <label className="md:col-span-2">
+                Pricing headline
+                <input name="salesPage.pricingHeadline" defaultValue={salesPageConfig.pricingHeadline ?? ""} />
+              </label>
+              <label className="md:col-span-2">
+                Pricing body
+                <textarea name="salesPage.pricingBody" rows={3} defaultValue={salesPageConfig.pricingBody ?? ""} />
+              </label>
+              <label>
+                Final CTA label
+                <input name="salesPage.finalCtaLabel" defaultValue={salesPageConfig.finalCtaLabel ?? ""} />
+              </label>
+              <label className="md:col-span-2">
+                Final CTA body
+                <textarea name="salesPage.finalCtaBody" rows={3} defaultValue={salesPageConfig.finalCtaBody ?? ""} />
+              </label>
+              <label>
+                Section order
+                <textarea
+                  name="salesPage.sectionOrder"
+                  rows={7}
+                  defaultValue={(salesPageConfig.sectionOrder ?? ["description", "highlights", "curriculum", "instructor", "testimonials", "faqs", "pricing"]).join("\n")}
+                />
+              </label>
+              <label>
+                Hidden sections
+                <textarea
+                  name="salesPage.hiddenSections"
+                  rows={7}
+                  defaultValue={(salesPageConfig.hiddenSections ?? []).join("\n")}
+                />
               </label>
             </ProductFormSection>
 

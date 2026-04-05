@@ -5,11 +5,19 @@ export function getBundleSalesPage(bundle: BundleWithRelations): BundleSalesPage
   const salesPage = bundle.pages.find((page) => page.pageType === "bundle-sales");
 
   if (salesPage?.isOverrideActive && salesPage.overridePayload) {
-    return salesPage.overridePayload as BundleSalesPagePayload;
+    const overridePayload = salesPage.overridePayload as Partial<BundleSalesPagePayload>;
+
+    if (overridePayload.version === "v2") {
+      return overridePayload as BundleSalesPagePayload;
+    }
   }
 
   if (salesPage?.generatedPayload) {
-    return salesPage.generatedPayload as BundleSalesPagePayload;
+    const generatedPayload = salesPage.generatedPayload as Partial<BundleSalesPagePayload>;
+
+    if (generatedPayload.version === "v2") {
+      return generatedPayload as BundleSalesPagePayload;
+    }
   }
 
   return generateBundleSalesPagePayload(bundle);

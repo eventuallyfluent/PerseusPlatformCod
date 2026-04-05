@@ -2,7 +2,7 @@ import { absoluteUrl } from "@/lib/utils";
 import type { BundleSalesPagePayload, BundleWithRelations, CourseWithRelations, GeneratedSalesPagePayload } from "@/types";
 
 export function buildCourseStructuredData(course: CourseWithRelations, payload: GeneratedSalesPagePayload) {
-  const offers = payload.pricing.map((price) => ({
+  const offers = payload.offers.map((price) => ({
     "@type": "Offer",
     price: price.price.replace(/[^0-9.]/g, ""),
     priceCurrency: price.currency,
@@ -17,7 +17,7 @@ export function buildCourseStructuredData(course: CourseWithRelations, payload: 
     description: course.shortDescription ?? course.longDescription ?? course.title,
     provider: {
       "@type": "Organization",
-      name: "Perseus Platform",
+      name: "Perseus Arcane Academy",
     },
     instructor: {
       "@type": "Person",
@@ -37,9 +37,9 @@ export function buildProductStructuredData(course: CourseWithRelations, payload:
     image: course.heroImageUrl ? [course.heroImageUrl] : undefined,
     brand: {
       "@type": "Brand",
-      name: "Perseus Platform",
+      name: "Perseus Arcane Academy",
     },
-    offers: payload.pricing.map((price) => ({
+    offers: payload.offers.map((price) => ({
       "@type": "Offer",
       price: price.price.replace(/[^0-9.]/g, ""),
       priceCurrency: price.currency,
@@ -58,14 +58,14 @@ export function buildBundleProductStructuredData(bundle: BundleWithRelations, pa
     image: bundle.heroImageUrl ? [bundle.heroImageUrl] : undefined,
     brand: {
       "@type": "Brand",
-      name: "Perseus Platform",
+      name: "Perseus Arcane Academy",
     },
-    isRelatedTo: payload.includedCourses.map((course) => ({
+    isRelatedTo: payload.includedCoursesSection.courses.map((course) => ({
       "@type": "Course",
       name: course.title,
       url: absoluteUrl(course.courseUrl),
     })),
-    offers: payload.pricing.map((price) => ({
+    offers: payload.offers.map((price) => ({
       "@type": "Offer",
       price: price.price.replace(/[^0-9.]/g, ""),
       priceCurrency: price.currency,

@@ -15,7 +15,7 @@ export async function persistGeneratedPage(course: CourseWithRelations, force = 
       where: { id: existing.id },
       data: {
         generatedPayload: generateSalesPagePayload(course),
-        templateVersion: "v1",
+        templateVersion: "v2",
         pageType: "sales",
         path: nextPath,
       },
@@ -27,7 +27,7 @@ export async function persistGeneratedPage(course: CourseWithRelations, force = 
       courseId: course.id,
       pageType: "sales",
       path: nextPath,
-      templateVersion: "v1",
+      templateVersion: "v2",
       generatedPayload: generateSalesPagePayload(course),
     },
   });

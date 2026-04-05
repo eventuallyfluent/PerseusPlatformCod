@@ -1,8 +1,32 @@
 import { CourseStatus, ImportType, LessonStatus, LessonType, OfferType } from "@prisma/client";
 import { z } from "zod";
+import type { SalesPageSectionKey } from "@/types";
 
 const optionalUrl = z.string().url().optional().or(z.literal(""));
 const optionalDateString = z.string().optional().or(z.literal(""));
+const salesPageSectionKeySchema = z.enum([
+  "description",
+  "highlights",
+  "curriculum",
+  "included-courses",
+  "instructor",
+  "testimonials",
+  "faqs",
+  "pricing",
+] satisfies [SalesPageSectionKey, ...SalesPageSectionKey[]]);
+
+export const salesPageConfigSchema = z.object({
+  heroMetadataLine: z.string().optional(),
+  primaryCtaLabel: z.string().optional(),
+  secondaryCtaLabel: z.string().optional(),
+  sectionOrder: z.array(salesPageSectionKeySchema).default([]),
+  hiddenSections: z.array(salesPageSectionKeySchema).default([]),
+  pricingBadge: z.string().optional(),
+  pricingHeadline: z.string().optional(),
+  pricingBody: z.string().optional(),
+  finalCtaLabel: z.string().optional(),
+  finalCtaBody: z.string().optional(),
+});
 
 export const instructorInputSchema = z.object({
   slug: z.string().min(1),
@@ -30,6 +54,7 @@ export const courseInputSchema = z.object({
   includes: z.array(z.string()).default([]),
   heroImageUrl: optionalUrl,
   salesVideoUrl: optionalUrl,
+  salesPageConfig: salesPageConfigSchema.optional(),
   instructorId: z.string().min(1),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
@@ -50,6 +75,7 @@ export const bundleInputSchema = z.object({
   includes: z.array(z.string()).default([]),
   heroImageUrl: optionalUrl,
   salesVideoUrl: optionalUrl,
+  salesPageConfig: salesPageConfigSchema.optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   status: z.nativeEnum(CourseStatus).default(CourseStatus.DRAFT),

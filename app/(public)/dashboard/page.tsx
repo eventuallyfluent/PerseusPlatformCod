@@ -51,15 +51,13 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(143,44,255,0.08),transparent_18%),linear-gradient(180deg,#0d0f1d,#13152a_34%,#0c0e1d_100%)]">
       <div className="mx-auto max-w-7xl px-6 py-10">
         <LearnerContextBar
-          title="Your learner dashboard"
-          description="Continue where you left off, see which courses are already open, and move through drip-locked material without losing the thread."
+          title="Your courses"
+          description="Pick up where you left off."
           identity={session.user.name ?? session.user.email!}
           primaryHref={spotlight?.state.nextLesson ? `/learn/${spotlight.enrollment.course.slug}/${spotlight.state.nextLesson.slug}` : undefined}
-          primaryLabel={spotlight?.state.nextLesson ? "Continue learning" : undefined}
+          primaryLabel={spotlight?.state.nextLesson ? "Continue" : undefined}
           secondaryHref="/"
-          secondaryLabel="Browse storefront"
-          auxiliaryHref={session.user.isAdmin ? "/admin" : undefined}
-          auxiliaryLabel={session.user.isAdmin ? "Open admin" : undefined}
+          secondaryLabel="Browse courses"
         />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
@@ -87,11 +85,6 @@ export default async function DashboardPage() {
                 <Link href="/" className="text-sm text-[var(--portal-muted)] transition hover:text-white">
                   Browse courses
                 </Link>
-                {session.user.isAdmin ? (
-                  <Link href="/admin" className="text-sm text-[var(--portal-muted)] transition hover:text-white">
-                    Open admin
-                  </Link>
-                ) : null}
               </div>
             </div>
           </aside>
@@ -173,17 +166,14 @@ export default async function DashboardPage() {
             ) : (
               <section className="rounded-[32px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-8 text-[var(--portal-text)]">
                 <Badge variant="warning">No active enrollments</Badge>
-                <h2 className="mt-5 text-4xl leading-none tracking-[-0.04em]">Your portal opens up as soon as you join a course.</h2>
-                <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--portal-muted)]">
-                  Free and paid access both begin from the product page, not from a generic membership route.
-                </p>
+                <h2 className="mt-5 text-4xl leading-none tracking-[-0.04em]">No courses yet.</h2>
               </section>
             )}
 
             <section className="space-y-6">
               <div className="space-y-3">
                 <Badge variant="portal">Course library</Badge>
-                <h2 className="text-5xl leading-none tracking-[-0.05em] text-white">Everything you can enter now.</h2>
+                <h2 className="text-5xl leading-none tracking-[-0.05em] text-white">Your library</h2>
               </div>
               <div className="grid gap-6 xl:grid-cols-2">
                 {courseStates.map(({ enrollment, state }) => (

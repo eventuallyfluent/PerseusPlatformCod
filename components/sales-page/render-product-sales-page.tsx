@@ -78,22 +78,42 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
     if (section === "curriculum" && payload.productType === "course") {
       return (
         <section key={section} id="curriculum" className="mx-auto max-w-7xl space-y-8 px-6">
-          <SectionIntro eyebrow={payload.curriculumSection.eyebrow} title={payload.curriculumSection.title} />
+          <SectionIntro eyebrow={payload.curriculumSection.eyebrow} title={payload.curriculumSection.title} body={payload.curriculumSection.body} />
           <div className="grid gap-5">
             {payload.curriculumSection.modules.map((module, index) => (
-              <div key={module.moduleTitle} className="grid gap-5 rounded-[34px] border border-[var(--border)] bg-[rgba(21,18,40,0.97)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.12)] lg:grid-cols-[0.34fr_1fr]">
-                <div className="space-y-3">
-                  <Badge variant="portal">Module {index + 1}</Badge>
-                  <h3 className="text-3xl leading-none tracking-[-0.03em]">{module.moduleTitle}</h3>
+              <div key={module.moduleTitle} className="overflow-hidden rounded-[30px] border border-[var(--border)] bg-[rgba(21,18,40,0.97)] text-white shadow-[0_24px_60px_rgba(18,20,41,0.12)]">
+                <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--portal-border)] px-6 py-5">
+                  <div className="space-y-3">
+                    <Badge variant="portal">Module {index + 1}</Badge>
+                    <h3 className="text-3xl leading-none tracking-[-0.03em]">{module.moduleTitle}</h3>
+                  </div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#b7abd9]">
+                    {module.lessonCount} lesson{module.lessonCount === 1 ? "" : "s"}
+                  </p>
                 </div>
-                <ul className="grid gap-3">
-                  {module.lessons.map((lesson) => (
-                    <li key={lesson.title} className="flex items-center justify-between gap-3 rounded-[22px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-4 py-4 text-sm text-[#ddd5f5]">
-                      <span>{lesson.title}</span>
-                      <Badge variant={lesson.isPreview ? "premium" : "portal"}>{lesson.isPreview ? "Preview" : "Included"}</Badge>
+                <ol className="grid">
+                  {module.lessons.map((lesson, lessonIndex) => (
+                    <li
+                      key={`${module.moduleTitle}-${lesson.title}`}
+                      className="grid gap-3 border-t border-[rgba(88,97,130,0.18)] px-6 py-4 first:border-t-0 lg:grid-cols-[72px_1fr_auto]"
+                    >
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8f86b4]">
+                        Lesson {lessonIndex + 1}
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-base font-medium text-[#f3ecff]">{lesson.title}</p>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="portal">{lesson.type.replace(/_/g, " ")}</Badge>
+                          {lesson.durationLabel ? <Badge variant="muted">{lesson.durationLabel}</Badge> : null}
+                          {lesson.dripDays ? <Badge variant="accent">Day {lesson.dripDays}</Badge> : null}
+                        </div>
+                      </div>
+                      <div className="flex items-start justify-start lg:justify-end">
+                        <Badge variant={lesson.isPreview ? "premium" : "portal"}>{lesson.isPreview ? "Preview" : "Included"}</Badge>
+                      </div>
                     </li>
                   ))}
-                </ul>
+                </ol>
               </div>
             ))}
           </div>
@@ -125,35 +145,33 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
     if (section === "instructor" && payload.productType === "course") {
       return (
         <section key={section} className="mx-auto max-w-7xl px-6">
-          <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-[34px] border border-[var(--border)] bg-[rgba(255,255,255,0.8)] p-6 shadow-[var(--shadow-soft)]">
+          <div className="grid gap-8 rounded-[34px] border border-[var(--border)] bg-[rgba(255,255,255,0.8)] p-6 shadow-[var(--shadow-soft)] lg:grid-cols-[320px_1fr] lg:p-8">
+            <div className="space-y-4">
               <Badge variant="muted">{payload.instructorSection.eyebrow}</Badge>
-              <h3 className="mt-4 text-4xl leading-none tracking-[-0.04em] text-[var(--foreground)]">{payload.instructorSection.name}</h3>
               {payload.instructorSection.imageUrl ? (
                 <div
-                  className="mt-5 h-72 rounded-[28px] bg-cover bg-center"
+                  className="h-80 rounded-[28px] bg-cover bg-center"
                   style={{ backgroundImage: `linear-gradient(180deg, rgba(22,12,45,0.08), rgba(22,12,45,0.24)), url(${payload.instructorSection.imageUrl})` }}
                 />
-              ) : null}
-              {payload.instructorSection.shortBio ? <p className="mt-5 text-sm leading-8 text-[var(--foreground-soft)]">{payload.instructorSection.shortBio}</p> : null}
-              <div className="mt-5 flex flex-wrap gap-3 text-sm text-[var(--foreground-soft)]">
-                {payload.instructorSection.socialLinks.map((social) => (
-                  <a key={social.label} href={social.url} target="_blank" rel="noreferrer" className="rounded-full border border-[var(--border)] px-4 py-2 transition hover:bg-white/80">
-                    {social.label}
-                  </a>
-                ))}
-              </div>
-              <Link href={payload.instructorSection.pageUrl} className="mt-6 inline-flex text-sm font-semibold text-[var(--foreground)] underline underline-offset-4">
-                View instructor page
-              </Link>
+              ) : <div className="h-80 rounded-[28px] bg-[linear-gradient(135deg,#1b0c34,#2e175f)]" />}
             </div>
-            <div className="flex items-end rounded-[34px] border border-[var(--border)] bg-[rgba(19,20,40,0.98)] p-8 text-white shadow-[0_30px_70px_rgba(18,20,41,0.18)]">
-              <div>
+            <div className="flex items-center">
+              <div className="max-w-3xl space-y-5">
                 <Badge variant="premium">{payload.instructorSection.eyebrow}</Badge>
-                <h3 className="mt-4 text-4xl leading-none tracking-[-0.04em]">{payload.instructorSection.title}</h3>
-                <p className="mt-5 text-base leading-8 text-[#bdb3da]">
-                  The sales page should make the teacher legible and credible without breaking the structured product flow.
-                </p>
+                <h3 className="text-5xl leading-none tracking-[-0.05em] text-[var(--foreground)]">{payload.instructorSection.name}</h3>
+                <p className="text-xl leading-8 text-[var(--foreground)]">{payload.instructorSection.title}</p>
+                {payload.instructorSection.body ? <p className="text-base leading-8 text-[var(--foreground-soft)]">{payload.instructorSection.body}</p> : null}
+                {payload.instructorSection.shortBio ? <p className="text-sm leading-8 text-[var(--foreground-soft)]">{payload.instructorSection.shortBio}</p> : null}
+                <div className="flex flex-wrap gap-3 pt-2 text-sm text-[var(--foreground-soft)]">
+                  {payload.instructorSection.socialLinks.map((social) => (
+                    <a key={social.label} href={social.url} target="_blank" rel="noreferrer" className="rounded-full border border-[var(--border)] px-4 py-2 transition hover:bg-white/80">
+                      {social.label}
+                    </a>
+                  ))}
+                </div>
+                <Link href={payload.instructorSection.pageUrl} className="inline-flex text-sm font-semibold text-[var(--foreground)] underline underline-offset-4">
+                  View instructor page
+                </Link>
               </div>
             </div>
           </div>

@@ -49,19 +49,18 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
   const outcomes = readStringArray(course.learningOutcomes);
   const audience = readStringArray(course.whoItsFor);
   const includes = readStringArray(course.includes);
+  const lessonCount = course.modules.reduce((count, module) => count + module.lessons.length, 0);
 
   return {
     version: "v2",
     productType: "course",
     hero: {
       eyebrow: "Perseus course",
-      metadataLine:
-        config.heroMetadataLine ??
-        `${course.instructor.name} • ${course.modules.reduce((count, module) => count + module.lessons.length, 0)} lessons`,
+      metadataLine: config.heroMetadataLine ?? `${course.instructor.name} • ${lessonCount} lessons`,
       title: course.title,
       subtitle: course.subtitle,
       imageUrl: course.heroImageUrl,
-      primaryCtaLabel: config.primaryCtaLabel || "Enroll now — get instant access",
+      primaryCtaLabel: config.primaryCtaLabel || "Enroll now - get instant access",
       primaryCtaHref: offers[0]?.checkoutUrl ?? resolveCoursePublicPath(course),
       secondaryCtaLabel: config.secondaryCtaLabel || "View curriculum",
       secondaryCtaHref: "#curriculum",
@@ -90,20 +89,26 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
     },
     curriculumSection: {
       eyebrow: "Curriculum",
-      title: "Preview the path before you enter.",
+      title: "See the full curriculum before you join.",
+      body: "Every module and lesson is listed here so the structure, pacing, and progression are visible before checkout.",
       modules: course.modules.map((module) => ({
         moduleTitle: module.title,
+        lessonCount: module.lessons.length,
         lessons: module.lessons
           .sort((left, right) => left.position - right.position)
           .map((lesson) => ({
             title: lesson.title,
             isPreview: lesson.isPreview,
+            type: lesson.type,
+            durationLabel: lesson.durationLabel,
+            dripDays: lesson.dripDays,
           })),
       })),
     },
     instructorSection: {
       eyebrow: "Instructor",
-      title: "Learn from a named guide, not an anonymous content feed.",
+      title: "Learn from a named guide with a visible body of work.",
+      body: "The teacher should be clear and credible on the page without turning the sales flow into a second oversized feature block.",
       name: course.instructor.name,
       imageUrl: course.instructor.imageUrl,
       shortBio: course.instructor.shortBio,
@@ -147,7 +152,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
       offers,
     },
     finalCta: {
-      label: config.finalCtaLabel || (offers.length > 0 ? "Enroll now — get instant access" : "Join the waitlist"),
+      label: config.finalCtaLabel || (offers.length > 0 ? "Enroll now - get instant access" : "Join the waitlist"),
       body:
         config.finalCtaBody ||
         "One dominant action, one clean buying path, and a clear move into the learner portal after enrollment.",

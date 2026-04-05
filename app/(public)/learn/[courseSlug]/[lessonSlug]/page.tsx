@@ -42,14 +42,12 @@ export default async function LessonPage({ params }: { params: Promise<{ courseS
       <LearnerContextBar
         label="Lesson space"
         title={course.title}
-        description={`Continue through ${lesson.title} with the same structured learner flow used across the platform.`}
+        description={lesson.title}
         identity={session.user.name ?? session.user.email!}
         primaryHref="/dashboard"
         primaryLabel="Back to dashboard"
         secondaryHref={course.publicPath ?? course.legacyUrl ?? `/course/${course.slug}`}
         secondaryLabel="View course front"
-        auxiliaryHref={session.user.isAdmin ? "/admin" : undefined}
-        auxiliaryLabel={session.user.isAdmin ? "Open admin" : undefined}
       />
       <CoursePlayerLayout course={course} activeLessonSlug={lessonSlug} enrolledAt={enrollment.enrolledAt} />
       </div>

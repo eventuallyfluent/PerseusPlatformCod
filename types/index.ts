@@ -173,14 +173,23 @@ export type GeneratedSalesPagePayload = SalesPageBasePayload & {
   curriculumSection: {
     eyebrow: string;
     title: string;
+    body?: string | null;
     modules: {
       moduleTitle: string;
-      lessons: { title: string; isPreview: boolean }[];
+      lessonCount: number;
+      lessons: {
+        title: string;
+        isPreview: boolean;
+        type: string;
+        durationLabel?: string | null;
+        dripDays?: number | null;
+      }[];
     }[];
   };
   instructorSection: {
     eyebrow: string;
     title: string;
+    body?: string | null;
     name: string;
     imageUrl?: string | null;
     shortBio?: string | null;

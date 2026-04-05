@@ -1,0 +1,227 @@
+import type { HomepageSectionType } from "@prisma/client";
+
+export type HomepageHeroPayload = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  primaryCtaLabel: string;
+  primaryCtaHref: string;
+  secondaryCtaLabel: string;
+  secondaryCtaHref: string;
+};
+
+export type HomepageCollectionItem = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  tone: "arcane" | "discipline" | "gateway";
+  courseSlugs: string[];
+};
+
+export type HomepageCollectionsPayload = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  items: HomepageCollectionItem[];
+};
+
+export type HomepageTestimonyItem = {
+  name: string;
+  source: string;
+  quote: string;
+};
+
+export type HomepageTestimoniesPayload = {
+  eyebrow: string;
+  title: string;
+  description?: string;
+  items: HomepageTestimonyItem[];
+};
+
+export type HomepageEmailSignupPayload = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  inputPlaceholder: string;
+  buttonLabel: string;
+  formActionUrl: string;
+  legalText: string;
+};
+
+export type HomepageLinkItem = {
+  label: string;
+  href: string;
+};
+
+export type HomepageFooterPayload = {
+  brandTitle: string;
+  brandSubtitle: string;
+  brandDescription: string;
+  platformHeading: string;
+  platformLinks: HomepageLinkItem[];
+  legalHeading: string;
+  legalLinks: HomepageLinkItem[];
+  socialLabels: string[];
+  bottomLeftText: string;
+  bottomRightText: string;
+};
+
+export type HomepageSectionPayloadMap = {
+  HERO: HomepageHeroPayload;
+  COLLECTIONS: HomepageCollectionsPayload;
+  TESTIMONIES: HomepageTestimoniesPayload;
+  EMAIL_SIGNUP: HomepageEmailSignupPayload;
+  FOOTER: HomepageFooterPayload;
+};
+
+export type HomepageSectionRecord<T extends HomepageSectionType = HomepageSectionType> = {
+  type: T;
+  enabled: boolean;
+  position: number;
+  payload: HomepageSectionPayloadMap[T];
+};
+
+export const HOMEPAGE_SECTION_ORDER: HomepageSectionType[] = [
+  "HERO",
+  "COLLECTIONS",
+  "TESTIMONIES",
+  "EMAIL_SIGNUP",
+  "FOOTER",
+];
+
+export function defaultHomepageSections(): HomepageSectionRecord[] {
+  return [
+    {
+      type: "HERO",
+      enabled: true,
+      position: 1,
+      payload: {
+        eyebrow: "Perseus Arcane Academy",
+        title: "PERSEUS ARCANE ACADEMY",
+        description:
+          "A structured academy for tarot, ritual, symbolism, and serious magical study. Enter through a course, then continue through a path designed for real practice.",
+        primaryCtaLabel: "Explore Courses",
+        primaryCtaHref: "/course/meta-magick-tarot",
+        secondaryCtaLabel: "View Curriculum",
+        secondaryCtaHref: "/bundle/ritual-library-bundle",
+      },
+    },
+    {
+      type: "COLLECTIONS",
+      enabled: true,
+      position: 2,
+      payload: {
+        eyebrow: "Collections",
+        title: "Perseus study collections",
+        description: "Enter the academy through a collection of courses that feels closest to your current line of study.",
+        items: [
+          {
+            eyebrow: "Collection 01",
+            title: "Hermetic foundations",
+            description: "Courses for students entering Perseus through symbolic language, tarot structure, and practical occult study.",
+            tone: "arcane",
+            courseSlugs: ["meta-magick-tarot"],
+          },
+          {
+            eyebrow: "Collection 02",
+            title: "Discipline and practice",
+            description: "Courses oriented around consistency, internal development, and direct application rather than scattered theory.",
+            tone: "discipline",
+            courseSlugs: ["meta-magick-tarot"],
+          },
+          {
+            eyebrow: "Collection 03",
+            title: "Gateway entry",
+            description: "The clearest starting points for new students who want a structured way into the academy and its study portal.",
+            tone: "gateway",
+            courseSlugs: ["meta-magick-tarot"],
+          },
+        ],
+      },
+    },
+    {
+      type: "TESTIMONIES",
+      enabled: true,
+      position: 3,
+      payload: {
+        eyebrow: "Testimonies",
+        title: "What students say after entering the work",
+        description: "",
+        items: [
+          {
+            name: "A. Reader",
+            source: "Meta Magick Tarot",
+            quote: "The most structured tarot course I have taken.",
+          },
+          {
+            name: "Bundle Student",
+            source: "Ritual Library Bundle",
+            quote: "The cleanest way to enter the full Perseus study path.",
+          },
+        ],
+      },
+    },
+    {
+      type: "EMAIL_SIGNUP",
+      enabled: true,
+      position: 4,
+      payload: {
+        eyebrow: "Stay in the loop",
+        title: "Stay close to the work.",
+        description: "Keep track of new course releases, collection updates, and Perseus study announcements.",
+        inputPlaceholder: "your@email.com",
+        buttonLabel: "Join Free",
+        formActionUrl: "/login",
+        legalText: "By subscribing you agree to our Privacy Policy. Unsubscribe any time.",
+      },
+    },
+    {
+      type: "FOOTER",
+      enabled: true,
+      position: 5,
+      payload: {
+        brandTitle: "Perseus Arcane Academy",
+        brandSubtitle: "Structured magical training",
+        brandDescription: "Ancient wisdom for the modern initiate. Structured courses in Hermetics, esoteric traditions, and martial arts.",
+        platformHeading: "Platform",
+        platformLinks: [
+          { label: "Courses", href: "/course/meta-magick-tarot" },
+          { label: "Collections", href: "/bundle/ritual-library-bundle" },
+          { label: "FAQ", href: "/faq" },
+          { label: "Login", href: "/login" },
+        ],
+        legalHeading: "Legal",
+        legalLinks: [
+          { label: "Privacy Policy", href: "#" },
+          { label: "Terms of Service", href: "#" },
+          { label: "Cookie Policy", href: "#" },
+          { label: "GDPR Data Request", href: "#" },
+        ],
+        socialLabels: ["X", "IG", "YT", "TT"],
+        bottomLeftText: "© 2026 Perseus Arcane Academy. All rights reserved.",
+        bottomRightText: "Structured magical training",
+      },
+    },
+  ];
+}
+
+export function parseLines(value: string) {
+  return value
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+export function parseLinkLines(value: string): HomepageLinkItem[] {
+  return parseLines(value).map((line) => {
+    const [label, href] = line.split("|").map((part) => part.trim());
+    return {
+      label: label || "",
+      href: href || "#",
+    };
+  });
+}
+
+export function stringifyLinkLines(links: HomepageLinkItem[]) {
+  return links.map((link) => `${link.label}|${link.href}`).join("\n");
+}

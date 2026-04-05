@@ -2,6 +2,7 @@ import { CourseStatus, ImportType, LessonStatus, LessonType, OfferType } from "@
 import { z } from "zod";
 
 const optionalUrl = z.string().url().optional().or(z.literal(""));
+const optionalDateString = z.string().optional().or(z.literal(""));
 
 export const instructorInputSchema = z.object({
   slug: z.string().min(1),
@@ -154,6 +155,45 @@ export const offerCsvRowSchema = z.object({
   price: z.coerce.number().min(0),
   type: z.nativeEnum(OfferType),
   currency: z.string().min(3).max(3),
+});
+
+export const coursePackageCsvRowSchema = z.object({
+  legacy_course_id: z.string().optional(),
+  slug: z.string().min(1),
+  legacy_slug: z.string().optional(),
+  legacy_url: z.string().optional(),
+  title: z.string().min(1),
+  subtitle: z.string().optional(),
+  short_description: z.string().optional(),
+  long_description: z.string().optional(),
+  learning_outcomes: z.string().optional(),
+  who_its_for: z.string().optional(),
+  includes: z.string().optional(),
+  hero_image_url: optionalUrl,
+  sales_video_url: optionalUrl,
+  instructor_slug: z.string().min(1),
+  seo_title: z.string().optional(),
+  seo_description: z.string().optional(),
+  status: z.nativeEnum(CourseStatus).default(CourseStatus.DRAFT),
+  module_position: z.coerce.number().int().min(1),
+  module_title: z.string().min(1),
+  lesson_position: z.coerce.number().int().min(1),
+  lesson_slug: z.string().min(1),
+  lesson_title: z.string().min(1),
+  lesson_type: z.nativeEnum(LessonType),
+  lesson_content: z.string().optional(),
+  video_url: optionalUrl,
+  download_url: optionalUrl,
+  is_preview: z.coerce.boolean().default(false),
+  drip_days: z.coerce.number().int().min(0).optional(),
+  duration_label: z.string().optional(),
+  lesson_status: z.nativeEnum(LessonStatus).default(LessonStatus.DRAFT),
+});
+
+export const courseStudentCsvRowSchema = z.object({
+  email: z.string().email(),
+  name: z.string().optional(),
+  enrolled_at: optionalDateString,
 });
 
 export const importRequestSchema = z.object({

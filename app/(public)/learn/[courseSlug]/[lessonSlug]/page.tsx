@@ -48,6 +48,8 @@ export default async function LessonPage({ params }: { params: Promise<{ courseS
         primaryLabel="Back to dashboard"
         secondaryHref={course.publicPath ?? course.legacyUrl ?? `/course/${course.slug}`}
         secondaryLabel="View course front"
+        auxiliaryHref={session.user.isAdmin ? "/admin" : undefined}
+        auxiliaryLabel={session.user.isAdmin ? "Open admin" : undefined}
       />
       <CoursePlayerLayout course={course} activeLessonSlug={lessonSlug} enrolledAt={enrollment.enrolledAt} />
       </div>

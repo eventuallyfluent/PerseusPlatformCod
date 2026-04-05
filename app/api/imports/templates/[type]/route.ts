@@ -7,6 +7,9 @@ const templates: Record<string, string> = {
   lessons:
     "legacy_course_id,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,status\n",
   offers: "legacy_course_id,offer_name,price,type,currency\n",
+  "course-package":
+    "legacy_course_id,slug,legacy_slug,legacy_url,title,subtitle,short_description,long_description,learning_outcomes,who_its_for,includes,hero_image_url,sales_video_url,instructor_slug,seo_title,seo_description,status,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,lesson_status\n",
+  "course-students": "email,name,enrolled_at\n",
 };
 
 export async function GET(_request: Request, { params }: { params: Promise<{ type: string }> }) {

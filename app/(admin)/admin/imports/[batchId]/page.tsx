@@ -15,12 +15,21 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
     notFound();
   }
 
+  const dryRunSummary = batch.dryRunSummary as Record<string, unknown> | null;
+  const executionSummary = batch.executionSummary as Record<string, unknown> | null;
+  const context = batch.context as Record<string, unknown> | null;
+  const targetCourse =
+    String(executionSummary?.targetCourseTitle ?? dryRunSummary?.targetCourseTitle ?? "") ||
+    String(executionSummary?.targetCourseSlug ?? dryRunSummary?.targetCourseSlug ?? "") ||
+    String(context?.targetCourseId ?? "");
+
   return (
     <AdminShell title={`Import ${batch.filename}`} description="Dry-run and execution reports remain attached to the batch.">
       <Card className="space-y-4">
         <div className="grid gap-3 text-sm text-stone-600">
           <div>Type: {batch.type}</div>
           <div>Status: {batch.status}</div>
+          {targetCourse ? <div>Target course: {targetCourse}</div> : null}
         </div>
         <div className="flex flex-wrap gap-3">
           {batch.status === "DRY_RUN" ? (

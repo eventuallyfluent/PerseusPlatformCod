@@ -11,6 +11,8 @@ type LearnerContextBarProps = {
   primaryLabel?: string;
   secondaryHref?: string;
   secondaryLabel?: string;
+  auxiliaryHref?: string;
+  auxiliaryLabel?: string;
 };
 
 export function LearnerContextBar({
@@ -22,6 +24,8 @@ export function LearnerContextBar({
   primaryLabel,
   secondaryHref,
   secondaryLabel,
+  auxiliaryHref,
+  auxiliaryLabel,
 }: LearnerContextBarProps) {
   return (
     <section className="grid gap-5 rounded-[30px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-6 text-[var(--portal-text)] shadow-[0_18px_40px_rgba(10,11,24,0.26)] lg:grid-cols-[1fr_auto] lg:items-end">
@@ -39,6 +43,13 @@ export function LearnerContextBar({
             <Link href={secondaryHref}>
               <Button variant="ghost" className="border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-4 py-2 text-[#d9d1f2] hover:bg-[rgba(255,255,255,0.08)] hover:text-white">
                 {secondaryLabel}
+              </Button>
+            </Link>
+          ) : null}
+          {auxiliaryHref && auxiliaryLabel ? (
+            <Link href={auxiliaryHref}>
+              <Button variant="ghost" className="border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-4 py-2 text-[#d9d1f2] hover:bg-[rgba(255,255,255,0.08)] hover:text-white">
+                {auxiliaryLabel}
               </Button>
             </Link>
           ) : null}

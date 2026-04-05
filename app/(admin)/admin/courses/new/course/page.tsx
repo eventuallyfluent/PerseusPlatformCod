@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
@@ -36,6 +37,29 @@ export default async function NewCoursePage() {
                 <li>Only use `legacyUrl` when preserving an exact migrated path.</li>
                 <li>Keep list fields concise. The generated page reads these directly.</li>
               </ul>
+            </Card>
+            <Card className="space-y-4 p-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Import one full course</p>
+              <p className="text-sm leading-7 text-stone-600">
+                Upload a single course-package CSV to create or update one course with its modules, lessons, sales copy, hero image, and promo video fields in one pass.
+              </p>
+              <Link href="/api/imports/templates/course-package" className="text-sm font-medium text-stone-950 underline">
+                Download course-package template
+              </Link>
+              <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">
+                <label>
+                  Course package CSV
+                  <input type="file" name="file" accept=".csv" required />
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
+                    Dry run
+                  </button>
+                  <button className="rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit" name="mode" value="execute">
+                    Execute import
+                  </button>
+                </div>
+              </form>
             </Card>
           </>
         }

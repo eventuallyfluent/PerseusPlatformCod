@@ -19,6 +19,11 @@ export type ImportDryRunSummary = {
   validCount: number;
   invalidCount: number;
   conflictCount: number;
+  targetCourseId?: string;
+  targetCourseSlug?: string;
+  targetCourseTitle?: string;
+  moduleCount?: number;
+  lessonCount?: number;
 };
 
 export type ImportExecutionSummary = {
@@ -28,4 +33,13 @@ export type ImportExecutionSummary = {
   skippedCount: number;
   failedCount: number;
   processedCount: number;
+  targetCourseId?: string;
+  targetCourseSlug?: string;
+  targetCourseTitle?: string;
+  moduleCount?: number;
+  lessonCount?: number;
+  createdModuleCount?: number;
+  updatedModuleCount?: number;
+  createdLessonCount?: number;
+  updatedLessonCount?: number;
 };

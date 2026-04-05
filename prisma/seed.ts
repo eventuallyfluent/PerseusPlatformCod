@@ -1,5 +1,6 @@
 import { CourseStatus, LessonStatus, LessonType, OfferType, PrismaClient } from "@prisma/client";
 import { encryptGatewayCredentialValue } from "@/lib/payments/gateway-credentials";
+import { defaultHomepageSections } from "@/lib/homepage/sections";
 
 const prisma = new PrismaClient();
 
@@ -358,6 +359,23 @@ async function main() {
       isActive: true,
     },
   });
+
+  for (const section of defaultHomepageSections()) {
+    await prisma.homepageSection.upsert({
+      where: { type: section.type },
+      update: {
+        enabled: section.enabled,
+        position: section.position,
+        payload: JSON.parse(JSON.stringify(section.payload)),
+      },
+      create: {
+        type: section.type,
+        enabled: section.enabled,
+        position: section.position,
+        payload: JSON.parse(JSON.stringify(section.payload)),
+      },
+    });
+  }
 }
 
 main()

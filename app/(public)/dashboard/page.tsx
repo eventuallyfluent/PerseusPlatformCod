@@ -58,6 +58,8 @@ export default async function DashboardPage() {
           primaryLabel={spotlight?.state.nextLesson ? "Continue learning" : undefined}
           secondaryHref="/"
           secondaryLabel="Browse storefront"
+          auxiliaryHref={session.user.isAdmin ? "/admin" : undefined}
+          auxiliaryLabel={session.user.isAdmin ? "Open admin" : undefined}
         />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
@@ -81,9 +83,16 @@ export default async function DashboardPage() {
             </div>
 
             <div className="mt-8 border-t border-[var(--portal-border)] pt-6">
-              <Link href="/" className="text-sm text-[var(--portal-muted)] transition hover:text-white">
-                Browse courses
-              </Link>
+              <div className="flex flex-col gap-3">
+                <Link href="/" className="text-sm text-[var(--portal-muted)] transition hover:text-white">
+                  Browse courses
+                </Link>
+                {session.user.isAdmin ? (
+                  <Link href="/admin" className="text-sm text-[var(--portal-muted)] transition hover:text-white">
+                    Open admin
+                  </Link>
+                ) : null}
+              </div>
             </div>
           </aside>
 

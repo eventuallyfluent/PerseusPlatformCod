@@ -14,13 +14,109 @@ import { bundleInputSchema, moduleInputSchema, lessonInputSchema } from "@/lib/z
 import { getPaymentConnector } from "@/lib/payments/adapter-registry";
 import { encryptGatewayCredentialValue, isEncryptedGatewayCredentialValue } from "@/lib/payments/gateway-credentials";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
-import { CourseStatus } from "@prisma/client";
+import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSectionPayloadMap } from "@/lib/homepage/sections";
+import { CourseStatus, type HomepageSectionType } from "@prisma/client";
 
 function toArray(value: FormDataEntryValue | null) {
   return String(value ?? "")
     .split("\n")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function getDefaultHomepagePayload(type: HomepageSectionType) {
+  return defaultHomepageSections().find((section) => section.type === type)!.payload;
+}
+
+export async function saveHomepageSectionAction(formData: FormData) {
+  const type = String(formData.get("type") ?? "") as HomepageSectionType;
+  const enabled = String(formData.get("enabled") ?? "") === "true";
+  const position = Number(formData.get("position") ?? 1);
+
+  let payload: HomepageSectionPayloadMap[HomepageSectionType];
+
+  if (type === "HERO") {
+    payload = {
+      eyebrow: String(formData.get("eyebrow") ?? ""),
+      title: String(formData.get("title") ?? ""),
+      description: String(formData.get("description") ?? ""),
+      primaryCtaLabel: String(formData.get("primaryCtaLabel") ?? ""),
+      primaryCtaHref: String(formData.get("primaryCtaHref") ?? ""),
+      secondaryCtaLabel: String(formData.get("secondaryCtaLabel") ?? ""),
+      secondaryCtaHref: String(formData.get("secondaryCtaHref") ?? ""),
+    };
+  } else if (type === "COLLECTIONS") {
+    payload = {
+      eyebrow: String(formData.get("eyebrow") ?? ""),
+      title: String(formData.get("title") ?? ""),
+      description: String(formData.get("description") ?? ""),
+      items: [0, 1, 2]
+        .map((index) => ({
+          eyebrow: String(formData.get(`itemEyebrow:${index}`) ?? ""),
+          title: String(formData.get(`itemTitle:${index}`) ?? ""),
+          description: String(formData.get(`itemDescription:${index}`) ?? ""),
+          tone: String(formData.get(`itemTone:${index}`) ?? "arcane") as "arcane" | "discipline" | "gateway",
+          courseSlugs: parseLines(String(formData.get(`itemCourseSlugs:${index}`) ?? "")),
+        }))
+        .filter((item) => item.title),
+    };
+  } else if (type === "TESTIMONIES") {
+    payload = {
+      eyebrow: String(formData.get("eyebrow") ?? ""),
+      title: String(formData.get("title") ?? ""),
+      description: String(formData.get("description") ?? ""),
+      items: [0, 1, 2, 3, 4, 5]
+        .map((index) => ({
+          name: String(formData.get(`itemName:${index}`) ?? ""),
+          source: String(formData.get(`itemSource:${index}`) ?? ""),
+          quote: String(formData.get(`itemQuote:${index}`) ?? ""),
+        }))
+        .filter((item) => item.quote),
+    };
+  } else if (type === "EMAIL_SIGNUP") {
+    payload = {
+      eyebrow: String(formData.get("eyebrow") ?? ""),
+      title: String(formData.get("title") ?? ""),
+      description: String(formData.get("description") ?? ""),
+      inputPlaceholder: String(formData.get("inputPlaceholder") ?? ""),
+      buttonLabel: String(formData.get("buttonLabel") ?? ""),
+      formActionUrl: String(formData.get("formActionUrl") ?? ""),
+      legalText: String(formData.get("legalText") ?? ""),
+    };
+  } else if (type === "FOOTER") {
+    payload = {
+      brandTitle: String(formData.get("brandTitle") ?? ""),
+      brandSubtitle: String(formData.get("brandSubtitle") ?? ""),
+      brandDescription: String(formData.get("brandDescription") ?? ""),
+      platformHeading: String(formData.get("platformHeading") ?? ""),
+      platformLinks: parseLinkLines(String(formData.get("platformLinks") ?? "")),
+      legalHeading: String(formData.get("legalHeading") ?? ""),
+      legalLinks: parseLinkLines(String(formData.get("legalLinks") ?? "")),
+      socialLabels: parseLines(String(formData.get("socialLabels") ?? "")),
+      bottomLeftText: String(formData.get("bottomLeftText") ?? ""),
+      bottomRightText: String(formData.get("bottomRightText") ?? ""),
+    };
+  } else {
+    payload = getDefaultHomepagePayload(type);
+  }
+
+  await prisma.homepageSection.upsert({
+    where: { type },
+    update: {
+      enabled,
+      position,
+      payload: JSON.parse(JSON.stringify(payload)),
+    },
+    create: {
+      type,
+      enabled,
+      position,
+      payload: JSON.parse(JSON.stringify(payload)),
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin/settings");
 }
 
 export async function saveCourseAction(formData: FormData) {

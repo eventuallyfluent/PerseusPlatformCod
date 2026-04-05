@@ -3,8 +3,8 @@ import type { ImportRowError, ImportValidationResult } from "@/lib/imports/types
 import { getIdempotencyKey } from "@/lib/imports/idempotency";
 import type { ImportType } from "@prisma/client";
 
-export function validateRows<Row extends Record<string, string | number | boolean | undefined>>(
-  rows: Row[],
+export function validateRows<Row extends Record<string, unknown>, InputRow extends Record<string, unknown> = Row>(
+  rows: InputRow[],
   schema: ZodType<Row>,
   type: ImportType,
 ): ImportValidationResult<Row> {
@@ -22,7 +22,7 @@ export function validateRows<Row extends Record<string, string | number | boolea
         acc.invalidRows.push({
           rowNumber: index + 2,
           idempotencyKey,
-          row,
+          row: row as unknown as Row,
           errors: result.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`),
         });
       }

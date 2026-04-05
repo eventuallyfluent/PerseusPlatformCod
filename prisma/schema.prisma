@@ -59,6 +59,8 @@ enum ImportType {
   COURSES
   LESSONS
   OFFERS
+  COURSE_PACKAGE
+  COURSE_STUDENTS
 }
 
 enum ImportStatus {
@@ -66,6 +68,14 @@ enum ImportStatus {
   DRY_RUN
   COMPLETED
   FAILED
+}
+
+enum HomepageSectionType {
+  HERO
+  COLLECTIONS
+  TESTIMONIES
+  EMAIL_SIGNUP
+  FOOTER
 }
 
 model User {
@@ -383,11 +393,22 @@ model ImportBatch {
   status           ImportStatus @default(DRAFT)
   filename         String
   sourceContent    String?
+  context          Json?
   dryRunSummary    Json?
   executionSummary Json?
   errorReport      Json?
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
+}
+
+model HomepageSection {
+  id        String              @id @default(cuid())
+  type      HomepageSectionType @unique
+  enabled   Boolean             @default(true)
+  position  Int
+  payload   Json
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
 }
 
 model Account {

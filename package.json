@@ -13,7 +13,8 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "node --env-file=.env --import tsx prisma/seed.ts",
     "prisma:check": "node --env-file=.env --import tsx prisma/sanity-check.ts",
-    "prisma:check:bundle-payment": "node --env-file=.env --import tsx prisma/verify-bundle-payment.ts"
+    "prisma:check:bundle-payment": "node --env-file=.env --import tsx prisma/verify-bundle-payment.ts",
+    "prisma:check:imports": "node --env-file=.env --import tsx prisma/verify-imports.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

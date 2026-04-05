@@ -28,7 +28,7 @@ export default function LoginPage() {
         type="button"
         className="w-full justify-center"
         onClick={async () => {
-          await signIn("resend", { email, redirectTo: "/dashboard" });
+          await signIn("resend", { email, redirectTo: "/auth/complete" });
           setSent(true);
         }}
       >

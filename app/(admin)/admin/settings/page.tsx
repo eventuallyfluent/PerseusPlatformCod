@@ -1,20 +1,314 @@
+import type { ReactNode } from "react";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { saveHomepageSectionAction } from "@/app/(admin)/admin/actions";
+import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
+import {
+  stringifyLinkLines,
+  type HomepageCollectionItem,
+  type HomepageCollectionsPayload,
+  type HomepageEmailSignupPayload,
+  type HomepageFooterPayload,
+  type HomepageHeroPayload,
+  type HomepageLinkItem,
+  type HomepageTestimoniesPayload,
+  type HomepageTestimonyItem,
+} from "@/lib/homepage/sections";
 
-export default function SettingsPage() {
+function TextInput({
+  name,
+  label,
+  defaultValue,
+  type = "text",
+}: {
+  name: string;
+  label: string;
+  defaultValue?: string;
+  type?: string;
+}) {
   return (
-    <AdminShell title="Settings" description="Phase 1 settings stay minimal and operational.">
-      <Card className="space-y-3">
-        <h2 className="text-lg font-semibold text-stone-950">Environment expectations</h2>
-        <ul className="space-y-2 text-sm text-stone-600">
-          <li>`DATABASE_URL` for Postgres and Prisma</li>
-          <li>`NEXT_PUBLIC_APP_URL` for canonical URLs and redirects</li>
-          <li>Gateway credentials are stored per provider in admin and should only fall back to provider-specific env vars when required.</li>
-          <li>`CREDENTIAL_ENCRYPTION_KEY` or `AUTH_SECRET` for encrypting stored gateway credentials</li>
-          <li>`RESEND_API_KEY` and `AUTH_EMAIL_FROM` for email delivery</li>
-          <li>`ADMIN_EMAIL_ALLOWLIST` for admin access control</li>
-        </ul>
-      </Card>
+    <label className="space-y-2">
+      <span className="text-sm font-medium text-stone-900">{label}</span>
+      <input
+        type={type}
+        name={name}
+        defaultValue={defaultValue}
+        className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-400"
+      />
+    </label>
+  );
+}
+
+function TextArea({
+  name,
+  label,
+  defaultValue,
+  rows = 4,
+}: {
+  name: string;
+  label: string;
+  defaultValue?: string;
+  rows?: number;
+}) {
+  return (
+    <label className="space-y-2">
+      <span className="text-sm font-medium text-stone-900">{label}</span>
+      <textarea
+        name={name}
+        defaultValue={defaultValue}
+        rows={rows}
+        className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm leading-6 text-stone-900 outline-none transition focus:border-stone-400"
+      />
+    </label>
+  );
+}
+
+function SectionFrame({
+  type,
+  title,
+  description,
+  position,
+  enabled,
+  children,
+}: {
+  type: string;
+  title: string;
+  description: string;
+  position: number;
+  enabled: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <Card className="space-y-6 p-6">
+      <form action={saveHomepageSectionAction} className="space-y-6">
+        <input type="hidden" name="type" value={type} />
+        <div className="flex flex-col gap-4 border-b border-stone-200 pb-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-1">
+            <h2 className="text-xl font-semibold text-stone-950">{title}</h2>
+            <p className="max-w-2xl text-sm leading-6 text-stone-600">{description}</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="space-y-2">
+              <span className="text-sm font-medium text-stone-900">Enabled</span>
+              <select
+                name="enabled"
+                defaultValue={enabled ? "true" : "false"}
+                className="rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-400"
+              >
+                <option value="true">Enabled</option>
+                <option value="false">Disabled</option>
+              </select>
+            </label>
+            <TextInput name="position" label="Position" type="number" defaultValue={String(position)} />
+          </div>
+        </div>
+        {children}
+        <div className="flex justify-end">
+          <Button type="submit">Save section</Button>
+        </div>
+      </form>
+    </Card>
+  );
+}
+
+function ensureCollectionItems(items: HomepageCollectionItem[]) {
+  return Array.from({ length: Math.max(3, items.length) }, (_, index) => {
+    return (
+      items[index] ?? {
+        eyebrow: "",
+        title: "",
+        description: "",
+        tone: "arcane" as const,
+        courseSlugs: [],
+      }
+    );
+  });
+}
+
+function ensureTestimonyItems(items: HomepageTestimonyItem[]) {
+  return Array.from({ length: Math.max(3, items.length) }, (_, index) => {
+    return (
+      items[index] ?? {
+        name: "",
+        source: "",
+        quote: "",
+      }
+    );
+  });
+}
+
+function linkLines(items: HomepageLinkItem[]) {
+  return stringifyLinkLines(items);
+}
+
+export default async function SettingsPage() {
+  const sections = await getHomepageSections();
+  const hero = sections.find((section) => section.type === "HERO")!;
+  const heroPayload = hero.payload as HomepageHeroPayload;
+  const collections = sections.find((section) => section.type === "COLLECTIONS")!;
+  const collectionsPayload = collections.payload as HomepageCollectionsPayload;
+  const testimonies = sections.find((section) => section.type === "TESTIMONIES")!;
+  const testimoniesPayload = testimonies.payload as HomepageTestimoniesPayload;
+  const emailSignup = sections.find((section) => section.type === "EMAIL_SIGNUP")!;
+  const emailSignupPayload = emailSignup.payload as HomepageEmailSignupPayload;
+  const footer = sections.find((section) => section.type === "FOOTER")!;
+  const footerPayload = footer.payload as HomepageFooterPayload;
+
+  return (
+    <AdminShell title="Homepage Settings" description="Edit, reorder, and toggle the five public homepage sections.">
+      <div className="space-y-6">
+        <SectionFrame
+          type="HERO"
+          title="Hero"
+          description="Centered opening section with Perseus brand copy and the two primary calls to action."
+          position={hero.position}
+          enabled={hero.enabled}
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            <TextInput name="eyebrow" label="Eyebrow" defaultValue={heroPayload.eyebrow} />
+            <TextInput name="title" label="Title" defaultValue={heroPayload.title} />
+          </div>
+          <TextArea name="description" label="Description" defaultValue={heroPayload.description} rows={4} />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <TextInput name="primaryCtaLabel" label="Primary CTA label" defaultValue={heroPayload.primaryCtaLabel} />
+            <TextInput name="primaryCtaHref" label="Primary CTA href" defaultValue={heroPayload.primaryCtaHref} />
+            <TextInput name="secondaryCtaLabel" label="Secondary CTA label" defaultValue={heroPayload.secondaryCtaLabel} />
+            <TextInput name="secondaryCtaHref" label="Secondary CTA href" defaultValue={heroPayload.secondaryCtaHref} />
+          </div>
+        </SectionFrame>
+
+        <SectionFrame
+          type="COLLECTIONS"
+          title="Collections"
+          description="Curated study groupings. Desktop renders them in rows of three, based on this ordered item list."
+          position={collections.position}
+          enabled={collections.enabled}
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            <TextInput name="eyebrow" label="Eyebrow" defaultValue={collectionsPayload.eyebrow} />
+            <TextInput name="title" label="Title" defaultValue={collectionsPayload.title} />
+          </div>
+          <TextArea name="description" label="Description" defaultValue={collectionsPayload.description} rows={3} />
+          <div className="space-y-4">
+            {ensureCollectionItems(collectionsPayload.items).map((item, index) => (
+              <div key={index} className="space-y-4 rounded-2xl border border-stone-200 p-4">
+                <div className="grid gap-4 lg:grid-cols-3">
+                  <TextInput name={`itemEyebrow:${index}`} label={`Collection ${index + 1} eyebrow`} defaultValue={item.eyebrow} />
+                  <TextInput name={`itemTitle:${index}`} label={`Collection ${index + 1} title`} defaultValue={item.title} />
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-stone-900">Tone</span>
+                    <select
+                      name={`itemTone:${index}`}
+                      defaultValue={item.tone}
+                      className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-400"
+                    >
+                      <option value="arcane">Arcane</option>
+                      <option value="discipline">Discipline</option>
+                      <option value="gateway">Gateway</option>
+                    </select>
+                  </label>
+                </div>
+                <TextArea
+                  name={`itemDescription:${index}`}
+                  label={`Collection ${index + 1} description`}
+                  defaultValue={item.description}
+                  rows={3}
+                />
+                <TextArea
+                  name={`itemCourseSlugs:${index}`}
+                  label={`Collection ${index + 1} course slugs`}
+                  defaultValue={item.courseSlugs.join("\n")}
+                  rows={4}
+                />
+              </div>
+            ))}
+          </div>
+        </SectionFrame>
+
+        <SectionFrame
+          type="TESTIMONIES"
+          title="Testimonies"
+          description="Public proof section. Add, remove, or reorder quotes directly here."
+          position={testimonies.position}
+          enabled={testimonies.enabled}
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            <TextInput name="eyebrow" label="Eyebrow" defaultValue={testimoniesPayload.eyebrow} />
+            <TextInput name="title" label="Title" defaultValue={testimoniesPayload.title} />
+          </div>
+          <TextArea name="description" label="Optional description" defaultValue={testimoniesPayload.description} rows={3} />
+          <div className="space-y-4">
+            {ensureTestimonyItems(testimoniesPayload.items).map((item, index) => (
+              <div key={index} className="grid gap-4 rounded-2xl border border-stone-200 p-4 lg:grid-cols-3">
+                <TextInput name={`itemName:${index}`} label={`Quote ${index + 1} name`} defaultValue={item.name} />
+                <TextInput name={`itemSource:${index}`} label={`Quote ${index + 1} source`} defaultValue={item.source} />
+                <TextArea name={`itemQuote:${index}`} label={`Quote ${index + 1}`} defaultValue={item.quote} rows={4} />
+              </div>
+            ))}
+          </div>
+        </SectionFrame>
+
+        <SectionFrame
+          type="EMAIL_SIGNUP"
+          title="Email Sign Up"
+          description="Standalone sign-up section that sits between testimonies and the footer."
+          position={emailSignup.position}
+          enabled={emailSignup.enabled}
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            <TextInput name="eyebrow" label="Eyebrow" defaultValue={emailSignupPayload.eyebrow} />
+            <TextInput name="title" label="Title" defaultValue={emailSignupPayload.title} />
+          </div>
+          <TextArea name="description" label="Description" defaultValue={emailSignupPayload.description} rows={3} />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <TextInput name="inputPlaceholder" label="Input placeholder" defaultValue={emailSignupPayload.inputPlaceholder} />
+            <TextInput name="buttonLabel" label="Button label" defaultValue={emailSignupPayload.buttonLabel} />
+            <TextInput name="formActionUrl" label="Form action URL" defaultValue={emailSignupPayload.formActionUrl} />
+            <TextArea name="legalText" label="Legal text" defaultValue={emailSignupPayload.legalText} rows={3} />
+          </div>
+        </SectionFrame>
+
+        <SectionFrame
+          type="FOOTER"
+          title="Footer"
+          description="Closing brand and navigation block. Keep signup content in the email section above, not here."
+          position={footer.position}
+          enabled={footer.enabled}
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            <TextInput name="brandTitle" label="Brand title" defaultValue={footerPayload.brandTitle} />
+            <TextInput name="brandSubtitle" label="Brand subtitle" defaultValue={footerPayload.brandSubtitle} />
+          </div>
+          <TextArea name="brandDescription" label="Brand description" defaultValue={footerPayload.brandDescription} rows={3} />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <TextInput name="platformHeading" label="Platform heading" defaultValue={footerPayload.platformHeading} />
+            <TextInput name="legalHeading" label="Legal heading" defaultValue={footerPayload.legalHeading} />
+            <TextArea
+              name="platformLinks"
+              label="Platform links"
+              defaultValue={linkLines(footerPayload.platformLinks)}
+              rows={5}
+            />
+            <TextArea
+              name="legalLinks"
+              label="Legal links"
+              defaultValue={linkLines(footerPayload.legalLinks)}
+              rows={5}
+            />
+            <TextArea
+              name="socialLabels"
+              label="Social labels"
+              defaultValue={footerPayload.socialLabels.join("\n")}
+              rows={4}
+            />
+            <div className="grid gap-4">
+              <TextArea name="bottomLeftText" label="Bottom-left text" defaultValue={footerPayload.bottomLeftText} rows={2} />
+              <TextArea name="bottomRightText" label="Bottom-right text" defaultValue={footerPayload.bottomRightText} rows={2} />
+            </div>
+          </div>
+        </SectionFrame>
+      </div>
     </AdminShell>
   );
 }

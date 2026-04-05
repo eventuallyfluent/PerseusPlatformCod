@@ -10,6 +10,8 @@ const templates = {
   lessons:
     "legacy_course_id,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,status",
   offers: "legacy_course_id,offer_name,price,type,currency",
+  "course-package":
+    "legacy_course_id,slug,legacy_slug,legacy_url,title,subtitle,short_description,long_description,learning_outcomes,who_its_for,includes,hero_image_url,sales_video_url,instructor_slug,seo_title,seo_description,status,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,lesson_status",
 };
 
 export const dynamic = "force-dynamic";
@@ -45,6 +47,16 @@ export default async function ImportsPage() {
             </form>
           </Card>
         ))}
+        <Card className="space-y-4">
+          <h2 className="text-lg font-semibold text-stone-950">Course student imports</h2>
+          <p className="rounded-2xl bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-600">email,name,enrolled_at</p>
+          <Link href="/api/imports/templates/course-students" className="text-sm font-medium text-stone-950 underline">
+            Download template
+          </Link>
+          <p className="text-sm leading-7 text-stone-600">
+            Student imports are tied to one course at a time, so run them from the relevant course detail page rather than this global migration center.
+          </p>
+        </Card>
       </div>
       <Card className="overflow-hidden p-0">
         <table>

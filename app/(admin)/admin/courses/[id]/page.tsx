@@ -258,6 +258,49 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               </button>
             </div>
           </Card>
+          <Card className="space-y-4 p-6">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">CSV import tools</p>
+            <div className="space-y-3 text-sm leading-7 text-stone-600">
+              <p>Use the course package CSV to refresh this course structure, then use the student CSV to grant access to this specific course.</p>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/api/imports/templates/course-package" className="text-sm font-medium text-stone-950 underline">
+                  Course package template
+                </Link>
+                <Link href="/api/imports/templates/course-students" className="text-sm font-medium text-stone-950 underline">
+                  Student import template
+                </Link>
+              </div>
+            </div>
+            <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
+              <label>
+                Course package CSV
+                <input type="file" name="file" accept=".csv" required />
+              </label>
+              <div className="flex flex-wrap gap-3">
+                <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
+                  Dry run
+                </button>
+                <button className="rounded-full border border-stone-200 px-4 py-3 text-sm font-medium text-stone-700" type="submit" name="mode" value="execute">
+                  Execute import
+                </button>
+              </div>
+            </form>
+            <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
+              <input type="hidden" name="courseId" value={course.id} />
+              <label>
+                Student CSV
+                <input type="file" name="file" accept=".csv" required />
+              </label>
+              <div className="flex flex-wrap gap-3">
+                <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
+                  Dry run
+                </button>
+                <button className="rounded-full border border-stone-200 px-4 py-3 text-sm font-medium text-stone-700" type="submit" name="mode" value="execute">
+                  Import students
+                </button>
+              </div>
+            </form>
+          </Card>
           <form id="course-editor-actions">
             <input type="hidden" name="id" value={course.id} />
           </form>

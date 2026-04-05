@@ -6,14 +6,24 @@ import { upsertInstructor } from "@/lib/instructors/upsert-instructor";
 import { createCourse } from "@/lib/courses/create-course";
 import { updateCourse } from "@/lib/courses/update-course";
 import { upsertOffer } from "@/lib/offers/upsert-offer";
-import { dryRunImport } from "@/lib/imports/dry-run-import";
+import { dryRunImport, type ImportContext } from "@/lib/imports/dry-run-import";
 import type { ImportExecutionSummary, ImportRowError } from "@/lib/imports/types";
-import { courseCsvRowSchema, instructorCsvRowSchema, lessonCsvRowSchema, offerCsvRowSchema } from "@/lib/zod/schemas";
+import {
+  courseCsvRowSchema,
+  instructorCsvRowSchema,
+  lessonCsvRowSchema,
+  offerCsvRowSchema,
+  coursePackageCsvRowSchema,
+  courseStudentCsvRowSchema,
+} from "@/lib/zod/schemas";
+import { ensureEnrollment } from "@/lib/enrollments/ensure-enrollment";
 
 type InstructorCsvRow = z.infer<typeof instructorCsvRowSchema>;
 type CourseCsvRow = z.infer<typeof courseCsvRowSchema>;
 type LessonCsvRow = z.infer<typeof lessonCsvRowSchema>;
 type OfferCsvRow = z.infer<typeof offerCsvRowSchema>;
+type CoursePackageCsvRow = z.infer<typeof coursePackageCsvRowSchema>;
+type CourseStudentCsvRow = z.infer<typeof courseStudentCsvRowSchema>;
 
 async function executeInstructorRow(row: InstructorCsvRow) {
   const existing = await prisma.instructor.findUnique({
@@ -249,14 +259,273 @@ function buildExecutionSummary(type: ImportType): ImportExecutionSummary {
   };
 }
 
-export async function createImportBatch(type: ImportType, filename: string, csvContent: string, dryRun = true) {
-  const validation = await dryRunImport(type, csvContent);
+async function resolveExistingCourse(row: CoursePackageCsvRow) {
+  return (
+    (row.legacy_course_id
+      ? await prisma.course.findFirst({
+          where: {
+            OR: [{ legacyCourseId: row.legacy_course_id }, { slug: row.slug }],
+          },
+          select: { id: true },
+        })
+      : await prisma.course.findUnique({
+          where: { slug: row.slug },
+          select: { id: true },
+        })) ?? null
+  );
+}
+
+async function executeCoursePackageRows(rows: CoursePackageCsvRow[]) {
+  const summary = buildExecutionSummary(ImportType.COURSE_PACKAGE);
+
+  if (rows.length === 0) {
+    return summary;
+  }
+
+  const firstRow = rows[0];
+  const instructor = await prisma.instructor.findUnique({
+    where: { slug: firstRow.instructor_slug },
+    select: { id: true },
+  });
+
+  if (!instructor) {
+    throw new Error(`Instructor ${firstRow.instructor_slug} not found`);
+  }
+
+  const payload = {
+    slug: firstRow.slug,
+    title: firstRow.title,
+    subtitle: firstRow.subtitle,
+    shortDescription: firstRow.short_description,
+    longDescription: firstRow.long_description,
+    learningOutcomes: splitPipeList(firstRow.learning_outcomes),
+    whoItsFor: splitPipeList(firstRow.who_its_for),
+    includes: splitPipeList(firstRow.includes),
+    heroImageUrl: firstRow.hero_image_url,
+    salesVideoUrl: firstRow.sales_video_url,
+    instructorId: instructor.id,
+    seoTitle: firstRow.seo_title,
+    seoDescription: firstRow.seo_description,
+    status: firstRow.status,
+    legacyCourseId: firstRow.legacy_course_id,
+    legacySlug: firstRow.legacy_slug,
+    legacyUrl: firstRow.legacy_url,
+  };
+
+  const existingCourse = await resolveExistingCourse(firstRow);
+  const course = existingCourse ? await updateCourse(existingCourse.id, payload) : await createCourse(payload);
+
+  summary.targetCourseId = course.id;
+  summary.targetCourseSlug = course.slug;
+  summary.targetCourseTitle = course.title;
+  summary.moduleCount = new Set(rows.map((row) => row.module_position)).size;
+  summary.lessonCount = rows.length;
+  if (existingCourse) {
+    summary.updatedCount += 1;
+  } else {
+    summary.createdCount += 1;
+  }
+
+  for (const row of rows) {
+    const existingModule = await prisma.module.findUnique({
+      where: {
+        courseId_position: {
+          courseId: course.id,
+          position: row.module_position,
+        },
+      },
+      include: {
+        lessons: true,
+      },
+    });
+
+    let moduleId: string;
+
+    if (!existingModule) {
+      const createdModule = await prisma.module.create({
+        data: {
+          courseId: course.id,
+          title: row.module_title,
+          position: row.module_position,
+        },
+        include: { lessons: true },
+      });
+      moduleId = createdModule.id;
+      summary.createdModuleCount = (summary.createdModuleCount ?? 0) + 1;
+    } else {
+      moduleId = existingModule.id;
+      if (existingModule.title !== row.module_title) {
+        await prisma.module.update({
+          where: { id: existingModule.id },
+          data: { title: row.module_title },
+        });
+        summary.updatedModuleCount = (summary.updatedModuleCount ?? 0) + 1;
+      }
+    }
+
+    const existingLesson = await prisma.lesson.findUnique({
+      where: {
+        moduleId_position: {
+          moduleId,
+          position: row.lesson_position,
+        },
+      },
+    });
+
+    const lessonPayload = {
+      slug: row.lesson_slug,
+      title: row.lesson_title,
+      position: row.lesson_position,
+      status: row.lesson_status,
+      type: row.lesson_type,
+      content: row.lesson_content || null,
+      videoUrl: row.video_url || null,
+      downloadUrl: row.download_url || null,
+      isPreview: row.is_preview,
+      dripDays: row.drip_days,
+      durationLabel: row.duration_label || null,
+    };
+
+    if (!existingLesson) {
+      await prisma.lesson.create({
+        data: {
+          moduleId,
+          ...lessonPayload,
+        },
+      });
+      summary.createdLessonCount = (summary.createdLessonCount ?? 0) + 1;
+      summary.createdCount += 1;
+      summary.processedCount += 1;
+      continue;
+    }
+
+    const unchanged =
+      existingLesson.slug === lessonPayload.slug &&
+      existingLesson.title === lessonPayload.title &&
+      existingLesson.position === lessonPayload.position &&
+      existingLesson.status === lessonPayload.status &&
+      existingLesson.type === lessonPayload.type &&
+      existingLesson.content === lessonPayload.content &&
+      existingLesson.videoUrl === lessonPayload.videoUrl &&
+      existingLesson.downloadUrl === lessonPayload.downloadUrl &&
+      existingLesson.isPreview === lessonPayload.isPreview &&
+      existingLesson.dripDays === (lessonPayload.dripDays ?? null) &&
+      existingLesson.durationLabel === lessonPayload.durationLabel;
+
+    if (unchanged) {
+      summary.skippedCount += 1;
+      summary.processedCount += 1;
+      continue;
+    }
+
+    await prisma.lesson.update({
+      where: { id: existingLesson.id },
+      data: lessonPayload,
+    });
+    summary.updatedLessonCount = (summary.updatedLessonCount ?? 0) + 1;
+    summary.updatedCount += 1;
+    summary.processedCount += 1;
+  }
+
+  return summary;
+}
+
+async function executeCourseStudentRow(row: CourseStudentCsvRow, courseId: string) {
+  const existingUser = await prisma.user.findUnique({
+    where: { email: row.email },
+    select: { id: true },
+  });
+
+  const user =
+    existingUser ??
+    (await prisma.user.create({
+      data: {
+        email: row.email,
+        name: row.name || null,
+      },
+      select: { id: true },
+    }));
+
+  if (row.name && existingUser) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { name: row.name },
+    });
+  }
+
+  const existingEnrollment = await prisma.enrollment.findUnique({
+    where: {
+      userId_courseId: {
+        userId: user.id,
+        courseId,
+      },
+    },
+    select: { id: true },
+  });
+
+  if (existingEnrollment) {
+    return "skipped";
+  }
+
+  await ensureEnrollment(user.id, courseId);
+
+  if (row.enrolled_at) {
+    const enrolledAt = new Date(row.enrolled_at);
+    if (!Number.isNaN(enrolledAt.getTime())) {
+      await prisma.enrollment.update({
+        where: {
+          userId_courseId: {
+            userId: user.id,
+            courseId,
+          },
+        },
+        data: { enrolledAt },
+      });
+    }
+  }
+
+  return existingUser ? "updated" : "created";
+}
+
+async function executeCourseStudentRows(rows: CourseStudentCsvRow[], context?: ImportContext) {
+  if (!context?.targetCourseId) {
+    throw new Error("Course student imports require a target course");
+  }
+
+  const course = await prisma.course.findUnique({
+    where: { id: context.targetCourseId },
+    select: { id: true, slug: true, title: true },
+  });
+
+  if (!course) {
+    throw new Error("Target course not found");
+  }
+
+  const summary = buildExecutionSummary(ImportType.COURSE_STUDENTS);
+  summary.targetCourseId = course.id;
+  summary.targetCourseSlug = course.slug;
+  summary.targetCourseTitle = course.title;
+
+  for (const row of rows) {
+    const result = await executeCourseStudentRow(row, course.id);
+    summary.processedCount += 1;
+    if (result === "created") summary.createdCount += 1;
+    if (result === "updated") summary.updatedCount += 1;
+    if (result === "skipped") summary.skippedCount += 1;
+  }
+
+  return summary;
+}
+
+export async function createImportBatch(type: ImportType, filename: string, csvContent: string, dryRun = true, context?: ImportContext) {
+  const validation = await dryRunImport(type, csvContent, context);
 
   return prisma.importBatch.create({
     data: {
       type,
       filename,
       sourceContent: csvContent,
+      context: context ? JSON.parse(JSON.stringify(context)) : undefined,
       status: dryRun ? ImportStatus.DRY_RUN : ImportStatus.DRAFT,
       dryRunSummary: validation.summary,
       errorReport: JSON.parse(JSON.stringify([...validation.invalidRows, ...validation.conflicts])),
@@ -287,9 +556,73 @@ export async function executeImportBatch(batchId: string) {
     throw new Error("Import batch source content is missing");
   }
 
-  const validation = await dryRunImport(batch.type, batch.sourceContent);
-  const summary = buildExecutionSummary(batch.type);
+  const context = (batch.context as ImportContext | null) ?? undefined;
+  const validation = await dryRunImport(batch.type, batch.sourceContent, context);
   const failures: ImportRowError[] = [...validation.invalidRows, ...validation.conflicts];
+
+  if (batch.type === ImportType.COURSE_PACKAGE) {
+    try {
+      const summary = await executeCoursePackageRows(validation.validRows.map((entry) => entry.row as CoursePackageCsvRow));
+      return prisma.importBatch.update({
+        where: { id: batch.id },
+        data: {
+          status: failures.length > 0 && summary.processedCount === 0 ? ImportStatus.FAILED : ImportStatus.COMPLETED,
+          dryRunSummary: validation.summary,
+          executionSummary: summary,
+          errorReport: JSON.parse(JSON.stringify(failures)),
+        },
+      });
+    } catch (error) {
+      failures.push({
+        rowNumber: 1,
+        idempotencyKey: "course-package",
+        row: {},
+        errors: [error instanceof Error ? error.message : "Unknown course package import error"],
+      });
+      return prisma.importBatch.update({
+        where: { id: batch.id },
+        data: {
+          status: ImportStatus.FAILED,
+          dryRunSummary: validation.summary,
+          executionSummary: buildExecutionSummary(batch.type),
+          errorReport: JSON.parse(JSON.stringify(failures)),
+        },
+      });
+    }
+  }
+
+  if (batch.type === ImportType.COURSE_STUDENTS) {
+    try {
+      const summary = await executeCourseStudentRows(validation.validRows.map((entry) => entry.row as CourseStudentCsvRow), context);
+      return prisma.importBatch.update({
+        where: { id: batch.id },
+        data: {
+          status: failures.length > 0 && summary.processedCount === 0 ? ImportStatus.FAILED : ImportStatus.COMPLETED,
+          dryRunSummary: validation.summary,
+          executionSummary: summary,
+          errorReport: JSON.parse(JSON.stringify(failures)),
+        },
+      });
+    } catch (error) {
+      failures.push({
+        rowNumber: 1,
+        idempotencyKey: "course-students",
+        row: {},
+        errors: [error instanceof Error ? error.message : "Unknown course student import error"],
+      });
+      return prisma.importBatch.update({
+        where: { id: batch.id },
+        data: {
+          status: ImportStatus.FAILED,
+          dryRunSummary: validation.summary,
+          executionSummary: buildExecutionSummary(batch.type),
+          errorReport: JSON.parse(JSON.stringify(failures)),
+        },
+      });
+    }
+  }
+
+  const summary = buildExecutionSummary(batch.type);
 
   for (const entry of validation.validRows) {
     try {
@@ -330,8 +663,8 @@ export async function executeImportBatch(batchId: string) {
   });
 }
 
-export async function executeImport(type: ImportType, filename: string, csvContent: string, dryRun = true) {
-  const batch = await createImportBatch(type, filename, csvContent, dryRun);
+export async function executeImport(type: ImportType, filename: string, csvContent: string, dryRun = true, context?: ImportContext) {
+  const batch = await createImportBatch(type, filename, csvContent, dryRun, context);
 
   if (dryRun) {
     return batch;

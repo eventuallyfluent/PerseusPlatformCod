@@ -34,6 +34,11 @@ export async function SiteHeader() {
           </Link>
           {session?.user ? (
             <>
+              {session.user.isAdmin ? (
+                <Link href="/admin" className="rounded-full px-3 py-2 transition hover:bg-[var(--accent-soft)] hover:text-[var(--foreground)]">
+                  Admin
+                </Link>
+              ) : null}
               <span className="hidden rounded-full border border-[var(--border)] bg-[var(--background-soft)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)] lg:inline-flex">
                 {session.user.name ?? session.user.email}
               </span>

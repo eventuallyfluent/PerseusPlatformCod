@@ -99,17 +99,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
   callbacks: {
-    async session({ session, user }) {
+    async jwt({ token, user }) {
+      if (user?.id) {
+        token.id = user.id;
+      }
+
+      if (user?.email) {
+        token.email = user.email;
+        token.isAdmin = isAdminEmail(user.email);
+      } else if (typeof token.email === "string") {
+        token.isAdmin = isAdminEmail(token.email);
+      }
+
+      return token;
+    },
+    async session({ session, token, user }) {
       if (session.user) {
-        session.user.id = user.id;
-        session.user.isAdmin = isAdminEmail(user.email);
+        session.user.id = String(user?.id ?? token.id ?? "");
+        session.user.email = typeof token.email === "string" ? token.email : session.user.email;
+        session.user.isAdmin = Boolean(token.isAdmin);
       }
 
       return session;
     },
   },
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   trustHost: true,
 });

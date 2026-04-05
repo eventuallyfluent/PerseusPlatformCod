@@ -291,30 +291,84 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <footer className="border-t border-[var(--border)]">
-        <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="space-y-8 text-center">
-            <div className="space-y-2">
-              <p className="text-xl font-semibold uppercase tracking-[0.24em] text-[var(--portal-text)] sm:text-2xl">Perseus Arcane Academy</p>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Structured magical training</p>
+      <footer className="mx-auto max-w-7xl px-6 py-16">
+        <div className="rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-8 shadow-[var(--shadow-soft)] sm:px-10 sm:py-10">
+          <div className="grid gap-10 border-b border-[var(--border)] pb-10 lg:grid-cols-[1.4fr_0.9fr_0.9fr_1.2fr]">
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <p className="text-xl font-semibold uppercase tracking-[0.12em] text-[var(--portal-text)]">Perseus Arcane Academy</p>
+                <p className="max-w-sm text-lg leading-8 text-[var(--foreground-soft)]">
+                  Ancient wisdom for the modern initiate. Structured courses in Hermetics, esoteric traditions, and martial arts.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {["X", "O", "▶", "♪"].map((label) => (
+                  <a
+                    key={label}
+                    href={featuredCourseHref}
+                    className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--perseus-collection-elevated)] text-sm text-[var(--accent-lavender)] transition hover:border-[var(--border-strong)] hover:text-[var(--portal-text)]"
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
             </div>
 
-            <nav className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-[var(--foreground-soft)]">
-              <Link href={featuredCourseHref} className="transition hover:text-[var(--portal-text)]">
-                Courses
-              </Link>
-              <Link href={featuredBundleHref} className="transition hover:text-[var(--portal-text)]">
-                Curriculum
-              </Link>
-              <Link href="/faq" className="transition hover:text-[var(--portal-text)]">
-                FAQ
-              </Link>
-              <Link href="/login" className="transition hover:text-[var(--portal-text)]">
-                Login
-              </Link>
-            </nav>
+            <div className="space-y-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-lavender)]">Platform</p>
+              <nav className="flex flex-col gap-3 text-lg text-[var(--foreground-soft)]">
+                <Link href={featuredCourseHref} className="transition hover:text-[var(--portal-text)]">
+                  Courses
+                </Link>
+                <Link href={featuredBundleHref} className="transition hover:text-[var(--portal-text)]">
+                  Collections
+                </Link>
+                <Link href="/faq" className="transition hover:text-[var(--portal-text)]">
+                  FAQ
+                </Link>
+                <Link href="/login" className="transition hover:text-[var(--portal-text)]">
+                  Login
+                </Link>
+              </nav>
+            </div>
 
-            <div className="text-sm text-[var(--foreground-soft)]">© 2026 Perseus Arcane Academy</div>
+            <div className="space-y-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-lavender)]">Legal</p>
+              <div className="flex flex-col gap-3 text-lg text-[var(--foreground-soft)]">
+                <a href="#" className="transition hover:text-[var(--portal-text)]">
+                  Privacy Policy
+                </a>
+                <a href="#" className="transition hover:text-[var(--portal-text)]">
+                  Terms of Service
+                </a>
+                <a href="#" className="transition hover:text-[var(--portal-text)]">
+                  Cookie Policy
+                </a>
+                <a href="#" className="transition hover:text-[var(--portal-text)]">
+                  GDPR Data Request
+                </a>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-lavender)]">Stay in the loop</p>
+              <div className="space-y-4">
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  className="h-14 w-full rounded-[18px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] px-5 text-lg text-[var(--portal-text)] placeholder:text-[var(--foreground-soft)] focus:border-[var(--accent)] focus:outline-none"
+                />
+                <Button className="h-14 w-full justify-center text-xl">Join Free</Button>
+                <p className="text-sm leading-7 text-[var(--foreground-soft)]">
+                  By subscribing you agree to our Privacy Policy. Unsubscribe any time.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 pt-6 text-sm text-[var(--foreground-soft)] sm:flex-row sm:items-center sm:justify-between">
+            <p>© 2026 Perseus Arcane Academy. All rights reserved.</p>
+            <p>Structured magical training</p>
           </div>
         </div>
       </footer>

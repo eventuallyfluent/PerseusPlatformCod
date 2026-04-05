@@ -29,9 +29,27 @@ export function AdminShell({ children, title, description }: PropsWithChildren<{
         </nav>
       </aside>
       <div className="space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-stone-950">{title}</h1>
-          {description ? <p className="text-sm leading-7 text-stone-600">{description}</p> : null}
+        <header className="space-y-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight text-stone-950">{title}</h1>
+              {description ? <p className="text-sm leading-7 text-stone-600">{description}</p> : null}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-stone-300 hover:text-stone-950"
+              >
+                Learner Dashboard
+              </Link>
+              <Link
+                href="/"
+                className="inline-flex items-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-stone-300 hover:text-stone-950"
+              >
+                View Storefront
+              </Link>
+            </div>
+          </div>
         </header>
         {children}
       </div>

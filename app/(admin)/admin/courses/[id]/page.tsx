@@ -56,14 +56,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const salesPageConfig = parseSalesPageConfig(course.salesPageConfig);
 
   return (
-    <AdminShell title={course.title} description="Basic info, curriculum, offers, SEO, and generated page controls.">
-      <div className="grid gap-6 xl:grid-cols-[1.08fr_0.52fr]">
-        <Card className="space-y-8 p-8">
+    <AdminShell title={course.title} description="One structured product record controls the course, generated product page, checkout messaging, curriculum, and access.">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
+        <Card className="space-y-8 bg-white p-8">
           <div className="space-y-4 border-b border-[var(--border)] pb-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Course editor</p>
-            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Keep the course record as the source of truth.</h2>
-            <p className="max-w-2xl text-sm leading-7 text-stone-600">
-              Sales page copy, metadata, preserved paths, and learner-facing context all derive from these structured fields.
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
+            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the course product and let the page generate from it.</h2>
+            <p className="max-w-3xl text-sm leading-7 text-stone-700">
+              Keep the product record clean. Course data, sales-page sections, pricing, curriculum, and learner delivery all stay tied to this one editor.
             </p>
           </div>
 
@@ -72,7 +72,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Core identity"
-              description="Control the course name, owner, route slug, and publish state."
+              description="Set the course title, owner, route, and status."
             >
               <label>
                 Title
@@ -109,17 +109,17 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Sales copy"
-              description="These fields feed the generated sales page sections directly."
+              description="These fields feed the generated product page directly."
             >
-              <label className="md:col-span-2">
+              <label className="lg:col-span-2">
                 Short description
                 <textarea name="shortDescription" rows={4} defaultValue={course.shortDescription ?? ""} />
               </label>
-              <label className="md:col-span-2">
+              <label className="lg:col-span-2">
                 Long description
                 <textarea name="longDescription" rows={6} defaultValue={course.longDescription ?? ""} />
               </label>
-              <label>
+              <label className="lg:col-span-2">
                 Outcomes
                 <textarea name="learningOutcomes" rows={4} defaultValue={(course.learningOutcomes as string[] | null)?.join("\n") ?? ""} />
               </label>
@@ -131,12 +131,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 Includes
                 <textarea name="includes" rows={4} defaultValue={(course.includes as string[] | null)?.join("\n") ?? ""} />
               </label>
-              <div className="hidden md:block" />
             </ProductFormSection>
 
             <ProductFormSection
               title="Media and SEO"
-              description="Media strengthens the hero and search metadata controls the external presentation."
+              description="Control the hero media and search appearance."
             >
               <label>
                 Hero image URL
@@ -150,7 +149,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 SEO title
                 <input name="seoTitle" defaultValue={course.seoTitle ?? ""} />
               </label>
-              <label className="md:col-span-2">
+              <label className="lg:col-span-2">
                 SEO description
                 <textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} />
               </label>
@@ -158,7 +157,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Sales page"
-              description="These settings shape the generated sales page without creating a separate hand-built page."
+              description="Shape the generated product page without making a separate custom page."
             >
               <label>
                 Hero metadata line
@@ -176,11 +175,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 Pricing badge
                 <input name="salesPage.pricingBadge" defaultValue={salesPageConfig.pricingBadge ?? ""} />
               </label>
-              <label className="md:col-span-2">
+              <label className="lg:col-span-2">
                 Pricing headline
                 <input name="salesPage.pricingHeadline" defaultValue={salesPageConfig.pricingHeadline ?? ""} />
               </label>
-              <label className="md:col-span-2">
+              <label className="lg:col-span-2">
                 Pricing body
                 <textarea name="salesPage.pricingBody" rows={3} defaultValue={salesPageConfig.pricingBody ?? ""} />
               </label>
@@ -188,11 +187,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 Final CTA label
                 <input name="salesPage.finalCtaLabel" defaultValue={salesPageConfig.finalCtaLabel ?? ""} />
               </label>
-              <label className="md:col-span-2">
+              <label className="lg:col-span-2">
                 Final CTA body
                 <textarea name="salesPage.finalCtaBody" rows={3} defaultValue={salesPageConfig.finalCtaBody ?? ""} />
               </label>
-              <label>
+              <label className="lg:col-span-2">
                 Section order
                 <textarea
                   name="salesPage.sectionOrder"
@@ -200,7 +199,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   defaultValue={(salesPageConfig.sectionOrder ?? ["description", "highlights", "curriculum", "instructor", "testimonials", "faqs", "pricing"]).join("\n")}
                 />
               </label>
-              <label>
+              <label className="lg:col-span-2">
                 Hidden sections
                 <textarea
                   name="salesPage.hiddenSections"
@@ -212,7 +211,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Migration and preserved URLs"
-              description="Use these fields carefully. Exact paths are preserved intentionally and collisions fail validation."
+              description="Only use preserved paths when replacing an existing live route."
             >
               <label>
                 Legacy course ID
@@ -237,23 +236,23 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </Card>
 
         <div className="space-y-4">
-          <Card className="space-y-4 p-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Product status</p>
-            <div className="grid gap-3 text-sm text-stone-600">
-              <div className="rounded-[22px] border border-[var(--border)] bg-stone-50/80 px-4 py-3">
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Current status</span>
+          <Card className="space-y-4 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product status</p>
+            <div className="grid gap-3 text-sm text-stone-700">
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span>
                 <span className="mt-1 block text-base font-semibold text-stone-950">{course.status}</span>
               </div>
-              <div className="rounded-[22px] border border-[var(--border)] bg-stone-50/80 px-4 py-3">
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Public path</span>
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Public path</span>
                 <span className="mt-1 block break-all text-base text-stone-950">{course.publicPath ?? `/course/${course.slug}`}</span>
               </div>
-              <div className="rounded-[22px] border border-[var(--border)] bg-stone-50/80 px-4 py-3">
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Generated pages</span>
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Generated pages</span>
                 <span className="mt-1 block text-base text-stone-950">{course.pages.length}</span>
               </div>
-              <div className="rounded-[22px] border border-[var(--border)] bg-stone-50/80 px-4 py-3">
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Curriculum</span>
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Curriculum</span>
                 <span className="mt-1 block text-base text-stone-950">
                   {course.modules.length} module{course.modules.length === 1 ? "" : "s"}
                 </span>
@@ -261,8 +260,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </div>
           </Card>
 
-          <Card className="space-y-3 p-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Actions</p>
+          <Card className="space-y-3 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Actions</p>
             <div className="grid gap-3">
               <button
                 className="rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700"
@@ -314,10 +313,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               </button>
             </div>
           </Card>
-          <Card className="space-y-4 p-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">CSV import tools</p>
-            <div className="space-y-3 text-sm leading-7 text-stone-600">
-              <p>Use the course package CSV to refresh this course structure, then use the student CSV to grant access to this specific course.</p>
+          <Card className="space-y-4 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">CSV import</p>
+            <div className="space-y-3 text-sm text-stone-700">
               <div className="flex flex-wrap gap-3">
                 <Link href="/api/imports/templates/course-package" className="text-sm font-medium text-stone-950 underline">
                   Course package template
@@ -327,7 +325,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 </Link>
               </div>
             </div>
-            <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
+            <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[18px] border border-dashed border-stone-200 p-4">
               <label>
                 Course package CSV
                 <input type="file" name="file" accept=".csv" required />
@@ -341,7 +339,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 </button>
               </div>
             </form>
-            <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
+            <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[18px] border border-dashed border-stone-200 p-4">
               <input type="hidden" name="courseId" value={course.id} />
               <label>
                 Student CSV
@@ -363,8 +361,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="space-y-4">
+      <div className="grid gap-6">
+        <Card className="space-y-4 bg-white">
           <h2 className="text-lg font-semibold text-stone-950">Curriculum</h2>
           {course.modules.map((module) => (
             <div key={module.id} className="space-y-3 rounded-[24px] bg-stone-50 p-4">
@@ -394,7 +392,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   </button>
                 </div>
               </form>
-              <ul className="space-y-3 text-sm text-stone-600">
+              <ul className="space-y-3 text-sm text-stone-700">
                 {module.lessons.map((lesson) => (
                   <li key={lesson.id} className="rounded-[20px] border border-stone-200 bg-white p-4">
                     <form action={addLessonAction} className="grid gap-3">
@@ -554,9 +552,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           </form>
         </Card>
 
-        <Card className="space-y-4">
+        <Card className="space-y-4 bg-white">
           <h2 className="text-lg font-semibold text-stone-950">Offers and social proof</h2>
-          <div className="space-y-3 text-sm text-stone-600">
+          <div className="space-y-3 text-sm text-stone-700">
             {course.offers.map((offer) => (
               <div key={offer.id} className="rounded-[20px] bg-stone-50 px-4 py-3">
                 {offer.name} · {offer.price.toString()} {offer.currency}

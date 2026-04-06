@@ -22,10 +22,12 @@ function OfferButtons({ offers, primaryLabel }: { offers: SalesPageOfferSummary[
 
 function SectionIntro({ eyebrow, title, body }: { eyebrow: string; title: string; body?: string | null }) {
   return (
-    <div className="max-w-3xl space-y-4">
-      <Badge variant="accent">{eyebrow}</Badge>
+    <div className="mx-auto max-w-3xl space-y-4 text-center">
+      <div className="flex justify-center">
+        <Badge variant="accent">{eyebrow}</Badge>
+      </div>
       <h2 className="text-5xl leading-none tracking-[-0.05em] text-[var(--foreground)]">{title}</h2>
-      {body ? <p className="text-lg leading-8 text-[var(--foreground-soft)]">{body}</p> : null}
+      {body ? <p className="text-lg leading-8 text-[#d2c6ee]">{body}</p> : null}
     </div>
   );
 }
@@ -37,20 +39,20 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
   const renderSection = (section: SalesPageSectionKey) => {
     if (section === "description") {
       return (
-        <section key={section} className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.05fr_0.95fr]">
+        <section key={section} className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
           <SectionIntro
             eyebrow={payload.descriptionSection.eyebrow}
             title={payload.descriptionSection.title}
             body={payload.descriptionSection.shortDescription}
           />
-          <div className="space-y-5 rounded-[30px] border border-[var(--border)] bg-[rgba(255,255,255,0.8)] p-6 shadow-[var(--shadow-soft)]">
+          <div className="space-y-5 rounded-[30px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)]">
             {payload.media.salesVideoUrl ? (
               <StreamableEmbed url={payload.media.salesVideoUrl} title={`${payload.hero.title} sales video`} />
             ) : (
-              <p className="text-sm text-[var(--muted)]">No sales video configured.</p>
+              <p className="text-sm text-[#b8add7]">No sales video configured.</p>
             )}
             {payload.descriptionSection.longDescription ? (
-              <p className="text-sm leading-8 text-[var(--foreground-soft)]">{payload.descriptionSection.longDescription}</p>
+              <p className="text-sm leading-8 text-[#d2c6ee]">{payload.descriptionSection.longDescription}</p>
             ) : null}
           </div>
         </section>
@@ -63,9 +65,9 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
           <SectionIntro eyebrow={payload.highlightsSection.eyebrow} title="The core promise at a glance." />
           <div className="grid gap-4 lg:grid-cols-3">
             {payload.highlightsSection.cards.map((card) => (
-              <div key={card.id} className="rounded-[30px] border border-[var(--border)] bg-[rgba(255,255,255,0.78)] p-6 shadow-[var(--shadow-soft)]">
+              <div key={card.id} className="rounded-[30px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)]">
                 <Badge variant={card.id === "audience" ? "premium" : card.id === "includes" ? "success" : "accent"}>{card.title}</Badge>
-                <ul className="mt-5 space-y-3 text-sm leading-7 text-[var(--foreground-soft)]">
+                <ul className="mt-5 space-y-3 text-sm leading-7 text-[#d2c6ee]">
                   {card.items.length > 0 ? card.items.map((item) => <li key={item}>{item}</li>) : <li>Nothing listed yet.</li>}
                 </ul>
               </div>
@@ -127,12 +129,12 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
           <SectionIntro eyebrow={payload.includedCoursesSection.eyebrow} title={payload.includedCoursesSection.title} body={payload.includedCoursesSection.body} />
           <div className="grid gap-4 md:grid-cols-2">
             {payload.includedCoursesSection.courses.map((course, index) => (
-              <div key={course.courseUrl} className="rounded-[28px] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-soft)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-stone-500">Included course {index + 1}</p>
-                <h3 className="mt-4 text-3xl leading-none tracking-[-0.03em] text-stone-950">{course.title}</h3>
-                {course.subtitle ? <p className="mt-3 text-sm leading-7 text-stone-600">{course.subtitle}</p> : null}
-                {course.instructorName ? <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.28em] text-stone-500">{course.instructorName}</p> : null}
-                <Link href={course.courseUrl} className="mt-5 inline-flex text-sm font-semibold text-stone-950 underline underline-offset-4">
+              <div key={course.courseUrl} className="rounded-[28px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#b8add7]">Included course {index + 1}</p>
+                <h3 className="mt-4 text-3xl leading-none tracking-[-0.03em] text-white">{course.title}</h3>
+                {course.subtitle ? <p className="mt-3 text-sm leading-7 text-[#d2c6ee]">{course.subtitle}</p> : null}
+                {course.instructorName ? <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#b8add7]">{course.instructorName}</p> : null}
+                <Link href={course.courseUrl} className="mt-5 inline-flex text-sm font-semibold text-white underline underline-offset-4">
                   View course details
                 </Link>
               </div>
@@ -145,7 +147,7 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
     if (section === "instructor" && payload.productType === "course") {
       return (
         <section key={section} className="mx-auto max-w-7xl px-6">
-          <div className="grid gap-8 rounded-[34px] border border-[var(--border)] bg-[rgba(255,255,255,0.8)] p-6 shadow-[var(--shadow-soft)] lg:grid-cols-[320px_1fr] lg:p-8">
+          <div className="grid gap-8 rounded-[34px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)] lg:grid-cols-[320px_1fr] lg:p-8">
             <div className="space-y-4">
               <Badge variant="muted">{payload.instructorSection.eyebrow}</Badge>
               {payload.instructorSection.imageUrl ? (
@@ -158,18 +160,18 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
             <div className="flex items-center">
               <div className="max-w-3xl space-y-5">
                 <Badge variant="premium">{payload.instructorSection.eyebrow}</Badge>
-                <h3 className="text-5xl leading-none tracking-[-0.05em] text-[var(--foreground)]">{payload.instructorSection.name}</h3>
-                <p className="text-xl leading-8 text-[var(--foreground)]">{payload.instructorSection.title}</p>
-                {payload.instructorSection.body ? <p className="text-base leading-8 text-[var(--foreground-soft)]">{payload.instructorSection.body}</p> : null}
-                {payload.instructorSection.shortBio ? <p className="text-sm leading-8 text-[var(--foreground-soft)]">{payload.instructorSection.shortBio}</p> : null}
-                <div className="flex flex-wrap gap-3 pt-2 text-sm text-[var(--foreground-soft)]">
+                <h3 className="text-5xl leading-none tracking-[-0.05em] text-white">{payload.instructorSection.name}</h3>
+                <p className="text-xl leading-8 text-[#efe8ff]">{payload.instructorSection.title}</p>
+                {payload.instructorSection.body ? <p className="text-base leading-8 text-[#d2c6ee]">{payload.instructorSection.body}</p> : null}
+                {payload.instructorSection.shortBio ? <p className="text-sm leading-8 text-[#d2c6ee]">{payload.instructorSection.shortBio}</p> : null}
+                <div className="flex flex-wrap gap-3 pt-2 text-sm text-[#d2c6ee]">
                   {payload.instructorSection.socialLinks.map((social) => (
-                    <a key={social.label} href={social.url} target="_blank" rel="noreferrer" className="rounded-full border border-[var(--border)] px-4 py-2 transition hover:bg-white/80">
+                    <a key={social.label} href={social.url} target="_blank" rel="noreferrer" className="rounded-full border border-[var(--portal-border)] px-4 py-2 transition hover:bg-[rgba(255,255,255,0.08)]">
                       {social.label}
                     </a>
                   ))}
                 </div>
-                <Link href={payload.instructorSection.pageUrl} className="inline-flex text-sm font-semibold text-[var(--foreground)] underline underline-offset-4">
+                <Link href={payload.instructorSection.pageUrl} className="inline-flex text-sm font-semibold text-white underline underline-offset-4">
                   View instructor page
                 </Link>
               </div>
@@ -185,10 +187,10 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
           <SectionIntro eyebrow={payload.testimonialsSection.eyebrow} title={payload.testimonialsSection.title} />
           <div className="grid gap-4 lg:grid-cols-3">
             {payload.testimonialsSection.items.map((testimonial, index) => (
-              <blockquote key={`${testimonial.quote}-${index}`} className="rounded-[30px] border border-[var(--border)] bg-[rgba(255,255,255,0.8)] p-6 shadow-[var(--shadow-soft)]">
-                <p className="text-lg leading-8 text-[var(--foreground-soft)]">&ldquo;{testimonial.quote}&rdquo;</p>
-                {testimonial.name ? <footer className="mt-4 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">{testimonial.name}</footer> : null}
-                {testimonial.source ? <p className="mt-1 text-sm text-[var(--muted)]">{testimonial.source}</p> : null}
+              <blockquote key={`${testimonial.quote}-${index}`} className="rounded-[30px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)]">
+                <p className="text-lg leading-8 text-[#d2c6ee]">&ldquo;{testimonial.quote}&rdquo;</p>
+                {testimonial.name ? <footer className="mt-4 text-sm font-semibold uppercase tracking-[0.2em] text-[#b8add7]">{testimonial.name}</footer> : null}
+                {testimonial.source ? <p className="mt-1 text-sm text-[#b8add7]">{testimonial.source}</p> : null}
               </blockquote>
             ))}
           </div>
@@ -202,9 +204,9 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
           <SectionIntro eyebrow={payload.faqSection.eyebrow} title={payload.faqSection.title} />
           <div className="grid gap-4">
             {payload.faqSection.items.map((faq) => (
-              <div key={faq.question} className="rounded-[28px] border border-[var(--border)] bg-[rgba(255,255,255,0.8)] p-6 shadow-[var(--shadow-soft)]">
-                <h3 className="text-xl leading-none tracking-[-0.02em] text-[var(--foreground)]">{faq.question}</h3>
-                <p className="mt-3 text-sm leading-8 text-[var(--foreground-soft)]">{faq.answer}</p>
+              <div key={faq.question} className="rounded-[28px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)]">
+                <h3 className="text-xl leading-none tracking-[-0.02em] text-white">{faq.question}</h3>
+                <p className="mt-3 text-sm leading-8 text-[#d2c6ee]">{faq.answer}</p>
               </div>
             ))}
           </div>

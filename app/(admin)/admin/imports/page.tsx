@@ -3,64 +3,107 @@ import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 
-const templates = {
-  instructors: "slug,name,image_url,short_bio,long_bio,website_url,youtube_url,instagram_url,x_url,facebook_url,discord_url,telegram_url",
-  courses:
-    "legacy_course_id,slug,legacy_url,title,subtitle,short_description,long_description,learning_outcomes,who_its_for,includes,hero_image_url,sales_video_url,instructor_slug,seo_title,seo_description,status",
-  lessons:
-    "legacy_course_id,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,status",
-  offers: "legacy_course_id,offer_name,price,type,currency",
-  "course-package":
-    "legacy_course_id,slug,legacy_slug,legacy_url,title,subtitle,short_description,long_description,learning_outcomes,who_its_for,includes,hero_image_url,sales_video_url,instructor_slug,seo_title,seo_description,status,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,lesson_status",
-};
-
 export const dynamic = "force-dynamic";
 
 export default async function ImportsPage() {
-  const batches = await prisma.importBatch.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const [batches, courses] = await Promise.all([
+    prisma.importBatch.findMany({
+      where: {
+        type: {
+          in: ["COURSE_PACKAGE", "COURSE_STUDENTS"],
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.course.findMany({
+      orderBy: { title: "asc" },
+      select: {
+        id: true,
+        title: true,
+      },
+    }),
+  ]);
 
   return (
-    <AdminShell title="Migration center" description="Upload CSVs, run dry runs, execute imports, and inspect error reports.">
-      <div className="grid gap-6 lg:grid-cols-2">
-        {Object.entries(templates).map(([type, template]) => (
-          <Card key={type} className="space-y-4">
-            <h2 className="text-lg font-semibold capitalize text-stone-950">{type}</h2>
-            <p className="rounded-2xl bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-600">{template}</p>
-            <Link href={`/api/imports/templates/${type}`} className="text-sm font-medium text-stone-950 underline">
-              Download template
-            </Link>
-            <form action={`/api/imports/${type}`} method="post" encType="multipart/form-data" className="grid gap-3">
-              <label>
-                CSV file
-                <input type="file" name="file" accept=".csv" />
-              </label>
-              <div className="flex flex-wrap gap-3">
-                <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
-                  Dry run
-                </button>
-                <button className="rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit" name="mode" value="execute">
-                  Execute now
-                </button>
-              </div>
-            </form>
-          </Card>
-        ))}
-        <Card className="space-y-4">
-          <h2 className="text-lg font-semibold text-stone-950">Course student imports</h2>
-          <p className="rounded-2xl bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-600">email,name,enrolled_at</p>
-          <Link href="/api/imports/templates/course-students" className="text-sm font-medium text-stone-950 underline">
-            Download template
-          </Link>
-          <p className="text-sm leading-7 text-stone-600">
-            Student imports are tied to one course at a time, so run them from the relevant course detail page rather than this global migration center.
+    <AdminShell title="Imports" description="Use one CSV for the full course package and one CSV for the students enrolled in that course.">
+      <div className="grid gap-6 xl:grid-cols-2">
+        <Card className="space-y-5 bg-white">
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course CSV</p>
+            <h2 className="text-3xl leading-none tracking-[-0.04em] text-stone-950">One file for the full course package.</h2>
+            <p className="text-sm leading-7 text-stone-700">Modules, lessons, course info, learning outcomes, image, and trailer all come through this one CSV.</p>
+          </div>
+
+          <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">
+            legacy_course_id,slug,legacy_slug,legacy_url,title,subtitle,short_description,long_description,learning_outcomes,who_its_for,includes,hero_image_url,sales_video_url,instructor_slug,seo_title,seo_description,status,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,lesson_status
           </p>
+
+          <Link href="/api/imports/templates/course-package" className="text-sm font-medium text-stone-950 underline">
+            Download course template
+          </Link>
+
+          <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">
+            <label>
+              Course CSV
+              <input type="file" name="file" accept=".csv" required />
+            </label>
+            <div className="flex flex-wrap gap-3">
+              <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
+                Dry run
+              </button>
+              <button className="rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800" type="submit" name="mode" value="execute">
+                Execute import
+              </button>
+            </div>
+          </form>
+        </Card>
+
+        <Card className="space-y-5 bg-white">
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course students CSV</p>
+            <h2 className="text-3xl leading-none tracking-[-0.04em] text-stone-950">One file for the students in one course.</h2>
+            <p className="text-sm leading-7 text-stone-700">This CSV only handles student enrollments for the selected course.</p>
+          </div>
+
+          <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">email,name,enrolled_at</p>
+
+          <Link href="/api/imports/templates/course-students" className="text-sm font-medium text-stone-950 underline">
+            Download student template
+          </Link>
+
+          <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3">
+            <label>
+              Course
+              <select name="courseId" required defaultValue="">
+                <option value="" disabled>
+                  Select course
+                </option>
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Student CSV
+              <input type="file" name="file" accept=".csv" required />
+            </label>
+            <div className="flex flex-wrap gap-3">
+              <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
+                Dry run
+              </button>
+              <button className="rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800" type="submit" name="mode" value="execute">
+                Import students
+              </button>
+            </div>
+          </form>
         </Card>
       </div>
-      <Card className="overflow-hidden p-0">
+
+      <Card className="overflow-hidden bg-white p-0">
         <table>
-          <thead className="bg-stone-50 text-stone-500">
+          <thead className="bg-stone-50 text-stone-600">
             <tr>
               <th>Type</th>
               <th>Status</th>
@@ -77,7 +120,7 @@ export default async function ImportsPage() {
                 <td>{batch.type}</td>
                 <td>{batch.status}</td>
                 <td>{batch.filename}</td>
-                <td>{batch.dryRunSummary ? "Ready" : "—"}</td>
+                <td>{batch.dryRunSummary ? "Ready" : "-"}</td>
                 <td>{batch.executionSummary ? "Recorded" : "Pending"}</td>
                 <td>{batch.createdAt.toLocaleString()}</td>
                 <td>

@@ -41,16 +41,19 @@ export default async function NewCoursePage() {
             <Card className="space-y-4 p-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Import one full course</p>
               <p className="text-sm leading-7 text-stone-600">
-                Upload a single course-package CSV to create or update one course with its modules, lessons, sales copy, hero image, and promo video fields in one pass.
+                Download the Perseus migration template, fill it with your current Payhip course details, then upload it here to create the course in one pass.
               </p>
               <div className="flex flex-wrap gap-4 text-sm">
                 <Link href="/api/imports/templates/course-package" className="font-medium text-stone-950 underline">
-                  Download blank template
+                  Download course migration template
                 </Link>
               </div>
+              <p className="text-xs leading-6 text-stone-500">
+                One row = one lesson. Repeat the course-level fields on every row so the platform can build the full structure.
+              </p>
               <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">
                 <label>
-                  Course package CSV
+                  Upload completed course migration CSV
                   <input type="file" name="file" accept=".csv" required />
                 </label>
                 <div className="flex flex-wrap gap-3">

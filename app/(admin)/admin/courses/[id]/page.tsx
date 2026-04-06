@@ -316,24 +316,22 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           <Card className="space-y-4 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">CSV import</p>
             <div className="space-y-3 text-sm text-stone-700">
+              <p>Migrate this Payhip course into Perseus by filling the platform template and uploading it here.</p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/api/imports/templates/course-package" className="text-sm font-medium text-stone-950 underline">
-                  Blank course template
-                </Link>
-                <Link href={`/api/imports/exports/course-package?courseId=${course.id}`} className="text-sm font-medium text-stone-950 underline">
-                  Download current course CSV
+                  Course migration template
                 </Link>
                 <Link href="/api/imports/templates/course-students" className="text-sm font-medium text-stone-950 underline">
-                  Blank student template
-                </Link>
-                <Link href={`/api/imports/exports/course-students?courseId=${course.id}`} className="text-sm font-medium text-stone-950 underline">
-                  Download enrolled students CSV
+                  Student migration template
                 </Link>
               </div>
+              <p className="text-xs leading-6 text-stone-600">
+                One row = one lesson. Repeat course-level fields on every row. Use the student CSV only for enrollments into this course.
+              </p>
             </div>
             <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[18px] border border-dashed border-stone-200 p-4">
               <label>
-                Course package CSV
+                Upload completed course migration CSV
                 <input type="file" name="file" accept=".csv" required />
               </label>
               <div className="flex flex-wrap gap-3">
@@ -348,7 +346,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[18px] border border-dashed border-stone-200 p-4">
               <input type="hidden" name="courseId" value={course.id} />
               <label>
-                Student CSV
+                Upload completed student migration CSV
                 <input type="file" name="file" accept=".csv" required />
               </label>
               <div className="flex flex-wrap gap-3">

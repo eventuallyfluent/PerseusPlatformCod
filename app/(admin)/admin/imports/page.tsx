@@ -24,48 +24,32 @@ export default async function ImportsPage() {
     }),
   ]);
 
+  void courses;
+
   return (
-    <AdminShell title="Imports" description="Use one CSV for the full course package and one CSV for the students enrolled in that course.">
+    <AdminShell title="Imports" description="Download the Perseus templates, fill them with your current Payhip course details, then upload them here.">
       <div className="grid gap-6 xl:grid-cols-2">
         <Card className="space-y-5 bg-white">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course CSV</p>
-            <h2 className="text-3xl leading-none tracking-[-0.04em] text-stone-950">One file for the full course package.</h2>
-            <p className="text-sm leading-7 text-stone-700">Modules, lessons, course info, learning outcomes, image, and trailer all come through this one CSV.</p>
+            <h2 className="text-3xl leading-none tracking-[-0.04em] text-stone-950">Migrate one Payhip course into Perseus.</h2>
+            <p className="text-sm leading-7 text-stone-700">Use the Perseus course migration template for course info, modules, lessons, outcomes, image, trailer, and SEO.</p>
           </div>
 
           <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">
             legacy_course_id,slug,legacy_slug,legacy_url,title,subtitle,short_description,long_description,learning_outcomes,who_its_for,includes,hero_image_url,sales_video_url,instructor_slug,seo_title,seo_description,status,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,lesson_status
           </p>
 
-          <div className="flex flex-wrap gap-4 text-sm">
+          <div className="space-y-2 text-sm text-stone-700">
             <Link href="/api/imports/templates/course-package" className="font-medium text-stone-950 underline">
-              Download blank course template
+              Download course migration template
             </Link>
+            <p>One row = one lesson. Repeat the course-level fields on every row. Module and lesson positions create the structure.</p>
           </div>
-
-          <form action="/api/imports/exports/course-package" method="get" className="grid gap-3">
-            <label>
-              Export current platform course as CSV
-              <select name="courseId" required defaultValue="">
-                <option value="" disabled>
-                  Select course
-                </option>
-                {courses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button className="w-fit rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800" type="submit">
-              Download real course CSV
-            </button>
-          </form>
 
           <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">
             <label>
-              Course CSV
+              Upload completed course migration CSV
               <input type="file" name="file" accept=".csv" required />
             </label>
             <div className="flex flex-wrap gap-3">
@@ -82,36 +66,18 @@ export default async function ImportsPage() {
         <Card className="space-y-5 bg-white">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course students CSV</p>
-            <h2 className="text-3xl leading-none tracking-[-0.04em] text-stone-950">One file for the students in one course.</h2>
-            <p className="text-sm leading-7 text-stone-700">This CSV only handles student enrollments for the selected course.</p>
+            <h2 className="text-3xl leading-none tracking-[-0.04em] text-stone-950">Migrate the students for one course.</h2>
+            <p className="text-sm leading-7 text-stone-700">Use the Perseus student migration template to enroll existing Payhip students into the selected course.</p>
           </div>
 
           <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">email,name,enrolled_at</p>
 
-          <div className="flex flex-wrap gap-4 text-sm">
+          <div className="space-y-2 text-sm text-stone-700">
             <Link href="/api/imports/templates/course-students" className="font-medium text-stone-950 underline">
-              Download blank student template
+              Download student migration template
             </Link>
+            <p>Use one file per course. Email is required. Name and enrolled date are optional.</p>
           </div>
-
-          <form action="/api/imports/exports/course-students" method="get" className="grid gap-3">
-            <label>
-              Export enrolled students as CSV
-              <select name="courseId" required defaultValue="">
-                <option value="" disabled>
-                  Select course
-                </option>
-                {courses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button className="w-fit rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800" type="submit">
-              Download real student CSV
-            </button>
-          </form>
 
           <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3">
             <label>

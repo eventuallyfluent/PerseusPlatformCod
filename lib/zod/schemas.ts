@@ -4,6 +4,23 @@ import type { SalesPageSectionKey } from "@/types";
 
 const optionalUrl = z.string().url().optional().or(z.literal(""));
 const optionalDateString = z.string().optional().or(z.literal(""));
+const csvBoolean = z.preprocess((value) => {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["true", "1", "yes", "y"].includes(normalized)) return true;
+    if (["false", "0", "no", "n", ""].includes(normalized)) return false;
+  }
+
+  return value;
+}, z.boolean());
+const csvCourseStatus = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase() : value), z.nativeEnum(CourseStatus));
+const csvLessonStatus = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase() : value), z.nativeEnum(LessonStatus));
+const csvOfferType = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase().replace(/[\s-]+/g, "_") : value), z.nativeEnum(OfferType));
+const csvLessonType = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase().replace(/[\s-]+/g, "_") : value), z.nativeEnum(LessonType));
 const salesPageSectionKeySchema = z.enum([
   "description",
   "highlights",
@@ -96,7 +113,7 @@ export const lessonInputSchema = z.object({
   content: z.string().optional(),
   videoUrl: optionalUrl,
   downloadUrl: optionalUrl,
-  isPreview: z.coerce.boolean().default(false),
+  isPreview: csvBoolean.default(false),
   dripDays: z.coerce.number().int().min(0).optional(),
   durationLabel: z.string().optional(),
 });
@@ -109,7 +126,7 @@ export const offerInputSchema = z.object({
   price: z.coerce.number().min(0),
   currency: z.string().min(3).max(3),
   compareAtPrice: z.coerce.number().min(0).optional(),
-  isPublished: z.coerce.boolean().default(false),
+  isPublished: csvBoolean.default(false),
   checkoutPath: z.string().optional(),
 });
 
@@ -140,7 +157,7 @@ export const courseCsvRowSchema = z.object({
   instructor_slug: z.string().min(1),
   seo_title: z.string().optional(),
   seo_description: z.string().optional(),
-  status: z.nativeEnum(CourseStatus).default(CourseStatus.DRAFT),
+  status: csvCourseStatus.default(CourseStatus.DRAFT),
 });
 
 export const instructorCsvRowSchema = z.object({
@@ -165,21 +182,21 @@ export const lessonCsvRowSchema = z.object({
   lesson_position: z.coerce.number().int().min(1),
   lesson_slug: z.string().min(1),
   lesson_title: z.string().min(1),
-  lesson_type: z.nativeEnum(LessonType),
+  lesson_type: csvLessonType,
   lesson_content: z.string().optional(),
   video_url: optionalUrl,
   download_url: optionalUrl,
-  is_preview: z.coerce.boolean(),
+  is_preview: csvBoolean,
   drip_days: z.coerce.number().int().min(0).optional(),
   duration_label: z.string().optional(),
-  status: z.nativeEnum(LessonStatus).default(LessonStatus.DRAFT),
+  status: csvLessonStatus.default(LessonStatus.DRAFT),
 });
 
 export const offerCsvRowSchema = z.object({
   legacy_course_id: z.string().min(1),
   offer_name: z.string().min(1),
   price: z.coerce.number().min(0),
-  type: z.nativeEnum(OfferType),
+  type: csvOfferType,
   currency: z.string().min(3).max(3),
 });
 
@@ -200,20 +217,20 @@ export const coursePackageCsvRowSchema = z.object({
   instructor_slug: z.string().min(1),
   seo_title: z.string().optional(),
   seo_description: z.string().optional(),
-  status: z.nativeEnum(CourseStatus).default(CourseStatus.DRAFT),
+  status: csvCourseStatus.default(CourseStatus.DRAFT),
   module_position: z.coerce.number().int().min(1),
   module_title: z.string().min(1),
   lesson_position: z.coerce.number().int().min(1),
   lesson_slug: z.string().min(1),
   lesson_title: z.string().min(1),
-  lesson_type: z.nativeEnum(LessonType),
+  lesson_type: csvLessonType,
   lesson_content: z.string().optional(),
   video_url: optionalUrl,
   download_url: optionalUrl,
-  is_preview: z.coerce.boolean().default(false),
+  is_preview: csvBoolean.default(false),
   drip_days: z.coerce.number().int().min(0).optional(),
   duration_label: z.string().optional(),
-  lesson_status: z.nativeEnum(LessonStatus).default(LessonStatus.DRAFT),
+  lesson_status: csvLessonStatus.default(LessonStatus.DRAFT),
 });
 
 export const courseStudentCsvRowSchema = z.object({
@@ -224,5 +241,5 @@ export const courseStudentCsvRowSchema = z.object({
 
 export const importRequestSchema = z.object({
   type: z.nativeEnum(ImportType),
-  dryRun: z.coerce.boolean().default(true),
+  dryRun: csvBoolean.default(true),
 });

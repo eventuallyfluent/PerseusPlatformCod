@@ -4,91 +4,67 @@ import { Card } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
+function ProductTypeCard({
+  href,
+  title,
+  description,
+  icon,
+}: {
+  href: string;
+  title: string;
+  description: string;
+  icon: "course" | "bundle";
+}) {
+  return (
+    <Link href={href}>
+      <Card className="flex h-full min-h-[320px] flex-col items-center justify-center gap-5 border-stone-200 bg-white p-10 text-center transition hover:-translate-y-1 hover:border-stone-300 hover:shadow-[0_20px_40px_rgba(28,21,18,0.08)]">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-[rgba(222,234,255,0.8)]">
+          {icon === "course" ? (
+            <svg viewBox="0 0 64 64" aria-hidden="true" className="h-16 w-16 text-[#4f60c8]">
+              <path
+                d="M18 16h20c5 0 9 4 9 9v23c0 2-2 3-4 2l-10-5-10 5c-2 1-4 0-4-2V16Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinejoin="round"
+              />
+              <path d="M25 24h15M25 31h12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 64 64" aria-hidden="true" className="h-16 w-16 text-[#4f60c8]">
+              <path
+                d="M14 22h36v25c0 3-2 5-5 5H19c-3 0-5-2-5-5V22Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinejoin="round"
+              />
+              <path d="M23 22c0-5 4-9 9-9s9 4 9 9" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M24 33h16M24 40h10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+          )}
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold uppercase tracking-[0.18em] text-stone-800">{title}</h2>
+          <p className="mx-auto max-w-[240px] text-base leading-7 text-stone-500">{description}</p>
+        </div>
+      </Card>
+    </Link>
+  );
+}
+
 export default function NewProductChooserPage() {
   return (
-    <AdminShell title="Add new product" description="Start with the sellable shape. Perseus keeps the creation flow explicit so product logic stays clean.">
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="space-y-6">
-          <Card className="space-y-4 bg-[linear-gradient(135deg,rgba(255,252,247,0.88),rgba(245,239,229,0.92))] p-8">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Creation flow</p>
-            <h2 className="text-5xl leading-none tracking-[-0.05em] text-stone-950">Choose the product shape before you enter content.</h2>
-            <p className="max-w-2xl text-sm leading-8 text-stone-600">
-              Courses and bundles share the same platform underneath, but the sales page, checkout messaging, and fulfillment path
-              differ. Pick the correct container first, then complete the structured fields.
-            </p>
-          </Card>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <Link href="/admin/courses/new/course">
-              <Card className="h-full space-y-5 border-stone-300 bg-[rgba(255,252,247,0.78)] p-7 transition hover:-translate-y-1 hover:shadow-[0_22px_45px_rgba(28,21,18,0.08)]">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Available now</p>
-                  <span className="rounded-full border border-stone-300 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">
-                    Course
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  <h2 className="text-4xl leading-none tracking-[-0.03em] text-stone-950">New Course</h2>
-                  <p className="text-sm leading-7 text-stone-600">
-                    A structured learning product with curriculum, lessons, generated sales sections, checkout, and learner delivery.
-                  </p>
-                </div>
-                <ul className="space-y-2 text-sm leading-7 text-stone-600">
-                  <li>Modules and lessons</li>
-                  <li>Generated sales page</li>
-                  <li>Single-course enrollment after purchase</li>
-                </ul>
-              </Card>
-            </Link>
-
-            <Link href="/admin/bundles/new">
-              <Card className="h-full space-y-5 border-stone-300 bg-[rgba(255,252,247,0.78)] p-7 transition hover:-translate-y-1 hover:shadow-[0_22px_45px_rgba(28,21,18,0.08)]">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Available now</p>
-                  <span className="rounded-full border border-stone-300 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">
-                    Bundle
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  <h2 className="text-4xl leading-none tracking-[-0.03em] text-stone-950">Bundle</h2>
-                  <p className="text-sm leading-7 text-stone-600">
-                    One public sales page and one checkout flow that unlock multiple existing courses at once.
-                  </p>
-                </div>
-                <ul className="space-y-2 text-sm leading-7 text-stone-600">
-                  <li>One bundle offer</li>
-                  <li>Multiple course enrollments on payment success</li>
-                  <li>Same learner dashboard after unlock</li>
-                </ul>
-              </Card>
-            </Link>
-          </div>
+    <AdminShell title="Add product" description="Choose what you want to create.">
+      <div className="mx-auto max-w-5xl space-y-8">
+        <div className="grid gap-8 md:grid-cols-2">
+          <ProductTypeCard href="/admin/courses/new/course" title="Course" description="Sell your course" icon="course" />
+          <ProductTypeCard href="/admin/bundles/new" title="Bundle" description="Bundle multiple courses for sale" icon="bundle" />
         </div>
 
-        <Card className="space-y-5 p-7">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Deferred product types</p>
-          <div className="space-y-4">
-            {[
-              {
-                title: "Digital Product",
-                copy: "Deferred until the platform supports non-course fulfillment without forcing course-first assumptions.",
-              },
-              {
-                title: "Event",
-                copy: "Deferred until scheduling, attendance, and event-specific delivery are designed as first-class flows.",
-              },
-            ].map((item) => (
-              <div key={item.title} className="rounded-[24px] border border-dashed border-stone-300 bg-stone-50/80 p-5">
-                <h3 className="text-2xl leading-none tracking-[-0.03em] text-stone-950">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-stone-600">{item.copy}</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm leading-7 text-stone-600">
-            This keeps the product system honest: only sellable shapes with complete fulfillment logic are exposed as real creation
-            paths.
-          </p>
-        </Card>
+        <div className="rounded-[24px] border border-dashed border-stone-300 bg-stone-50/80 px-6 py-5 text-center text-sm text-stone-500">
+          More product types can be added later. For now, Perseus supports courses and bundles only.
+        </div>
       </div>
     </AdminShell>
   );

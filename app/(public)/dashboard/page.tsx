@@ -3,7 +3,6 @@ import { requireSession } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { getDashboardCourseState } from "@/lib/courses/dashboard-progress";
 import { Badge } from "@/components/ui/badge";
-import { LearnerContextBar } from "@/components/public/learner-context-bar";
 
 export const dynamic = "force-dynamic";
 
@@ -50,44 +49,29 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(143,44,255,0.08),transparent_18%),linear-gradient(180deg,#0d0f1d,#13152a_34%,#0c0e1d_100%)]">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        <LearnerContextBar
-          title="Your courses"
-          description="Pick up where you left off."
-          identity={session.user.name ?? session.user.email!}
-          primaryHref={spotlight?.state.nextLesson ? `/learn/${spotlight.enrollment.course.slug}/${spotlight.state.nextLesson.slug}` : undefined}
-          primaryLabel={spotlight?.state.nextLesson ? "Continue" : undefined}
-          secondaryHref="/"
-          secondaryLabel="Browse courses"
-        />
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
-          <aside className="rounded-[32px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-6 text-[var(--portal-text)] shadow-[0_22px_48px_rgba(10,11,24,0.24)]">
-            <div className="space-y-4">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.32em] text-[var(--portal-muted)]">Perseus</p>
-                <h2 className="mt-3 text-3xl leading-none tracking-[-0.04em]">Study portal</h2>
-              </div>
-              <div className="rounded-[24px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-4 py-4">
-                <p className="text-sm font-semibold">{session.user.name ?? session.user.email!}</p>
-                <p className="mt-1 text-sm text-[var(--portal-muted)]">Learner</p>
-              </div>
+        <div className="space-y-8">
+          <section className="flex flex-wrap items-end justify-between gap-4">
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Learner dashboard</p>
+              <h1 className="text-5xl leading-none tracking-[-0.05em] text-white">Your courses</h1>
             </div>
-
-            <div className="mt-8 space-y-2">
-              <div className="rounded-[18px] bg-[rgba(143,44,255,0.14)] px-4 py-3 text-sm font-semibold text-[#dcc3ff]">Dashboard</div>
-              <div className="rounded-[18px] px-4 py-3 text-sm text-[var(--portal-muted)]">My Courses</div>
-              <div className="rounded-[18px] px-4 py-3 text-sm text-[var(--portal-muted)]">Library</div>
-              <div className="rounded-[18px] px-4 py-3 text-sm text-[var(--portal-muted)]">Account</div>
-            </div>
-
-            <div className="mt-8 border-t border-[var(--portal-border)] pt-6">
-              <div className="flex flex-col gap-3">
-                <Link href="/" className="text-sm text-[var(--portal-muted)] transition hover:text-white">
-                  Browse courses
+            <div className="flex flex-wrap gap-3">
+              {spotlight?.state.nextLesson ? (
+                <Link
+                  href={`/learn/${spotlight.enrollment.course.slug}/${spotlight.state.nextLesson.slug}`}
+                  className="inline-flex rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
+                >
+                  Continue
                 </Link>
-              </div>
+              ) : null}
+              <Link
+                href="/"
+                className="inline-flex rounded-full border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-6 py-3 text-sm font-semibold text-[#d9d1f2] transition hover:bg-[rgba(255,255,255,0.08)]"
+              >
+                Browse courses
+              </Link>
             </div>
-          </aside>
+          </section>
 
           <div className="space-y-6">
             <section className="grid gap-4 md:grid-cols-3">

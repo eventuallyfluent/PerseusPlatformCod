@@ -260,53 +260,52 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
 
   return (
     <div className="space-y-20">
-      <section className="relative overflow-hidden px-6">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_20%,rgba(143,44,255,0.13),transparent_24%),radial-gradient(circle_at_70%_30%,rgba(212,168,70,0.12),transparent_22%)]" />
-        <div className="relative mx-auto grid max-w-7xl gap-10 rounded-[40px] border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-8 py-10 shadow-[var(--shadow-soft)] lg:grid-cols-[1.08fr_0.92fr] lg:items-end lg:px-12 lg:py-12">
-          <div className="space-y-7">
-            <div className="flex flex-wrap gap-3">
+      <section className="px-6">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[42px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,#150a2f,#110a24)] px-8 py-12 text-white shadow-[0_34px_80px_rgba(10,11,24,0.28)] lg:px-12 lg:py-16">
+          <div
+            className="absolute inset-0 opacity-90"
+            style={{
+              backgroundImage: payload.hero.imageUrl
+                ? `radial-gradient(circle_at_20%_18%,rgba(168,102,255,0.24),transparent 24%),radial-gradient(circle_at_78%_24%,rgba(212,168,70,0.14),transparent 20%),linear-gradient(180deg, rgba(10,7,20,0.30), rgba(10,7,20,0.70)), url(${payload.hero.imageUrl})`
+                : "radial-gradient(circle_at_20%_18%,rgba(168,102,255,0.24),transparent 24%),radial-gradient(circle_at_78%_24%,rgba(212,168,70,0.14),transparent 20%),linear-gradient(135deg,#1b0c34,#2e175f)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,7,23,0.22),rgba(11,7,23,0.82))]" />
+
+          <div className="relative mx-auto max-w-4xl text-center">
+            <div className="flex flex-wrap items-center justify-center gap-3">
               <Badge variant="accent">{payload.hero.eyebrow}</Badge>
               {payload.hero.primaryOffer?.savingsLabel ? <Badge variant="premium">{payload.hero.primaryOffer.savingsLabel}</Badge> : null}
             </div>
-            <div className="space-y-5">
-              {payload.hero.metadataLine ? <p className="text-[11px] font-semibold uppercase tracking-[0.36em] text-[var(--muted)]">{payload.hero.metadataLine}</p> : null}
-              <h1 className="max-w-4xl text-6xl leading-[0.9] tracking-[-0.06em] text-[var(--foreground)] sm:text-7xl lg:text-[5.5rem]">{payload.hero.title}</h1>
-              {payload.hero.subtitle ? <p className="max-w-2xl text-xl leading-9 text-[var(--foreground-soft)]">{payload.hero.subtitle}</p> : null}
+
+            <div className="mt-10 space-y-6">
+              {payload.hero.metadataLine ? (
+                <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[#b8add7]">{payload.hero.metadataLine}</p>
+              ) : null}
+              <h1 className="text-6xl leading-[0.9] tracking-[-0.06em] text-[#f2eaff] sm:text-7xl lg:text-[5.8rem]">{payload.hero.title}</h1>
+              {payload.hero.subtitle ? <p className="mx-auto max-w-3xl text-xl leading-9 text-[#d0c3ef]">{payload.hero.subtitle}</p> : null}
             </div>
-            <div className="flex flex-wrap gap-3">
+
+            {payload.hero.primaryOffer ? (
+              <div className="mt-10 flex flex-wrap items-end justify-center gap-x-4 gap-y-2">
+                <p className="text-5xl font-semibold text-white">{payload.hero.primaryOffer.price}</p>
+                {payload.hero.primaryOffer.compareAtPrice ? <p className="text-xl text-[#9a90bd] line-through">{payload.hero.primaryOffer.compareAtPrice}</p> : null}
+                {payload.hero.primaryOffer.savingsLabel ? <Badge variant="premium">{payload.hero.primaryOffer.savingsLabel}</Badge> : null}
+              </div>
+            ) : null}
+
+            <div className="mt-10 flex flex-wrap justify-center gap-3">
               <Link href={payload.hero.primaryCtaHref}>
-                <Button className="min-w-[260px]">{payload.hero.primaryCtaLabel}</Button>
+                <Button className="min-w-[280px]">{payload.hero.primaryCtaLabel}</Button>
               </Link>
               <a href={payload.hero.secondaryCtaHref}>
-                <Button variant="secondary" className="min-w-[220px]">
+                <Button variant="secondary" className="min-w-[220px] border-white/15 bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.10)]">
                   {payload.hero.secondaryCtaLabel}
                 </Button>
               </a>
             </div>
-          </div>
-          <div className="space-y-5">
-            <div
-              className="min-h-[520px] rounded-[34px] border border-[rgba(88,97,130,0.12)] bg-cover bg-center"
-              style={{
-                backgroundImage: payload.hero.imageUrl
-                  ? `linear-gradient(180deg, rgba(22, 12, 45, 0.18), rgba(22, 12, 45, 0.46)), url(${payload.hero.imageUrl})`
-                  : "linear-gradient(135deg, #1b0c34, #2e175f)",
-              }}
-            />
-            {payload.hero.primaryOffer ? (
-              <div className="rounded-[28px] bg-[rgba(24,25,47,0.96)] px-6 py-5 text-white">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.3em] text-[#b7abd9]">Pricing</p>
-                    <div className="mt-2 flex items-end gap-3">
-                      <p className="text-4xl font-semibold">{payload.hero.primaryOffer.price}</p>
-                      {payload.hero.primaryOffer.compareAtPrice ? <p className="text-lg text-[#9a90bd] line-through">{payload.hero.primaryOffer.compareAtPrice}</p> : null}
-                    </div>
-                  </div>
-                  {payload.hero.primaryOffer.savingsLabel ? <Badge variant="premium">{payload.hero.primaryOffer.savingsLabel}</Badge> : null}
-                </div>
-              </div>
-            ) : null}
           </div>
         </div>
       </section>

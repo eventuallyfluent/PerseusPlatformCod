@@ -50,16 +50,13 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
   const salesPageConfig = parseSalesPageConfig(bundle.salesPageConfig);
 
   return (
-    <AdminShell title={bundle.title} description="One structured product record controls the bundle page, included courses, pricing, and access.">
+    <AdminShell title={bundle.title} description="One product record controls the bundle page, included courses, pricing, and access.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <Card className="space-y-8 bg-white p-8">
           <div className="space-y-4 border-b border-[var(--border)] pb-6">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
-            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the bundle product and let the page generate from it.</h2>
-            <p className="max-w-3xl text-sm leading-7 text-stone-700">
-              Bundles keep fulfillment course-based underneath. This record defines the promise, metadata, preserved path, and
-              public bundle presentation.
-            </p>
+            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the product once and let the page generate from it.</h2>
+            <p className="max-w-3xl text-sm leading-7 text-stone-700">Bundles stay course-based underneath. This record defines the bundle promise, pricing, and public presentation.</p>
           </div>
 
           <form action={saveBundleAction} className="space-y-8">
@@ -67,7 +64,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Core identity"
-              description="Set the bundle title, route, and status."
+              description="Title, route, and status."
             >
               <label>
                 Title
@@ -93,7 +90,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Sales copy"
-              description="These fields feed the generated product page directly."
+              description="Core page copy."
             >
               <label className="lg:col-span-2">
                 Short description
@@ -119,7 +116,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Media and SEO"
-              description="Control the hero media and search appearance."
+              description="Hero media and search."
             >
               <label>
                 Hero image URL
@@ -141,7 +138,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Sales page"
-              description="Shape the generated product page without making a separate custom page."
+              description="Section order and CTA copy."
             >
               <label>
                 Hero metadata line
@@ -195,7 +192,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Preserved URLs"
-              description="Only use preserved paths when replacing an existing live route."
+              description="Only use this when preserving an old live route."
             >
               <label className="lg:col-span-2">
                 Legacy URL
@@ -265,7 +262,10 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
 
       <div className="grid gap-6">
         <Card className="space-y-4 bg-white">
-          <h2 className="text-lg font-semibold text-stone-950">Included courses</h2>
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold text-stone-950">Included courses</h2>
+            <p className="text-sm text-stone-600">Select the courses this bundle unlocks.</p>
+          </div>
           <form action={saveBundleCoursesAction} className="space-y-3">
             <input type="hidden" name="bundleId" value={bundle.id} />
             {allCourses.map((course) => (
@@ -281,9 +281,20 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
           </form>
         </Card>
 
-        <Card className="space-y-4 bg-white">
-          <h2 className="text-lg font-semibold text-stone-950">Offers and social proof</h2>
+        <Card className="space-y-6 bg-white">
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold text-stone-950">Pricing, FAQ, and reviews</h2>
+            <p className="text-sm text-stone-600">Keep the bundle commerce details in one place.</p>
+          </div>
           <div className="space-y-3 text-sm text-stone-700">
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-stone-500">Pricing</h3>
+              {bundle.offers.map((offer) => (
+                <div key={`summary-${offer.id}`} className="rounded-[20px] bg-stone-50 px-4 py-3">
+                  {offer.name} · {offer.price.toString()} {offer.currency}
+                </div>
+              ))}
+            </div>
             <form action={saveOfferAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
               <input type="hidden" name="bundleId" value={bundle.id} />
               <label>
@@ -370,6 +381,14 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
                 </div>
               </form>
             ))}
+            <div className="space-y-3 pt-2">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-stone-500">FAQ</h3>
+              {bundle.faqs.map((faq) => (
+                <div key={`summary-${faq.id}`} className="rounded-[20px] bg-stone-50 px-4 py-3">
+                  {faq.question}
+                </div>
+              ))}
+            </div>
             <form action={saveFaqAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
               <input type="hidden" name="bundleId" value={bundle.id} />
               <label>
@@ -416,6 +435,14 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
                 </div>
               </form>
             ))}
+            <div className="space-y-3 pt-2">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-stone-500">Reviews</h3>
+              {bundle.testimonials.map((testimonial) => (
+                <div key={`summary-${testimonial.id}`} className="rounded-[20px] bg-stone-50 px-4 py-3">
+                  {testimonial.quote}
+                </div>
+              ))}
+            </div>
             <form action={saveTestimonialAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
               <input type="hidden" name="bundleId" value={bundle.id} />
               <label>

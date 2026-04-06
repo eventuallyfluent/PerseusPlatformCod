@@ -358,7 +358,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         <Card className="space-y-4 bg-white">
           <div className="space-y-1">
             <h2 className="text-lg font-semibold text-stone-950">Curriculum</h2>
-            <p className="text-sm text-stone-600">Keep manual building compact: module, lesson, lesson type, and text or video.</p>
+            <p className="text-sm text-stone-600">Build modules and lessons here.</p>
           </div>
           {course.modules.map((module) => (
             <details key={module.id} className="rounded-[24px] border border-stone-200 bg-stone-50 p-4" open>

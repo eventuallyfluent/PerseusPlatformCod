@@ -312,7 +312,7 @@ export default async function HomePage() {
       {
         id: testimonial.id,
         name: testimonial.name ?? "Student",
-        source: testimonial.course?.title ?? testimonial.bundle?.title ?? "Perseus student",
+        source: testimonial.course?.title ?? testimonial.bundle?.title ?? "Student",
         quote: testimonial.quote,
       },
     ]),
@@ -326,7 +326,7 @@ export default async function HomePage() {
       : approvedTestimonials.map((testimonial) => ({
           id: testimonial.id,
           name: testimonial.name ?? "Student",
-          source: testimonial.course?.title ?? testimonial.bundle?.title ?? "Perseus student",
+          source: testimonial.course?.title ?? testimonial.bundle?.title ?? "Student",
           quote: testimonial.quote,
         }));
 

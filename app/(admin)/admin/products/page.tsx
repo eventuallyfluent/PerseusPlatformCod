@@ -92,7 +92,7 @@ export default async function AdminProductsPage() {
           </span>
         </div>
         <Link href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
-          Add new product
+          Add product
         </Link>
       </div>
 

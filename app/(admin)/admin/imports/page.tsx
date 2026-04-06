@@ -33,7 +33,7 @@ export default async function ImportsPage() {
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course CSV</p>
             <h2 className="text-3xl leading-none tracking-[-0.04em] text-stone-950">Migrate one Payhip course into Perseus.</h2>
-            <p className="text-sm leading-7 text-stone-700">Use the Perseus course migration template for course info, modules, lessons, outcomes, image, trailer, and SEO.</p>
+            <p className="text-sm leading-7 text-stone-700">Use the course migration template for course info, modules, lessons, outcomes, image, trailer, and SEO.</p>
           </div>
 
           <div className="space-y-3">
@@ -68,7 +68,7 @@ export default async function ImportsPage() {
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course students CSV</p>
             <h2 className="text-3xl leading-none tracking-[-0.04em] text-stone-950">Migrate the students for one course.</h2>
-            <p className="text-sm leading-7 text-stone-700">Use the Perseus student migration template to enroll existing Payhip students into the selected course.</p>
+            <p className="text-sm leading-7 text-stone-700">Use the student migration template to enroll existing Payhip students into the selected course.</p>
           </div>
 
           <div className="space-y-3">

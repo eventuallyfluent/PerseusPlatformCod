@@ -69,7 +69,7 @@ export default async function AdminOverviewPage() {
   const salesThisMonth = Number(monthlySales._sum.totalAmount ?? 0);
 
   return (
-    <AdminShell title="Admin overview" description="Track products, revenue, and review approvals from one place.">
+    <AdminShell title="Admin overview" description="Sales, products, and pending reviews in one place.">
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <Card className="border-stone-200 bg-white text-stone-950">
           <p className="text-sm text-stone-600">Products</p>
@@ -84,7 +84,7 @@ export default async function AdminOverviewPage() {
         <Card className="border-stone-200 bg-white text-stone-950">
           <p className="text-sm text-stone-600">Reviews to approve</p>
           <p className="mt-3 text-3xl font-semibold text-stone-950">{pendingReviews}</p>
-          <p className="mt-2 text-sm text-stone-600">Pending testimonials hidden from public pages</p>
+          <p className="mt-2 text-sm text-stone-600">Pending reviews waiting for approval</p>
         </Card>
         <Card className="border-stone-200 bg-white text-stone-950">
           <p className="text-sm text-stone-600">Catalog actions</p>
@@ -103,7 +103,7 @@ export default async function AdminOverviewPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-stone-950">Latest products</h2>
-            <p className="text-sm text-stone-600">Jump into editing or preview the public page.</p>
+            <p className="text-sm text-stone-600">Open a product or jump straight into editing.</p>
           </div>
           <Link href="/admin/products" className="text-sm font-medium text-stone-950 underline underline-offset-4">
             Manage all products

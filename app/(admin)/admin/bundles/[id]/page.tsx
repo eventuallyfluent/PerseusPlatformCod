@@ -56,7 +56,6 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
           <div className="space-y-4 border-b border-[var(--border)] pb-6">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
             <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the product once and let the page generate from it.</h2>
-            <p className="max-w-3xl text-sm leading-7 text-stone-700">Bundles stay course-based underneath. This record defines the bundle promise, pricing, and public presentation.</p>
           </div>
 
           <form action={saveBundleAction} className="space-y-8">
@@ -284,7 +283,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
         <Card className="space-y-6 bg-white">
           <div className="space-y-1">
             <h2 className="text-lg font-semibold text-stone-950">Pricing, FAQ, and reviews</h2>
-            <p className="text-sm text-stone-600">Keep the bundle commerce details in one place.</p>
+            <p className="text-sm text-stone-600">Manage bundle commerce details here.</p>
           </div>
           <div className="space-y-3 text-sm text-stone-700">
             <div className="space-y-3">

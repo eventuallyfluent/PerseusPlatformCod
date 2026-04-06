@@ -113,7 +113,7 @@ function SectionFrame({
 }
 
 function ensureCollectionItems(items: HomepageCollectionItem[]) {
-  return Array.from({ length: Math.max(3, items.length) }, (_, index) => {
+  return Array.from({ length: Math.max(4, items.length + 1) }, (_, index) => {
     return (
       items[index] ?? {
         eyebrow: "",
@@ -131,7 +131,7 @@ function linkLines(items: HomepageLinkItem[]) {
 }
 
 export default async function SettingsPage() {
-  const [sections, approvedTestimonials] = await Promise.all([
+  const [sections, approvedTestimonials, courses] = await Promise.all([
     getHomepageSections(),
     prisma.testimonial.findMany({
       where: { isApproved: true },
@@ -141,6 +141,15 @@ export default async function SettingsPage() {
       },
       orderBy: [{ position: "asc" }],
       take: 12,
+    }),
+    prisma.course.findMany({
+      orderBy: { title: "asc" },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        status: true,
+      },
     }),
   ]);
   const hero = sections.find((section) => section.type === "HERO")!;
@@ -215,12 +224,28 @@ export default async function SettingsPage() {
                   defaultValue={item.description}
                   rows={3}
                 />
-                <TextArea
-                  name={`itemCourseSlugs:${index}`}
-                  label={`Collection ${index + 1} course slugs`}
-                  defaultValue={item.courseSlugs.join("\n")}
-                  rows={4}
-                />
+                <div className="space-y-2">
+                  <span className="text-sm font-medium text-stone-900">Courses in collection {index + 1}</span>
+                  <div className="grid gap-3 rounded-2xl border border-stone-200 bg-stone-50 p-4 md:grid-cols-2">
+                    {courses.map((course) => (
+                      <label key={`${index}-${course.id}`} className="flex items-start gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3">
+                        <input
+                          className="mt-1 w-auto"
+                          type="checkbox"
+                          name={`itemCourseSlugs:${index}`}
+                          value={course.slug}
+                          defaultChecked={item.courseSlugs.includes(course.slug)}
+                        />
+                        <span className="space-y-1">
+                          <span className="block text-sm font-semibold text-stone-950">{course.title}</span>
+                          <span className="block text-xs uppercase tracking-[0.22em] text-stone-500">
+                            {course.slug} · {course.status}
+                          </span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
               </div>
             ))}
           </div>

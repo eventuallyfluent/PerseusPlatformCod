@@ -68,17 +68,27 @@ export async function saveHomepageSectionAction(formData: FormData) {
       secondaryCtaHref: String(formData.get("secondaryCtaHref") ?? ""),
     };
   } else if (type === "COLLECTIONS") {
+    const itemIndexes = [...new Set(
+      Array.from(formData.keys())
+        .filter((key) => key.startsWith("itemTitle:"))
+        .map((key) => Number(key.split(":")[1]))
+        .filter((index) => Number.isFinite(index)),
+    )].sort((left, right) => left - right);
+
     payload = {
       eyebrow: String(formData.get("eyebrow") ?? ""),
       title: String(formData.get("title") ?? ""),
       description: String(formData.get("description") ?? ""),
-      items: [0, 1, 2]
+      items: itemIndexes
         .map((index) => ({
           eyebrow: String(formData.get(`itemEyebrow:${index}`) ?? ""),
           title: String(formData.get(`itemTitle:${index}`) ?? ""),
           description: String(formData.get(`itemDescription:${index}`) ?? ""),
           tone: String(formData.get(`itemTone:${index}`) ?? "arcane") as "arcane" | "discipline" | "gateway",
-          courseSlugs: parseLines(String(formData.get(`itemCourseSlugs:${index}`) ?? "")),
+          courseSlugs: formData
+            .getAll(`itemCourseSlugs:${index}`)
+            .map((value) => String(value).trim())
+            .filter(Boolean),
         }))
         .filter((item) => item.title),
     };

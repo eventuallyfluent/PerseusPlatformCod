@@ -36,16 +36,17 @@ export default async function ImportsPage() {
             <p className="text-sm leading-7 text-stone-700">Use the Perseus course migration template for course info, modules, lessons, outcomes, image, trailer, and SEO.</p>
           </div>
 
-          <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">
-            legacy_course_id,slug,legacy_slug,legacy_url,title,subtitle,short_description,long_description,learning_outcomes,who_its_for,includes,hero_image_url,sales_video_url,instructor_slug,seo_title,seo_description,status,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,lesson_status
-          </p>
-
-          <div className="space-y-2 text-sm text-stone-700">
-            <Link href="/api/imports/templates/course-package" className="font-medium text-stone-950 underline">
-              Download course migration template
+          <div className="space-y-3">
+            <Link href="/api/imports/templates/course-package" className="inline-flex rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+              Download Course CSV
             </Link>
-            <p>One row = one lesson. Repeat the course-level fields on every row. Module and lesson positions create the structure.</p>
+            <p className="text-sm text-stone-700">Filename: <span className="font-medium text-stone-950">course-package-template.csv</span></p>
+            <p className="text-sm leading-7 text-stone-700">One row = one lesson. Repeat course-level fields on every row. Module and lesson positions create the structure.</p>
           </div>
+
+          <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">
+            legacy_course_id, slug, title, instructor_slug, module_position, module_title, lesson_position, lesson_title, lesson_type, lesson_content, video_url...
+          </p>
 
           <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">
             <label>
@@ -70,14 +71,15 @@ export default async function ImportsPage() {
             <p className="text-sm leading-7 text-stone-700">Use the Perseus student migration template to enroll existing Payhip students into the selected course.</p>
           </div>
 
-          <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">email,name,enrolled_at</p>
-
-          <div className="space-y-2 text-sm text-stone-700">
-            <Link href="/api/imports/templates/course-students" className="font-medium text-stone-950 underline">
-              Download student migration template
+          <div className="space-y-3">
+            <Link href="/api/imports/templates/course-students" className="inline-flex rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+              Download Course Students CSV
             </Link>
-            <p>Use one file per course. Email is required. Name and enrolled date are optional.</p>
+            <p className="text-sm text-stone-700">Filename: <span className="font-medium text-stone-950">course-students-template.csv</span></p>
+            <p className="text-sm leading-7 text-stone-700">Use one file per course. Email is required. Name and enrolled date are optional.</p>
           </div>
+
+          <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">email, name, enrolled_at</p>
 
           <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3">
             <label>

@@ -97,8 +97,8 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
           "A structured academy for tarot, ritual, symbolism, and serious magical study. Enter through a course, then continue through a path designed for real practice.",
         primaryCtaLabel: "Explore Courses",
         primaryCtaHref: "/course/meta-magick-tarot",
-        secondaryCtaLabel: "View Curriculum",
-        secondaryCtaHref: "/bundle/ritual-library-bundle",
+        secondaryCtaLabel: "See Instructors",
+        secondaryCtaHref: "/instructors",
       },
     },
     {

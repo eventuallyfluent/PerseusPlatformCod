@@ -108,8 +108,8 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
     },
     instructorSection: {
       eyebrow: "Instructor",
-      title: "Learn from a named guide with a visible body of work.",
-      body: "The teacher should be clear and credible on the page without turning the sales flow into a second oversized feature block.",
+      title: "",
+      body: "",
       name: course.instructor.name,
       imageUrl: course.instructor.imageUrl,
       shortBio: course.instructor.shortBio,

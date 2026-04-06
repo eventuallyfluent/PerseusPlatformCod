@@ -68,6 +68,37 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+.admin-theme {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fafaf9 0%, #f5f5f4 100%);
+  color: #1c1917;
+}
+
+.admin-theme input,
+.admin-theme textarea,
+.admin-theme select {
+  border-color: #d6d3d1;
+  background: #ffffff;
+  color: #1c1917;
+}
+
+.admin-theme input:focus,
+.admin-theme textarea:focus,
+.admin-theme select:focus {
+  border-color: #7b2fbe;
+  box-shadow: 0 0 0 4px rgba(123, 47, 190, 0.12);
+  background: #ffffff;
+}
+
+.admin-theme label {
+  color: #44403c;
+}
+
+.admin-theme th,
+.admin-theme td {
+  border-bottom-color: #e7e5e4;
+}
+
 body::before {
   content: "";
   position: fixed;

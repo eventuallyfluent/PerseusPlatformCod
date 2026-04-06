@@ -62,180 +62,213 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   return (
     <AdminShell title={course.title} description="One product record controls the page, curriculum, pricing, and delivery.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
-        <Card className="space-y-8 bg-white p-8">
-          <div className="space-y-4 border-b border-[var(--border)] pb-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
-            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the product once and let the page generate from it.</h2>
-            <p className="max-w-3xl text-sm leading-7 text-stone-700">Keep the course record clean. This is the single source for the sales page and learner experience.</p>
-          </div>
-
-          <form action={saveCourseAction} className="space-y-8">
-            <input type="hidden" name="id" value={course.id} />
-
-            <ProductFormSection
-              title="Core identity"
-              description="Title, route, owner, and status."
-            >
-              <label>
-                Title
-                <input name="title" defaultValue={course.title} required />
-              </label>
-              <label>
-                Slug
-                <input name="slug" defaultValue={course.slug} required />
-              </label>
-              <label>
-                Subtitle
-                <input name="subtitle" defaultValue={course.subtitle ?? ""} />
-              </label>
-              <label>
-                Instructor
-                <select name="instructorId" defaultValue={course.instructorId}>
-                  {instructors.map((instructor) => (
-                    <option key={instructor.id} value={instructor.id}>
-                      {instructor.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Status
-                <select name="status" defaultValue={course.status}>
-                  <option value="DRAFT">DRAFT</option>
-                  <option value="PUBLISHED">PUBLISHED</option>
-                  <option value="ARCHIVED">ARCHIVED</option>
-                </select>
-              </label>
-              <div className="hidden md:block" />
-            </ProductFormSection>
-
-            <ProductFormSection
-              title="Sales copy"
-              description="Core page copy."
-            >
-              <label className="lg:col-span-2">
-                Short description
-                <textarea name="shortDescription" rows={4} defaultValue={course.shortDescription ?? ""} />
-              </label>
-              <label className="lg:col-span-2">
-                Long description
-                <textarea name="longDescription" rows={6} defaultValue={course.longDescription ?? ""} />
-              </label>
-              <label className="lg:col-span-2">
-                Outcomes
-                <textarea name="learningOutcomes" rows={4} defaultValue={(course.learningOutcomes as string[] | null)?.join("\n") ?? ""} />
-              </label>
-              <label>
-                Who it&apos;s for
-                <textarea name="whoItsFor" rows={4} defaultValue={(course.whoItsFor as string[] | null)?.join("\n") ?? ""} />
-              </label>
-              <label>
-                Includes
-                <textarea name="includes" rows={4} defaultValue={(course.includes as string[] | null)?.join("\n") ?? ""} />
-              </label>
-            </ProductFormSection>
-
-            <ProductFormSection
-              title="Media and SEO"
-              description="Hero media and search."
-            >
-              <label>
-                Hero image URL
-                <input name="heroImageUrl" defaultValue={course.heroImageUrl ?? ""} />
-              </label>
-              <label>
-                Sales video URL
-                <input name="salesVideoUrl" defaultValue={course.salesVideoUrl ?? ""} />
-              </label>
-              <label>
-                SEO title
-                <input name="seoTitle" defaultValue={course.seoTitle ?? ""} />
-              </label>
-              <label className="lg:col-span-2">
-                SEO description
-                <textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} />
-              </label>
-            </ProductFormSection>
-
-            <ProductFormSection
-              title="Sales page"
-              description="Section order and CTA copy."
-            >
-              <label>
-                Hero metadata line
-                <input name="salesPage.heroMetadataLine" defaultValue={salesPageConfig.heroMetadataLine ?? ""} />
-              </label>
-              <label>
-                Primary CTA label
-                <input name="salesPage.primaryCtaLabel" defaultValue={salesPageConfig.primaryCtaLabel ?? ""} />
-              </label>
-              <label>
-                Secondary CTA label
-                <input name="salesPage.secondaryCtaLabel" defaultValue={salesPageConfig.secondaryCtaLabel ?? ""} />
-              </label>
-              <label>
-                Pricing badge
-                <input name="salesPage.pricingBadge" defaultValue={salesPageConfig.pricingBadge ?? ""} />
-              </label>
-              <label className="lg:col-span-2">
-                Pricing headline
-                <input name="salesPage.pricingHeadline" defaultValue={salesPageConfig.pricingHeadline ?? ""} />
-              </label>
-              <label className="lg:col-span-2">
-                Pricing body
-                <textarea name="salesPage.pricingBody" rows={3} defaultValue={salesPageConfig.pricingBody ?? ""} />
-              </label>
-              <label>
-                Final CTA label
-                <input name="salesPage.finalCtaLabel" defaultValue={salesPageConfig.finalCtaLabel ?? ""} />
-              </label>
-              <label className="lg:col-span-2">
-                Final CTA body
-                <textarea name="salesPage.finalCtaBody" rows={3} defaultValue={salesPageConfig.finalCtaBody ?? ""} />
-              </label>
-              <label className="lg:col-span-2">
-                Section order
-                <textarea
-                  name="salesPage.sectionOrder"
-                  rows={7}
-                  defaultValue={(salesPageConfig.sectionOrder ?? ["description", "highlights", "curriculum", "instructor", "testimonials", "faqs", "pricing"]).join("\n")}
-                />
-              </label>
-              <label className="lg:col-span-2">
-                Hidden sections
-                <textarea
-                  name="salesPage.hiddenSections"
-                  rows={7}
-                  defaultValue={(salesPageConfig.hiddenSections ?? []).join("\n")}
-                />
-              </label>
-            </ProductFormSection>
-
-            <ProductFormSection
-              title="Migration and preserved URLs"
-              description="Only use these when preserving an old live route."
-            >
-              <label>
-                Legacy course ID
-                <input name="legacyCourseId" defaultValue={course.legacyCourseId ?? ""} />
-              </label>
-              <label>
-                Legacy slug
-                <input name="legacySlug" defaultValue={course.legacySlug ?? ""} />
-              </label>
-              <label className="md:col-span-2">
-                Legacy URL
-                <input name="legacyUrl" defaultValue={course.legacyUrl ?? ""} />
-              </label>
-            </ProductFormSection>
-
-            <div className="border-t border-[var(--border)] pt-6">
-              <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
-                Save course
-              </button>
+        <div className="space-y-6">
+          <Card className="space-y-8 bg-white p-8">
+            <div className="space-y-4 border-b border-[var(--border)] pb-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
+              <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the product once and let the page generate from it.</h2>
             </div>
-          </form>
-        </Card>
+
+            <form action={saveCourseAction} className="space-y-8">
+              <input type="hidden" name="id" value={course.id} />
+
+              <ProductFormSection title="Core identity" description="Title, route, owner, and status.">
+                <label>
+                  Title
+                  <input name="title" defaultValue={course.title} required />
+                </label>
+                <label>
+                  Slug
+                  <input name="slug" defaultValue={course.slug} required />
+                </label>
+                <label>
+                  Subtitle
+                  <input name="subtitle" defaultValue={course.subtitle ?? ""} />
+                </label>
+                <label>
+                  Instructor
+                  <select name="instructorId" defaultValue={course.instructorId}>
+                    {instructors.map((instructor) => (
+                      <option key={instructor.id} value={instructor.id}>
+                        {instructor.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Status
+                  <select name="status" defaultValue={course.status}>
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="PUBLISHED">PUBLISHED</option>
+                    <option value="ARCHIVED">ARCHIVED</option>
+                  </select>
+                </label>
+                <div className="hidden md:block" />
+              </ProductFormSection>
+
+              <ProductFormSection title="Sales copy" description="Core page copy.">
+                <label className="lg:col-span-2">
+                  Short description
+                  <textarea name="shortDescription" rows={4} defaultValue={course.shortDescription ?? ""} />
+                </label>
+                <label className="lg:col-span-2">
+                  Long description
+                  <textarea name="longDescription" rows={6} defaultValue={course.longDescription ?? ""} />
+                </label>
+                <label className="lg:col-span-2">
+                  Outcomes
+                  <textarea name="learningOutcomes" rows={4} defaultValue={(course.learningOutcomes as string[] | null)?.join("\n") ?? ""} />
+                </label>
+                <label>
+                  Who it&apos;s for
+                  <textarea name="whoItsFor" rows={4} defaultValue={(course.whoItsFor as string[] | null)?.join("\n") ?? ""} />
+                </label>
+                <label>
+                  Includes
+                  <textarea name="includes" rows={4} defaultValue={(course.includes as string[] | null)?.join("\n") ?? ""} />
+                </label>
+              </ProductFormSection>
+
+              <ProductFormSection title="Media and SEO" description="Hero media and search.">
+                <label>
+                  Hero image URL
+                  <input name="heroImageUrl" defaultValue={course.heroImageUrl ?? ""} />
+                </label>
+                <label>
+                  Sales video URL
+                  <input name="salesVideoUrl" defaultValue={course.salesVideoUrl ?? ""} />
+                </label>
+                <label>
+                  SEO title
+                  <input name="seoTitle" defaultValue={course.seoTitle ?? ""} />
+                </label>
+                <label className="lg:col-span-2">
+                  SEO description
+                  <textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} />
+                </label>
+              </ProductFormSection>
+
+              <ProductFormSection title="Sales page" description="CTA copy and section visibility.">
+                <label>
+                  Hero metadata line
+                  <input name="salesPage.heroMetadataLine" defaultValue={salesPageConfig.heroMetadataLine ?? ""} />
+                </label>
+                <label>
+                  Primary CTA label
+                  <input name="salesPage.primaryCtaLabel" defaultValue={salesPageConfig.primaryCtaLabel ?? ""} />
+                </label>
+                <label>
+                  Secondary CTA label
+                  <input name="salesPage.secondaryCtaLabel" defaultValue={salesPageConfig.secondaryCtaLabel ?? ""} />
+                </label>
+                <label>
+                  Pricing badge
+                  <input name="salesPage.pricingBadge" defaultValue={salesPageConfig.pricingBadge ?? ""} />
+                </label>
+                <label className="lg:col-span-2">
+                  Pricing headline
+                  <input name="salesPage.pricingHeadline" defaultValue={salesPageConfig.pricingHeadline ?? ""} />
+                </label>
+                <label className="lg:col-span-2">
+                  Pricing body
+                  <textarea name="salesPage.pricingBody" rows={3} defaultValue={salesPageConfig.pricingBody ?? ""} />
+                </label>
+                <label>
+                  Final CTA label
+                  <input name="salesPage.finalCtaLabel" defaultValue={salesPageConfig.finalCtaLabel ?? ""} />
+                </label>
+                <label className="lg:col-span-2">
+                  Final CTA body
+                  <textarea name="salesPage.finalCtaBody" rows={3} defaultValue={salesPageConfig.finalCtaBody ?? ""} />
+                </label>
+                <label className="lg:col-span-2">
+                  Section order
+                  <textarea
+                    name="salesPage.sectionOrder"
+                    rows={7}
+                    defaultValue={(salesPageConfig.sectionOrder ?? ["description", "highlights", "curriculum", "instructor", "testimonials", "faqs", "pricing"]).join("\n")}
+                  />
+                </label>
+                <label className="lg:col-span-2">
+                  Hidden sections
+                  <textarea
+                    name="salesPage.hiddenSections"
+                    rows={7}
+                    defaultValue={(salesPageConfig.hiddenSections ?? []).join("\n")}
+                  />
+                </label>
+              </ProductFormSection>
+
+              <ProductFormSection title="Migration and preserved URLs" description="Only use these when preserving an old live route.">
+                <label>
+                  Legacy course ID
+                  <input name="legacyCourseId" defaultValue={course.legacyCourseId ?? ""} />
+                </label>
+                <label>
+                  Legacy slug
+                  <input name="legacySlug" defaultValue={course.legacySlug ?? ""} />
+                </label>
+                <label className="md:col-span-2">
+                  Legacy URL
+                  <input name="legacyUrl" defaultValue={course.legacyUrl ?? ""} />
+                </label>
+              </ProductFormSection>
+
+              <div className="border-t border-[var(--border)] pt-6">
+                <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
+                  Save course
+                </button>
+              </div>
+            </form>
+          </Card>
+
+          <Card className="space-y-4 bg-white p-6">
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course CSV</p>
+              <h2 className="text-2xl leading-none tracking-[-0.03em] text-stone-950">Download the migration CSV, fill it with Payhip details, then upload it here.</h2>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/api/imports/templates/course-package" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+                Download Course CSV
+              </Link>
+              <Link href="/api/imports/templates/course-students" className="rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800">
+                Download Course Students CSV
+              </Link>
+            </div>
+            <p className="text-sm leading-7 text-stone-700">One row = one lesson. Repeat course-level fields on each row. Use the student CSV only for enrollments into this course.</p>
+            <div className="grid gap-4 xl:grid-cols-2">
+              <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[20px] border border-dashed border-stone-300 p-4">
+                <label>
+                  Upload completed course migration CSV
+                  <input type="file" name="file" accept=".csv" required />
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
+                    Dry run
+                  </button>
+                  <button className="rounded-full border border-stone-300 px-4 py-3 text-sm font-medium text-stone-800" type="submit" name="mode" value="execute">
+                    Execute import
+                  </button>
+                </div>
+              </form>
+              <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[20px] border border-dashed border-stone-300 p-4">
+                <input type="hidden" name="courseId" value={course.id} />
+                <label>
+                  Upload completed student migration CSV
+                  <input type="file" name="file" accept=".csv" required />
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
+                    Dry run
+                  </button>
+                  <button className="rounded-full border border-stone-300 px-4 py-3 text-sm font-medium text-stone-800" type="submit" name="mode" value="execute">
+                    Import students
+                  </button>
+                </div>
+              </form>
+            </div>
+          </Card>
+        </div>
 
         <div className="space-y-4">
           <Card className="space-y-4 bg-white p-5">
@@ -314,50 +347,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 Delete course
               </button>
             </div>
-          </Card>
-          <Card className="space-y-4 bg-white p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course CSV</p>
-            <div className="space-y-3 text-sm text-stone-700">
-              <p>Download the Perseus template, fill it with the Payhip course details, then upload it here.</p>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/api/imports/templates/course-package" className="text-sm font-medium text-stone-950 underline">
-                  Download course CSV template
-                </Link>
-                <Link href="/api/imports/templates/course-students" className="text-sm font-medium text-stone-950 underline">
-                  Download students CSV template
-                </Link>
-              </div>
-              <p className="text-xs leading-6 text-stone-600">One row = one lesson. Use the student CSV only for enrollments into this course.</p>
-            </div>
-            <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[18px] border border-dashed border-stone-200 p-4">
-              <label>
-                Upload completed course migration CSV
-                <input type="file" name="file" accept=".csv" required />
-              </label>
-              <div className="flex flex-wrap gap-3">
-                <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
-                  Dry run
-                </button>
-                <button className="rounded-full border border-stone-200 px-4 py-3 text-sm font-medium text-stone-700" type="submit" name="mode" value="execute">
-                  Execute import
-                </button>
-              </div>
-            </form>
-            <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[18px] border border-dashed border-stone-200 p-4">
-              <input type="hidden" name="courseId" value={course.id} />
-              <label>
-                Upload completed student migration CSV
-                <input type="file" name="file" accept=".csv" required />
-              </label>
-              <div className="flex flex-wrap gap-3">
-                <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
-                  Dry run
-                </button>
-                <button className="rounded-full border border-stone-200 px-4 py-3 text-sm font-medium text-stone-700" type="submit" name="mode" value="execute">
-                  Import students
-                </button>
-              </div>
-            </form>
           </Card>
           <form id="course-editor-actions">
             <input type="hidden" name="id" value={course.id} />

@@ -160,8 +160,6 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
               <div className="max-w-3xl space-y-5">
                 <Badge variant="premium">{payload.instructorSection.eyebrow}</Badge>
                 <h3 className="text-5xl leading-none tracking-[-0.05em] text-white">{payload.instructorSection.name}</h3>
-                <p className="text-xl leading-8 text-[#efe8ff]">{payload.instructorSection.title}</p>
-                {payload.instructorSection.body ? <p className="text-base leading-8 text-[#d2c6ee]">{payload.instructorSection.body}</p> : null}
                 {payload.instructorSection.shortBio ? <p className="text-sm leading-8 text-[#d2c6ee]">{payload.instructorSection.shortBio}</p> : null}
                 <div className="flex flex-wrap gap-3 pt-2 text-sm text-[#d2c6ee]">
                   {payload.instructorSection.socialLinks.map((social) => (

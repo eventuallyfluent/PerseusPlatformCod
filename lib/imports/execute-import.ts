@@ -25,6 +25,35 @@ type OfferCsvRow = z.infer<typeof offerCsvRowSchema>;
 type CoursePackageCsvRow = z.infer<typeof coursePackageCsvRowSchema>;
 type CourseStudentCsvRow = z.infer<typeof courseStudentCsvRowSchema>;
 
+function humanizeSlug(slug: string) {
+  return slug
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+async function ensureInstructorForImport(slug: string, name?: string | null) {
+  const normalizedSlug = slug.trim();
+  const normalizedName = String(name ?? "").trim() || humanizeSlug(normalizedSlug);
+
+  if (!normalizedSlug || !normalizedName) {
+    throw new Error("Instructor details are required");
+  }
+
+  const instructor = await prisma.instructor.upsert({
+    where: { slug: normalizedSlug },
+    update: normalizedName ? { name: normalizedName } : {},
+    create: {
+      slug: normalizedSlug,
+      name: normalizedName,
+    },
+    select: { id: true },
+  });
+
+  return instructor;
+}
+
 async function executeInstructorRow(row: InstructorCsvRow) {
   const existing = await prisma.instructor.findUnique({
     where: { slug: row.slug },
@@ -66,14 +95,7 @@ async function executeCourseRow(row: CourseCsvRow) {
           select: { id: true },
         })) ?? null;
 
-  const instructor = await prisma.instructor.findUnique({
-    where: { slug: row.instructor_slug },
-    select: { id: true },
-  });
-
-  if (!instructor) {
-    throw new Error(`Instructor ${row.instructor_slug} not found`);
-  }
+  const instructor = await ensureInstructorForImport(row.instructor_slug, row.instructor_name);
 
   const payload = {
     slug: row.slug,
@@ -283,14 +305,7 @@ async function executeCoursePackageRows(rows: CoursePackageCsvRow[]) {
   }
 
   const firstRow = rows[0];
-  const instructor = await prisma.instructor.findUnique({
-    where: { slug: firstRow.instructor_slug },
-    select: { id: true },
-  });
-
-  if (!instructor) {
-    throw new Error(`Instructor ${firstRow.instructor_slug} not found`);
-  }
+  const instructor = await ensureInstructorForImport(firstRow.instructor_slug, firstRow.instructor_name);
 
   const payload = {
     slug: firstRow.slug,

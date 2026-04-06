@@ -235,7 +235,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 Download Course Students CSV
               </Link>
             </div>
-            <p className="text-sm leading-7 text-stone-700">One row = one lesson. Repeat course-level fields on each row. Use the student CSV only for enrollments into this course.</p>
+            <p className="text-sm leading-7 text-stone-700">One row = one lesson. Repeat course-level fields on each row, including instructor slug and instructor name. Use the student CSV only for enrollments into this course.</p>
             <div className="grid gap-4 xl:grid-cols-2">
               <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[20px] border border-dashed border-stone-300 p-4">
                 <label>

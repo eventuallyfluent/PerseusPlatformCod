@@ -17,6 +17,14 @@ export type ImportContext = {
 
 type PackageRow = Record<string, string | number | boolean | undefined>;
 
+function humanizeSlug(slug: string) {
+  return slug
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 async function enrichCourseValidation(
   validation: ImportValidationResult<Record<string, unknown>>,
 ): Promise<ImportValidationResult<Record<string, unknown>>> {
@@ -26,13 +34,10 @@ async function enrichCourseValidation(
 
   for (const entry of validation.validRows) {
     const row = entry.row as Record<string, string>;
-    const instructor = await prisma.instructor.findUnique({
-      where: { slug: row.instructor_slug },
-      select: { id: true },
-    });
+    const instructorName = String(row.instructor_name ?? "").trim() || humanizeSlug(String(row.instructor_slug ?? ""));
 
-    if (!instructor) {
-      invalidRows.push(buildImportError(entry.rowNumber, entry.idempotencyKey, entry.row, [`instructor_slug: Instructor ${row.instructor_slug} not found`]));
+    if (!instructorName) {
+      invalidRows.push(buildImportError(entry.rowNumber, entry.idempotencyKey, entry.row, ["instructor_name: Provide an instructor name or a usable instructor_slug"]));
       continue;
     }
 
@@ -138,6 +143,7 @@ function getPackageMetaFields(row: PackageRow) {
     hero_image_url: row.hero_image_url ?? "",
     sales_video_url: row.sales_video_url ?? "",
     instructor_slug: row.instructor_slug ?? "",
+    instructor_name: row.instructor_name ?? "",
     seo_title: row.seo_title ?? "",
     seo_description: row.seo_description ?? "",
     status: row.status ?? "",
@@ -157,18 +163,16 @@ async function enrichCoursePackageValidation(
 
   const firstRow = validation.validRows[0].row;
   const canonicalMeta = getPackageMetaFields(firstRow);
-  const instructor = await prisma.instructor.findUnique({
-    where: { slug: String(firstRow.instructor_slug) },
-    select: { id: true },
-  });
+  const instructorSlug = String(firstRow.instructor_slug);
+  const derivedInstructorName = String(firstRow.instructor_name || "").trim() || humanizeSlug(instructorSlug);
 
-  if (!instructor) {
+  if (!derivedInstructorName) {
     return {
       validRows: [],
       invalidRows: [
         ...invalidRows,
         ...validation.validRows.map((entry) =>
-          buildImportError(entry.rowNumber, entry.idempotencyKey, entry.row, [`instructor_slug: Instructor ${String(entry.row.instructor_slug)} not found`]),
+          buildImportError(entry.rowNumber, entry.idempotencyKey, entry.row, ["instructor_name: Provide an instructor name or a usable instructor_slug"]),
         ),
       ],
       conflicts,

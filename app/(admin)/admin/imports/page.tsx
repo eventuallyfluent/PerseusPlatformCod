@@ -41,11 +41,11 @@ export default async function ImportsPage() {
               Download Course CSV
             </Link>
             <p className="text-sm text-stone-700">Filename: <span className="font-medium text-stone-950">course-package-template.csv</span></p>
-            <p className="text-sm leading-7 text-stone-700">One row = one lesson. Repeat course-level fields on every row. Module and lesson positions create the structure.</p>
+            <p className="text-sm leading-7 text-stone-700">One row = one lesson. Repeat course-level fields on every row. Include instructor slug and instructor name. Module and lesson positions create the structure.</p>
           </div>
 
           <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">
-            legacy_course_id, slug, title, instructor_slug, module_position, module_title, lesson_position, lesson_title, lesson_type, lesson_content, video_url...
+            legacy_course_id, slug, title, instructor_slug, instructor_name, module_position, module_title, lesson_position, lesson_title, lesson_type...
           </p>
 
           <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">

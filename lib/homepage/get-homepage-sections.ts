@@ -48,7 +48,7 @@ export async function getHomepageSections(): Promise<HomepageSectionRecord[]> {
     if (type === "FOOTER" && existing) {
       const payload = existing.payload as HomepageFooterPayload;
       const normalizedLinks = payload.platformLinks.map((link) =>
-        link.label === "Courses" && link.href === "/course/meta-magick-tarot"
+        link.label === "Courses" && link.href.startsWith("/course/")
           ? { ...link, href: "/courses" }
           : link,
       );

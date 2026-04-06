@@ -320,14 +320,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 <Link href="/api/imports/templates/course-package" className="text-sm font-medium text-stone-950 underline">
                   Blank course template
                 </Link>
-                <Link href="/imports/perseus-course-package-sample.csv" className="text-sm font-medium text-stone-950 underline">
-                  Sample course CSV
+                <Link href={`/api/imports/exports/course-package?courseId=${course.id}`} className="text-sm font-medium text-stone-950 underline">
+                  Download current course CSV
                 </Link>
                 <Link href="/api/imports/templates/course-students" className="text-sm font-medium text-stone-950 underline">
                   Blank student template
                 </Link>
-                <Link href="/imports/perseus-course-students-sample.csv" className="text-sm font-medium text-stone-950 underline">
-                  Sample student CSV
+                <Link href={`/api/imports/exports/course-students?courseId=${course.id}`} className="text-sm font-medium text-stone-950 underline">
+                  Download enrolled students CSV
                 </Link>
               </div>
             </div>

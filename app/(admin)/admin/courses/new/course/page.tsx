@@ -47,9 +47,6 @@ export default async function NewCoursePage() {
                 <Link href="/api/imports/templates/course-package" className="font-medium text-stone-950 underline">
                   Download blank template
                 </Link>
-                <Link href="/imports/perseus-course-package-sample.csv" className="font-medium text-stone-950 underline">
-                  Download sample CSV
-                </Link>
               </div>
               <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">
                 <label>

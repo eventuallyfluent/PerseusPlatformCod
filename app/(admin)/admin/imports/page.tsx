@@ -42,10 +42,26 @@ export default async function ImportsPage() {
             <Link href="/api/imports/templates/course-package" className="font-medium text-stone-950 underline">
               Download blank course template
             </Link>
-            <Link href="/imports/perseus-course-package-sample.csv" className="font-medium text-stone-950 underline">
-              Download sample course CSV
-            </Link>
           </div>
+
+          <form action="/api/imports/exports/course-package" method="get" className="grid gap-3">
+            <label>
+              Export current platform course as CSV
+              <select name="courseId" required defaultValue="">
+                <option value="" disabled>
+                  Select course
+                </option>
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button className="w-fit rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800" type="submit">
+              Download real course CSV
+            </button>
+          </form>
 
           <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">
             <label>
@@ -76,10 +92,26 @@ export default async function ImportsPage() {
             <Link href="/api/imports/templates/course-students" className="font-medium text-stone-950 underline">
               Download blank student template
             </Link>
-            <Link href="/imports/perseus-course-students-sample.csv" className="font-medium text-stone-950 underline">
-              Download sample student CSV
-            </Link>
           </div>
+
+          <form action="/api/imports/exports/course-students" method="get" className="grid gap-3">
+            <label>
+              Export enrolled students as CSV
+              <select name="courseId" required defaultValue="">
+                <option value="" disabled>
+                  Select course
+                </option>
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button className="w-fit rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800" type="submit">
+              Download real student CSV
+            </button>
+          </form>
 
           <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3">
             <label>

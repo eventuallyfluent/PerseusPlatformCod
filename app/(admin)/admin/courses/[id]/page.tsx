@@ -299,16 +299,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           <Card className="space-y-3 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Actions</p>
             <div className="grid gap-3">
-              <button
-                className="rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700"
-                type="submit"
-                formAction={regeneratePageAction}
-                form="course-editor-actions"
-                name="courseId"
-                value={course.id}
-              >
-                Regenerate page
-              </button>
+              <form action={regeneratePageAction}>
+                <input type="hidden" name="courseId" value={course.id} />
+                <button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">
+                  Regenerate page
+                </button>
+              </form>
               <Link href={resolveCoursePublicPath(course)} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
                 View public page
               </Link>
@@ -317,41 +313,28 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   Preview checkout
                 </Link>
               ) : null}
-              <button
-                className="rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700"
-                type="submit"
-                formAction={setCourseStatusAction}
-                form="course-editor-actions"
-                name="status"
-                value="PUBLISHED"
-              >
-                Publish
-              </button>
-              <button
-                className="rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700"
-                type="submit"
-                formAction={setCourseStatusAction}
-                form="course-editor-actions"
-                name="status"
-                value="DRAFT"
-              >
-                Unpublish
-              </button>
-              <button
-                className="rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700"
-                type="submit"
-                formAction={deleteCourseAction}
-                form="course-editor-actions"
-                name="courseId"
-                value={course.id}
-              >
-                Delete course
-              </button>
+              <form action={setCourseStatusAction}>
+                <input type="hidden" name="courseId" value={course.id} />
+                <input type="hidden" name="status" value="PUBLISHED" />
+                <button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">
+                  Publish
+                </button>
+              </form>
+              <form action={setCourseStatusAction}>
+                <input type="hidden" name="courseId" value={course.id} />
+                <input type="hidden" name="status" value="DRAFT" />
+                <button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">
+                  Unpublish
+                </button>
+              </form>
+              <form action={deleteCourseAction}>
+                <input type="hidden" name="courseId" value={course.id} />
+                <button className="w-full rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" type="submit">
+                  Delete course
+                </button>
+              </form>
             </div>
           </Card>
-          <form id="course-editor-actions">
-            <input type="hidden" name="id" value={course.id} />
-          </form>
         </div>
       </div>
 

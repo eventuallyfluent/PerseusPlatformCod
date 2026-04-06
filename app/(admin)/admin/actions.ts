@@ -436,6 +436,7 @@ export async function regeneratePageAction(formData: FormData) {
   const courseId = String(formData.get("courseId"));
   await regenerateCoursePage(courseId, true);
   revalidatePath(`/admin/courses/${courseId}`);
+  redirect(`/admin/courses/${courseId}`);
 }
 
 export async function deleteCourseAction(formData: FormData) {
@@ -641,4 +642,5 @@ export async function setCourseStatusAction(formData: FormData) {
 
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
+  redirect(`/admin/courses/${courseId}`);
 }

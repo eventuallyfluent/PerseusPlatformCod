@@ -93,7 +93,7 @@ export default async function DashboardPage() {
               <section className="rounded-[32px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-7 text-[var(--portal-text)] shadow-[0_22px_48px_rgba(10,11,24,0.24)]">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="space-y-3">
-                    <Badge variant="portal">Continue learning</Badge>
+                <Badge variant="portal">Current course</Badge>
                     <h2 className="text-5xl leading-none tracking-[-0.05em]">{spotlight.enrollment.course.title}</h2>
                     <p className="max-w-2xl text-base leading-8 text-[var(--portal-muted)]">{spotlight.enrollment.course.shortDescription}</p>
                   </div>
@@ -156,7 +156,7 @@ export default async function DashboardPage() {
 
             <section className="space-y-6">
               <div className="space-y-3">
-                <Badge variant="portal">Course library</Badge>
+                <Badge variant="portal">Library</Badge>
                 <h2 className="text-5xl leading-none tracking-[-0.05em] text-white">Your library</h2>
               </div>
               <div className="grid gap-6 xl:grid-cols-2">

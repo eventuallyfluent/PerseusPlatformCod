@@ -27,7 +27,7 @@ export default async function ImportsPage() {
   void courses;
 
   return (
-    <AdminShell title="Imports" description="Download the Perseus templates, fill them with your current Payhip course details, then upload them here.">
+    <AdminShell title="Imports" description="Download the migration template, fill it with Payhip details, then upload it here.">
       <div className="grid gap-6 xl:grid-cols-2">
         <Card className="space-y-5 bg-white">
           <div className="space-y-2">

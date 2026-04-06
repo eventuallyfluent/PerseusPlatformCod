@@ -16,7 +16,7 @@ export default async function OrdersPage() {
   });
 
   return (
-    <AdminShell title="Orders" description="Order and payment persistence lives in the gateway abstraction layer.">
+    <AdminShell title="Orders" description="See paid, pending, and failed orders in one place.">
       <Card className="overflow-hidden p-0">
         <table>
           <thead className="bg-stone-50 text-stone-500">

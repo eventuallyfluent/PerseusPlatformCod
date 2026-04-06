@@ -80,7 +80,7 @@ export default async function AdminProductsPage() {
   return (
     <AdminShell
       title="Products"
-      description="Manage the sellable catalog from one place while keeping course and bundle editing distinct."
+      description="See every course and bundle, then jump straight into managing it."
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-3 text-sm text-stone-600">

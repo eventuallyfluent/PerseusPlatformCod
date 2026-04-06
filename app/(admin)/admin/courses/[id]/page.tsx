@@ -575,6 +575,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <p className="text-sm text-stone-600">Commerce details stay in the same product editor.</p>
           </div>
           <div className="space-y-3 text-sm text-stone-700">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-stone-500">Pricing</p>
             {course.offers.map((offer) => (
               <div key={offer.id} className="rounded-[20px] bg-stone-50 px-4 py-3">
                 {offer.name} · {offer.price.toString()} {offer.currency}
@@ -676,6 +677,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 </div>
               </form>
             ))}
+            <p className="pt-2 text-sm font-semibold uppercase tracking-[0.24em] text-stone-500">FAQ</p>
             <form action={saveFaqAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
               <input type="hidden" name="courseId" value={course.id} />
               <label>
@@ -722,6 +724,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 </div>
               </form>
             ))}
+            <p className="pt-2 text-sm font-semibold uppercase tracking-[0.24em] text-stone-500">Reviews</p>
             <form action={saveTestimonialAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
               <input type="hidden" name="courseId" value={course.id} />
               <label>

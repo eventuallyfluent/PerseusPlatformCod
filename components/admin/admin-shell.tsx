@@ -36,8 +36,8 @@ export function AdminShell({ children, title, description }: PropsWithChildren<{
         <header className="space-y-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-stone-950">{title}</h1>
-              {description ? <p className="max-w-3xl text-sm leading-7 text-stone-700">{description}</p> : null}
+              <h1 className="text-3xl font-semibold tracking-tight text-white">{title}</h1>
+              {description ? <p className="max-w-3xl text-sm leading-7 text-[#c8bedf]">{description}</p> : null}
             </div>
             <div className="flex flex-wrap gap-2">
               <Link

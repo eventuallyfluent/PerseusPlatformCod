@@ -39,13 +39,13 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
   const renderSection = (section: SalesPageSectionKey) => {
     if (section === "description") {
       return (
-        <section key={section} className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+        <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
           <SectionIntro
             eyebrow={payload.descriptionSection.eyebrow}
             title={payload.descriptionSection.title}
             body={payload.descriptionSection.shortDescription}
           />
-          <div className="space-y-5 rounded-[30px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)]">
+          <div className="mx-auto max-w-4xl space-y-5 rounded-[30px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)]">
             {payload.media.salesVideoUrl ? (
               <StreamableEmbed url={payload.media.salesVideoUrl} title={`${payload.hero.title} sales video`} />
             ) : (

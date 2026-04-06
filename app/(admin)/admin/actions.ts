@@ -391,6 +391,7 @@ export async function saveTestimonialAction(formData: FormData) {
     name: String(formData.get("name") ?? "") || null,
     quote: String(formData.get("quote") ?? ""),
     position: Number(formData.get("position") ?? 1),
+    isApproved: Boolean(formData.get("isApproved")),
   };
 
   if (testimonialId) {

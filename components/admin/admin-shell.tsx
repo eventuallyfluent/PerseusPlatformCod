@@ -18,14 +18,14 @@ const links = [
 export function AdminShell({ children, title, description }: PropsWithChildren<{ title: string; description?: string }>) {
   return (
     <div className="mx-auto grid max-w-[1580px] gap-6 px-6 py-10 lg:grid-cols-[250px_minmax(0,1fr)]">
-      <aside className="rounded-[28px] border border-stone-200 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)]">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-stone-700">Admin</h2>
+      <aside className="rounded-[28px] border border-[rgba(255,255,255,0.08)] bg-[rgba(18,18,36,0.94)] p-5 shadow-[0_20px_50px_rgba(6,8,20,0.22)]">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-white">Admin</h2>
         <nav className="space-y-2">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="block rounded-2xl px-4 py-3 text-sm font-medium text-stone-800 transition hover:bg-stone-100 hover:text-stone-950 focus:bg-stone-100 focus:text-stone-950"
+              className="block rounded-2xl px-4 py-3 text-sm font-medium text-[#ddd2f5] transition hover:bg-[rgba(255,255,255,0.08)] hover:text-white focus:bg-[rgba(255,255,255,0.08)] focus:text-white"
             >
               {link.label}
             </Link>
@@ -42,13 +42,13 @@ export function AdminShell({ children, title, description }: PropsWithChildren<{
             <div className="flex flex-wrap gap-2">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-800 transition hover:border-stone-400 hover:text-stone-950"
+                className="inline-flex items-center rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.06)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[rgba(255,255,255,0.10)]"
               >
                 Learner Dashboard
               </Link>
               <Link
                 href="/"
-                className="inline-flex items-center rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-800 transition hover:border-stone-400 hover:text-stone-950"
+                className="inline-flex items-center rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.06)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[rgba(255,255,255,0.10)]"
               >
                 View Storefront
               </Link>

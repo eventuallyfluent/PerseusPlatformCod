@@ -324,6 +324,7 @@ model Testimonial {
   name     String?
   quote    String
   position Int
+  isApproved Boolean @default(false)
   course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
   bundle   Bundle? @relation(fields: [bundleId], references: [id], onDelete: Cascade)
 }

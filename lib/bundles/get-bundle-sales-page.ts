@@ -16,7 +16,7 @@ export function getBundleSalesPage(bundle: BundleWithRelations): BundleSalesPage
     const generatedPayload = salesPage.generatedPayload as Partial<BundleSalesPagePayload>;
 
     if (generatedPayload.version === "v2") {
-      return generatedPayload as BundleSalesPagePayload;
+      return generateBundleSalesPagePayload(bundle);
     }
   }
 

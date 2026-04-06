@@ -716,6 +716,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 Position
                 <input name="position" type="number" min="1" defaultValue={course.testimonials.length + 1} />
               </label>
+              <label className="flex items-center gap-2">
+                <input className="w-auto" name="isApproved" type="checkbox" value="true" defaultChecked />
+                Approved
+              </label>
               <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Add testimonial</button>
             </form>
             {course.testimonials.map((testimonial) => (
@@ -737,6 +741,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 <label>
                   Position
                   <input name="position" type="number" min="1" defaultValue={testimonial.position} />
+                </label>
+                <label className="flex items-center gap-2">
+                  <input className="w-auto" name="isApproved" type="checkbox" value="true" defaultChecked={testimonial.isApproved} />
+                  Approved
                 </label>
                 <div className="flex flex-wrap gap-3">
                   <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save testimonial</button>

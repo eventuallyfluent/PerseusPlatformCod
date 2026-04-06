@@ -16,7 +16,7 @@ export function getCourseSalesPage(course: CourseWithRelations): GeneratedSalesP
     const generatedPayload = salesPage.generatedPayload as Partial<GeneratedSalesPagePayload>;
 
     if (generatedPayload.version === "v2") {
-      return generatedPayload as GeneratedSalesPagePayload;
+      return generateSalesPagePayload(course);
     }
   }
 

@@ -37,6 +37,7 @@ function buildOffers(course: CourseWithRelations): SalesPageOfferSummary[] {
 export function generateSalesPagePayload(course: CourseWithRelations): GeneratedSalesPagePayload {
   const config = parseSalesPageConfig(course.salesPageConfig);
   const offers = buildOffers(course);
+  const approvedTestimonials = course.testimonials.filter((testimonial) => testimonial.isApproved);
   const sectionOrder = normalizeSectionOrder(config.sectionOrder, [
     "description",
     "highlights",
@@ -128,7 +129,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
     testimonialsSection: {
       eyebrow: "Testimonies",
       title: "What students say after entering the work",
-      items: course.testimonials.map((testimonial) => ({
+      items: approvedTestimonials.map((testimonial) => ({
         name: testimonial.name,
         quote: testimonial.quote,
         source: course.title,

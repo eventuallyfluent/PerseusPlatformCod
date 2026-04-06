@@ -37,6 +37,7 @@ function buildOffers(bundle: BundleWithRelations): SalesPageOfferSummary[] {
 export function generateBundleSalesPagePayload(bundle: BundleWithRelations): BundleSalesPagePayload {
   const config = parseSalesPageConfig(bundle.salesPageConfig);
   const offers = buildOffers(bundle);
+  const approvedTestimonials = bundle.testimonials.filter((testimonial) => testimonial.isApproved);
   const sectionOrder = normalizeSectionOrder(config.sectionOrder, [
     "description",
     "highlights",
@@ -96,7 +97,7 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
     testimonialsSection: {
       eyebrow: "Testimonies",
       title: "What students say after entering the bundle",
-      items: bundle.testimonials.map((testimonial) => ({
+      items: approvedTestimonials.map((testimonial) => ({
         name: testimonial.name,
         quote: testimonial.quote,
         source: bundle.title,

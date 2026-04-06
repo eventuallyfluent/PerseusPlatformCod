@@ -290,9 +290,11 @@ export async function saveInstructorAction(formData: FormData) {
 
 export async function saveOfferAction(formData: FormData) {
   const offerId = String(formData.get("id") ?? "");
+  const courseId = String(formData.get("courseId") ?? "");
+  const bundleId = String(formData.get("bundleId") ?? "");
   await upsertOffer({
-    courseId: String(formData.get("courseId") ?? "") || undefined,
-    bundleId: String(formData.get("bundleId") ?? "") || undefined,
+    courseId: courseId || undefined,
+    bundleId: bundleId || undefined,
     name: String(formData.get("name") ?? ""),
     type: String(formData.get("type") ?? "ONE_TIME"),
     price: Number(formData.get("price") ?? 0),
@@ -303,13 +305,13 @@ export async function saveOfferAction(formData: FormData) {
   }, offerId || undefined);
 
   revalidatePath("/admin/offers");
-  const courseId = String(formData.get("courseId") ?? "");
-  const bundleId = String(formData.get("bundleId") ?? "");
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
+    redirect(`/admin/courses/${courseId}`);
   }
   if (bundleId) {
     revalidatePath(`/admin/bundles/${bundleId}`);
+    redirect(`/admin/bundles/${bundleId}`);
   }
 }
 
@@ -325,9 +327,11 @@ export async function deleteOfferAction(formData: FormData) {
   revalidatePath("/admin/offers");
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
+    redirect(`/admin/courses/${courseId}`);
   }
   if (bundleId) {
     revalidatePath(`/admin/bundles/${bundleId}`);
+    redirect(`/admin/bundles/${bundleId}`);
   }
 }
 

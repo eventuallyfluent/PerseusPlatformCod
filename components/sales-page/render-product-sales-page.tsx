@@ -149,7 +149,6 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
         <section key={section} className="mx-auto max-w-7xl px-6">
           <div className="grid gap-8 rounded-[34px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)] lg:grid-cols-[320px_1fr] lg:p-8">
             <div className="space-y-4">
-              <Badge variant="muted">{payload.instructorSection.eyebrow}</Badge>
               {payload.instructorSection.imageUrl ? (
                 <div
                   className="h-80 rounded-[28px] bg-cover bg-center"

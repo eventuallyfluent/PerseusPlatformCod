@@ -37,11 +37,7 @@ export default async function LessonPage({ params }: { params: Promise<{ courseS
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(143,44,255,0.08),transparent_18%),linear-gradient(180deg,#0d0f1d,#13152a_32%,#0c0e1d_100%)]">
-      <div className="mx-auto max-w-7xl space-y-6 px-6 py-10">
-        <div className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">{course.title}</p>
-          <h1 className="text-4xl leading-none tracking-[-0.05em] text-white">{lesson.title}</h1>
-        </div>
+      <div className="mx-auto max-w-7xl px-6 py-10">
         <CoursePlayerLayout course={course} activeLessonSlug={lessonSlug} enrolledAt={enrollment.enrolledAt} />
       </div>
     </div>

@@ -316,15 +316,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </div>
           </Card>
           <Card className="space-y-4 bg-white p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">CSV import</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course CSV</p>
             <div className="space-y-3 text-sm text-stone-700">
               <p>Download the Perseus template, fill it with the Payhip course details, then upload it here.</p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/api/imports/templates/course-package" className="text-sm font-medium text-stone-950 underline">
-                  Course migration template
+                  Download course CSV template
                 </Link>
                 <Link href="/api/imports/templates/course-students" className="text-sm font-medium text-stone-950 underline">
-                  Student migration template
+                  Download students CSV template
                 </Link>
               </div>
               <p className="text-xs leading-6 text-stone-600">One row = one lesson. Use the student CSV only for enrollments into this course.</p>

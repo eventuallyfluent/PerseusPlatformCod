@@ -25,21 +25,21 @@ export async function SiteHeader() {
             <span className="block text-[11px] uppercase tracking-[0.34em] text-[var(--foreground-soft)]">Structured magical training</span>
           </div>
         </Link>
-        <nav className="flex items-center gap-2 text-sm text-[var(--foreground-soft)] sm:gap-4">
-          <Link href="/faq" className="rounded-full px-3 py-2 transition hover:bg-[var(--accent-soft)] hover:text-[var(--foreground)]">
+        <nav className="flex items-center gap-2 text-sm text-[var(--foreground)] sm:gap-4">
+          <Link href="/faq" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
             FAQ
           </Link>
-          <Link href="/dashboard" className="rounded-full px-3 py-2 transition hover:bg-[var(--accent-soft)] hover:text-[var(--foreground)]">
+          <Link href="/dashboard" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
             Dashboard
           </Link>
           {session?.user ? (
             <>
               {session.user.isAdmin ? (
-                <Link href="/admin" className="rounded-full px-3 py-2 transition hover:bg-[var(--accent-soft)] hover:text-[var(--foreground)]">
+                <Link href="/admin" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
                   Admin
                 </Link>
               ) : null}
-              <span className="hidden rounded-full border border-[var(--border)] bg-[var(--background-soft)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)] lg:inline-flex">
+              <span className="hidden rounded-full border border-[var(--accent-soft)] bg-[rgba(255,255,255,0.05)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white lg:inline-flex">
                 {session.user.name ?? session.user.email}
               </span>
               <form
@@ -48,7 +48,7 @@ export async function SiteHeader() {
                   await signOut({ redirectTo: "/" });
                 }}
               >
-                <Button type="submit" variant="ghost" className="px-4 py-2">
+                <Button type="submit" variant="ghost" className="border-white/12 bg-[rgba(255,255,255,0.08)] px-4 py-2 text-white hover:border-white/20 hover:bg-[rgba(255,255,255,0.16)] hover:text-white">
                   Sign out
                 </Button>
               </form>

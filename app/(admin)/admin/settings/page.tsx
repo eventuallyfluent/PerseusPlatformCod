@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,7 +14,6 @@ import {
   type HomepageHeroPayload,
   type HomepageLinkItem,
   type HomepageTestimoniesPayload,
-  type HomepageTestimonyItem,
 } from "@/lib/homepage/sections";
 
 function TextInput({
@@ -126,30 +126,30 @@ function ensureCollectionItems(items: HomepageCollectionItem[]) {
   });
 }
 
-function ensureTestimonyItems(items: HomepageTestimonyItem[]) {
-  return Array.from({ length: Math.max(3, items.length) }, (_, index) => {
-    return (
-      items[index] ?? {
-        name: "",
-        source: "",
-        quote: "",
-      }
-    );
-  });
-}
-
 function linkLines(items: HomepageLinkItem[]) {
   return stringifyLinkLines(items);
 }
 
 export default async function SettingsPage() {
-  const sections = await getHomepageSections();
+  const [sections, approvedTestimonials] = await Promise.all([
+    getHomepageSections(),
+    prisma.testimonial.findMany({
+      where: { isApproved: true },
+      include: {
+        course: { select: { title: true } },
+        bundle: { select: { title: true } },
+      },
+      orderBy: [{ position: "asc" }],
+      take: 12,
+    }),
+  ]);
   const hero = sections.find((section) => section.type === "HERO")!;
   const heroPayload = hero.payload as HomepageHeroPayload;
   const collections = sections.find((section) => section.type === "COLLECTIONS")!;
   const collectionsPayload = collections.payload as HomepageCollectionsPayload;
   const testimonies = sections.find((section) => section.type === "TESTIMONIES")!;
   const testimoniesPayload = testimonies.payload as HomepageTestimoniesPayload;
+  const selectedHomepageTestimonials = testimoniesPayload.selectedTestimonialIds ?? [];
   const emailSignup = sections.find((section) => section.type === "EMAIL_SIGNUP")!;
   const emailSignupPayload = emailSignup.payload as HomepageEmailSignupPayload;
   const footer = sections.find((section) => section.type === "FOOTER")!;
@@ -229,7 +229,7 @@ export default async function SettingsPage() {
         <SectionFrame
           type="TESTIMONIES"
           title="Testimonies"
-          description="Public proof section. Add, remove, or reorder quotes directly here."
+          description="Homepage proof now comes from the approved testimonial bank used across products."
           position={testimonies.position}
           enabled={testimonies.enabled}
         >
@@ -238,14 +238,44 @@ export default async function SettingsPage() {
             <TextInput name="title" label="Title" defaultValue={testimoniesPayload.title} />
           </div>
           <TextArea name="description" label="Optional description" defaultValue={testimoniesPayload.description} rows={3} />
-          <div className="space-y-4">
-            {ensureTestimonyItems(testimoniesPayload.items).map((item, index) => (
-              <div key={index} className="grid gap-4 rounded-2xl border border-stone-200 p-4 lg:grid-cols-3">
-                <TextInput name={`itemName:${index}`} label={`Quote ${index + 1} name`} defaultValue={item.name} />
-                <TextInput name={`itemSource:${index}`} label={`Quote ${index + 1} source`} defaultValue={item.source} />
-                <TextArea name={`itemQuote:${index}`} label={`Quote ${index + 1}`} defaultValue={item.quote} rows={4} />
+          <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+            <label className="space-y-2">
+              <span className="text-sm font-medium text-stone-900">Source mode</span>
+              <select
+                name="sourceMode"
+                defaultValue={testimoniesPayload.sourceMode ?? "latest-approved"}
+                className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-400"
+              >
+                <option value="latest-approved">Latest approved</option>
+                <option value="selected">Selected testimonials</option>
+              </select>
+            </label>
+            <div className="rounded-2xl border border-stone-200 p-4">
+              <p className="text-sm font-medium text-stone-900">Approved testimonial bank</p>
+              <p className="mt-1 text-sm leading-6 text-stone-600">Select specific testimonials or leave the section on latest approved.</p>
+              <div className="mt-4 grid gap-3">
+                {approvedTestimonials.map((testimonial) => {
+                  const source = testimonial.course?.title ?? testimonial.bundle?.title ?? "General";
+                  return (
+                    <label key={testimonial.id} className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3">
+                      <input
+                        className="mt-1 w-auto"
+                        type="checkbox"
+                        name="selectedTestimonialIds"
+                        value={testimonial.id}
+                        defaultChecked={selectedHomepageTestimonials.includes(testimonial.id)}
+                      />
+                      <span className="space-y-1">
+                        <span className="block text-sm font-semibold text-stone-950">
+                          {testimonial.name ?? "Anonymous"} · {source}
+                        </span>
+                        <span className="block text-sm leading-6 text-stone-700">{testimonial.quote}</span>
+                      </span>
+                    </label>
+                  );
+                })}
               </div>
-            ))}
+            </div>
           </div>
         </SectionFrame>
 

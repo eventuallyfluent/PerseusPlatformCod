@@ -87,13 +87,11 @@ export async function saveHomepageSectionAction(formData: FormData) {
       eyebrow: String(formData.get("eyebrow") ?? ""),
       title: String(formData.get("title") ?? ""),
       description: String(formData.get("description") ?? ""),
-      items: [0, 1, 2, 3, 4, 5]
-        .map((index) => ({
-          name: String(formData.get(`itemName:${index}`) ?? ""),
-          source: String(formData.get(`itemSource:${index}`) ?? ""),
-          quote: String(formData.get(`itemQuote:${index}`) ?? ""),
-        }))
-        .filter((item) => item.quote),
+      sourceMode: String(formData.get("sourceMode") ?? "selected") === "latest-approved" ? "latest-approved" : "selected",
+      selectedTestimonialIds: formData
+        .getAll("selectedTestimonialIds")
+        .map((value) => String(value))
+        .filter(Boolean),
     };
   } else if (type === "EMAIL_SIGNUP") {
     payload = {

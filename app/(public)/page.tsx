@@ -174,7 +174,17 @@ function CollectionsSection({
   );
 }
 
-function TestimoniesSection({ payload }: { payload: HomepageTestimoniesPayload }) {
+function TestimoniesSection({
+  payload,
+  items,
+}: {
+  payload: HomepageTestimoniesPayload;
+  items: Array<{ id: string; name: string; source: string; quote: string }>;
+}) {
+  if (items.length === 0) {
+    return null;
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-6 py-16">
       <div className="mx-auto mb-10 max-w-4xl space-y-4 text-center">
@@ -183,8 +193,8 @@ function TestimoniesSection({ payload }: { payload: HomepageTestimoniesPayload }
         {payload.description ? <p className="text-lg leading-8 text-[var(--foreground-soft)]">{payload.description}</p> : null}
       </div>
       <div className="grid gap-6 xl:grid-cols-3">
-        {payload.items.map((testimonial, index) => (
-          <figure key={`${testimonial.name}-${index}`} className="rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-7 shadow-[var(--shadow-soft)]">
+        {items.map((testimonial) => (
+          <figure key={testimonial.id} className="rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-7 shadow-[var(--shadow-soft)]">
             <blockquote className="text-lg leading-9 text-[var(--portal-text)]">&ldquo;{testimonial.quote}&rdquo;</blockquote>
             <figcaption className="mt-6 space-y-1">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--accent-lavender)]">{testimonial.name}</p>
@@ -285,6 +295,9 @@ export default async function HomePage() {
   const collectionsSection = sections.find((section) => section.type === "COLLECTIONS");
   const collectionsPayload =
     collectionsSection?.type === "COLLECTIONS" ? (collectionsSection.payload as HomepageCollectionsPayload) : null;
+  const testimoniesSection = sections.find((section) => section.type === "TESTIMONIES");
+  const testimoniesPayload =
+    testimoniesSection?.type === "TESTIMONIES" ? (testimoniesSection.payload as HomepageTestimoniesPayload) : null;
 
   const allCollectionSlugs = collectionsPayload ? collectionsPayload.items.flatMap((item) => item.courseSlugs) : [];
 
@@ -316,6 +329,22 @@ export default async function HomePage() {
         })
       : [];
 
+  const selectedTestimonialIds = testimoniesPayload?.selectedTestimonialIds ?? [];
+  const approvedTestimonials = testimoniesPayload
+    ? await prisma.testimonial.findMany({
+        where: {
+          isApproved: true,
+          ...(selectedTestimonialIds.length > 0 ? { id: { in: selectedTestimonialIds } } : {}),
+        },
+        include: {
+          course: { select: { title: true } },
+          bundle: { select: { title: true } },
+        },
+        orderBy: [{ position: "asc" }],
+        take: selectedTestimonialIds.length > 0 ? selectedTestimonialIds.length : 6,
+      })
+    : [];
+
   const coursesBySlug = new Map(
     collectionCourses.map((course, index) => [
       course.slug,
@@ -333,6 +362,30 @@ export default async function HomePage() {
     ]),
   );
 
+  const approvedTestimonialsById = new Map(
+    approvedTestimonials.map((testimonial) => [
+      testimonial.id,
+      {
+        id: testimonial.id,
+        name: testimonial.name ?? "Student",
+        source: testimonial.course?.title ?? testimonial.bundle?.title ?? "Perseus student",
+        quote: testimonial.quote,
+      },
+    ]),
+  );
+
+  const homepageTestimonials =
+    selectedTestimonialIds.length > 0
+      ? selectedTestimonialIds
+          .map((id) => approvedTestimonialsById.get(id))
+          .filter((item): item is { id: string; name: string; source: string; quote: string } => Boolean(item))
+      : approvedTestimonials.map((testimonial) => ({
+          id: testimonial.id,
+          name: testimonial.name ?? "Student",
+          source: testimonial.course?.title ?? testimonial.bundle?.title ?? "Perseus student",
+          quote: testimonial.quote,
+        }));
+
   const sectionRenderers = sections.map((section) => {
     if (section.type === "HERO") {
       return <HeroSection key={section.type} payload={section.payload as HomepageHeroPayload} />;
@@ -349,7 +402,7 @@ export default async function HomePage() {
     }
 
     if (section.type === "TESTIMONIES") {
-      return <TestimoniesSection key={section.type} payload={section.payload as HomepageTestimoniesPayload} />;
+      return <TestimoniesSection key={section.type} payload={section.payload as HomepageTestimoniesPayload} items={homepageTestimonials} />;
     }
 
     if (section.type === "EMAIL_SIGNUP") {

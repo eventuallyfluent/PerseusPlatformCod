@@ -24,6 +24,10 @@ import {
 
 export const dynamic = "force-dynamic";
 
+function formatLessonType(type: string) {
+  return type.charAt(0) + type.slice(1).toLowerCase();
+}
+
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [course, instructors] = await Promise.all([
@@ -56,15 +60,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const salesPageConfig = parseSalesPageConfig(course.salesPageConfig);
 
   return (
-    <AdminShell title={course.title} description="One structured product record controls the course, generated product page, checkout messaging, curriculum, and access.">
+    <AdminShell title={course.title} description="One product record controls the page, curriculum, pricing, and delivery.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <Card className="space-y-8 bg-white p-8">
           <div className="space-y-4 border-b border-[var(--border)] pb-6">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
-            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the course product and let the page generate from it.</h2>
-            <p className="max-w-3xl text-sm leading-7 text-stone-700">
-              Keep the product record clean. Course data, sales-page sections, pricing, curriculum, and learner delivery all stay tied to this one editor.
-            </p>
+            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the product once and let the page generate from it.</h2>
+            <p className="max-w-3xl text-sm leading-7 text-stone-700">Keep the course record clean. This is the single source for the sales page and learner experience.</p>
           </div>
 
           <form action={saveCourseAction} className="space-y-8">
@@ -72,7 +74,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Core identity"
-              description="Set the course title, owner, route, and status."
+              description="Title, route, owner, and status."
             >
               <label>
                 Title
@@ -109,7 +111,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Sales copy"
-              description="These fields feed the generated product page directly."
+              description="Core page copy."
             >
               <label className="lg:col-span-2">
                 Short description
@@ -135,7 +137,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Media and SEO"
-              description="Control the hero media and search appearance."
+              description="Hero media and search."
             >
               <label>
                 Hero image URL
@@ -157,7 +159,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Sales page"
-              description="Shape the generated product page without making a separate custom page."
+              description="Section order and CTA copy."
             >
               <label>
                 Hero metadata line
@@ -211,7 +213,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
             <ProductFormSection
               title="Migration and preserved URLs"
-              description="Only use preserved paths when replacing an existing live route."
+              description="Only use these when preserving an old live route."
             >
               <label>
                 Legacy course ID
@@ -316,7 +318,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           <Card className="space-y-4 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">CSV import</p>
             <div className="space-y-3 text-sm text-stone-700">
-              <p>Migrate this Payhip course into Perseus by filling the platform template and uploading it here.</p>
+              <p>Download the Perseus template, fill it with the Payhip course details, then upload it here.</p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/api/imports/templates/course-package" className="text-sm font-medium text-stone-950 underline">
                   Course migration template
@@ -325,9 +327,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   Student migration template
                 </Link>
               </div>
-              <p className="text-xs leading-6 text-stone-600">
-                One row = one lesson. Repeat course-level fields on every row. Use the student CSV only for enrollments into this course.
-              </p>
+              <p className="text-xs leading-6 text-stone-600">One row = one lesson. Use the student CSV only for enrollments into this course.</p>
             </div>
             <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[18px] border border-dashed border-stone-200 p-4">
               <label>
@@ -367,197 +367,213 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
       <div className="grid gap-6">
         <Card className="space-y-4 bg-white">
-          <h2 className="text-lg font-semibold text-stone-950">Curriculum</h2>
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold text-stone-950">Curriculum</h2>
+            <p className="text-sm text-stone-600">Keep manual building compact: module, lesson, lesson type, and text or video.</p>
+          </div>
           {course.modules.map((module) => (
-            <div key={module.id} className="space-y-3 rounded-[24px] bg-stone-50 p-4">
-              <form action={addModuleAction} className="grid gap-3 rounded-[20px] border border-stone-200 bg-white p-4">
-                <input type="hidden" name="courseId" value={course.id} />
-                <input type="hidden" name="moduleId" value={module.id} />
-                <label>
-                  Module title
-                  <input name="title" defaultValue={module.title} />
-                </label>
-                <label>
-                  Position
-                  <input name="position" type="number" min="1" defaultValue={module.position} />
-                </label>
-                <div className="flex flex-wrap gap-3">
-                  <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">
-                    Save module
-                  </button>
-                  <button
-                    className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700"
-                    type="submit"
-                    formAction={deleteModuleAction}
-                    name="moduleId"
-                    value={module.id}
-                  >
-                    Delete module
-                  </button>
+            <details key={module.id} className="rounded-[24px] border border-stone-200 bg-stone-50 p-4" open>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">Module {module.position}</p>
+                  <p className="mt-1 text-lg font-semibold text-stone-950">{module.title}</p>
                 </div>
-              </form>
-              <ul className="space-y-3 text-sm text-stone-700">
-                {module.lessons.map((lesson) => (
-                  <li key={lesson.id} className="rounded-[20px] border border-stone-200 bg-white p-4">
-                    <form action={addLessonAction} className="grid gap-3">
-                      <input type="hidden" name="courseId" value={course.id} />
-                      <input type="hidden" name="moduleId" value={module.id} />
-                      <input type="hidden" name="lessonId" value={lesson.id} />
+                <p className="text-sm text-stone-600">{module.lessons.length} lesson{module.lessons.length === 1 ? "" : "s"}</p>
+              </summary>
+              <div className="mt-4 space-y-4">
+                <form action={addModuleAction} className="grid gap-3 rounded-[20px] border border-stone-200 bg-white p-4 md:grid-cols-[minmax(0,1fr)_120px_auto]">
+                  <input type="hidden" name="courseId" value={course.id} />
+                  <input type="hidden" name="moduleId" value={module.id} />
+                  <label>
+                    Module title
+                    <input name="title" defaultValue={module.title} />
+                  </label>
+                  <label>
+                    Position
+                    <input name="position" type="number" min="1" defaultValue={module.position} />
+                  </label>
+                  <div className="flex flex-wrap items-end gap-3">
+                    <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">
+                      Save
+                    </button>
+                    <button
+                      className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700"
+                      type="submit"
+                      formAction={deleteModuleAction}
+                      name="moduleId"
+                      value={module.id}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </form>
+
+                <div className="space-y-3">
+                  {module.lessons.map((lesson) => (
+                    <details key={lesson.id} className="rounded-[20px] border border-stone-200 bg-white p-4">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-stone-950">{lesson.title}</p>
+                          <p className="mt-1 text-xs uppercase tracking-[0.22em] text-stone-500">
+                            {formatLessonType(lesson.type)} · {lesson.status}
+                          </p>
+                        </div>
+                        <p className="text-sm text-stone-600">Open</p>
+                      </summary>
+                      <form action={addLessonAction} className="mt-4 grid gap-3">
+                        <input type="hidden" name="courseId" value={course.id} />
+                        <input type="hidden" name="moduleId" value={module.id} />
+                        <input type="hidden" name="lessonId" value={lesson.id} />
+                        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                          <label>
+                            Lesson title
+                            <input name="title" defaultValue={lesson.title} />
+                          </label>
+                          <label>
+                            Lesson slug
+                            <input name="slug" defaultValue={lesson.slug} />
+                          </label>
+                          <label>
+                            Position
+                            <input name="position" type="number" min="1" defaultValue={lesson.position} />
+                          </label>
+                          <label>
+                            Type
+                            <select name="type" defaultValue={lesson.type}>
+                              <option value="VIDEO">VIDEO</option>
+                              <option value="TEXT">TEXT</option>
+                              <option value="DOWNLOAD">DOWNLOAD</option>
+                              <option value="MIXED">MIXED</option>
+                            </select>
+                          </label>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <label>
+                            Text content
+                            <textarea name="content" rows={3} defaultValue={lesson.content ?? ""} />
+                          </label>
+                          <label>
+                            Video embed URL
+                            <input name="videoUrl" defaultValue={lesson.videoUrl ?? ""} />
+                          </label>
+                        </div>
+                        <details className="rounded-[18px] border border-stone-200 bg-stone-50 px-4 py-3">
+                          <summary className="cursor-pointer text-sm font-medium text-stone-700">Advanced lesson fields</summary>
+                          <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                            <label>
+                              Download URL
+                              <input name="downloadUrl" defaultValue={lesson.downloadUrl ?? ""} />
+                            </label>
+                            <label>
+                              Duration
+                              <input name="durationLabel" defaultValue={lesson.durationLabel ?? ""} />
+                            </label>
+                            <label>
+                              Drip days
+                              <input name="dripDays" type="number" min="0" defaultValue={lesson.dripDays ?? ""} />
+                            </label>
+                            <label>
+                              Status
+                              <select name="status" defaultValue={lesson.status}>
+                                <option value="DRAFT">DRAFT</option>
+                                <option value="PUBLISHED">PUBLISHED</option>
+                              </select>
+                            </label>
+                          </div>
+                          <label className="mt-3 flex items-center gap-3 text-stone-700">
+                            <input className="w-auto" type="checkbox" name="isPreview" value="true" defaultChecked={lesson.isPreview} />
+                            Preview lesson
+                          </label>
+                        </details>
+                        <div className="flex flex-wrap gap-3">
+                          <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">
+                            Save lesson
+                          </button>
+                          <button
+                            className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700"
+                            type="submit"
+                            formAction={deleteLessonAction}
+                            name="lessonId"
+                            value={lesson.id}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </form>
+                    </details>
+                  ))}
+                </div>
+
+                <details className="rounded-[20px] border border-dashed border-stone-200 bg-white p-4">
+                  <summary className="cursor-pointer text-sm font-semibold text-stone-950">Add lesson</summary>
+                  <form action={addLessonAction} className="mt-4 grid gap-3">
+                    <input type="hidden" name="courseId" value={course.id} />
+                    <input type="hidden" name="moduleId" value={module.id} />
+                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                       <label>
                         Lesson title
-                        <input name="title" defaultValue={lesson.title} />
+                        <input name="title" />
                       </label>
                       <label>
                         Lesson slug
-                        <input name="slug" defaultValue={lesson.slug} />
+                        <input name="slug" />
                       </label>
-                      <div className="grid gap-3 md:grid-cols-3">
-                        <label>
-                          Position
-                          <input name="position" type="number" min="1" defaultValue={lesson.position} />
-                        </label>
-                        <label>
-                          Type
-                          <select name="type" defaultValue={lesson.type}>
-                            <option value="VIDEO">VIDEO</option>
-                            <option value="TEXT">TEXT</option>
-                            <option value="DOWNLOAD">DOWNLOAD</option>
-                            <option value="MIXED">MIXED</option>
-                          </select>
-                        </label>
-                        <label>
-                          Status
-                          <select name="status" defaultValue={lesson.status}>
-                            <option value="DRAFT">DRAFT</option>
-                            <option value="PUBLISHED">PUBLISHED</option>
-                          </select>
-                        </label>
-                      </div>
                       <label>
-                        Content
-                        <textarea name="content" rows={3} defaultValue={lesson.content ?? ""} />
+                        Position
+                        <input name="position" type="number" min="1" />
                       </label>
-                      <div className="grid gap-3 md:grid-cols-2">
-                        <label>
-                          Video URL
-                          <input name="videoUrl" defaultValue={lesson.videoUrl ?? ""} />
-                        </label>
-                        <label>
-                          Download URL
-                          <input name="downloadUrl" defaultValue={lesson.downloadUrl ?? ""} />
-                        </label>
-                      </div>
-                      <div className="grid gap-3 md:grid-cols-2">
-                        <label>
-                          Duration label
-                          <input name="durationLabel" defaultValue={lesson.durationLabel ?? ""} />
-                        </label>
-                        <label>
-                          Drip days
-                          <input name="dripDays" type="number" min="0" defaultValue={lesson.dripDays ?? ""} />
-                        </label>
-                      </div>
-                      <label className="flex items-center gap-3 text-stone-700">
-                        <input className="w-auto" type="checkbox" name="isPreview" value="true" defaultChecked={lesson.isPreview} />
-                        Preview lesson
+                      <label>
+                        Type
+                        <select name="type" defaultValue="VIDEO">
+                          <option value="VIDEO">VIDEO</option>
+                          <option value="TEXT">TEXT</option>
+                          <option value="DOWNLOAD">DOWNLOAD</option>
+                          <option value="MIXED">MIXED</option>
+                        </select>
                       </label>
-                      <div className="flex flex-wrap gap-3">
-                        <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">
-                          Save lesson
-                        </button>
-                        <button
-                          className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700"
-                          type="submit"
-                          formAction={deleteLessonAction}
-                          name="lessonId"
-                          value={lesson.id}
-                        >
-                          Delete lesson
-                        </button>
-                      </div>
-                    </form>
-                  </li>
-                ))}
-              </ul>
-              <form action={addLessonAction} className="grid gap-3">
-                <input type="hidden" name="courseId" value={course.id} />
-                <input type="hidden" name="moduleId" value={module.id} />
-                <label>
-                  Lesson title
-                  <input name="title" />
-                </label>
-                <label>
-                  Lesson slug
-                  <input name="slug" />
-                </label>
-                <label>
-                  Position
-                  <input name="position" type="number" min="1" />
-                </label>
-                <label>
-                  Type
-                  <select name="type" defaultValue="VIDEO">
-                    <option value="VIDEO">VIDEO</option>
-                    <option value="TEXT">TEXT</option>
-                    <option value="DOWNLOAD">DOWNLOAD</option>
-                    <option value="MIXED">MIXED</option>
-                  </select>
-                </label>
-                <label>
-                  Status
-                  <select name="status" defaultValue="DRAFT">
-                    <option value="DRAFT">DRAFT</option>
-                    <option value="PUBLISHED">PUBLISHED</option>
-                  </select>
-                </label>
-                <label>
-                  Content
-                  <textarea name="content" rows={3} />
-                </label>
-                <label>
-                  Video URL
-                  <input name="videoUrl" />
-                </label>
-                <label>
-                  Download URL
-                  <input name="downloadUrl" />
-                </label>
-                <label>
-                  Duration label
-                  <input name="durationLabel" />
-                </label>
-                <label>
-                  Drip days
-                  <input name="dripDays" type="number" min="0" />
-                </label>
-                <label className="flex items-center gap-3 text-stone-700">
-                  <input className="w-auto" type="checkbox" name="isPreview" value="true" />
-                  Preview lesson
-                </label>
-                <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">
-                  Add lesson
-                </button>
-              </form>
-            </div>
+                    </div>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <label>
+                        Text content
+                        <textarea name="content" rows={3} />
+                      </label>
+                      <label>
+                        Video embed URL
+                        <input name="videoUrl" />
+                      </label>
+                    </div>
+                    <button className="w-fit rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">
+                      Add lesson
+                    </button>
+                  </form>
+                </details>
+              </div>
+            </details>
           ))}
-          <form action={addModuleAction} className="grid gap-3 rounded-[24px] border border-dashed border-stone-200 p-4">
-            <input type="hidden" name="courseId" value={course.id} />
-            <label>
-              Module title
-              <input name="title" />
-            </label>
-            <label>
-              Position
-              <input name="position" type="number" min="1" />
-            </label>
-            <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">
-              Add module
-            </button>
-          </form>
+          <details className="rounded-[24px] border border-dashed border-stone-200 p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-stone-950">Add module</summary>
+            <form action={addModuleAction} className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_120px_auto]">
+              <input type="hidden" name="courseId" value={course.id} />
+              <label>
+                Module title
+                <input name="title" />
+              </label>
+              <label>
+                Position
+                <input name="position" type="number" min="1" />
+              </label>
+              <button className="w-fit rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">
+                Add module
+              </button>
+            </form>
+          </details>
         </Card>
 
-        <Card className="space-y-4 bg-white">
-          <h2 className="text-lg font-semibold text-stone-950">Offers and social proof</h2>
+        <Card className="space-y-6 bg-white">
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold text-stone-950">Pricing, FAQ, and reviews</h2>
+            <p className="text-sm text-stone-600">Commerce details stay in the same product editor.</p>
+          </div>
           <div className="space-y-3 text-sm text-stone-700">
             {course.offers.map((offer) => (
               <div key={offer.id} className="rounded-[20px] bg-stone-50 px-4 py-3">

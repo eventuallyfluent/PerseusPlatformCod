@@ -25,17 +25,12 @@ export type HomepageCollectionsPayload = {
   items: HomepageCollectionItem[];
 };
 
-export type HomepageTestimonyItem = {
-  name: string;
-  source: string;
-  quote: string;
-};
-
 export type HomepageTestimoniesPayload = {
   eyebrow: string;
   title: string;
   description?: string;
-  items: HomepageTestimonyItem[];
+  sourceMode?: "selected" | "latest-approved";
+  selectedTestimonialIds: string[];
 };
 
 export type HomepageEmailSignupPayload = {
@@ -147,18 +142,8 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
         eyebrow: "Testimonies",
         title: "What students say after entering the work",
         description: "",
-        items: [
-          {
-            name: "A. Reader",
-            source: "Meta Magick Tarot",
-            quote: "The most structured tarot course I have taken.",
-          },
-          {
-            name: "Bundle Student",
-            source: "Ritual Library Bundle",
-            quote: "The cleanest way to enter the full Perseus study path.",
-          },
-        ],
+        sourceMode: "latest-approved",
+        selectedTestimonialIds: [],
       },
     },
     {

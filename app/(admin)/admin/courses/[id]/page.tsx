@@ -318,10 +318,16 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <div className="space-y-3 text-sm text-stone-700">
               <div className="flex flex-wrap gap-3">
                 <Link href="/api/imports/templates/course-package" className="text-sm font-medium text-stone-950 underline">
-                  Course package template
+                  Blank course template
+                </Link>
+                <Link href="/imports/perseus-course-package-sample.csv" className="text-sm font-medium text-stone-950 underline">
+                  Sample course CSV
                 </Link>
                 <Link href="/api/imports/templates/course-students" className="text-sm font-medium text-stone-950 underline">
-                  Student import template
+                  Blank student template
+                </Link>
+                <Link href="/imports/perseus-course-students-sample.csv" className="text-sm font-medium text-stone-950 underline">
+                  Sample student CSV
                 </Link>
               </div>
             </div>

@@ -43,9 +43,14 @@ export default async function NewCoursePage() {
               <p className="text-sm leading-7 text-stone-600">
                 Upload a single course-package CSV to create or update one course with its modules, lessons, sales copy, hero image, and promo video fields in one pass.
               </p>
-              <Link href="/api/imports/templates/course-package" className="text-sm font-medium text-stone-950 underline">
-                Download course-package template
-              </Link>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <Link href="/api/imports/templates/course-package" className="font-medium text-stone-950 underline">
+                  Download blank template
+                </Link>
+                <Link href="/imports/perseus-course-package-sample.csv" className="font-medium text-stone-950 underline">
+                  Download sample CSV
+                </Link>
+              </div>
               <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">
                 <label>
                   Course package CSV

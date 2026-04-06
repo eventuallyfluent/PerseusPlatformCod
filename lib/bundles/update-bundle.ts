@@ -17,7 +17,11 @@ export async function updateBundle(bundleId: string, input: unknown) {
 
   const slug = data.slug ?? existing.slug;
   const desiredPath =
-    data.legacyUrl === undefined ? existing.publicPath ?? `/bundle/${slug}` : data.legacyUrl || `/bundle/${slug}`;
+    data.legacyUrl === undefined
+      ? (existing.publicPath?.startsWith("/") ? existing.publicPath : `/bundle/${slug}`)
+      : data.legacyUrl?.startsWith("/")
+        ? data.legacyUrl
+        : `/bundle/${slug}`;
 
   const isAvailable = await validatePublicPathAvailability(desiredPath, undefined, bundleId);
 

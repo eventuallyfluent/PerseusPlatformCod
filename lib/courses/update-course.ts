@@ -17,7 +17,11 @@ export async function updateCourse(courseId: string, input: unknown) {
 
   const slug = data.slug ?? existing.slug;
   const desiredPath =
-    data.legacyUrl === undefined ? existing.publicPath ?? `/course/${slug}` : data.legacyUrl || `/course/${slug}`;
+    data.legacyUrl === undefined
+      ? (existing.publicPath?.startsWith("/") ? existing.publicPath : `/course/${slug}`)
+      : data.legacyUrl?.startsWith("/")
+        ? data.legacyUrl
+        : `/course/${slug}`;
 
   const isAvailable = await validatePublicPathAvailability(desiredPath, courseId);
   if (!isAvailable) {

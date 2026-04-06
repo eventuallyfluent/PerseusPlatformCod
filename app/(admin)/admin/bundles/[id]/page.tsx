@@ -5,6 +5,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { ProductFormSection } from "@/components/admin/product-form-shell";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
+import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import {
   deleteBundleAction,
   deleteFaqAction,
@@ -215,7 +216,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
               </div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
                 <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Public path</span>
-                <span className="mt-1 block break-all text-base text-stone-950">{bundle.publicPath ?? `/bundle/${bundle.slug}`}</span>
+                <span className="mt-1 block break-all text-base text-stone-950">{resolveBundlePublicPath(bundle)}</span>
               </div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
                 <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Included courses</span>
@@ -233,7 +234,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
           <Card className="space-y-3 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Actions</p>
             <div className="grid gap-3">
-              <Link href={bundle.publicPath ?? `/bundle/${bundle.slug}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
+              <Link href={resolveBundlePublicPath(bundle)} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
                 View public page
               </Link>
               {previewOffer ? (

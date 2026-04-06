@@ -7,7 +7,7 @@ import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 
 export async function createBundle(input: unknown) {
   const data = bundleInputSchema.parse(input);
-  const desiredPath = data.legacyUrl || `/bundle/${data.slug}`;
+  const desiredPath = data.legacyUrl?.startsWith("/") ? data.legacyUrl : `/bundle/${data.slug}`;
   const isAvailable = await validatePublicPathAvailability(desiredPath);
 
   if (!isAvailable) {

@@ -7,7 +7,7 @@ import { courseInclude } from "@/lib/courses/course-query";
 
 export async function createCourse(input: unknown) {
   const data = courseInputSchema.parse(input);
-  const desiredPath = data.legacyUrl || `/course/${data.slug}`;
+  const desiredPath = data.legacyUrl?.startsWith("/") ? data.legacyUrl : `/course/${data.slug}`;
   const isAvailable = await validatePublicPathAvailability(desiredPath);
 
   if (!isAvailable) {

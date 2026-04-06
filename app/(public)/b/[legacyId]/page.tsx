@@ -4,6 +4,7 @@ import { CourseSalesPage } from "@/components/public/course-sales-page";
 import { getBundleSalesPage } from "@/lib/bundles/get-bundle-sales-page";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { getCourseSalesPage } from "@/lib/sales-pages/get-course-sales-page";
+import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { resolvePublicRequest } from "@/lib/urls/resolve-public-request";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ legacyId:
   return buildMetadata({
     title: resolved.course.seoTitle ?? resolved.course.title,
     description: resolved.course.seoDescription ?? resolved.course.shortDescription ?? resolved.course.title,
-    path: resolved.course.publicPath ?? `/course/${resolved.course.slug}`,
+    path: resolveCoursePublicPath(resolved.course),
     image: resolved.course.heroImageUrl,
   });
 }

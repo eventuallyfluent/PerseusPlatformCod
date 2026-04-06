@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
+import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +61,7 @@ export default async function AdminProductsPage() {
       price: course.offers[0]?.price?.toString() ?? "-",
       updatedAt: course.updatedAt,
       editHref: `/admin/courses/${course.id}`,
-      viewHref: course.publicPath ?? `/course/${course.slug}`,
+      viewHref: resolveCoursePublicPath(course),
     })),
     ...bundles.map((bundle) => ({
       id: bundle.id,
@@ -73,7 +75,7 @@ export default async function AdminProductsPage() {
       price: bundle.offers[0]?.price?.toString() ?? "-",
       updatedAt: bundle.updatedAt,
       editHref: `/admin/bundles/${bundle.id}`,
-      viewHref: bundle.publicPath ?? `/bundle/${bundle.slug}`,
+      viewHref: resolveBundlePublicPath(bundle),
     })),
   ].sort((left, right) => right.updatedAt.getTime() - left.updatedAt.getTime());
 

@@ -3,6 +3,7 @@ import { CourseSalesPage } from "@/components/public/course-sales-page";
 import { getCourseBySlug } from "@/lib/courses/get-course-by-slug";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { getCourseSalesPage } from "@/lib/sales-pages/get-course-sales-page";
+import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { resolvePublicRequest } from "@/lib/urls/resolve-public-request";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       return buildMetadata({
         title: resolved.course.seoTitle ?? resolved.course.title,
         description: resolved.course.seoDescription ?? resolved.course.shortDescription ?? resolved.course.title,
-        path: resolved.course.publicPath ?? `/course/${resolved.course.slug}`,
+        path: resolveCoursePublicPath(resolved.course),
         image: resolved.course.heroImageUrl,
       });
     }
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return buildMetadata({
     title: course.seoTitle ?? course.title,
     description: course.seoDescription ?? course.shortDescription ?? course.title,
-    path: course.publicPath ?? `/course/${course.slug}`,
+    path: resolveCoursePublicPath(course),
     image: course.heroImageUrl,
   });
 }

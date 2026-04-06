@@ -3,6 +3,7 @@ import { BundleSalesPage } from "@/components/public/bundle-sales-page";
 import { getBundleBySlug } from "@/lib/bundles/get-bundle-by-slug";
 import { getBundleSalesPage } from "@/lib/bundles/get-bundle-sales-page";
 import { buildMetadata } from "@/lib/seo/metadata";
+import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { resolvePublicRequest } from "@/lib/urls/resolve-public-request";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       return buildMetadata({
         title: resolved.bundle.seoTitle ?? resolved.bundle.title,
         description: resolved.bundle.seoDescription ?? resolved.bundle.shortDescription ?? resolved.bundle.title,
-        path: resolved.bundle.publicPath ?? `/bundle/${resolved.bundle.slug}`,
+        path: resolveBundlePublicPath(resolved.bundle),
         image: resolved.bundle.heroImageUrl,
       });
     }
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return buildMetadata({
     title: bundle.seoTitle ?? bundle.title,
     description: bundle.seoDescription ?? bundle.shortDescription ?? bundle.title,
-    path: bundle.publicPath ?? `/bundle/${bundle.slug}`,
+    path: resolveBundlePublicPath(bundle),
     image: bundle.heroImageUrl,
   });
 }

@@ -12,5 +12,16 @@ export async function POST(request: Request) {
   }
 
   const batch = await executeImport("COURSE_PACKAGE", file.name, await file.text(), dryRun);
+  const executionSummary = batch.executionSummary as Record<string, unknown> | null;
+  const targetCourseId = typeof executionSummary?.targetCourseId === "string" ? executionSummary.targetCourseId : null;
+
+  if (!dryRun && targetCourseId) {
+    return NextResponse.redirect(new URL(`/admin/courses/${targetCourseId}`, request.url));
+  }
+
+  if (!dryRun) {
+    return NextResponse.redirect(new URL("/admin/courses", request.url));
+  }
+
   return NextResponse.redirect(new URL(`/admin/imports/${batch.id}`, request.url));
 }

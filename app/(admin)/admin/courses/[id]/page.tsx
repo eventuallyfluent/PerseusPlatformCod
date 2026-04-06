@@ -5,6 +5,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { ProductFormSection } from "@/components/admin/product-form-shell";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
+import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import {
   addLessonAction,
   addModuleAction,
@@ -280,7 +281,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               </div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
                 <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Public path</span>
-                <span className="mt-1 block break-all text-base text-stone-950">{course.publicPath ?? `/course/${course.slug}`}</span>
+                <span className="mt-1 block break-all text-base text-stone-950">{resolveCoursePublicPath(course)}</span>
               </div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
                 <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Generated pages</span>
@@ -308,7 +309,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               >
                 Regenerate page
               </button>
-              <Link href={course.publicPath ?? `/course/${course.slug}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
+              <Link href={resolveCoursePublicPath(course)} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
                 View public page
               </Link>
               {previewOffer ? (

@@ -96,7 +96,7 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
         description:
           "A structured academy for tarot, ritual, symbolism, and serious magical study. Enter through a course, then continue through a path designed for real practice.",
         primaryCtaLabel: "Explore Courses",
-        primaryCtaHref: "/course/meta-magick-tarot",
+        primaryCtaHref: "/courses",
         secondaryCtaLabel: "See Instructors",
         secondaryCtaHref: "/instructors",
       },
@@ -170,7 +170,7 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
         brandDescription: "Ancient wisdom for the modern initiate. Structured courses in Hermetics, esoteric traditions, and martial arts.",
         platformHeading: "Platform",
         platformLinks: [
-          { label: "Courses", href: "/course/meta-magick-tarot" },
+          { label: "Courses", href: "/courses" },
           { label: "Collections", href: "/bundle/ritual-library-bundle" },
           { label: "FAQ", href: "/faq" },
           { label: "Login", href: "/login" },

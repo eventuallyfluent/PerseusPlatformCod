@@ -141,7 +141,7 @@ export default async function NewCoursePage() {
           description="Add supporting media now if you have it. Canonical page metadata will derive from this record."
         >
           <label>
-            Hero image URL
+            Course cover image URL
             <input name="heroImageUrl" placeholder="https://..." />
           </label>
           <label>

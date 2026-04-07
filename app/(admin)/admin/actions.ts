@@ -84,6 +84,7 @@ export async function saveHomepageSectionAction(formData: FormData) {
           eyebrow: String(formData.get(`itemEyebrow:${index}`) ?? ""),
           title: String(formData.get(`itemTitle:${index}`) ?? ""),
           description: String(formData.get(`itemDescription:${index}`) ?? ""),
+          imageUrl: String(formData.get(`itemImageUrl:${index}`) ?? ""),
           tone: String(formData.get(`itemTone:${index}`) ?? "arcane") as "arcane" | "discipline" | "gateway",
           courseSlugs: formData
             .getAll(`itemCourseSlugs:${index}`)

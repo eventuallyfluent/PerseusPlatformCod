@@ -14,6 +14,7 @@ export type HomepageCollectionItem = {
   eyebrow: string;
   title: string;
   description: string;
+  imageUrl?: string;
   tone: "arcane" | "discipline" | "gateway";
   courseSlugs: string[];
 };
@@ -114,6 +115,7 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
             eyebrow: "Collection 01",
             title: "Hermetic foundations",
             description: "Courses for students entering Perseus through symbolic language, tarot structure, and practical occult study.",
+            imageUrl: "",
             tone: "arcane",
             courseSlugs: ["meta-magick-tarot"],
           },
@@ -121,6 +123,7 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
             eyebrow: "Collection 02",
             title: "Discipline and practice",
             description: "Courses oriented around consistency, internal development, and direct application rather than scattered theory.",
+            imageUrl: "",
             tone: "discipline",
             courseSlugs: ["meta-magick-tarot"],
           },
@@ -128,6 +131,7 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
             eyebrow: "Collection 03",
             title: "Gateway entry",
             description: "The clearest starting points for new students who want a structured way into the academy and its study portal.",
+            imageUrl: "",
             tone: "gateway",
             courseSlugs: ["meta-magick-tarot"],
           },

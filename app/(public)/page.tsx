@@ -80,12 +80,14 @@ function CollectionPanel({
   eyebrow,
   title,
   description,
+  imageUrl,
   tone,
   courses,
 }: {
   eyebrow: string;
   title: string;
   description: string;
+  imageUrl?: string;
   tone: CollectionTone;
   courses: HomepageCourse[];
 }) {
@@ -98,7 +100,16 @@ function CollectionPanel({
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] shadow-[var(--shadow-soft)]">
-      <div className="min-h-[220px] border-b border-[var(--border)] px-7 py-7" style={{ backgroundImage: toneVar }}>
+      <div
+        className="min-h-[220px] border-b border-[var(--border)] px-7 py-7"
+        style={{
+          backgroundImage: imageUrl
+            ? `linear-gradient(180deg, rgba(13,15,29,0.36), rgba(13,15,29,0.74)), ${toneVar}, url(${imageUrl})`
+            : toneVar,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
         <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[rgba(240,234,248,0.76)]">{eyebrow}</p>
         <h2 className="mt-5 font-serif text-4xl leading-none tracking-[-0.04em] text-[var(--portal-text)]">{title}</h2>
         <p className="mt-5 max-w-sm text-base leading-8 text-[rgba(240,234,248,0.76)]">{description}</p>
@@ -164,6 +175,7 @@ function CollectionsSection({
             eyebrow={collection.eyebrow}
             title={collection.title}
             description={collection.description}
+            imageUrl={collection.imageUrl}
             tone={collection.tone}
             courses={collection.courses}
           />

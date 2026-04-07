@@ -119,6 +119,7 @@ function ensureCollectionItems(items: HomepageCollectionItem[]) {
         eyebrow: "",
         title: "",
         description: "",
+        imageUrl: "",
         tone: "arcane" as const,
         courseSlugs: [],
       }
@@ -218,6 +219,11 @@ export default async function SettingsPage() {
                     </select>
                   </label>
                 </div>
+                <TextInput
+                  name={`itemImageUrl:${index}`}
+                  label={`Collection ${index + 1} image URL`}
+                  defaultValue={item.imageUrl ?? ""}
+                />
                 <TextArea
                   name={`itemDescription:${index}`}
                   label={`Collection ${index + 1} description`}

@@ -63,10 +63,21 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 <label>Includes<textarea name="includes" rows={4} defaultValue={(course.includes as string[] | null)?.join("\n") ?? ""} /></label>
               </ProductFormSection>
               <ProductFormSection title="Media and SEO" description="Hero media and search.">
-                <label>Hero image URL<input name="heroImageUrl" defaultValue={course.heroImageUrl ?? ""} /></label>
+                <label>Course cover image URL<input name="heroImageUrl" defaultValue={course.heroImageUrl ?? ""} /></label>
                 <label>Sales video URL<input name="salesVideoUrl" defaultValue={course.salesVideoUrl ?? ""} /></label>
                 <label>SEO title<input name="seoTitle" defaultValue={course.seoTitle ?? ""} /></label>
                 <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} /></label>
+                <div className="lg:col-span-2 rounded-[24px] border border-stone-200 bg-stone-50 p-4">
+                  <p className="mb-3 text-sm font-medium text-stone-900">Current cover preview</p>
+                  <div
+                    className="h-48 rounded-[20px] border border-stone-200 bg-stone-100 bg-cover bg-center"
+                    style={{
+                      backgroundImage: course.heroImageUrl
+                        ? `linear-gradient(180deg, rgba(28,25,23,0.12), rgba(28,25,23,0.42)), url(${course.heroImageUrl})`
+                        : "linear-gradient(135deg, #f5f5f4, #e7e5e4)",
+                    }}
+                  />
+                </div>
               </ProductFormSection>
               <ProductFormSection title="Pricing" description="Set the live course price here. Coupons apply discounts at checkout.">
                 <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={course.price.toString()} /></label>
@@ -139,6 +150,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <form action={regeneratePageAction}><input type="hidden" name="courseId" value={course.id} /><button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">Regenerate page</button></form>
               <Link href={resolveCoursePublicPath(course)} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">View public page</Link>
               {previewOffer ? <Link href={`/checkout/${previewOffer.id}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">Preview checkout</Link> : null}
+              {course.modules[0]?.lessons[0] ? (
+                <Link href={`/learn/${course.slug}/${course.modules[0].lessons[0].slug}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
+                  Preview learner view
+                </Link>
+              ) : null}
               <form action={setCourseStatusAction}><input type="hidden" name="courseId" value={course.id} /><input type="hidden" name="status" value="PUBLISHED" /><button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">Publish</button></form>
               <form action={setCourseStatusAction}><input type="hidden" name="courseId" value={course.id} /><input type="hidden" name="status" value="DRAFT" /><button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">Unpublish</button></form>
               <form action={deleteCourseAction}><input type="hidden" name="courseId" value={course.id} /><button className="w-full rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" type="submit">Delete course</button></form>

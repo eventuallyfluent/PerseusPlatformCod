@@ -93,7 +93,7 @@ export default function NewBundlePage() {
           description="Use media only if it strengthens the bundle promise. Search metadata can stay blank until final polish."
         >
           <label>
-            Hero image URL
+            Bundle cover image URL
             <input name="heroImageUrl" placeholder="https://..." />
           </label>
           <label>

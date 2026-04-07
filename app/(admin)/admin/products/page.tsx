@@ -17,6 +17,7 @@ type ProductRow = {
   updatedAt: Date;
   editHref: string;
   viewHref: string;
+  previewHref?: string;
 };
 
 export default async function AdminProductsPage() {
@@ -24,6 +25,16 @@ export default async function AdminProductsPage() {
     prisma.course.findMany({
       include: {
         instructor: true,
+        modules: {
+          include: {
+            lessons: {
+              orderBy: { position: "asc" },
+              take: 1,
+            },
+          },
+          orderBy: { position: "asc" },
+          take: 1,
+        },
       },
       orderBy: { updatedAt: "desc" },
     }),
@@ -54,6 +65,7 @@ export default async function AdminProductsPage() {
       updatedAt: course.updatedAt,
       editHref: `/admin/courses/${course.id}`,
       viewHref: resolveCoursePublicPath(course),
+      previewHref: course.modules[0]?.lessons[0] ? `/learn/${course.slug}/${course.modules[0].lessons[0].slug}` : undefined,
     })),
     ...bundles.map((bundle) => ({
       id: bundle.id,
@@ -120,6 +132,11 @@ export default async function AdminProductsPage() {
                   <Link href={product.viewHref} className="underline">
                     View
                   </Link>
+                  {product.previewHref ? (
+                    <Link href={product.previewHref} className="underline">
+                      Preview
+                    </Link>
+                  ) : null}
                   <Link href={product.editHref} className="underline">
                     Edit
                   </Link>

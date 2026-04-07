@@ -25,20 +25,23 @@ export default async function LessonPage({ params }: { params: Promise<{ courseS
     },
   });
 
-  if (!enrollment) {
+  const previewEnrolledAt = session.user.isAdmin ? new Date(0) : null;
+  const effectiveEnrolledAt = enrollment?.enrolledAt ?? previewEnrolledAt;
+
+  if (!effectiveEnrolledAt) {
     notFound();
   }
 
   const lesson = course.modules.flatMap((module) => module.lessons).find((item) => item.slug === lessonSlug);
 
-  if (!lesson || !isLessonUnlocked({ enrolledAt: enrollment.enrolledAt, dripDays: lesson.dripDays })) {
+  if (!lesson || !isLessonUnlocked({ enrolledAt: effectiveEnrolledAt, dripDays: lesson.dripDays })) {
     notFound();
   }
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(143,44,255,0.08),transparent_18%),linear-gradient(180deg,#0d0f1d,#13152a_32%,#0c0e1d_100%)]">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        <CoursePlayerLayout course={course} activeLessonSlug={lessonSlug} enrolledAt={enrollment.enrolledAt} />
+        <CoursePlayerLayout course={course} activeLessonSlug={lessonSlug} enrolledAt={effectiveEnrolledAt} />
       </div>
     </div>
   );

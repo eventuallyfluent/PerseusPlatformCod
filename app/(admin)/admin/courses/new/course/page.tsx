@@ -27,7 +27,7 @@ export default async function NewCoursePage() {
               <ul className="space-y-2 text-sm leading-7 text-stone-600">
                 <li>The platform reserves the course path from the slug or preserved legacy URL.</li>
                 <li>A generated sales page payload is created from these structured fields.</li>
-                <li>Modules, lessons, offers, FAQ, and testimonials are added from the course detail screen.</li>
+                <li>Modules, lessons, pricing, FAQ, and testimonials are added from the course detail screen.</li>
               </ul>
             </Card>
             <Card className="space-y-4 p-6">
@@ -45,11 +45,11 @@ export default async function NewCoursePage() {
               </p>
               <div className="flex flex-wrap gap-4 text-sm">
                 <Link href="/api/imports/templates/course-package" className="font-medium text-stone-950 underline">
-                  Download course migration template
-                </Link>
+                Download course migration CSV
+              </Link>
               </div>
               <p className="text-xs leading-6 text-stone-500">
-                One row = one lesson. Repeat the course-level fields on every row so the platform can build the full structure.
+                One row = one lesson. Repeat the course-level fields on every row. Add testimonial columns on any rows where you want imported Payhip reviews.
               </p>
               <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">
                 <label>

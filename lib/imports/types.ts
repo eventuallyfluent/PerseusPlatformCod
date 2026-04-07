@@ -24,6 +24,7 @@ export type ImportDryRunSummary = {
   targetCourseTitle?: string;
   moduleCount?: number;
   lessonCount?: number;
+  testimonialCount?: number;
 };
 
 export type ImportExecutionSummary = {
@@ -38,8 +39,11 @@ export type ImportExecutionSummary = {
   targetCourseTitle?: string;
   moduleCount?: number;
   lessonCount?: number;
+  testimonialCount?: number;
   createdModuleCount?: number;
   updatedModuleCount?: number;
   createdLessonCount?: number;
   updatedLessonCount?: number;
+  createdTestimonialCount?: number;
+  updatedTestimonialCount?: number;
 };

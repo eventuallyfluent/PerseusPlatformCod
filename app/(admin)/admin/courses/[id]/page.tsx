@@ -114,7 +114,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <Link href="/api/imports/templates/course-package" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">Download Course CSV</Link>
               <Link href="/api/imports/templates/course-students" className="rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800">Download Course Students CSV</Link>
             </div>
-            <p className="text-sm leading-7 text-stone-700">One row = one lesson. Repeat course-level fields on each row, including instructor slug and instructor name. Use the student CSV only for enrollments into this course.</p>
+            <p className="text-sm leading-7 text-stone-700">One row = one lesson. Repeat course-level fields on each row, including instructor slug/name. Add testimonial columns on any rows where you want imported Payhip reviews. Use the student CSV only for enrollments into this course.</p>
             <div className="grid gap-4 xl:grid-cols-2">
               <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[20px] border border-dashed border-stone-300 p-4">
                 <label>Upload completed course migration CSV<input type="file" name="file" accept=".csv" required /></label>

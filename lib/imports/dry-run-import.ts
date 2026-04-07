@@ -150,6 +150,15 @@ function getPackageMetaFields(row: PackageRow) {
   };
 }
 
+function getPackageTestimonialFields(row: PackageRow) {
+  return {
+    testimonial_name: String(row.testimonial_name ?? "").trim(),
+    testimonial_email: String(row.testimonial_email ?? "").trim(),
+    testimonial_quote: String(row.testimonial_quote ?? "").trim(),
+    testimonial_position: String(row.testimonial_position ?? "").trim(),
+  };
+}
+
 async function enrichCoursePackageValidation(
   validation: ImportValidationResult<PackageRow>,
 ): Promise<ImportValidationResult<PackageRow>> {
@@ -207,9 +216,14 @@ async function enrichCoursePackageValidation(
 
   for (const entry of validation.validRows) {
     const currentMeta = getPackageMetaFields(entry.row);
+    const testimonial = getPackageTestimonialFields(entry.row);
     const mismatches = Object.entries(canonicalMeta)
       .filter(([key, value]) => String(currentMeta[key as keyof typeof currentMeta] ?? "") !== String(value ?? ""))
       .map(([key]) => `Course-level field ${key} must match across every row in the file`);
+
+    if ((testimonial.testimonial_name || testimonial.testimonial_email) && !testimonial.testimonial_quote) {
+      mismatches.push("testimonial_quote: Add the review text when providing testimonial_name or testimonial_email");
+    }
 
     if (mismatches.length > 0) {
       invalidRows.push(buildImportError(entry.rowNumber, entry.idempotencyKey, entry.row, mismatches));
@@ -273,6 +287,18 @@ function buildSummary(
     summary.targetCourseTitle = String(firstRow.title);
     summary.moduleCount = new Set(validation.validRows.map((entry) => String((entry.row as PackageRow).module_position))).size;
     summary.lessonCount = validation.validRows.length;
+    summary.testimonialCount = new Set(
+      validation.validRows
+        .map((entry) => {
+          const row = entry.row as PackageRow;
+          const quote = String(row.testimonial_quote ?? "").trim();
+          if (!quote) return "";
+          const email = String(row.testimonial_email ?? "").trim().toLowerCase();
+          const name = String(row.testimonial_name ?? "").trim().toLowerCase();
+          return email || `${name}:${quote.toLowerCase()}`;
+        })
+        .filter(Boolean),
+    ).size;
   }
 
   if (type === ImportType.COURSE_STUDENTS && context?.targetCourseId) {

@@ -24,6 +24,12 @@ type LessonCsvRow = z.infer<typeof lessonCsvRowSchema>;
 type OfferCsvRow = z.infer<typeof offerCsvRowSchema>;
 type CoursePackageCsvRow = z.infer<typeof coursePackageCsvRowSchema>;
 type CourseStudentCsvRow = z.infer<typeof courseStudentCsvRowSchema>;
+type ImportedTestimonial = {
+  name: string;
+  email: string | null;
+  quote: string;
+  position: number;
+};
 
 function humanizeSlug(slug: string) {
   return slug
@@ -300,6 +306,31 @@ async function resolveExistingCourse(row: CoursePackageCsvRow) {
   );
 }
 
+function collectImportedTestimonials(rows: CoursePackageCsvRow[]): ImportedTestimonial[] {
+  const testimonials = new Map<string, ImportedTestimonial>();
+
+  for (const row of rows) {
+    const quote = String(row.testimonial_quote ?? "").trim();
+    if (!quote) continue;
+
+    const email = String(row.testimonial_email ?? "").trim().toLowerCase() || null;
+    const name = String(row.testimonial_name ?? "").trim() || "Payhip student";
+    const position = row.testimonial_position ?? testimonials.size + 1;
+    const key = email || `${name.toLowerCase()}:${quote.toLowerCase()}`;
+
+    if (!testimonials.has(key)) {
+      testimonials.set(key, {
+        name,
+        email,
+        quote,
+        position,
+      });
+    }
+  }
+
+  return [...testimonials.values()].sort((a, b) => a.position - b.position);
+}
+
 async function executeCoursePackageRows(rows: CoursePackageCsvRow[]) {
   const summary = buildExecutionSummary(ImportType.COURSE_PACKAGE);
 
@@ -341,6 +372,8 @@ async function executeCoursePackageRows(rows: CoursePackageCsvRow[]) {
   summary.targetCourseTitle = course.title;
   summary.moduleCount = new Set(rows.map((row) => row.module_position)).size;
   summary.lessonCount = rows.length;
+  const importedTestimonials = collectImportedTestimonials(rows);
+  summary.testimonialCount = importedTestimonials.length;
   if (existingCourse) {
     summary.updatedCount += 1;
   } else {
@@ -446,6 +479,59 @@ async function executeCoursePackageRows(rows: CoursePackageCsvRow[]) {
     summary.updatedLessonCount = (summary.updatedLessonCount ?? 0) + 1;
     summary.updatedCount += 1;
     summary.processedCount += 1;
+  }
+
+  for (const testimonial of importedTestimonials) {
+    const existingTestimonial = testimonial.email
+      ? await prisma.testimonial.findFirst({
+          where: {
+            courseId: course.id,
+            email: testimonial.email,
+          },
+        })
+      : await prisma.testimonial.findFirst({
+          where: {
+            courseId: course.id,
+            name: testimonial.name,
+            quote: testimonial.quote,
+          },
+        });
+
+    const data = {
+      name: testimonial.name,
+      email: testimonial.email,
+      quote: testimonial.quote,
+      position: testimonial.position,
+      isApproved: true,
+    };
+
+    if (!existingTestimonial) {
+      await prisma.testimonial.create({
+        data: {
+          courseId: course.id,
+          ...data,
+        },
+      });
+      summary.createdTestimonialCount = (summary.createdTestimonialCount ?? 0) + 1;
+      continue;
+    }
+
+    const unchanged =
+      existingTestimonial.name === data.name &&
+      existingTestimonial.email === data.email &&
+      existingTestimonial.quote === data.quote &&
+      existingTestimonial.position === data.position &&
+      existingTestimonial.isApproved === data.isApproved;
+
+    if (unchanged) {
+      continue;
+    }
+
+    await prisma.testimonial.update({
+      where: { id: existingTestimonial.id },
+      data,
+    });
+    summary.updatedTestimonialCount = (summary.updatedTestimonialCount ?? 0) + 1;
   }
 
   return summary;

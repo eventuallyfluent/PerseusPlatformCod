@@ -33,7 +33,7 @@ export default async function ImportsPage() {
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course CSV</p>
             <h2 className="text-3xl leading-none tracking-[-0.04em] text-stone-950">Migrate one Payhip course into Perseus.</h2>
-            <p className="text-sm leading-7 text-stone-700">Use the course migration template for course info, modules, lessons, outcomes, image, trailer, and SEO.</p>
+            <p className="text-sm leading-7 text-stone-700">Use the course migration template for course info, modules, lessons, outcomes, image, trailer, reviews, and SEO.</p>
           </div>
 
           <div className="space-y-3">
@@ -41,11 +41,11 @@ export default async function ImportsPage() {
               Download Course CSV
             </Link>
             <p className="text-sm text-stone-700">Filename: <span className="font-medium text-stone-950">course-package-template.csv</span></p>
-            <p className="text-sm leading-7 text-stone-700">One row = one lesson. Repeat course-level fields on every row. Include instructor slug and instructor name. Module and lesson positions create the structure.</p>
+            <p className="text-sm leading-7 text-stone-700">One row = one lesson. Repeat course-level fields on every row. Include instructor slug/name, and add testimonial columns on any rows where you want imported Payhip reviews.</p>
           </div>
 
           <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">
-            legacy_course_id, slug, title, instructor_slug, instructor_name, module_position, module_title, lesson_position, lesson_title, lesson_type...
+            legacy_course_id, slug, title, instructor_slug, instructor_name, testimonial_name, testimonial_quote, module_position, module_title, lesson_position, lesson_title...
           </p>
 
           <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">

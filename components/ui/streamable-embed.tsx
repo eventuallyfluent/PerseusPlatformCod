@@ -1,6 +1,7 @@
 type StreamableEmbedProps = {
   url: string;
   title: string;
+  focus?: boolean;
 };
 
 function resolveEmbedUrl(url: string) {
@@ -35,7 +36,7 @@ function resolveEmbedUrl(url: string) {
   }
 }
 
-export function StreamableEmbed({ url, title }: StreamableEmbedProps) {
+export function StreamableEmbed({ url, title, focus = false }: StreamableEmbedProps) {
   const embedUrl = resolveEmbedUrl(url);
 
   if (!embedUrl) {
@@ -47,13 +48,13 @@ export function StreamableEmbed({ url, title }: StreamableEmbedProps) {
   }
 
   return (
-    <div className="max-h-[52svh] overflow-hidden rounded-[24px] border border-stone-200 bg-black">
+    <div className={`${focus ? "h-full" : "max-h-[52svh]"} overflow-hidden rounded-[24px] border border-stone-200 bg-black`}>
       <iframe
         src={embedUrl}
         title={title}
         allow="autoplay; fullscreen; picture-in-picture"
         allowFullScreen
-        className="aspect-video w-full"
+        className={`${focus ? "h-full min-h-[72svh]" : "aspect-video"} w-full`}
       />
     </div>
   );

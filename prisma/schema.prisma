@@ -329,6 +329,7 @@ model Testimonial {
   courseId String?
   bundleId String?
   name     String?
+  email    String?
   quote    String
   position Int
   isApproved Boolean @default(false)

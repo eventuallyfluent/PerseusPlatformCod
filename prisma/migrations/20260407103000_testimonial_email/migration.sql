@@ -1,0 +1,2 @@
+ALTER TABLE "Testimonial"
+ADD COLUMN IF NOT EXISTS "email" TEXT;

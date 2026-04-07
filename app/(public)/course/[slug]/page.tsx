@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { CourseSalesPage } from "@/components/public/course-sales-page";
 import { getCourseBySlug } from "@/lib/courses/get-course-by-slug";
+import { prisma } from "@/lib/db/prisma";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { getCourseSalesPage } from "@/lib/sales-pages/get-course-sales-page";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
@@ -36,6 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const session = await auth();
   const course = await getCourseBySlug(slug);
 
   if (!course) {
@@ -46,13 +49,53 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
     }
 
     if (resolved?.type === "course") {
-      return <CourseSalesPage course={resolved.course} payload={getCourseSalesPage(resolved.course)} />;
+      const canLeaveReview = Boolean(
+        session?.user?.email &&
+          (await prisma.enrollment.findFirst({
+            where: {
+              courseId: resolved.course.id,
+              user: { email: session.user.email },
+            },
+            select: { id: true },
+          })),
+      );
+      const existingReview =
+        session?.user?.email
+          ? await prisma.testimonial.findFirst({
+              where: {
+                courseId: resolved.course.id,
+                email: session.user.email,
+              },
+              select: { quote: true, isApproved: true },
+            })
+          : null;
+      return <CourseSalesPage course={resolved.course} payload={getCourseSalesPage(resolved.course)} canLeaveReview={canLeaveReview} existingReview={existingReview} />;
     }
 
     notFound();
   }
 
   const payload = getCourseSalesPage(course);
+  const canLeaveReview = Boolean(
+    session?.user?.email &&
+      (await prisma.enrollment.findFirst({
+        where: {
+          courseId: course.id,
+          user: { email: session.user.email },
+        },
+        select: { id: true },
+      })),
+  );
+  const existingReview =
+    session?.user?.email
+      ? await prisma.testimonial.findFirst({
+          where: {
+            courseId: course.id,
+            email: session.user.email,
+          },
+          select: { quote: true, isApproved: true },
+        })
+      : null;
 
-  return <CourseSalesPage course={course} payload={payload} />;
+  return <CourseSalesPage course={course} payload={payload} canLeaveReview={canLeaveReview} existingReview={existingReview} />;
 }

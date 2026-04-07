@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StreamableEmbed } from "@/components/ui/streamable-embed";
@@ -32,7 +33,7 @@ function SectionIntro({ eyebrow, title, body }: { eyebrow: string; title: string
   );
 }
 
-export function RenderProductSalesPage({ payload }: { payload: ProductPayload }) {
+export function RenderProductSalesPage({ payload, reviewSlot }: { payload: ProductPayload; reviewSlot?: ReactNode }) {
   const hidden = new Set(payload.sections.hidden);
   const orderedSections = payload.sections.order.filter((section) => !hidden.has(section));
 
@@ -191,6 +192,7 @@ export function RenderProductSalesPage({ payload }: { payload: ProductPayload })
               </blockquote>
             ))}
           </div>
+          {reviewSlot ? <div className="pt-2">{reviewSlot}</div> : null}
         </section>
       );
     }

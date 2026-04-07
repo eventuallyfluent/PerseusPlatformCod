@@ -100,14 +100,24 @@ export default async function DashboardPage() {
                         <p className="mt-2 text-sm font-semibold">{state.nextLockedLesson?.title ?? "Fully open"}</p>
                       </div>
                     </div>
-                    {state.nextLesson ? (
-                      <Link
-                        href={`/learn/${enrollment.course.slug}/${state.nextLesson.slug}`}
-                        className="mt-6 inline-flex rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
-                      >
-                        Open course
-                      </Link>
-                    ) : null}
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      {state.nextLesson ? (
+                        <Link
+                          href={`/learn/${enrollment.course.slug}/${state.nextLesson.slug}`}
+                          className="inline-flex rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
+                        >
+                          Open course
+                        </Link>
+                      ) : null}
+                      {!enrollment.course.testimonials.some((testimonial) => testimonial.email === session.user.email) ? (
+                        <Link
+                          href={`/course/${enrollment.course.slug}#leave-review`}
+                          className="inline-flex rounded-full border border-[var(--portal-border)] px-5 py-3 text-sm font-semibold text-[var(--portal-text)] transition hover:bg-[rgba(255,255,255,0.06)]"
+                        >
+                          Leave review
+                        </Link>
+                      ) : null}
+                    </div>
                   </article>
                 ))}
               </div>

@@ -655,6 +655,55 @@ export async function createImportBatch(type: ImportType, filename: string, csvC
   });
 }
 
+export async function createFailedImportBatch(type: ImportType, filename: string, csvContent: string, error: unknown, context?: ImportContext) {
+  return prisma.importBatch.create({
+    data: {
+      type,
+      filename,
+      sourceContent: csvContent,
+      context: context ? JSON.parse(JSON.stringify(context)) : undefined,
+      status: ImportStatus.FAILED,
+      dryRunSummary: {
+        type,
+        totalRows: 0,
+        validCount: 0,
+        invalidCount: 0,
+        conflictCount: 0,
+      },
+      executionSummary: buildExecutionSummary(type),
+      errorReport: JSON.parse(
+        JSON.stringify([
+          {
+            rowNumber: 1,
+            idempotencyKey: "request",
+            row: {},
+            errors: [error instanceof Error ? error.message : "Unknown import error"],
+          },
+        ]),
+      ),
+    },
+  });
+}
+
+export async function markImportBatchFailed(batchId: string, error: unknown) {
+  return prisma.importBatch.update({
+    where: { id: batchId },
+    data: {
+      status: ImportStatus.FAILED,
+      errorReport: JSON.parse(
+        JSON.stringify([
+          {
+            rowNumber: 1,
+            idempotencyKey: "execution",
+            row: {},
+            errors: [error instanceof Error ? error.message : "Unknown import execution error"],
+          },
+        ]),
+      ),
+    },
+  });
+}
+
 export async function executeImportBatch(batchId: string) {
   const batch = await prisma.importBatch.findUnique({
     where: { id: batchId },

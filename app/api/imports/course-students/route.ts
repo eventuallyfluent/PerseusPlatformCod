@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { executeImport } from "@/lib/imports/execute-import";
+import { createFailedImportBatch, executeImport } from "@/lib/imports/execute-import";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -16,8 +16,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Course is required" }, { status: 400 });
   }
 
-  const batch = await executeImport("COURSE_STUDENTS", file.name, await file.text(), dryRun, {
-    targetCourseId: courseId,
-  });
+  const csvContent = await file.text();
+  let batch;
+
+  try {
+    batch = await executeImport("COURSE_STUDENTS", file.name, csvContent, dryRun, {
+      targetCourseId: courseId,
+    });
+  } catch (error) {
+    const failedBatch = await createFailedImportBatch("COURSE_STUDENTS", file.name, csvContent, error, {
+      targetCourseId: courseId,
+    });
+    return NextResponse.redirect(new URL(`/admin/imports/${failedBatch.id}`, request.url));
+  }
+
   return NextResponse.redirect(new URL(`/admin/imports/${batch.id}`, request.url));
 }

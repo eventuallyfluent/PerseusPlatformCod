@@ -24,19 +24,11 @@ export default async function AdminProductsPage() {
     prisma.course.findMany({
       include: {
         instructor: true,
-        offers: {
-          where: { isPublished: true },
-          take: 1,
-        },
       },
       orderBy: { updatedAt: "desc" },
     }),
     prisma.bundle.findMany({
       include: {
-        offers: {
-          where: { isPublished: true },
-          take: 1,
-        },
         courses: {
           include: {
             course: {
@@ -58,7 +50,7 @@ export default async function AdminProductsPage() {
       title: course.title,
       owner: course.instructor.name,
       status: course.status,
-      price: course.offers[0]?.price?.toString() ?? "-",
+      price: `${course.price.toString()} ${course.currency}`,
       updatedAt: course.updatedAt,
       editHref: `/admin/courses/${course.id}`,
       viewHref: resolveCoursePublicPath(course),
@@ -72,7 +64,7 @@ export default async function AdminProductsPage() {
           ? `${bundle.courses.length} course${bundle.courses.length === 1 ? "" : "s"}`
           : "No courses yet",
       status: bundle.status,
-      price: bundle.offers[0]?.price?.toString() ?? "-",
+      price: `${bundle.price.toString()} ${bundle.currency}`,
       updatedAt: bundle.updatedAt,
       editHref: `/admin/bundles/${bundle.id}`,
       viewHref: resolveBundlePublicPath(bundle),

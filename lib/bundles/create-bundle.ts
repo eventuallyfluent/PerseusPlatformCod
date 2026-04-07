@@ -4,6 +4,7 @@ import { validatePublicPathAvailability } from "@/lib/urls/validate-public-path"
 import { bundleInclude } from "@/lib/bundles/bundle-query";
 import { persistGeneratedBundlePage } from "@/lib/bundles/persist-generated-bundle-page";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
+import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 
 export async function createBundle(input: unknown) {
   const data = bundleInputSchema.parse(input);
@@ -23,6 +24,15 @@ export async function createBundle(input: unknown) {
       publicPath: desiredPath,
     },
     include: bundleInclude,
+  });
+
+  await syncProductOffer({
+    bundleId: bundle.id,
+    title: bundle.title,
+    price: bundle.price.toString(),
+    currency: bundle.currency,
+    compareAtPrice: bundle.compareAtPrice?.toString() ?? null,
+    status: bundle.status,
   });
 
   await persistGeneratedBundlePage(bundle);

@@ -2,6 +2,7 @@ import { currencyFormatter } from "@/lib/utils";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { normalizeSectionOrder, parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import type { BundleSalesPagePayload, BundleWithRelations, SalesPageOfferSummary } from "@/types";
+import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 
 function readStringArray(value: unknown) {
   if (Array.isArray(value)) {
@@ -12,26 +13,28 @@ function readStringArray(value: unknown) {
 }
 
 function buildOffers(bundle: BundleWithRelations): SalesPageOfferSummary[] {
-  return bundle.offers
-    .filter((offer) => offer.isPublished)
-    .map((offer) => {
-      const price = currencyFormatter(offer.price.toString(), offer.currency);
-      const compareAtPrice = offer.compareAtPrice ? currencyFormatter(offer.compareAtPrice.toString(), offer.currency) : null;
-      const savingsLabel =
-        offer.compareAtPrice && Number(offer.compareAtPrice) > Number(offer.price)
-          ? `Save ${Math.round(((Number(offer.compareAtPrice) - Number(offer.price)) / Number(offer.compareAtPrice)) * 100)}%`
-          : null;
+  const offer = getPrimaryOffer(bundle.offers);
 
-      return {
-        offerId: offer.id,
-        name: offer.name,
-        price,
-        currency: offer.currency,
-        checkoutUrl: `/checkout/${offer.id}`,
-        compareAtPrice,
-        savingsLabel,
-      };
-    });
+  if (!offer) {
+    return [];
+  }
+
+  const price = currencyFormatter(bundle.price.toString(), bundle.currency);
+  const compareAtPrice = bundle.compareAtPrice ? currencyFormatter(bundle.compareAtPrice.toString(), bundle.currency) : null;
+  const savingsLabel =
+    bundle.compareAtPrice && Number(bundle.compareAtPrice) > Number(bundle.price)
+      ? `Save ${Math.round(((Number(bundle.compareAtPrice) - Number(bundle.price)) / Number(bundle.compareAtPrice)) * 100)}%`
+      : null;
+
+  return [{
+    offerId: offer.id,
+    name: `${bundle.title} access`,
+    price,
+    currency: bundle.currency,
+    checkoutUrl: `/checkout/${offer.id}`,
+    compareAtPrice,
+    savingsLabel,
+  }];
 }
 
 export function generateBundleSalesPagePayload(bundle: BundleWithRelations): BundleSalesPagePayload {

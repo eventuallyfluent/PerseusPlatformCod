@@ -9,16 +9,12 @@ export default async function AdminCoursesPage() {
   const courses = await prisma.course.findMany({
     include: {
       instructor: true,
-      offers: {
-        where: { isPublished: true },
-        take: 1,
-      },
     },
     orderBy: { updatedAt: "desc" },
   });
 
   return (
-    <AdminShell title="Courses" description="Create, edit, publish, and regenerate generated sales pages.">
+    <AdminShell title="Courses" description="Create, edit, publish, and manage course pricing from one product screen.">
       <div className="flex justify-end">
         <Link href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
           Add new product
@@ -42,7 +38,7 @@ export default async function AdminCoursesPage() {
                 <td>{course.title}</td>
                 <td>{course.instructor.name}</td>
                 <td>{course.status}</td>
-                <td>{course.offers[0]?.price?.toString() ?? "—"}</td>
+                <td>{course.price.toString()} {course.currency}</td>
                 <td>{course.updatedAt.toLocaleDateString()}</td>
                 <td>
                   <Link href={`/admin/courses/${course.id}`} className="underline">

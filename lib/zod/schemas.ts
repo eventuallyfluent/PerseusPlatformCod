@@ -76,6 +76,9 @@ export const courseInputSchema = z.object({
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   status: z.nativeEnum(CourseStatus).default(CourseStatus.DRAFT),
+  price: z.coerce.number().min(0).default(0),
+  currency: z.string().min(3).max(3).default("USD"),
+  compareAtPrice: z.coerce.number().min(0).optional(),
   legacyCourseId: z.string().optional(),
   legacySlug: z.string().optional(),
   legacyUrl: z.string().optional(),
@@ -96,6 +99,9 @@ export const bundleInputSchema = z.object({
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   status: z.nativeEnum(CourseStatus).default(CourseStatus.DRAFT),
+  price: z.coerce.number().min(0).default(0),
+  currency: z.string().min(3).max(3).default("USD"),
+  compareAtPrice: z.coerce.number().min(0).optional(),
   legacyUrl: z.string().optional(),
 });
 
@@ -159,6 +165,9 @@ export const courseCsvRowSchema = z.object({
   seo_title: z.string().optional(),
   seo_description: z.string().optional(),
   status: csvCourseStatus.default(CourseStatus.DRAFT),
+  price: z.coerce.number().min(0).default(0),
+  currency: z.string().min(3).max(3).default("USD"),
+  compare_at_price: z.coerce.number().min(0).optional(),
 });
 
 export const instructorCsvRowSchema = z.object({
@@ -220,6 +229,9 @@ export const coursePackageCsvRowSchema = z.object({
   seo_title: z.string().optional(),
   seo_description: z.string().optional(),
   status: csvCourseStatus.default(CourseStatus.DRAFT),
+  price: z.coerce.number().min(0).default(0),
+  currency: z.string().min(3).max(3).default("USD"),
+  compare_at_price: z.coerce.number().min(0).optional(),
   module_position: z.coerce.number().int().min(1),
   module_title: z.string().min(1),
   lesson_position: z.coerce.number().int().min(1),

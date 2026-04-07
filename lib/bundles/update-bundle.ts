@@ -3,6 +3,7 @@ import { bundleInputSchema } from "@/lib/zod/schemas";
 import { validatePublicPathAvailability } from "@/lib/urls/validate-public-path";
 import { bundleInclude } from "@/lib/bundles/bundle-query";
 import { persistGeneratedBundlePage } from "@/lib/bundles/persist-generated-bundle-page";
+import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 
 export async function updateBundle(bundleId: string, input: unknown) {
   const data = bundleInputSchema.partial().parse(input);
@@ -38,6 +39,15 @@ export async function updateBundle(bundleId: string, input: unknown) {
       salesVideoUrl: data.salesVideoUrl === "" ? null : data.salesVideoUrl,
     },
     include: bundleInclude,
+  });
+
+  await syncProductOffer({
+    bundleId: bundle.id,
+    title: bundle.title,
+    price: bundle.price.toString(),
+    currency: bundle.currency,
+    compareAtPrice: bundle.compareAtPrice?.toString() ?? null,
+    status: bundle.status,
   });
 
   await persistGeneratedBundlePage(bundle);

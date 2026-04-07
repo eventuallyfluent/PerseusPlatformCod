@@ -2,6 +2,7 @@ import { currencyFormatter } from "@/lib/utils";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { normalizeSectionOrder, parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import type { CourseWithRelations, GeneratedSalesPagePayload, SalesPageOfferSummary } from "@/types";
+import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 
 function readStringArray(value: unknown) {
   if (Array.isArray(value)) {
@@ -12,26 +13,28 @@ function readStringArray(value: unknown) {
 }
 
 function buildOffers(course: CourseWithRelations): SalesPageOfferSummary[] {
-  return course.offers
-    .filter((offer) => offer.isPublished)
-    .map((offer) => {
-      const price = currencyFormatter(offer.price.toString(), offer.currency);
-      const compareAtPrice = offer.compareAtPrice ? currencyFormatter(offer.compareAtPrice.toString(), offer.currency) : null;
-      const savingsLabel =
-        offer.compareAtPrice && Number(offer.compareAtPrice) > Number(offer.price)
-          ? `Save ${Math.round(((Number(offer.compareAtPrice) - Number(offer.price)) / Number(offer.compareAtPrice)) * 100)}%`
-          : null;
+  const offer = getPrimaryOffer(course.offers);
 
-      return {
-        offerId: offer.id,
-        name: offer.name,
-        price,
-        currency: offer.currency,
-        checkoutUrl: `/checkout/${offer.id}`,
-        compareAtPrice,
-        savingsLabel,
-      };
-    });
+  if (!offer) {
+    return [];
+  }
+
+  const price = currencyFormatter(course.price.toString(), course.currency);
+  const compareAtPrice = course.compareAtPrice ? currencyFormatter(course.compareAtPrice.toString(), course.currency) : null;
+  const savingsLabel =
+    course.compareAtPrice && Number(course.compareAtPrice) > Number(course.price)
+      ? `Save ${Math.round(((Number(course.compareAtPrice) - Number(course.price)) / Number(course.compareAtPrice)) * 100)}%`
+      : null;
+
+  return [{
+    offerId: offer.id,
+    name: `${course.title} access`,
+    price,
+    currency: course.currency,
+    checkoutUrl: `/checkout/${offer.id}`,
+    compareAtPrice,
+    savingsLabel,
+  }];
 }
 
 export function generateSalesPagePayload(course: CourseWithRelations): GeneratedSalesPagePayload {

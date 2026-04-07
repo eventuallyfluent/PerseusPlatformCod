@@ -8,17 +8,13 @@ export const dynamic = "force-dynamic";
 export default async function AdminBundlesPage() {
   const bundles = await prisma.bundle.findMany({
     include: {
-      offers: {
-        where: { isPublished: true },
-        take: 1,
-      },
       courses: true,
     },
     orderBy: { updatedAt: "desc" },
   });
 
   return (
-    <AdminShell title="Bundles" description="Course bundles sell one page and unlock multiple existing courses.">
+    <AdminShell title="Bundles" description="Bundle pricing now lives directly on the bundle product.">
       <div className="flex justify-end">
         <Link href="/admin/bundles/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
           New bundle
@@ -42,7 +38,7 @@ export default async function AdminBundlesPage() {
                 <td>{bundle.title}</td>
                 <td>{bundle.courses.length}</td>
                 <td>{bundle.status}</td>
-                <td>{bundle.offers[0]?.price?.toString() ?? "—"}</td>
+                <td>{bundle.price.toString()} {bundle.currency}</td>
                 <td>{bundle.updatedAt.toLocaleDateString()}</td>
                 <td>
                   <Link href={`/admin/bundles/${bundle.id}`} className="underline">

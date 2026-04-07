@@ -126,6 +126,9 @@ model Course {
   salesVideoUrl    String?
   salesPageConfig  Json?
   status           CourseStatus   @default(DRAFT)
+  price            Decimal        @default(0) @db.Decimal(10, 2)
+  currency         String         @default("USD")
+  compareAtPrice   Decimal?       @db.Decimal(10, 2)
   legacyCourseId   String?        @unique
   legacySlug       String?
   legacyUrl        String?        @unique
@@ -159,6 +162,9 @@ model Bundle {
   salesVideoUrl    String?
   salesPageConfig  Json?
   status           CourseStatus   @default(DRAFT)
+  price            Decimal        @default(0) @db.Decimal(10, 2)
+  currency         String         @default("USD")
+  compareAtPrice   Decimal?       @db.Decimal(10, 2)
   legacyUrl        String?        @unique
   publicPath       String?        @unique
   seoTitle         String?
@@ -225,6 +231,7 @@ model Offer {
   currency       String
   compareAtPrice Decimal?    @db.Decimal(10, 2)
   isPublished    Boolean     @default(false)
+  isDefault      Boolean     @default(false)
   checkoutPath   String?     @unique
   course         Course?     @relation(fields: [courseId], references: [id], onDelete: Cascade)
   bundle         Bundle?     @relation(fields: [bundleId], references: [id], onDelete: Cascade)

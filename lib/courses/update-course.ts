@@ -3,6 +3,7 @@ import { persistGeneratedPage } from "@/lib/sales-pages/persist-generated-page";
 import { courseInputSchema } from "@/lib/zod/schemas";
 import { courseInclude } from "@/lib/courses/course-query";
 import { validatePublicPathAvailability } from "@/lib/urls/validate-public-path";
+import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 
 export async function updateCourse(courseId: string, input: unknown) {
   const data = courseInputSchema.partial().parse(input);
@@ -37,6 +38,15 @@ export async function updateCourse(courseId: string, input: unknown) {
       salesVideoUrl: data.salesVideoUrl === "" ? null : data.salesVideoUrl,
     },
     include: courseInclude,
+  });
+
+  await syncProductOffer({
+    courseId: course.id,
+    title: course.title,
+    price: course.price.toString(),
+    currency: course.currency,
+    compareAtPrice: course.compareAtPrice?.toString() ?? null,
+    status: course.status,
   });
 
   await persistGeneratedPage(course);

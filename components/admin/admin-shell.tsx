@@ -7,7 +7,7 @@ const links = [
   { href: "/admin/courses", label: "Courses" },
   { href: "/admin/bundles", label: "Bundles" },
   { href: "/admin/instructors", label: "Instructors" },
-  { href: "/admin/offers", label: "Offers" },
+  { href: "/admin/coupons", label: "Coupons" },
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/students", label: "Students" },
   { href: "/admin/imports", label: "Imports" },

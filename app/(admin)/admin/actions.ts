@@ -167,6 +167,9 @@ export async function saveCourseAction(formData: FormData) {
     seoTitle: String(formData.get("seoTitle") ?? ""),
     seoDescription: String(formData.get("seoDescription") ?? ""),
     status: String(formData.get("status") ?? "DRAFT"),
+    price: Number(formData.get("price") ?? 0),
+    currency: String(formData.get("currency") ?? "USD"),
+    compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
     legacyCourseId: String(formData.get("legacyCourseId") ?? ""),
     legacySlug: String(formData.get("legacySlug") ?? ""),
     legacyUrl: String(formData.get("legacyUrl") ?? ""),
@@ -195,6 +198,9 @@ export async function saveBundleAction(formData: FormData) {
     seoTitle: String(formData.get("seoTitle") ?? ""),
     seoDescription: String(formData.get("seoDescription") ?? ""),
     status: String(formData.get("status") ?? "DRAFT"),
+    price: Number(formData.get("price") ?? 0),
+    currency: String(formData.get("currency") ?? "USD"),
+    compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
     legacyUrl: String(formData.get("legacyUrl") ?? ""),
   });
 
@@ -343,6 +349,45 @@ export async function deleteOfferAction(formData: FormData) {
     revalidatePath(`/admin/bundles/${bundleId}`);
     redirect(`/admin/bundles/${bundleId}`);
   }
+}
+
+export async function saveCouponAction(formData: FormData) {
+  const couponId = String(formData.get("couponId") ?? "");
+  const code = String(formData.get("code") ?? "").trim().toUpperCase();
+  const amountOffRaw = String(formData.get("amountOff") ?? "").trim();
+  const percentOffRaw = String(formData.get("percentOff") ?? "").trim();
+  const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
+
+  const payload = {
+    code,
+    amountOff: amountOffRaw ? Number(amountOffRaw) : null,
+    percentOff: percentOffRaw ? Number(percentOffRaw) : null,
+    isActive: Boolean(formData.get("isActive")),
+    expiresAt: expiresAtRaw ? new Date(expiresAtRaw) : null,
+  };
+
+  if (couponId) {
+    await prisma.coupon.update({
+      where: { id: couponId },
+      data: payload,
+    });
+  } else {
+    await prisma.coupon.create({
+      data: payload,
+    });
+  }
+
+  revalidatePath("/admin/coupons");
+  redirect("/admin/coupons");
+}
+
+export async function deleteCouponAction(formData: FormData) {
+  const couponId = String(formData.get("couponId") ?? "");
+  await prisma.coupon.delete({
+    where: { id: couponId },
+  });
+  revalidatePath("/admin/coupons");
+  redirect("/admin/coupons");
 }
 
 export async function saveFaqAction(formData: FormData) {

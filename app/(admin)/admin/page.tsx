@@ -44,20 +44,10 @@ export default async function AdminOverviewPage() {
       },
       include: {
         course: {
-          include: {
-            offers: {
-              where: { isPublished: true },
-              take: 1,
-            },
-          },
+          include: {},
         },
         bundle: {
-          include: {
-            offers: {
-              where: { isPublished: true },
-              take: 1,
-            },
-          },
+          include: {},
         },
       },
       orderBy: { updatedAt: "desc" },
@@ -114,7 +104,7 @@ export default async function AdminOverviewPage() {
             const product = page.course ?? page.bundle;
             const type = page.course ? "Course" : "Bundle";
             const editHref = page.course ? `/admin/courses/${page.course.id}` : `/admin/bundles/${page.bundle!.id}`;
-            const offerCount = product?.offers.length ?? 0;
+            const priceSummary = product ? `${product.price.toString()} ${product.currency}` : "No price";
 
             return (
               <div
@@ -131,9 +121,7 @@ export default async function AdminOverviewPage() {
                     </span>
                   </div>
                   <p className="text-xl font-semibold text-stone-950">{product?.title ?? "Untitled product"}</p>
-                  <p className="text-sm text-stone-600">
-                    {offerCount} published offer{offerCount === 1 ? "" : "s"} attached
-                  </p>
+                  <p className="text-sm text-stone-600">{priceSummary}</p>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Link href={page.path} className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100">

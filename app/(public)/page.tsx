@@ -260,15 +260,8 @@ export default async function HomePage() {
             subtitle: true,
             publicPath: true,
             legacyUrl: true,
-            offers: {
-              where: { isPublished: true },
-              orderBy: { price: "asc" },
-              take: 1,
-              select: {
-                price: true,
-                currency: true,
-              },
-            },
+            price: true,
+            currency: true,
           },
         })
       : [];
@@ -299,7 +292,7 @@ export default async function HomePage() {
         subtitle: course.subtitle,
         publicPath: course.publicPath,
         legacyUrl: course.legacyUrl,
-        priceLabel: course.offers[0] ? formatPrice(course.offers[0].price.toString(), course.offers[0].currency) : null,
+        priceLabel: formatPrice(course.price.toString(), course.currency),
         statusLabel: index === 0 ? "Featured" : "Open now",
         ctaLabel: "Enroll now",
       } satisfies HomepageCourse,

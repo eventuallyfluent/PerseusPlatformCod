@@ -4,6 +4,7 @@ import { persistGeneratedPage } from "@/lib/sales-pages/persist-generated-page";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { validatePublicPathAvailability } from "@/lib/urls/validate-public-path";
 import { courseInclude } from "@/lib/courses/course-query";
+import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 
 export async function createCourse(input: unknown) {
   const data = courseInputSchema.parse(input);
@@ -23,6 +24,15 @@ export async function createCourse(input: unknown) {
       publicPath: desiredPath,
     },
     include: courseInclude,
+  });
+
+  await syncProductOffer({
+    courseId: course.id,
+    title: course.title,
+    price: course.price.toString(),
+    currency: course.currency,
+    compareAtPrice: course.compareAtPrice?.toString() ?? null,
+    status: course.status,
   });
 
   await persistGeneratedPage(course);

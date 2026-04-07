@@ -8,10 +8,6 @@ export default async function CoursesIndexPage() {
     where: { status: "PUBLISHED" },
     include: {
       instructor: true,
-      offers: {
-        where: { isPublished: true },
-        orderBy: { price: "asc" },
-      },
     },
     orderBy: { updatedAt: "desc" },
   });
@@ -29,7 +25,17 @@ export default async function CoursesIndexPage() {
       {courses.length > 0 ? (
         <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {courses.map((course) => (
-            <CourseCard key={course.id} course={course} />
+            <CourseCard
+              key={course.id}
+              course={{
+                ...course,
+                priceLabel: new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: course.currency,
+                  maximumFractionDigits: Number(course.price) % 1 === 0 ? 0 : 2,
+                }).format(Number(course.price)),
+              }}
+            />
           ))}
         </div>
       ) : (

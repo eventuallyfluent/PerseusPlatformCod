@@ -355,14 +355,35 @@ export async function deleteOfferAction(formData: FormData) {
 export async function saveCouponAction(formData: FormData) {
   const couponId = String(formData.get("couponId") ?? "");
   const code = String(formData.get("code") ?? "").trim().toUpperCase();
+  const discountType = String(formData.get("discountType") ?? "").trim();
   const amountOffRaw = String(formData.get("amountOff") ?? "").trim();
   const percentOffRaw = String(formData.get("percentOff") ?? "").trim();
   const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
+  const redirectBase = `/admin/coupons${couponId ? "?saved=updated" : "?saved=created"}`;
+
+  if (!code) {
+    redirect("/admin/coupons?error=code");
+  }
+
+  if (discountType !== "amount" && discountType !== "percent") {
+    redirect("/admin/coupons?error=discountType");
+  }
+
+  const amountOff = amountOffRaw ? Number(amountOffRaw) : null;
+  const percentOff = percentOffRaw ? Number(percentOffRaw) : null;
+
+  if (discountType === "amount" && (!amountOff || amountOff <= 0)) {
+    redirect("/admin/coupons?error=amount");
+  }
+
+  if (discountType === "percent" && (!percentOff || percentOff < 1 || percentOff > 100)) {
+    redirect("/admin/coupons?error=percent");
+  }
 
   const payload = {
     code,
-    amountOff: amountOffRaw ? Number(amountOffRaw) : null,
-    percentOff: percentOffRaw ? Number(percentOffRaw) : null,
+    amountOff: discountType === "amount" ? amountOff : null,
+    percentOff: discountType === "percent" ? percentOff : null,
     isActive: Boolean(formData.get("isActive")),
     expiresAt: expiresAtRaw ? new Date(expiresAtRaw) : null,
   };
@@ -379,7 +400,7 @@ export async function saveCouponAction(formData: FormData) {
   }
 
   revalidatePath("/admin/coupons");
-  redirect("/admin/coupons");
+  redirect(redirectBase);
 }
 
 export async function deleteCouponAction(formData: FormData) {
@@ -388,7 +409,7 @@ export async function deleteCouponAction(formData: FormData) {
     where: { id: couponId },
   });
   revalidatePath("/admin/coupons");
-  redirect("/admin/coupons");
+  redirect("/admin/coupons?saved=deleted");
 }
 
 export async function saveFaqAction(formData: FormData) {
@@ -443,11 +464,13 @@ export async function saveTestimonialAction(formData: FormData) {
   const testimonialId = String(formData.get("testimonialId") ?? "");
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
+  const rating = Number(formData.get("rating") ?? 5);
   const payload = {
     courseId: courseId || null,
     bundleId: bundleId || null,
     name: String(formData.get("name") ?? "") || null,
     quote: String(formData.get("quote") ?? ""),
+    rating: Number.isInteger(rating) && rating >= 1 && rating <= 5 ? rating : 5,
     position: Number(formData.get("position") ?? 1),
     isApproved: Boolean(formData.get("isApproved")),
   };

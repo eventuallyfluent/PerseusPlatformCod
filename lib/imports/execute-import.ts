@@ -28,6 +28,7 @@ type ImportedTestimonial = {
   name: string;
   email: string | null;
   quote: string;
+  rating: number;
   position: number;
 };
 
@@ -315,6 +316,7 @@ function collectImportedTestimonials(rows: CoursePackageCsvRow[]): ImportedTesti
 
     const email = String(row.testimonial_email ?? "").trim().toLowerCase() || null;
     const name = String(row.testimonial_name ?? "").trim() || "Payhip student";
+    const rating = row.testimonial_rating ?? 5;
     const position = row.testimonial_position ?? testimonials.size + 1;
     const key = email || `${name.toLowerCase()}:${quote.toLowerCase()}`;
 
@@ -323,6 +325,7 @@ function collectImportedTestimonials(rows: CoursePackageCsvRow[]): ImportedTesti
         name,
         email,
         quote,
+        rating,
         position,
       });
     }
@@ -501,6 +504,7 @@ async function executeCoursePackageRows(rows: CoursePackageCsvRow[]) {
       name: testimonial.name,
       email: testimonial.email,
       quote: testimonial.quote,
+      rating: testimonial.rating,
       position: testimonial.position,
       isApproved: true,
     };
@@ -520,6 +524,7 @@ async function executeCoursePackageRows(rows: CoursePackageCsvRow[]) {
       existingTestimonial.name === data.name &&
       existingTestimonial.email === data.email &&
       existingTestimonial.quote === data.quote &&
+      existingTestimonial.rating === data.rating &&
       existingTestimonial.position === data.position &&
       existingTestimonial.isApproved === data.isApproved;
 

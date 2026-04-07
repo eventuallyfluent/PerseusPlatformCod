@@ -135,6 +135,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
       items: approvedTestimonials.map((testimonial) => ({
         name: testimonial.name,
         quote: testimonial.quote,
+        rating: testimonial.rating,
         source: course.title,
       })),
     },

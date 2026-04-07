@@ -114,7 +114,7 @@ export default async function DashboardPage() {
                           href={`/course/${enrollment.course.slug}#leave-review`}
                           className="inline-flex rounded-full border border-[var(--portal-border)] px-5 py-3 text-sm font-semibold text-[var(--portal-text)] transition hover:bg-[rgba(255,255,255,0.06)]"
                         >
-                          Leave review
+                          Write review
                         </Link>
                       ) : null}
                     </div>

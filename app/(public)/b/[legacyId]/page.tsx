@@ -61,7 +61,7 @@ export default async function LegacyCoursePage({ params }: { params: Promise<{ l
             courseId: resolved.course.id,
             email: session.user.email,
           },
-          select: { quote: true, isApproved: true },
+          select: { quote: true, isApproved: true, rating: true },
         })
       : null;
 

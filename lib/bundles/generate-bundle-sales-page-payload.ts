@@ -103,6 +103,7 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
       items: approvedTestimonials.map((testimonial) => ({
         name: testimonial.name,
         quote: testimonial.quote,
+        rating: testimonial.rating,
         source: bundle.title,
       })),
     },

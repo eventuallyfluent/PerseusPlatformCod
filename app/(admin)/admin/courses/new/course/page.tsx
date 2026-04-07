@@ -49,7 +49,7 @@ export default async function NewCoursePage() {
               </Link>
               </div>
               <p className="text-xs leading-6 text-stone-500">
-                One row = one lesson. Repeat the course-level fields on every row. Add testimonial columns on any rows where you want imported Payhip reviews.
+                One row = one lesson. Repeat the course-level fields on every row. Add testimonial columns, including rating, on any rows where you want imported Payhip reviews.
               </p>
               <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">
                 <label>

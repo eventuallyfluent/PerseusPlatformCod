@@ -235,6 +235,7 @@ export const coursePackageCsvRowSchema = z.object({
   testimonial_name: z.string().optional(),
   testimonial_email: z.string().email().optional().or(z.literal("")),
   testimonial_quote: z.string().optional(),
+  testimonial_rating: z.coerce.number().int().min(1).max(5).optional(),
   testimonial_position: z.coerce.number().int().min(1).optional(),
   module_position: z.coerce.number().int().min(1),
   module_title: z.string().min(1),

@@ -66,7 +66,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 courseId: resolved.course.id,
                 email: session.user.email,
               },
-              select: { quote: true, isApproved: true },
+              select: { quote: true, isApproved: true, rating: true },
             })
           : null;
       return <CourseSalesPage course={resolved.course} payload={getCourseSalesPage(resolved.course)} canLeaveReview={canLeaveReview} existingReview={existingReview} />;
@@ -93,7 +93,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             courseId: course.id,
             email: session.user.email,
           },
-          select: { quote: true, isApproved: true },
+          select: { quote: true, isApproved: true, rating: true },
         })
       : null;
 

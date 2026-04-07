@@ -16,8 +16,9 @@ export async function submitCourseReviewAction(formData: FormData) {
   const courseSlug = String(formData.get("courseSlug") ?? "");
   const quote = String(formData.get("quote") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim() || session.user.name || "Student";
+  const rating = Number(formData.get("rating") ?? 0);
 
-  if (!courseId || !courseSlug || !quote) {
+  if (!courseId || !courseSlug || !quote || !Number.isInteger(rating) || rating < 1 || rating > 5) {
     redirect(`/course/${courseSlug}#leave-review`);
   }
 
@@ -48,6 +49,7 @@ export async function submitCourseReviewAction(formData: FormData) {
         name,
         email: session.user.email,
         quote,
+        rating,
         isApproved: false,
       },
     });
@@ -63,6 +65,7 @@ export async function submitCourseReviewAction(formData: FormData) {
         name,
         email: session.user.email,
         quote,
+        rating,
         position: (maxPosition._max.position ?? 0) + 1,
         isApproved: false,
       },

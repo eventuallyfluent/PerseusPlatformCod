@@ -77,7 +77,7 @@ export default async function PublicPathPage({ params }: { params: Promise<{ slu
             courseId: resolved.course.id,
             email: session.user.email,
           },
-          select: { quote: true, isApproved: true },
+          select: { quote: true, isApproved: true, rating: true },
         })
       : null;
 

@@ -331,6 +331,7 @@ model Testimonial {
   name     String?
   email    String?
   quote    String
+  rating   Int     @default(5)
   position Int
   isApproved Boolean @default(false)
   course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)

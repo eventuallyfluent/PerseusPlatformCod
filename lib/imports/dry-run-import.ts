@@ -155,6 +155,7 @@ function getPackageTestimonialFields(row: PackageRow) {
     testimonial_name: String(row.testimonial_name ?? "").trim(),
     testimonial_email: String(row.testimonial_email ?? "").trim(),
     testimonial_quote: String(row.testimonial_quote ?? "").trim(),
+    testimonial_rating: String(row.testimonial_rating ?? "").trim(),
     testimonial_position: String(row.testimonial_position ?? "").trim(),
   };
 }

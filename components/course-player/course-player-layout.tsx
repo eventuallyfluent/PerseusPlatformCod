@@ -83,9 +83,19 @@ export function CoursePlayerLayout({ course, activeLessonSlug, enrolledAt }: Cou
 
       <div className="space-y-6 lg:h-[calc(100svh-7.5rem)] lg:overflow-hidden">
         <div className="space-y-6 rounded-[30px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-8 text-[var(--portal-text)] shadow-[0_20px_40px_rgba(10,11,24,0.24)] lg:flex lg:h-full lg:flex-col lg:overflow-hidden">
-          {activeLesson.videoUrl ? <StreamableEmbed url={activeLesson.videoUrl} title={activeLesson.title} /> : null}
+          {activeLesson.videoUrl ? (
+            <StreamableEmbed url={activeLesson.videoUrl} title={activeLesson.title} />
+          ) : (
+            <div className="flex aspect-video w-full items-center justify-center rounded-[24px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] text-center text-[var(--portal-muted)]">
+              <div className="space-y-2 px-6">
+                <p className="text-sm font-semibold uppercase tracking-[0.28em]">Video placeholder</p>
+                <p className="text-base leading-7">Video not added yet.</p>
+              </div>
+            </div>
+          )}
           <div className="space-y-6 lg:flex-1 lg:overflow-y-auto lg:pr-2">
             <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--portal-muted)]">{course.title}</p>
               <Badge variant="portal">{activeLesson.moduleTitle}</Badge>
               <h1 className="text-5xl leading-none tracking-[-0.04em]">{activeLesson.title}</h1>
               {activeLesson.durationLabel ? <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--portal-muted)]">{activeLesson.durationLabel}</p> : null}

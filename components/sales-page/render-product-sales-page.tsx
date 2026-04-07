@@ -7,6 +7,16 @@ import type { BundleSalesPagePayload, GeneratedSalesPagePayload, SalesPageOfferS
 
 type ProductPayload = GeneratedSalesPagePayload | BundleSalesPagePayload;
 
+function RatingStars({ rating }: { rating: number }) {
+  return (
+    <div aria-label={`${rating} star rating`} className="flex gap-1 text-lg leading-none text-[#ffc247]">
+      {Array.from({ length: 5 }, (_, index) => (
+        <span key={index}>{index < rating ? "★" : "☆"}</span>
+      ))}
+    </div>
+  );
+}
+
 function OfferButtons({ offers, primaryLabel }: { offers: SalesPageOfferSummary[]; primaryLabel: string }) {
   return (
     <div className="flex flex-wrap gap-3">
@@ -183,12 +193,20 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
       return (
         <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
           <SectionIntro eyebrow={payload.testimonialsSection.eyebrow} title={payload.testimonialsSection.title} />
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4">
             {payload.testimonialsSection.items.map((testimonial, index) => (
-              <blockquote key={`${testimonial.quote}-${index}`} className="rounded-[30px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)]">
-                <p className="text-lg leading-8 text-[#d2c6ee]">&ldquo;{testimonial.quote}&rdquo;</p>
-                {testimonial.name ? <footer className="mt-4 text-sm font-semibold uppercase tracking-[0.2em] text-[#b8add7]">{testimonial.name}</footer> : null}
-                {testimonial.source ? <p className="mt-1 text-sm text-[#b8add7]">{testimonial.source}</p> : null}
+              <blockquote
+                key={`${testimonial.quote}-${index}`}
+                className="grid gap-6 rounded-[30px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)] lg:grid-cols-[220px_1fr]"
+              >
+                <div className="space-y-3 lg:border-r lg:border-[var(--portal-border)] lg:pr-6">
+                  {testimonial.name ? <footer className="text-base font-semibold text-white">{testimonial.name}</footer> : null}
+                  {testimonial.source ? <p className="text-sm text-[#b8add7]">{testimonial.source}</p> : null}
+                </div>
+                <div className="space-y-4">
+                  <RatingStars rating={testimonial.rating} />
+                  <p className="text-lg leading-8 text-[#d2c6ee]">&ldquo;{testimonial.quote}&rdquo;</p>
+                </div>
               </blockquote>
             ))}
           </div>

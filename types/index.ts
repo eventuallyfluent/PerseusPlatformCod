@@ -143,6 +143,7 @@ type SalesPageBasePayload = {
     items: {
       name?: string | null;
       quote: string;
+      rating: number;
       source?: string | null;
     }[];
   };

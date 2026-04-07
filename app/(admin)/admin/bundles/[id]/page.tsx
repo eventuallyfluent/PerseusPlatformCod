@@ -167,6 +167,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
               <input type="hidden" name="bundleId" value={bundle.id} />
               <label>Name<input name="name" /></label>
               <label>Quote<textarea name="quote" rows={3} /></label>
+              <label>Rating<input name="rating" type="number" min="1" max="5" defaultValue={5} /></label>
               <label>Position<input name="position" type="number" min="1" defaultValue={bundle.testimonials.length + 1} /></label>
               <label className="flex items-center gap-2"><input className="w-auto" name="isApproved" type="checkbox" value="true" defaultChecked />Approved</label>
               <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Add testimonial</button>
@@ -177,6 +178,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
                 <input type="hidden" name="bundleId" value={bundle.id} />
                 <label>Name<input name="name" defaultValue={testimonial.name ?? ""} /></label>
                 <label>Quote<textarea name="quote" rows={3} defaultValue={testimonial.quote} /></label>
+                <label>Rating<input name="rating" type="number" min="1" max="5" defaultValue={testimonial.rating} /></label>
                 <label>Position<input name="position" type="number" min="1" defaultValue={testimonial.position} /></label>
                 <label className="flex items-center gap-2"><input className="w-auto" name="isApproved" type="checkbox" value="true" defaultChecked={testimonial.isApproved} />Approved</label>
                 <div className="flex flex-wrap gap-3">

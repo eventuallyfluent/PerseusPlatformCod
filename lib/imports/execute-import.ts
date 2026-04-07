@@ -31,6 +31,16 @@ type ImportedTestimonial = {
   rating: number;
   position: number;
 };
+type ValidatedImportRow<Row> = {
+  rowNumber: number;
+  idempotencyKey: string;
+  row: Row;
+};
+type PersistedImportContext<Row = Record<string, unknown>> = ImportContext & {
+  preparedRows?: ValidatedImportRow<Row>[];
+};
+
+const IMPORT_CHUNK_SIZE = 20;
 
 function humanizeSlug(slug: string) {
   return slug
@@ -38,6 +48,51 @@ function humanizeSlug(slug: string) {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function buildExecutionSummary(type: ImportType, totalCount = 0): ImportExecutionSummary {
+  return {
+    type,
+    createdCount: 0,
+    updatedCount: 0,
+    skippedCount: 0,
+    failedCount: 0,
+    processedCount: 0,
+    cursor: 0,
+    totalCount,
+    hasMore: totalCount > 0,
+    lessonsApplied: false,
+    testimonialsApplied: false,
+  };
+}
+
+function normalizeExecutionSummary(type: ImportType, raw: unknown, totalCount = 0): ImportExecutionSummary {
+  const summary = raw && typeof raw === "object" ? (raw as Partial<ImportExecutionSummary>) : {};
+
+  return {
+    ...buildExecutionSummary(type, totalCount),
+    ...summary,
+    type,
+    totalCount,
+    cursor: typeof summary.cursor === "number" ? summary.cursor : 0,
+    hasMore: typeof summary.hasMore === "boolean" ? summary.hasMore : totalCount > (typeof summary.cursor === "number" ? summary.cursor : 0),
+  };
+}
+
+function normalizeErrorReport(raw: unknown): ImportRowError[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  return raw.filter((entry): entry is ImportRowError => typeof entry === "object" && entry !== null && "errors" in entry);
+}
+
+function serializeJson(value: unknown) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function buildProcessingSummary(type: ImportType, totalCount = 0) {
+  return buildExecutionSummary(type, totalCount);
 }
 
 async function ensureInstructorForImport(slug: string, name?: string | null) {
@@ -280,17 +335,6 @@ async function executeOfferRow(row: OfferCsvRow) {
   return "created";
 }
 
-function buildExecutionSummary(type: ImportType): ImportExecutionSummary {
-  return {
-    type,
-    createdCount: 0,
-    updatedCount: 0,
-    skippedCount: 0,
-    failedCount: 0,
-    processedCount: 0,
-  };
-}
-
 async function resolveExistingCourse(row: CoursePackageCsvRow) {
   return (
     (row.legacy_course_id
@@ -334,11 +378,16 @@ function collectImportedTestimonials(rows: CoursePackageCsvRow[]): ImportedTesti
   return [...testimonials.values()].sort((a, b) => a.position - b.position);
 }
 
-async function executeCoursePackageRows(rows: CoursePackageCsvRow[]) {
-  const summary = buildExecutionSummary(ImportType.COURSE_PACKAGE);
-
+async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: ImportExecutionSummary) {
   if (rows.length === 0) {
-    return summary;
+    return null;
+  }
+
+  if (summary.targetCourseId) {
+    return prisma.course.findUnique({
+      where: { id: summary.targetCourseId },
+      select: { id: true, slug: true, title: true },
+    });
   }
 
   const firstRow = rows[0];
@@ -375,126 +424,129 @@ async function executeCoursePackageRows(rows: CoursePackageCsvRow[]) {
   summary.targetCourseTitle = course.title;
   summary.moduleCount = new Set(rows.map((row) => row.module_position)).size;
   summary.lessonCount = rows.length;
-  const importedTestimonials = collectImportedTestimonials(rows);
-  summary.testimonialCount = importedTestimonials.length;
+  summary.testimonialCount = collectImportedTestimonials(rows).length;
+  summary.totalCount = rows.length;
+  summary.hasMore = rows.length > 0;
+
   if (existingCourse) {
     summary.updatedCount += 1;
   } else {
     summary.createdCount += 1;
   }
 
-  for (const row of rows) {
-    const existingModule = await prisma.module.findUnique({
-      where: {
-        courseId_position: {
-          courseId: course.id,
-          position: row.module_position,
-        },
+  return course;
+}
+
+async function applyCoursePackageLessonRow(courseId: string, row: CoursePackageCsvRow, summary: ImportExecutionSummary) {
+  const existingModule = await prisma.module.findUnique({
+    where: {
+      courseId_position: {
+        courseId,
+        position: row.module_position,
       },
-      include: {
-        lessons: true,
+    },
+    include: {
+      lessons: true,
+    },
+  });
+
+  let moduleId: string;
+
+  if (!existingModule) {
+    const createdModule = await prisma.module.create({
+      data: {
+        courseId,
+        title: row.module_title,
+        position: row.module_position,
       },
+      include: { lessons: true },
     });
-
-    let moduleId: string;
-
-    if (!existingModule) {
-      const createdModule = await prisma.module.create({
-        data: {
-          courseId: course.id,
-          title: row.module_title,
-          position: row.module_position,
-        },
-        include: { lessons: true },
+    moduleId = createdModule.id;
+    summary.createdModuleCount = (summary.createdModuleCount ?? 0) + 1;
+  } else {
+    moduleId = existingModule.id;
+    if (existingModule.title !== row.module_title) {
+      await prisma.module.update({
+        where: { id: existingModule.id },
+        data: { title: row.module_title },
       });
-      moduleId = createdModule.id;
-      summary.createdModuleCount = (summary.createdModuleCount ?? 0) + 1;
-    } else {
-      moduleId = existingModule.id;
-      if (existingModule.title !== row.module_title) {
-        await prisma.module.update({
-          where: { id: existingModule.id },
-          data: { title: row.module_title },
-        });
-        summary.updatedModuleCount = (summary.updatedModuleCount ?? 0) + 1;
-      }
+      summary.updatedModuleCount = (summary.updatedModuleCount ?? 0) + 1;
     }
-
-    const existingLesson = await prisma.lesson.findUnique({
-      where: {
-        moduleId_position: {
-          moduleId,
-          position: row.lesson_position,
-        },
-      },
-    });
-
-    const lessonPayload = {
-      slug: row.lesson_slug,
-      title: row.lesson_title,
-      position: row.lesson_position,
-      status: row.lesson_status,
-      type: row.lesson_type,
-      content: row.lesson_content || null,
-      videoUrl: row.video_url || null,
-      downloadUrl: row.download_url || null,
-      isPreview: row.is_preview,
-      dripDays: row.drip_days,
-      durationLabel: row.duration_label || null,
-    };
-
-    if (!existingLesson) {
-      await prisma.lesson.create({
-        data: {
-          moduleId,
-          ...lessonPayload,
-        },
-      });
-      summary.createdLessonCount = (summary.createdLessonCount ?? 0) + 1;
-      summary.createdCount += 1;
-      summary.processedCount += 1;
-      continue;
-    }
-
-    const unchanged =
-      existingLesson.slug === lessonPayload.slug &&
-      existingLesson.title === lessonPayload.title &&
-      existingLesson.position === lessonPayload.position &&
-      existingLesson.status === lessonPayload.status &&
-      existingLesson.type === lessonPayload.type &&
-      existingLesson.content === lessonPayload.content &&
-      existingLesson.videoUrl === lessonPayload.videoUrl &&
-      existingLesson.downloadUrl === lessonPayload.downloadUrl &&
-      existingLesson.isPreview === lessonPayload.isPreview &&
-      existingLesson.dripDays === (lessonPayload.dripDays ?? null) &&
-      existingLesson.durationLabel === lessonPayload.durationLabel;
-
-    if (unchanged) {
-      summary.skippedCount += 1;
-      summary.processedCount += 1;
-      continue;
-    }
-
-    await prisma.lesson.update({
-      where: { id: existingLesson.id },
-      data: lessonPayload,
-    });
-    summary.updatedLessonCount = (summary.updatedLessonCount ?? 0) + 1;
-    summary.updatedCount += 1;
-    summary.processedCount += 1;
   }
 
-  for (const testimonial of importedTestimonials) {
+  const existingLesson = await prisma.lesson.findUnique({
+    where: {
+      moduleId_position: {
+        moduleId,
+        position: row.lesson_position,
+      },
+    },
+  });
+
+  const lessonPayload = {
+    slug: row.lesson_slug,
+    title: row.lesson_title,
+    position: row.lesson_position,
+    status: row.lesson_status,
+    type: row.lesson_type,
+    content: row.lesson_content || null,
+    videoUrl: row.video_url || null,
+    downloadUrl: row.download_url || null,
+    isPreview: row.is_preview,
+    dripDays: row.drip_days,
+    durationLabel: row.duration_label || null,
+  };
+
+  if (!existingLesson) {
+    await prisma.lesson.create({
+      data: {
+        moduleId,
+        ...lessonPayload,
+      },
+    });
+    summary.createdLessonCount = (summary.createdLessonCount ?? 0) + 1;
+    summary.createdCount += 1;
+    return;
+  }
+
+  const unchanged =
+    existingLesson.slug === lessonPayload.slug &&
+    existingLesson.title === lessonPayload.title &&
+    existingLesson.position === lessonPayload.position &&
+    existingLesson.status === lessonPayload.status &&
+    existingLesson.type === lessonPayload.type &&
+    existingLesson.content === lessonPayload.content &&
+    existingLesson.videoUrl === lessonPayload.videoUrl &&
+    existingLesson.downloadUrl === lessonPayload.downloadUrl &&
+    existingLesson.isPreview === lessonPayload.isPreview &&
+    existingLesson.dripDays === (lessonPayload.dripDays ?? null) &&
+    existingLesson.durationLabel === lessonPayload.durationLabel;
+
+  if (unchanged) {
+    summary.skippedCount += 1;
+    return;
+  }
+
+  await prisma.lesson.update({
+    where: { id: existingLesson.id },
+    data: lessonPayload,
+  });
+  summary.updatedLessonCount = (summary.updatedLessonCount ?? 0) + 1;
+  summary.updatedCount += 1;
+}
+
+async function applyCoursePackageTestimonials(courseId: string, rows: CoursePackageCsvRow[], summary: ImportExecutionSummary) {
+  for (const testimonial of collectImportedTestimonials(rows)) {
     const existingTestimonial = testimonial.email
       ? await prisma.testimonial.findFirst({
           where: {
-            courseId: course.id,
+            courseId,
             email: testimonial.email,
           },
         })
       : await prisma.testimonial.findFirst({
           where: {
-            courseId: course.id,
+            courseId,
             name: testimonial.name,
             quote: testimonial.quote,
           },
@@ -512,7 +564,7 @@ async function executeCoursePackageRows(rows: CoursePackageCsvRow[]) {
     if (!existingTestimonial) {
       await prisma.testimonial.create({
         data: {
-          courseId: course.id,
+          courseId,
           ...data,
         },
       });
@@ -537,6 +589,53 @@ async function executeCoursePackageRows(rows: CoursePackageCsvRow[]) {
       data,
     });
     summary.updatedTestimonialCount = (summary.updatedTestimonialCount ?? 0) + 1;
+  }
+
+  summary.testimonialsApplied = true;
+}
+
+async function processCoursePackageChunk(
+  entries: ValidatedImportRow<CoursePackageCsvRow>[],
+  summary: ImportExecutionSummary,
+  failures: ImportRowError[],
+) {
+  const rows = entries.map((entry) => entry.row);
+  const course = await ensureCoursePackageTarget(rows, summary);
+
+  if (!course) {
+    summary.lessonsApplied = true;
+    summary.testimonialsApplied = true;
+    summary.hasMore = false;
+    return summary;
+  }
+
+  const cursor = summary.cursor ?? 0;
+  const chunk = entries.slice(cursor, cursor + IMPORT_CHUNK_SIZE);
+
+  for (const entry of chunk) {
+    try {
+      await applyCoursePackageLessonRow(course.id, entry.row, summary);
+    } catch (error) {
+      summary.failedCount += 1;
+      failures.push({
+        rowNumber: entry.rowNumber,
+        idempotencyKey: entry.idempotencyKey,
+        row: entry.row,
+        errors: [error instanceof Error ? error.message : "Unknown course package import error"],
+      });
+    } finally {
+      summary.processedCount += 1;
+    }
+  }
+
+  const nextCursor = cursor + chunk.length;
+  summary.cursor = nextCursor;
+  summary.lessonsApplied = nextCursor >= entries.length;
+  summary.hasMore = nextCursor < entries.length || !summary.testimonialsApplied;
+
+  if (summary.lessonsApplied && !summary.testimonialsApplied) {
+    await applyCoursePackageTestimonials(course.id, rows, summary);
+    summary.hasMore = false;
   }
 
   return summary;
@@ -599,7 +698,12 @@ async function executeCourseStudentRow(row: CourseStudentCsvRow, courseId: strin
   return existingUser ? "updated" : "created";
 }
 
-async function executeCourseStudentRows(rows: CourseStudentCsvRow[], context?: ImportContext) {
+async function processCourseStudentChunk(
+  entries: ValidatedImportRow<CourseStudentCsvRow>[],
+  summary: ImportExecutionSummary,
+  failures: ImportRowError[],
+  context?: ImportContext,
+) {
   if (!context?.targetCourseId) {
     throw new Error("Course student imports require a target course");
   }
@@ -613,98 +717,106 @@ async function executeCourseStudentRows(rows: CourseStudentCsvRow[], context?: I
     throw new Error("Target course not found");
   }
 
-  const summary = buildExecutionSummary(ImportType.COURSE_STUDENTS);
   summary.targetCourseId = course.id;
   summary.targetCourseSlug = course.slug;
   summary.targetCourseTitle = course.title;
+  summary.totalCount = entries.length;
 
-  for (const row of rows) {
-    const result = await executeCourseStudentRow(row, course.id);
-    summary.processedCount += 1;
-    if (result === "created") summary.createdCount += 1;
-    if (result === "updated") summary.updatedCount += 1;
-    if (result === "skipped") summary.skippedCount += 1;
+  const cursor = summary.cursor ?? 0;
+  const chunk = entries.slice(cursor, cursor + IMPORT_CHUNK_SIZE);
+
+  for (const entry of chunk) {
+    try {
+      const result = await executeCourseStudentRow(entry.row, course.id);
+      if (result === "created") summary.createdCount += 1;
+      if (result === "updated") summary.updatedCount += 1;
+      if (result === "skipped") summary.skippedCount += 1;
+    } catch (error) {
+      summary.failedCount += 1;
+      failures.push({
+        rowNumber: entry.rowNumber,
+        idempotencyKey: entry.idempotencyKey,
+        row: entry.row,
+        errors: [error instanceof Error ? error.message : "Unknown course student import error"],
+      });
+    } finally {
+      summary.processedCount += 1;
+    }
   }
+
+  const nextCursor = cursor + chunk.length;
+  summary.cursor = nextCursor;
+  summary.lessonsApplied = true;
+  summary.testimonialsApplied = true;
+  summary.hasMore = nextCursor < entries.length;
 
   return summary;
 }
 
-export async function createImportBatch(type: ImportType, filename: string, csvContent: string, dryRun = true, context?: ImportContext) {
-  const validation = await dryRunImport(type, csvContent, context);
+async function processLegacyImportBatch(
+  batchType: ImportType,
+  validationRows: ValidatedImportRow<InstructorCsvRow | CourseCsvRow | LessonCsvRow | OfferCsvRow>[],
+  summary: ImportExecutionSummary,
+  failures: ImportRowError[],
+) {
+  for (const entry of validationRows) {
+    try {
+      let result: "created" | "updated" | "skipped";
+      if (batchType === ImportType.INSTRUCTORS) {
+        result = await executeInstructorRow(entry.row as InstructorCsvRow);
+      } else if (batchType === ImportType.COURSES) {
+        result = await executeCourseRow(entry.row as CourseCsvRow);
+      } else if (batchType === ImportType.LESSONS) {
+        result = await executeLessonRow(entry.row as LessonCsvRow);
+      } else {
+        result = await executeOfferRow(entry.row as OfferCsvRow);
+      }
 
-  return prisma.importBatch.create({
-    data: {
-      type,
-      filename,
-      sourceContent: csvContent,
-      context: context ? JSON.parse(JSON.stringify(context)) : undefined,
-      status: dryRun ? ImportStatus.DRY_RUN : ImportStatus.DRAFT,
-      dryRunSummary: validation.summary,
-      errorReport: JSON.parse(JSON.stringify([...validation.invalidRows, ...validation.conflicts])),
-      executionSummary: dryRun
-        ? undefined
-        : {
-            type,
-            createdCount: 0,
-            updatedCount: 0,
-            skippedCount: 0,
-            failedCount: 0,
-            processedCount: 0,
-          },
-    },
-  });
+      if (result === "created") summary.createdCount += 1;
+      if (result === "updated") summary.updatedCount += 1;
+      if (result === "skipped") summary.skippedCount += 1;
+    } catch (error) {
+      summary.failedCount += 1;
+      failures.push({
+        rowNumber: entry.rowNumber,
+        idempotencyKey: entry.idempotencyKey,
+        row: entry.row,
+        errors: [error instanceof Error ? error.message : "Unknown import execution error"],
+      });
+    } finally {
+      summary.processedCount += 1;
+    }
+  }
+
+  summary.cursor = validationRows.length;
+  summary.totalCount = validationRows.length;
+  summary.hasMore = false;
+  summary.lessonsApplied = true;
+  summary.testimonialsApplied = true;
+
+  return summary;
 }
 
-export async function createFailedImportBatch(type: ImportType, filename: string, csvContent: string, error: unknown, context?: ImportContext) {
-  return prisma.importBatch.create({
-    data: {
-      type,
-      filename,
-      sourceContent: csvContent,
-      context: context ? JSON.parse(JSON.stringify(context)) : undefined,
-      status: ImportStatus.FAILED,
-      dryRunSummary: {
-        type,
-        totalRows: 0,
-        validCount: 0,
-        invalidCount: 0,
-        conflictCount: 0,
-      },
-      executionSummary: buildExecutionSummary(type),
-      errorReport: JSON.parse(
-        JSON.stringify([
-          {
-            rowNumber: 1,
-            idempotencyKey: "request",
-            row: {},
-            errors: [error instanceof Error ? error.message : "Unknown import error"],
-          },
-        ]),
-      ),
-    },
-  });
+function buildFailureStatus(summary: ImportExecutionSummary, failures: ImportRowError[]) {
+  if (failures.length > 0 && summary.processedCount === 0) {
+    return ImportStatus.FAILED;
+  }
+
+  return summary.hasMore ? ImportStatus.PROCESSING : ImportStatus.COMPLETED;
 }
 
-export async function markImportBatchFailed(batchId: string, error: unknown) {
+async function updateBatchProgress(batchId: string, status: ImportStatus, summary: ImportExecutionSummary, failures: ImportRowError[]) {
   return prisma.importBatch.update({
     where: { id: batchId },
     data: {
-      status: ImportStatus.FAILED,
-      errorReport: JSON.parse(
-        JSON.stringify([
-          {
-            rowNumber: 1,
-            idempotencyKey: "execution",
-            row: {},
-            errors: [error instanceof Error ? error.message : "Unknown import execution error"],
-          },
-        ]),
-      ),
+      status,
+      executionSummary: serializeJson(summary),
+      errorReport: serializeJson(failures),
     },
   });
 }
 
-export async function executeImportBatch(batchId: string) {
+async function processChunkedBatch(batchId: string) {
   const batch = await prisma.importBatch.findUnique({
     where: { id: batchId },
   });
@@ -717,111 +829,154 @@ export async function executeImportBatch(batchId: string) {
     throw new Error("Import batch source content is missing");
   }
 
-  const context = (batch.context as ImportContext | null) ?? undefined;
-  const validation = await dryRunImport(batch.type, batch.sourceContent, context);
-  const failures: ImportRowError[] = [...validation.invalidRows, ...validation.conflicts];
+  const persistedContext = (batch.context as PersistedImportContext<CoursePackageCsvRow | CourseStudentCsvRow> | null) ?? undefined;
+  const context = persistedContext ? { targetCourseId: persistedContext.targetCourseId } : undefined;
+  const validation = persistedContext?.preparedRows ? null : await dryRunImport(batch.type, batch.sourceContent, context);
+  const validRows = (persistedContext?.preparedRows ?? validation?.validRows ?? []) as ValidatedImportRow<CoursePackageCsvRow | CourseStudentCsvRow>[];
+  const failures = normalizeErrorReport(batch.errorReport);
+
+  if (failures.length === 0) {
+    failures.push(...(validation?.invalidRows ?? []), ...(validation?.conflicts ?? []));
+  }
+
+  const summary = normalizeExecutionSummary(batch.type, batch.executionSummary, validRows.length);
 
   if (batch.type === ImportType.COURSE_PACKAGE) {
-    try {
-      const summary = await executeCoursePackageRows(validation.validRows.map((entry) => entry.row as CoursePackageCsvRow));
-      return prisma.importBatch.update({
-        where: { id: batch.id },
-        data: {
-          status: failures.length > 0 && summary.processedCount === 0 ? ImportStatus.FAILED : ImportStatus.COMPLETED,
-          dryRunSummary: validation.summary,
-          executionSummary: summary,
-          errorReport: JSON.parse(JSON.stringify(failures)),
-        },
-      });
-    } catch (error) {
-      failures.push({
-        rowNumber: 1,
-        idempotencyKey: "course-package",
-        row: {},
-        errors: [error instanceof Error ? error.message : "Unknown course package import error"],
-      });
-      return prisma.importBatch.update({
-        where: { id: batch.id },
-        data: {
-          status: ImportStatus.FAILED,
-          dryRunSummary: validation.summary,
-          executionSummary: buildExecutionSummary(batch.type),
-          errorReport: JSON.parse(JSON.stringify(failures)),
-        },
-      });
-    }
+    await processCoursePackageChunk(validRows as ValidatedImportRow<CoursePackageCsvRow>[], summary, failures);
+    return updateBatchProgress(batch.id, buildFailureStatus(summary, failures), summary, failures);
   }
 
   if (batch.type === ImportType.COURSE_STUDENTS) {
-    try {
-      const summary = await executeCourseStudentRows(validation.validRows.map((entry) => entry.row as CourseStudentCsvRow), context);
-      return prisma.importBatch.update({
-        where: { id: batch.id },
-        data: {
-          status: failures.length > 0 && summary.processedCount === 0 ? ImportStatus.FAILED : ImportStatus.COMPLETED,
-          dryRunSummary: validation.summary,
-          executionSummary: summary,
-          errorReport: JSON.parse(JSON.stringify(failures)),
-        },
-      });
-    } catch (error) {
-      failures.push({
-        rowNumber: 1,
-        idempotencyKey: "course-students",
-        row: {},
-        errors: [error instanceof Error ? error.message : "Unknown course student import error"],
-      });
-      return prisma.importBatch.update({
-        where: { id: batch.id },
-        data: {
-          status: ImportStatus.FAILED,
-          dryRunSummary: validation.summary,
-          executionSummary: buildExecutionSummary(batch.type),
-          errorReport: JSON.parse(JSON.stringify(failures)),
-        },
-      });
-    }
+    await processCourseStudentChunk(validRows as ValidatedImportRow<CourseStudentCsvRow>[], summary, failures, context);
+    return updateBatchProgress(batch.id, buildFailureStatus(summary, failures), summary, failures);
   }
 
-  const summary = buildExecutionSummary(batch.type);
+  await processLegacyImportBatch(
+    batch.type,
+    validRows as ValidatedImportRow<InstructorCsvRow | CourseCsvRow | LessonCsvRow | OfferCsvRow>[],
+    summary,
+    failures,
+  );
+  return updateBatchProgress(batch.id, buildFailureStatus(summary, failures), summary, failures);
+}
 
-  for (const entry of validation.validRows) {
-    try {
-      let result: "created" | "updated" | "skipped";
-      if (batch.type === ImportType.INSTRUCTORS) {
-        result = await executeInstructorRow(entry.row as InstructorCsvRow);
-      } else if (batch.type === ImportType.COURSES) {
-        result = await executeCourseRow(entry.row as CourseCsvRow);
-      } else if (batch.type === ImportType.LESSONS) {
-        result = await executeLessonRow(entry.row as LessonCsvRow);
-      } else {
-        result = await executeOfferRow(entry.row as OfferCsvRow);
-      }
+export async function createImportBatch(type: ImportType, filename: string, csvContent: string, dryRun = true, context?: ImportContext) {
+  const validation = await dryRunImport(type, csvContent, context);
+  const totalCount = validation.validRows.length;
+  const persistedContext: PersistedImportContext = {
+    ...(context ?? {}),
+    preparedRows: validation.validRows as ValidatedImportRow<Record<string, unknown>>[],
+  };
 
-      summary.processedCount += 1;
-      if (result === "created") summary.createdCount += 1;
-      if (result === "updated") summary.updatedCount += 1;
-      if (result === "skipped") summary.skippedCount += 1;
-    } catch (error) {
-      summary.failedCount += 1;
-      failures.push({
-        rowNumber: entry.rowNumber,
-        idempotencyKey: entry.idempotencyKey,
-        row: entry.row,
-        errors: [error instanceof Error ? error.message : "Unknown import execution error"],
-      });
-    }
-  }
-
-  return prisma.importBatch.update({
-    where: { id: batch.id },
+  return prisma.importBatch.create({
     data: {
-      status: failures.length > 0 && summary.processedCount === 0 ? ImportStatus.FAILED : ImportStatus.COMPLETED,
-      dryRunSummary: validation.summary,
-      executionSummary: summary,
-      errorReport: JSON.parse(JSON.stringify(failures)),
+      type,
+      filename,
+      sourceContent: csvContent,
+      context: serializeJson(persistedContext),
+      status: dryRun ? ImportStatus.DRY_RUN : ImportStatus.PROCESSING,
+      dryRunSummary: serializeJson(validation.summary),
+      errorReport: serializeJson([...validation.invalidRows, ...validation.conflicts]),
+      executionSummary: serializeJson(buildProcessingSummary(type, totalCount)),
     },
   });
+}
+
+export async function startImportBatch(batchId: string) {
+  const batch = await prisma.importBatch.findUnique({
+    where: { id: batchId },
+  });
+
+  if (!batch) {
+    throw new Error("Import batch not found");
+  }
+
+  const totalCount =
+    batch.dryRunSummary && typeof batch.dryRunSummary === "object" && batch.dryRunSummary !== null && "validCount" in batch.dryRunSummary
+      ? Number((batch.dryRunSummary as Record<string, unknown>).validCount ?? 0)
+      : 0;
+
+  return prisma.importBatch.update({
+    where: { id: batchId },
+    data: {
+      status: ImportStatus.PROCESSING,
+      executionSummary: serializeJson(normalizeExecutionSummary(batch.type, batch.executionSummary, totalCount)),
+    },
+  });
+}
+
+export async function createFailedImportBatch(type: ImportType, filename: string, csvContent: string, error: unknown, context?: ImportContext) {
+  return prisma.importBatch.create({
+    data: {
+      type,
+      filename,
+      sourceContent: csvContent,
+      context: context ? serializeJson(context) : undefined,
+      status: ImportStatus.FAILED,
+      dryRunSummary: {
+        type,
+        totalRows: 0,
+        validCount: 0,
+        invalidCount: 0,
+        conflictCount: 0,
+      },
+      executionSummary: serializeJson(buildExecutionSummary(type)),
+      errorReport: serializeJson([
+        {
+          rowNumber: 1,
+          idempotencyKey: "request",
+          row: {},
+          errors: [error instanceof Error ? error.message : "Unknown import error"],
+        },
+      ]),
+    },
+  });
+}
+
+export async function markImportBatchFailed(batchId: string, error: unknown) {
+  const batch = await prisma.importBatch.findUnique({
+    where: { id: batchId },
+    select: { type: true, executionSummary: true, dryRunSummary: true },
+  });
+
+  const totalCount =
+    batch?.dryRunSummary && typeof batch.dryRunSummary === "object" && batch.dryRunSummary !== null && "validCount" in batch.dryRunSummary
+      ? Number((batch.dryRunSummary as Record<string, unknown>).validCount ?? 0)
+      : 0;
+
+  return prisma.importBatch.update({
+    where: { id: batchId },
+    data: {
+      status: ImportStatus.FAILED,
+      executionSummary: serializeJson(normalizeExecutionSummary(batch?.type ?? ImportType.COURSE_PACKAGE, batch?.executionSummary, totalCount)),
+      errorReport: serializeJson([
+        {
+          rowNumber: 1,
+          idempotencyKey: "execution",
+          row: {},
+          errors: [error instanceof Error ? error.message : "Unknown import execution error"],
+        },
+      ]),
+    },
+  });
+}
+
+export async function processImportBatchChunk(batchId: string) {
+  try {
+    return await processChunkedBatch(batchId);
+  } catch (error) {
+    return markImportBatchFailed(batchId, error);
+  }
+}
+
+export async function executeImportBatch(batchId: string) {
+  let batch = await startImportBatch(batchId);
+
+  while (batch.status === ImportStatus.PROCESSING) {
+    batch = await processImportBatchChunk(batchId);
+  }
+
+  return batch;
 }
 
 export async function executeImport(type: ImportType, filename: string, csvContent: string, dryRun = true, context?: ImportContext) {

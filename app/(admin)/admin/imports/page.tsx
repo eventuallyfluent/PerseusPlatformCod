@@ -131,7 +131,7 @@ export default async function ImportsPage() {
                 <td>{batch.status}</td>
                 <td>{batch.filename}</td>
                 <td>{batch.dryRunSummary ? "Ready" : "-"}</td>
-                <td>{batch.executionSummary ? "Recorded" : "Pending"}</td>
+                <td>{batch.status === "PROCESSING" ? "Processing" : batch.status === "COMPLETED" || batch.status === "FAILED" ? "Recorded" : "Pending"}</td>
                 <td>{batch.createdAt.toLocaleString()}</td>
                 <td>
                   <Link href={`/admin/imports/${batch.id}`} className="underline">

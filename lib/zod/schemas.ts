@@ -4,6 +4,13 @@ import type { SalesPageSectionKey } from "@/types";
 
 const optionalUrl = z.string().url().optional().or(z.literal(""));
 const optionalDateString = z.string().optional().or(z.literal(""));
+const optionalCsvNumber = z.preprocess((value) => {
+  if (value === "" || value === null || value === undefined) {
+    return undefined;
+  }
+
+  return value;
+}, z.coerce.number().optional());
 const csvBoolean = z.preprocess((value) => {
   if (typeof value === "boolean") {
     return value;
@@ -239,8 +246,8 @@ export const coursePackageCsvRowSchema = z.object({
   testimonial_name: z.string().optional(),
   testimonial_email: z.string().email().optional().or(z.literal("")),
   testimonial_quote: z.string().optional(),
-  testimonial_rating: z.coerce.number().int().min(1).max(5).optional(),
-  testimonial_position: z.coerce.number().int().min(1).optional(),
+  testimonial_rating: optionalCsvNumber.pipe(z.number().int().min(1).max(5).optional()),
+  testimonial_position: optionalCsvNumber.pipe(z.number().int().min(1).optional()),
   module_position: z.coerce.number().int().min(1),
   module_title: z.string().min(1),
   lesson_position: z.coerce.number().int().min(1),

@@ -66,6 +66,7 @@ enum ImportType {
 enum ImportStatus {
   DRAFT
   DRY_RUN
+  PROCESSING
   COMPLETED
   FAILED
 }

@@ -34,6 +34,11 @@ export type ImportExecutionSummary = {
   skippedCount: number;
   failedCount: number;
   processedCount: number;
+  cursor?: number;
+  totalCount?: number;
+  hasMore?: boolean;
+  lessonsApplied?: boolean;
+  testimonialsApplied?: boolean;
   targetCourseId?: string;
   targetCourseSlug?: string;
   targetCourseTitle?: string;

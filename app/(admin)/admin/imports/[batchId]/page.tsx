@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { ImportBatchRunner } from "@/components/admin/import-batch-runner";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,9 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
   const dryRunSummary = batch.dryRunSummary as Record<string, unknown> | null;
   const executionSummary = batch.executionSummary as Record<string, unknown> | null;
   const context = batch.context as Record<string, unknown> | null;
+  const processedCount = Number(executionSummary?.processedCount ?? 0);
+  const totalCount = Number(executionSummary?.totalCount ?? 0);
+  const isProcessing = batch.status === "PROCESSING";
   const targetCourse =
     String(executionSummary?.targetCourseTitle ?? dryRunSummary?.targetCourseTitle ?? "") ||
     String(executionSummary?.targetCourseSlug ?? dryRunSummary?.targetCourseSlug ?? "") ||
@@ -26,9 +30,11 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
   return (
     <AdminShell title={`Import ${batch.filename}`} description="Dry-run and execution reports remain attached to the batch.">
       <Card className="space-y-4">
+        <ImportBatchRunner batchId={batch.id} isProcessing={isProcessing} />
         <div className="grid gap-3 text-sm text-stone-600">
           <div>Type: {batch.type}</div>
           <div>Status: {batch.status}</div>
+          {totalCount > 0 ? <div>Progress: {processedCount} / {totalCount}</div> : null}
           {targetCourse ? <div>Target course: {targetCourse}</div> : null}
         </div>
         <div className="flex flex-wrap gap-3">

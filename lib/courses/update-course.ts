@@ -36,6 +36,9 @@ export async function updateCourse(courseId: string, input: unknown) {
       publicPath: desiredPath,
       heroImageUrl: data.heroImageUrl === "" ? null : data.heroImageUrl,
       salesVideoUrl: data.salesVideoUrl === "" ? null : data.salesVideoUrl,
+      legacyCourseId: data.legacyCourseId === "" ? null : data.legacyCourseId,
+      legacySlug: data.legacySlug === "" ? null : data.legacySlug,
+      legacyUrl: data.legacyUrl === "" ? null : data.legacyUrl,
     },
     include: courseInclude,
   });

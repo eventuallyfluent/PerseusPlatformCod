@@ -37,6 +37,7 @@ export async function updateBundle(bundleId: string, input: unknown) {
       publicPath: desiredPath,
       heroImageUrl: data.heroImageUrl === "" ? null : data.heroImageUrl,
       salesVideoUrl: data.salesVideoUrl === "" ? null : data.salesVideoUrl,
+      legacyUrl: data.legacyUrl === "" ? null : data.legacyUrl,
     },
     include: bundleInclude,
   });

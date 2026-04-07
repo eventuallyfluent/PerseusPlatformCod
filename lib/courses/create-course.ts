@@ -20,6 +20,8 @@ export async function createCourse(input: unknown) {
       ...data,
       heroImageUrl: data.heroImageUrl || null,
       salesVideoUrl: data.salesVideoUrl || null,
+      legacyCourseId: data.legacyCourseId || null,
+      legacySlug: data.legacySlug || null,
       legacyUrl: data.legacyUrl || null,
       publicPath: desiredPath,
     },

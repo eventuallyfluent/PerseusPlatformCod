@@ -22,7 +22,7 @@ function OfferButtons({ offers, primaryLabel }: { offers: SalesPageOfferSummary[
     <div className="flex flex-wrap gap-3">
       {offers.map((offer) => (
         <Link key={offer.offerId} href={offer.checkoutUrl}>
-          <Button className="min-w-[260px]">
+          <Button className="min-w-[260px] bg-[linear-gradient(135deg,var(--accent),#c16bff)] shadow-[0_22px_44px_rgba(143,44,255,0.28)]">
             {primaryLabel} - {offer.price}
           </Button>
         </Link>
@@ -262,10 +262,10 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                 ))}
               </div>
             </div>
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--portal-border)] pt-8">
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[rgba(143,44,255,0.18)] bg-[linear-gradient(135deg,rgba(143,44,255,0.14),rgba(212,168,70,0.12))] p-6">
               <div className="max-w-2xl">
                 <h3 className="text-4xl leading-none tracking-[-0.04em]">{payload.finalCta.label}</h3>
-                <p className="mt-4 text-base leading-8 text-[#bdb3da]">{payload.finalCta.body}</p>
+                <p className="mt-4 text-base leading-8 text-[#ece3ff]">{payload.finalCta.body}</p>
               </div>
               <OfferButtons offers={payload.pricingSection.offers} primaryLabel={payload.hero.primaryCtaLabel} />
             </div>

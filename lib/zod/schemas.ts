@@ -79,6 +79,8 @@ export const courseInputSchema = z.object({
   price: z.coerce.number().min(0).default(0),
   currency: z.string().min(3).max(3).default("USD"),
   compareAtPrice: z.coerce.number().min(0).optional(),
+  upsellCourseId: z.string().nullable().optional(),
+  upsellBundleId: z.string().nullable().optional(),
   legacyCourseId: z.string().optional(),
   legacySlug: z.string().optional(),
   legacyUrl: z.string().optional(),
@@ -102,6 +104,8 @@ export const bundleInputSchema = z.object({
   price: z.coerce.number().min(0).default(0),
   currency: z.string().min(3).max(3).default("USD"),
   compareAtPrice: z.coerce.number().min(0).optional(),
+  upsellCourseId: z.string().nullable().optional(),
+  upsellBundleId: z.string().nullable().optional(),
   legacyUrl: z.string().optional(),
 });
 

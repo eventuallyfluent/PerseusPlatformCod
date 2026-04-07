@@ -30,6 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ legacyId:
 export default async function LegacyCoursePage({ params }: { params: Promise<{ legacyId: string }> }) {
   const { legacyId } = await params;
   const session = await auth();
+  const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`/b/${legacyId}#leave-review`)}`;
   const resolved = await resolvePublicRequest(`/b/${legacyId}`);
 
   if (!resolved) {
@@ -65,5 +66,14 @@ export default async function LegacyCoursePage({ params }: { params: Promise<{ l
         })
       : null;
 
-  return <CourseSalesPage course={resolved.course} payload={getCourseSalesPage(resolved.course)} canLeaveReview={canLeaveReview} existingReview={existingReview} />;
+  return (
+    <CourseSalesPage
+      course={resolved.course}
+      payload={getCourseSalesPage(resolved.course)}
+      canLeaveReview={canLeaveReview}
+      isLoggedIn={Boolean(session?.user?.email)}
+      reviewLoginHref={reviewLoginHref}
+      existingReview={existingReview}
+    />
+  );
 }

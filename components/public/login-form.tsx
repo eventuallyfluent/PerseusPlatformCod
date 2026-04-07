@@ -5,7 +5,15 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { AuthEntryShell } from "@/components/public/auth-entry-shell";
 
-export function LoginForm({ previewEnabled, emailEnabled }: { previewEnabled: boolean; emailEnabled: boolean }) {
+export function LoginForm({
+  previewEnabled,
+  emailEnabled,
+  redirectTo,
+}: {
+  previewEnabled: boolean;
+  emailEnabled: boolean;
+  redirectTo: string;
+}) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
 
@@ -30,7 +38,7 @@ export function LoginForm({ previewEnabled, emailEnabled }: { previewEnabled: bo
             type="button"
             className="w-full justify-center"
             onClick={async () => {
-              await signIn("resend", { email, redirectTo: "/auth/complete" });
+              await signIn("resend", { email, redirectTo });
               setSent(true);
             }}
           >
@@ -49,7 +57,7 @@ export function LoginForm({ previewEnabled, emailEnabled }: { previewEnabled: bo
               onClick={async () => {
                 await signIn("preview-access", {
                   previewRole: "admin",
-                  redirectTo: "/auth/complete",
+                  redirectTo,
                 });
               }}
             >
@@ -62,7 +70,7 @@ export function LoginForm({ previewEnabled, emailEnabled }: { previewEnabled: bo
               onClick={async () => {
                 await signIn("preview-access", {
                   previewRole: "student",
-                  redirectTo: "/auth/complete",
+                  redirectTo,
                 });
               }}
             >

@@ -10,14 +10,28 @@ export function CheckoutForm({ offerId, initialCouponCode = "" }: { offerId: str
 
   return (
     <div className="space-y-5">
-      <label>
-        Coupon code
-        <input value={couponCode} onChange={(event) => setCouponCode(event.target.value)} name="coupon" placeholder="Optional coupon code" />
+      <label className="block space-y-2">
+        <span className="text-sm font-medium text-stone-900">Coupon code</span>
+        <input
+          className="w-full rounded-[18px] border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-[rgba(143,44,255,0.55)]"
+          value={couponCode}
+          onChange={(event) => setCouponCode(event.target.value)}
+          name="coupon"
+          placeholder="Optional coupon code"
+        />
       </label>
       {error ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p> : null}
-      <p className="text-sm leading-7 text-stone-600">Payment is completed on the active hosted checkout provider. Discounts are validated before redirect.</p>
+      <div className="grid gap-3 rounded-[22px] bg-stone-50 p-4 text-sm leading-7 text-stone-600">
+        <p>Payment is completed on the active hosted checkout provider. Discounts are validated before redirect.</p>
+        <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-stone-500">
+          <span>Secure checkout</span>
+          <span>Instant enrollment</span>
+          <span>Coupon support</span>
+        </div>
+      </div>
       <Button
         type="button"
+        className="w-full justify-center"
         disabled={pending}
         onClick={async () => {
           setPending(true);

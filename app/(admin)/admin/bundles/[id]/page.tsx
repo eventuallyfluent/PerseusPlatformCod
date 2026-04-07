@@ -13,10 +13,12 @@ export const dynamic = "force-dynamic";
 
 export default async function BundleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [bundle, allCourses] = await Promise.all([
+  const [bundle, allCourses, upsellCourses, upsellBundles] = await Promise.all([
     prisma.bundle.findUnique({
       where: { id },
       include: {
+        upsellCourse: true,
+        upsellBundle: true,
         courses: { include: { course: true }, orderBy: { position: "asc" } },
         offers: true,
         faqs: { orderBy: { position: "asc" } },
@@ -24,12 +26,22 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
       },
     }),
     prisma.course.findMany({ orderBy: { title: "asc" } }),
+    prisma.course.findMany({
+      orderBy: { title: "asc" },
+      select: { id: true, title: true },
+    }),
+    prisma.bundle.findMany({
+      where: { id: { not: id } },
+      orderBy: { title: "asc" },
+      select: { id: true, title: true },
+    }),
   ]);
 
   if (!bundle) notFound();
   const selectedCourseIds = new Set(bundle.courses.map((item) => item.courseId));
   const previewOffer = getPrimaryOffer(bundle.offers);
   const salesPageConfig = parseSalesPageConfig(bundle.salesPageConfig);
+  const upsellTarget = bundle.upsellCourseId ? `course:${bundle.upsellCourseId}` : bundle.upsellBundleId ? `bundle:${bundle.upsellBundleId}` : "";
 
   return (
     <AdminShell title={bundle.title} description="One product record controls the bundle page, included courses, pricing, and access.">
@@ -75,7 +87,23 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
               <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={bundle.price.toString()} /></label>
               <label>Currency<input name="currency" defaultValue={bundle.currency} /></label>
               <label>Compare-at price<input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={bundle.compareAtPrice?.toString() ?? ""} /></label>
-              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">Checkout reads the bundle price directly. Use coupons for discounts instead of separate offers.</div>
+              <label className="lg:col-span-2">
+                Checkout upsell
+                <select name="upsellTarget" defaultValue={upsellTarget}>
+                  <option value="">No upsell</option>
+                  {upsellCourses.map((upsellCourse) => (
+                    <option key={`course-${upsellCourse.id}`} value={`course:${upsellCourse.id}`}>
+                      Course: {upsellCourse.title}
+                    </option>
+                  ))}
+                  {upsellBundles.map((upsellBundle) => (
+                    <option key={`bundle-${upsellBundle.id}`} value={`bundle:${upsellBundle.id}`}>
+                      Bundle: {upsellBundle.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">Checkout reads the bundle price directly. Use coupons for discounts and one optional upsell instead of separate offer management.</div>
             </ProductFormSection>
             <ProductFormSection title="Sales page" description="Section order and CTA copy.">
               <label>Hero metadata line<input name="salesPage.heroMetadataLine" defaultValue={salesPageConfig.heroMetadataLine ?? ""} /></label>

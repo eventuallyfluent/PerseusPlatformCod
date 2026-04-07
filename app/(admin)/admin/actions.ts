@@ -46,6 +46,24 @@ function parseSalesPageConfig(formData: FormData) {
   };
 }
 
+function parseUpsellSelection(value: FormDataEntryValue | null) {
+  const raw = String(value ?? "").trim();
+
+  if (!raw) {
+    return {
+      upsellCourseId: null,
+      upsellBundleId: null,
+    };
+  }
+
+  const [kind, id] = raw.split(":");
+
+  return {
+    upsellCourseId: kind === "course" ? id : null,
+    upsellBundleId: kind === "bundle" ? id : null,
+  };
+}
+
 function getDefaultHomepagePayload(type: HomepageSectionType) {
   return defaultHomepageSections().find((section) => section.type === type)!.payload;
 }
@@ -152,6 +170,7 @@ export async function saveHomepageSectionAction(formData: FormData) {
 
 export async function saveCourseAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
+  const upsell = parseUpsellSelection(formData.get("upsellTarget"));
   const payload = {
     slug: String(formData.get("slug") ?? ""),
     title: String(formData.get("title") ?? ""),
@@ -171,6 +190,7 @@ export async function saveCourseAction(formData: FormData) {
     price: Number(formData.get("price") ?? 0),
     currency: String(formData.get("currency") ?? "USD"),
     compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
+    ...upsell,
     legacyCourseId: String(formData.get("legacyCourseId") ?? ""),
     legacySlug: String(formData.get("legacySlug") ?? ""),
     legacyUrl: String(formData.get("legacyUrl") ?? ""),
@@ -184,6 +204,7 @@ export async function saveCourseAction(formData: FormData) {
 
 export async function saveBundleAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
+  const upsell = parseUpsellSelection(formData.get("upsellTarget"));
   const payload = bundleInputSchema.parse({
     slug: String(formData.get("slug") ?? ""),
     title: String(formData.get("title") ?? ""),
@@ -202,6 +223,7 @@ export async function saveBundleAction(formData: FormData) {
     price: Number(formData.get("price") ?? 0),
     currency: String(formData.get("currency") ?? "USD"),
     compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
+    ...upsell,
     legacyUrl: String(formData.get("legacyUrl") ?? ""),
   });
 

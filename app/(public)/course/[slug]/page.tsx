@@ -40,6 +40,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const { slug } = await params;
   const session = await auth();
   const course = await getCourseBySlug(slug);
+  const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`/course/${slug}#leave-review`)}`;
 
   if (!course) {
     const resolved = await resolvePublicRequest(`/course/${slug}`);
@@ -69,7 +70,16 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
               select: { quote: true, isApproved: true, rating: true },
             })
           : null;
-      return <CourseSalesPage course={resolved.course} payload={getCourseSalesPage(resolved.course)} canLeaveReview={canLeaveReview} existingReview={existingReview} />;
+      return (
+        <CourseSalesPage
+          course={resolved.course}
+          payload={getCourseSalesPage(resolved.course)}
+          canLeaveReview={canLeaveReview}
+          isLoggedIn={Boolean(session?.user?.email)}
+          reviewLoginHref={reviewLoginHref}
+          existingReview={existingReview}
+        />
+      );
     }
 
     notFound();
@@ -97,5 +107,14 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         })
       : null;
 
-  return <CourseSalesPage course={course} payload={payload} canLeaveReview={canLeaveReview} existingReview={existingReview} />;
+  return (
+    <CourseSalesPage
+      course={course}
+      payload={payload}
+      canLeaveReview={canLeaveReview}
+      isLoggedIn={Boolean(session?.user?.email)}
+      reviewLoginHref={reviewLoginHref}
+      existingReview={existingReview}
+    />
+  );
 }

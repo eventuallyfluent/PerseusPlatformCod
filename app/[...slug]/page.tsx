@@ -46,7 +46,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PublicPathPage({ params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params;
   const session = await auth();
-  const resolved = await resolvePublicRequest(buildRequestPath(slug));
+  const requestPath = buildRequestPath(slug);
+  const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`${requestPath}#leave-review`)}`;
+  const resolved = await resolvePublicRequest(requestPath);
 
   if (!resolved) {
     notFound();
@@ -81,5 +83,14 @@ export default async function PublicPathPage({ params }: { params: Promise<{ slu
         })
       : null;
 
-  return <CourseSalesPage course={resolved.course} payload={getCourseSalesPage(resolved.course)} canLeaveReview={canLeaveReview} existingReview={existingReview} />;
+  return (
+    <CourseSalesPage
+      course={resolved.course}
+      payload={getCourseSalesPage(resolved.course)}
+      canLeaveReview={canLeaveReview}
+      isLoggedIn={Boolean(session?.user?.email)}
+      reviewLoginHref={reviewLoginHref}
+      existingReview={existingReview}
+    />
+  );
 }

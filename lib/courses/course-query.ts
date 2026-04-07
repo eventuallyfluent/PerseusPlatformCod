@@ -1,5 +1,41 @@
 export const courseInclude = {
   instructor: true,
+  upsellCourse: {
+    include: {
+      instructor: true,
+      offers: {
+        include: {
+          prices: true,
+        },
+      },
+    },
+  },
+  upsellBundle: {
+    include: {
+      courses: {
+        include: {
+          course: {
+            include: {
+              instructor: true,
+              offers: {
+                include: {
+                  prices: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          position: "asc" as const,
+        },
+      },
+      offers: {
+        include: {
+          prices: true,
+        },
+      },
+    },
+  },
   modules: {
     include: {
       lessons: true,

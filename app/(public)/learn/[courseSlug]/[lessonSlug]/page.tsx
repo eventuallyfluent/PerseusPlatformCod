@@ -27,6 +27,7 @@ export default async function LessonPage({ params }: { params: Promise<{ courseS
 
   const previewEnrolledAt = session.user.isAdmin ? new Date(0) : null;
   const effectiveEnrolledAt = enrollment?.enrolledAt ?? previewEnrolledAt;
+  const previewMode = Boolean(session.user.isAdmin && !enrollment);
 
   if (!effectiveEnrolledAt) {
     notFound();
@@ -38,10 +39,39 @@ export default async function LessonPage({ params }: { params: Promise<{ courseS
     notFound();
   }
 
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email! },
+    select: { id: true },
+  });
+
+  const completedLessonIds = user
+    ? new Set(
+        (
+          await prisma.lessonCompletion.findMany({
+            where: {
+              userId: user.id,
+              lesson: {
+                module: {
+                  courseId: course.id,
+                },
+              },
+            },
+            select: { lessonId: true },
+          })
+        ).map((item) => item.lessonId),
+      )
+    : new Set<string>();
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(143,44,255,0.08),transparent_18%),linear-gradient(180deg,#0d0f1d,#13152a_32%,#0c0e1d_100%)]">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        <CoursePlayerLayout course={course} activeLessonSlug={lessonSlug} enrolledAt={effectiveEnrolledAt} />
+        <CoursePlayerLayout
+          course={course}
+          activeLessonSlug={lessonSlug}
+          enrolledAt={effectiveEnrolledAt}
+          previewMode={previewMode}
+          completedLessonIds={completedLessonIds}
+        />
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { normalizeSectionOrder, parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import type { CourseWithRelations, GeneratedSalesPagePayload, SalesPageOfferSummary } from "@/types";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
+import { getPublicReviewName } from "@/lib/testimonials/public-review-name";
 
 function readStringArray(value: unknown) {
   if (Array.isArray(value)) {
@@ -66,7 +67,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
       imageUrl: course.heroImageUrl,
       primaryCtaLabel: config.primaryCtaLabel || "Enroll now - get instant access",
       primaryCtaHref: offers[0]?.checkoutUrl ?? resolveCoursePublicPath(course),
-      secondaryCtaLabel: config.secondaryCtaLabel || "View curriculum",
+      secondaryCtaLabel: config.secondaryCtaLabel || "See full curriculum",
       secondaryCtaHref: "#curriculum",
       primaryOffer: offers[0] ?? null,
     },
@@ -133,7 +134,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
       eyebrow: "Testimonies",
       title: "What students say after entering the work",
       items: approvedTestimonials.map((testimonial) => ({
-        name: testimonial.name,
+        name: getPublicReviewName(testimonial.name),
         quote: testimonial.quote,
         rating: testimonial.rating,
         source: course.title,
@@ -160,7 +161,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
       label: config.finalCtaLabel || (offers.length > 0 ? "Enroll now - get instant access" : "Join the waitlist"),
       body:
         config.finalCtaBody ||
-        "One dominant action, one clean buying path, and a clear move into the learner portal after enrollment.",
+        "A clear buying path, immediate course access, and a direct move into the learner portal after enrollment.",
     },
     offers,
   };

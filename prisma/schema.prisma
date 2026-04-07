@@ -88,6 +88,7 @@ model User {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   enrollments    Enrollment[]
+  lessonCompletions LessonCompletion[]
   orders         Order[]
   accounts       Account[]
   sessions       Session[]
@@ -129,6 +130,8 @@ model Course {
   price            Decimal        @default(0) @db.Decimal(10, 2)
   currency         String         @default("USD")
   compareAtPrice   Decimal?       @db.Decimal(10, 2)
+  upsellCourseId   String?
+  upsellBundleId   String?
   legacyCourseId   String?        @unique
   legacySlug       String?
   legacyUrl        String?        @unique
@@ -137,6 +140,10 @@ model Course {
   seoDescription   String?
   instructorId     String
   instructor       Instructor     @relation(fields: [instructorId], references: [id])
+  upsellCourse     Course?        @relation("CourseUpsellCourse", fields: [upsellCourseId], references: [id])
+  upsellBundle     Bundle?        @relation("CourseUpsellBundle", fields: [upsellBundleId], references: [id])
+  upsellChildren   Course[]       @relation("CourseUpsellCourse")
+  bundleUpsells    Bundle[]       @relation("BundleUpsellCourse")
   modules          Module[]
   offers           Offer[]
   faqs             FAQ[]
@@ -165,10 +172,16 @@ model Bundle {
   price            Decimal        @default(0) @db.Decimal(10, 2)
   currency         String         @default("USD")
   compareAtPrice   Decimal?       @db.Decimal(10, 2)
+  upsellCourseId   String?
+  upsellBundleId   String?
   legacyUrl        String?        @unique
   publicPath       String?        @unique
   seoTitle         String?
   seoDescription   String?
+  upsellCourse     Course?        @relation("BundleUpsellCourse", fields: [upsellCourseId], references: [id])
+  upsellBundle     Bundle?        @relation("BundleUpsellBundle", fields: [upsellBundleId], references: [id])
+  courseUpsells    Course[]       @relation("CourseUpsellBundle")
+  upsellChildren   Bundle[]       @relation("BundleUpsellBundle")
   courses          BundleCourse[]
   offers           Offer[]
   faqs             FAQ[]
@@ -216,6 +229,7 @@ model Lesson {
   dripDays      Int?
   durationLabel String?
   module        Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  completions   LessonCompletion[]
 
   @@unique([moduleId, position])
   @@unique([moduleId, slug])
@@ -259,6 +273,17 @@ model Enrollment {
   course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
+}
+
+model LessonCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  completedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
 }
 
 model Order {

@@ -17,11 +17,13 @@ function formatLessonType(type: string) {
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [course, instructors] = await Promise.all([
+  const [course, instructors, upsellCourses, upsellBundles] = await Promise.all([
     prisma.course.findUnique({
       where: { id },
       include: {
         instructor: true,
+        upsellCourse: true,
+        upsellBundle: true,
         modules: { include: { lessons: { orderBy: { position: "asc" } } }, orderBy: { position: "asc" } },
         offers: true,
         faqs: { orderBy: { position: "asc" } },
@@ -30,11 +32,21 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       },
     }),
     prisma.instructor.findMany({ orderBy: { name: "asc" } }),
+    prisma.course.findMany({
+      where: { id: { not: id } },
+      orderBy: { title: "asc" },
+      select: { id: true, title: true },
+    }),
+    prisma.bundle.findMany({
+      orderBy: { title: "asc" },
+      select: { id: true, title: true },
+    }),
   ]);
 
   if (!course) notFound();
   const previewOffer = getPrimaryOffer(course.offers);
   const salesPageConfig = parseSalesPageConfig(course.salesPageConfig);
+  const upsellTarget = course.upsellCourseId ? `course:${course.upsellCourseId}` : course.upsellBundleId ? `bundle:${course.upsellBundleId}` : "";
 
   return (
     <AdminShell title={course.title} description="One product record controls the page, curriculum, pricing, and delivery.">
@@ -83,7 +95,23 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={course.price.toString()} /></label>
                 <label>Currency<input name="currency" defaultValue={course.currency} /></label>
                 <label>Compare-at price<input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={course.compareAtPrice?.toString() ?? ""} /></label>
-                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">Checkout reads the course price directly. Use coupons for discounts instead of separate offers.</div>
+                <label className="lg:col-span-2">
+                  Checkout upsell
+                  <select name="upsellTarget" defaultValue={upsellTarget}>
+                    <option value="">No upsell</option>
+                    {upsellCourses.map((upsellCourse) => (
+                      <option key={`course-${upsellCourse.id}`} value={`course:${upsellCourse.id}`}>
+                        Course: {upsellCourse.title}
+                      </option>
+                    ))}
+                    {upsellBundles.map((upsellBundle) => (
+                      <option key={`bundle-${upsellBundle.id}`} value={`bundle:${upsellBundle.id}`}>
+                        Bundle: {upsellBundle.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">Checkout reads the course price directly. Use coupons for discounts and one optional upsell instead of separate offer management.</div>
               </ProductFormSection>
               <ProductFormSection title="Sales page" description="CTA copy and section visibility.">
                 <label>Hero metadata line<input name="salesPage.heroMetadataLine" defaultValue={salesPageConfig.heroMetadataLine ?? ""} /></label>

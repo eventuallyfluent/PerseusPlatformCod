@@ -6,11 +6,15 @@ import { useRouter } from "next/navigation";
 type ImportBatchRunnerProps = {
   batchId: string;
   isProcessing: boolean;
+  initialProcessedCount: number;
+  initialTotalCount: number;
 };
 
-export function ImportBatchRunner({ batchId, isProcessing }: ImportBatchRunnerProps) {
+export function ImportBatchRunner({ batchId, isProcessing, initialProcessedCount, initialTotalCount }: ImportBatchRunnerProps) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
+  const [processedCount, setProcessedCount] = useState(initialProcessedCount);
+  const [totalCount, setTotalCount] = useState(initialTotalCount);
 
   useEffect(() => {
     if (!isProcessing) {
@@ -20,35 +24,42 @@ export function ImportBatchRunner({ batchId, isProcessing }: ImportBatchRunnerPr
     let cancelled = false;
 
     async function run() {
-      setMessage("Processing next import chunk...");
+      let nextProcessed = initialProcessedCount;
+      let nextTotal = initialTotalCount;
 
-      const response = await fetch(`/api/imports/batches/${batchId}/process`, {
-        method: "POST",
-      });
+      while (!cancelled) {
+        setMessage(nextTotal > 0 ? `Processed ${nextProcessed} of ${nextTotal} rows...` : "Processing import...");
 
-      if (!response.ok) {
-        setMessage("Processing stopped. Refresh to inspect the batch report.");
-        router.refresh();
-        return;
-      }
+        const response = await fetch(`/api/imports/batches/${batchId}/process`, {
+          method: "POST",
+        });
 
-      const data = (await response.json()) as {
-        status: string;
-        hasMore: boolean;
-        executionSummary?: {
-          processedCount?: number;
-          totalCount?: number;
+        if (!response.ok) {
+          setMessage("Processing stopped. Refresh to inspect the batch report.");
+          router.refresh();
+          return;
+        }
+
+        const data = (await response.json()) as {
+          status: string;
+          hasMore: boolean;
+          executionSummary?: {
+            processedCount?: number;
+            totalCount?: number;
+          };
         };
-      };
 
-      const processed = Number(data.executionSummary?.processedCount ?? 0);
-      const total = Number(data.executionSummary?.totalCount ?? 0);
+        nextProcessed = Number(data.executionSummary?.processedCount ?? nextProcessed);
+        nextTotal = Number(data.executionSummary?.totalCount ?? nextTotal);
+        setProcessedCount(nextProcessed);
+        setTotalCount(nextTotal);
 
-      if (!cancelled) {
-        setMessage(total > 0 ? `Processed ${processed} of ${total} rows...` : "Processing import...");
+        if (!data.hasMore || data.status !== "PROCESSING") {
+          setMessage(null);
+          router.refresh();
+          return;
+        }
       }
-
-      router.refresh();
     }
 
     void run();
@@ -56,11 +67,16 @@ export function ImportBatchRunner({ batchId, isProcessing }: ImportBatchRunnerPr
     return () => {
       cancelled = true;
     };
-  }, [batchId, isProcessing, router]);
+  }, [batchId, initialProcessedCount, initialTotalCount, isProcessing, router]);
 
-  if (!isProcessing || !message) {
+  if (!isProcessing) {
     return null;
   }
 
-  return <p className="rounded-[20px] bg-amber-50 px-4 py-3 text-sm text-amber-900">{message}</p>;
+  return (
+    <div className="space-y-2 rounded-[20px] bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      <p>{message ?? "Processing import..."}</p>
+      {totalCount > 0 ? <p className="text-xs font-medium uppercase tracking-[0.2em]">{processedCount} / {totalCount}</p> : null}
+    </div>
+  );
 }

@@ -30,7 +30,7 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
   return (
     <AdminShell title={`Import ${batch.filename}`} description="Dry-run and execution reports remain attached to the batch.">
       <Card className="space-y-4">
-        <ImportBatchRunner batchId={batch.id} isProcessing={isProcessing} />
+        <ImportBatchRunner batchId={batch.id} isProcessing={isProcessing} initialProcessedCount={processedCount} initialTotalCount={totalCount} />
         <div className="grid gap-3 text-sm text-stone-600">
           <div>Type: {batch.type}</div>
           <div>Status: {batch.status}</div>

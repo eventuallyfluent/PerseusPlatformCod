@@ -40,8 +40,8 @@ export function CoursePlayerLayout({ course, activeLessonSlug, enrolledAt, previ
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
-      <aside className="space-y-4 lg:flex lg:h-[calc(100svh-7.5rem)] lg:flex-col lg:overflow-hidden">
+    <div className="grid gap-6 pb-6 lg:grid-cols-[340px_minmax(0,1fr)]">
+      <aside className="space-y-4 lg:flex lg:h-[calc(100svh-6.75rem)] lg:flex-col lg:overflow-hidden">
         <div className="space-y-5 rounded-[30px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-6 text-[var(--portal-text)] shadow-[0_20px_40px_rgba(10,11,24,0.24)] lg:flex-1 lg:overflow-y-auto">
           {course.modules.map((module, moduleIndex) => (
             <div key={module.id} className="space-y-3">
@@ -87,14 +87,14 @@ export function CoursePlayerLayout({ course, activeLessonSlug, enrolledAt, previ
         </div>
       </aside>
 
-      <div className="space-y-6 lg:h-[calc(100svh-7.5rem)] lg:overflow-hidden">
+      <div className="space-y-6 lg:h-[calc(100svh-6.75rem)]">
         <div className="space-y-6 rounded-[30px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-8 text-[var(--portal-text)] shadow-[0_20px_40px_rgba(10,11,24,0.24)]">
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div className="space-y-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--portal-muted)]">{course.title}</p>
                 <Badge variant="portal">{activeLesson.moduleTitle}</Badge>
-                <h1 className="text-5xl leading-none tracking-[-0.04em]">{activeLesson.title}</h1>
+                <h1 className="text-4xl leading-[0.95] tracking-[-0.04em] lg:text-[3.25rem]">{activeLesson.title}</h1>
                 {activeLesson.durationLabel ? <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--portal-muted)]">{activeLesson.durationLabel}</p> : null}
               </div>
               <FocusModeButton targetId={playerId} />
@@ -103,7 +103,7 @@ export function CoursePlayerLayout({ course, activeLessonSlug, enrolledAt, previ
               {activeLesson.videoUrl ? (
                 <StreamableEmbed url={activeLesson.videoUrl} title={activeLesson.title} />
               ) : (
-                <div className="flex aspect-video w-full items-center justify-center rounded-[24px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] text-center text-[var(--portal-muted)]">
+                <div className="flex aspect-video max-h-[52svh] w-full items-center justify-center rounded-[24px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] text-center text-[var(--portal-muted)]">
                   <div className="space-y-2 px-6">
                     <p className="text-sm font-semibold uppercase tracking-[0.28em]">Video placeholder</p>
                     <p className="text-base leading-7">Video not added yet.</p>
@@ -119,7 +119,7 @@ export function CoursePlayerLayout({ course, activeLessonSlug, enrolledAt, previ
                 Download lesson resource
               </a>
             ) : null}
-            <form action={markLessonCompleteAction} className="pt-2">
+            <form action={markLessonCompleteAction} className="pt-2 pb-2">
               <input type="hidden" name="lessonId" value={activeLesson.id} />
               <input type="hidden" name="courseSlug" value={course.slug} />
               <input type="hidden" name="lessonSlug" value={activeLesson.slug} />

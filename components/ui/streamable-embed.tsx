@@ -47,7 +47,7 @@ export function StreamableEmbed({ url, title }: StreamableEmbedProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-[24px] border border-stone-200 bg-black">
+    <div className="max-h-[52svh] overflow-hidden rounded-[24px] border border-stone-200 bg-black">
       <iframe
         src={embedUrl}
         title={title}

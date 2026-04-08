@@ -81,14 +81,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
                       : "linear-gradient(135deg, #f5f5f4, #e7e5e4)",
                     }}
                   />
-                  <div className="mt-4">
-                    <button
-                      className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50"
-                      type="submit"
-                    >
-                      Save cover image changes
-                    </button>
-                  </div>
+                  <p className="mt-4 text-sm leading-7 text-stone-600">Change the image URL here, then use the main bundle save button at the top or bottom of the page.</p>
                 </div>
               </ProductFormSection>
             <ProductFormSection title="Pricing" description="Set the live bundle price here. Coupons apply discounts at checkout.">

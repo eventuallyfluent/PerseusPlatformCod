@@ -120,6 +120,11 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                           {lesson.durationLabel ? <Badge variant="muted">{lesson.durationLabel}</Badge> : null}
                           {lesson.dripDays ? <Badge variant="accent">Day {lesson.dripDays}</Badge> : null}
                         </div>
+                        {lesson.isPreview && lesson.previewHref ? (
+                          <Link href={lesson.previewHref} className="inline-flex text-sm font-semibold text-[#f4d27a] underline underline-offset-4">
+                            Watch preview
+                          </Link>
+                        ) : null}
                       </div>
                       <div className="flex items-start justify-start lg:justify-end">
                         <Badge variant={lesson.isPreview ? "premium" : "portal"}>{lesson.isPreview ? "Preview" : "Included"}</Badge>

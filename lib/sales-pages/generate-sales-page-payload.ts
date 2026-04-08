@@ -104,6 +104,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
           .map((lesson) => ({
             title: lesson.title,
             isPreview: lesson.isPreview,
+            previewHref: lesson.isPreview ? `/preview/${course.slug}/${lesson.slug}` : null,
             type: lesson.type,
             durationLabel: lesson.durationLabel,
             dripDays: lesson.dripDays,

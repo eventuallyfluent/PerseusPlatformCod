@@ -15,6 +15,7 @@ type CoursePlayerLayoutProps = {
   enrolledAt: Date;
   previewMode: boolean;
   completedLessonIds: Set<string>;
+  publicPreview?: boolean;
 };
 
 type LessonRecord = CourseWithRelations["modules"][number]["lessons"][number] & {
@@ -102,7 +103,14 @@ function FocusModeOverlay({
   );
 }
 
-export function CoursePlayerLayout({ course, activeLessonSlug, enrolledAt, previewMode, completedLessonIds }: CoursePlayerLayoutProps) {
+export function CoursePlayerLayout({
+  course,
+  activeLessonSlug,
+  enrolledAt,
+  previewMode,
+  completedLessonIds,
+  publicPreview = false,
+}: CoursePlayerLayoutProps) {
   const [focusModeActive, setFocusModeActive] = useState(false);
 
   const lessons = course.modules.flatMap((module) =>
@@ -144,10 +152,24 @@ export function CoursePlayerLayout({ course, activeLessonSlug, enrolledAt, previ
                     const unlocked = isLessonUnlocked({ enrolledAt, dripDays: lesson.dripDays });
                     const completed = completedLessonIds.has(lesson.id);
 
+                    const lessonHref = publicPreview ? `/preview/${course.slug}/${lesson.slug}` : `/learn/${course.slug}/${lesson.slug}`;
+
+                    if (publicPreview && !lesson.isPreview) {
+                      return (
+                        <div key={lesson.id} className="rounded-[22px] border border-dashed border-[var(--portal-border)] bg-[rgba(255,255,255,0.02)] px-4 py-3 text-sm text-[#877ca7]">
+                          <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em]">
+                            <span>Members only</span>
+                            <span>{lesson.durationLabel ?? "Included"}</span>
+                          </span>
+                          <span className="mt-1 block font-semibold">{lesson.title}</span>
+                        </div>
+                      );
+                    }
+
                     return unlocked ? (
                       <Link
                         key={lesson.id}
-                        href={`/learn/${course.slug}/${lesson.slug}`}
+                        href={lessonHref}
                         className={`block rounded-[22px] border px-4 py-3 text-sm transition ${
                           lesson.slug === activeLessonSlug
                             ? "border-[rgba(143,44,255,0.45)] bg-[rgba(143,44,255,0.14)] text-white shadow-[0_14px_30px_rgba(28,25,23,0.16)]"
@@ -195,23 +217,25 @@ export function CoursePlayerLayout({ course, activeLessonSlug, enrolledAt, previ
             </div>
             <div className="space-y-6">
               {activeLesson.content ? <div className="max-w-3xl text-base leading-8 text-[#ddd5f5]">{activeLesson.content}</div> : null}
-              {activeLesson.downloadUrl ? (
+              {!publicPreview && activeLesson.downloadUrl ? (
                 <a className="inline-flex rounded-full border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-5 py-3 text-sm font-semibold text-[#d9d1f2] transition hover:bg-[rgba(255,255,255,0.08)]" href={activeLesson.downloadUrl} target="_blank" rel="noreferrer">
                   Download lesson resource
                 </a>
               ) : null}
-              <form action={markLessonCompleteAction} className="pt-1 pb-3">
-                <input type="hidden" name="lessonId" value={activeLesson.id} />
-                <input type="hidden" name="courseSlug" value={course.slug} />
-                <input type="hidden" name="lessonSlug" value={activeLesson.slug} />
-                <button
-                  className="inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[var(--accent)] px-6 py-4 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(143,44,255,0.18)] transition hover:bg-[var(--accent-strong)]"
-                  type="submit"
-                  disabled={previewMode}
-                >
-                  {activeLesson.isCompleted ? "Marked complete" : "Mark as complete"}
-                </button>
-              </form>
+              {!publicPreview ? (
+                <form action={markLessonCompleteAction} className="pt-1 pb-3">
+                  <input type="hidden" name="lessonId" value={activeLesson.id} />
+                  <input type="hidden" name="courseSlug" value={course.slug} />
+                  <input type="hidden" name="lessonSlug" value={activeLesson.slug} />
+                  <button
+                    className="inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[var(--accent)] px-6 py-4 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(143,44,255,0.18)] transition hover:bg-[var(--accent-strong)]"
+                    type="submit"
+                    disabled={previewMode}
+                  >
+                    {activeLesson.isCompleted ? "Marked complete" : "Mark as complete"}
+                  </button>
+                </form>
+              ) : null}
             </div>
           </div>
         </div>

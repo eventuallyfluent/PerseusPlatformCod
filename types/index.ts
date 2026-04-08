@@ -181,6 +181,7 @@ export type GeneratedSalesPagePayload = SalesPageBasePayload & {
       lessons: {
         title: string;
         isPreview: boolean;
+        previewHref?: string | null;
         type: string;
         durationLabel?: string | null;
         dripDays?: number | null;

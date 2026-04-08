@@ -259,7 +259,11 @@ export async function saveCourseAction(formData: FormData) {
 
   const course = id ? await updateCourse(id, payload) : await createCourse(payload);
   revalidatePath("/admin/courses");
+  revalidatePath("/admin/products");
+  revalidatePath("/courses");
+  revalidatePath("/");
   revalidatePath(`/admin/courses/${course.id}`);
+  revalidatePath(`/course/${course.slug}`);
   redirect(`/admin/courses/${course.id}`);
 }
 

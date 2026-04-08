@@ -89,14 +89,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                         : "linear-gradient(135deg, #f5f5f4, #e7e5e4)",
                     }}
                   />
-                  <div className="mt-4">
-                    <button
-                      className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50"
-                      type="submit"
-                    >
-                      Save cover image changes
-                    </button>
-                  </div>
+                  <p className="mt-4 text-sm leading-7 text-stone-600">Change the image URL here, then use the main course save button at the top or bottom of the page.</p>
                 </div>
               </ProductFormSection>
               <ProductFormSection title="Pricing" description="Set the live course price here. Coupons apply discounts at checkout.">
@@ -264,7 +257,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                             <label>Drip days<input name="dripDays" type="number" min="0" defaultValue={lesson.dripDays ?? ""} /></label>
                             <label>Status<select name="status" defaultValue={lesson.status}><option value="DRAFT">DRAFT</option><option value="PUBLISHED">PUBLISHED</option></select></label>
                           </div>
-                          <label className="mt-3 flex items-center gap-3 text-stone-700"><input className="w-auto" type="checkbox" name="isPreview" value="true" defaultChecked={lesson.isPreview} />Preview lesson</label>
+                          <div className="mt-3 space-y-2">
+                            <label className="flex items-center gap-3 text-stone-700"><input className="w-auto" type="checkbox" name="isPreview" value="true" defaultChecked={lesson.isPreview} />Preview lesson</label>
+                            <p className="text-sm leading-6 text-stone-600">Preview lessons get a public Watch preview link on the sales page. Leave this off for buyer-only lessons.</p>
+                          </div>
                         </details>
                         <div className="flex flex-wrap gap-3">
                           <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Save lesson</button>

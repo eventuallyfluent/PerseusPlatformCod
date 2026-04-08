@@ -34,7 +34,7 @@ export default async function InstructorsPage() {
                 <td>{instructor.slug}</td>
                 <td>{instructor.updatedAt.toLocaleDateString()}</td>
                 <td>
-                  <Link href={`/admin/instructors/${instructor.id}`} className="underline">
+                  <Link href={`/admin/instructors/${instructor.id}`} className="underline" prefetch={false}>
                     Edit
                   </Link>
                 </td>

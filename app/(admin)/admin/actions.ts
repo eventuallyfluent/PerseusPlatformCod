@@ -183,7 +183,8 @@ export async function saveCollectionAction(formData: FormData) {
   revalidatePath("/courses");
   revalidatePath("/");
   revalidatePath("/admin/collections");
-  redirect(`/admin/collections/${collection.id}`);
+  revalidatePath(`/admin/collections/${collection.id}`);
+  redirect(`/admin/collections/${collection.id}?saved=details`);
 }
 
 export async function saveCollectionCoursesAction(formData: FormData) {
@@ -221,6 +222,7 @@ export async function saveCollectionCoursesAction(formData: FormData) {
   revalidatePath("/courses");
   revalidatePath("/");
   revalidatePath(`/admin/collections/${collectionId}`);
+  redirect(`/admin/collections/${collectionId}?saved=courses`);
 }
 
 export async function deleteCollectionAction(formData: FormData) {

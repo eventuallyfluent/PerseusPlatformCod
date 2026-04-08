@@ -6,6 +6,7 @@ import { saveCollectionAction } from "@/app/(admin)/admin/actions";
 export const dynamic = "force-dynamic";
 
 export default function NewCollectionPage() {
+  const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
   return (
     <AdminShell
       title="New collection"
@@ -44,6 +45,7 @@ export default function NewCollectionPage() {
             label="Collection image URL"
             previewLabel="Collection image preview"
             uploadFolder="collections"
+            uploadEnabled={uploadEnabled}
           />
           <label className="block">
             Description

@@ -8,6 +8,7 @@ type ImageFieldProps = {
   defaultValue?: string | null;
   previewLabel: string;
   uploadFolder: "courses" | "bundles" | "collections" | "instructors";
+  uploadEnabled?: boolean;
 };
 
 export function ImageField({
@@ -16,6 +17,7 @@ export function ImageField({
   defaultValue = "",
   previewLabel,
   uploadFolder,
+  uploadEnabled = false,
 }: ImageFieldProps) {
   const inputId = useId();
   const fileId = useId();
@@ -35,12 +37,16 @@ export function ImageField({
           placeholder="https://..."
         />
       </label>
-      <p className="mt-2 text-sm leading-6 text-stone-600">Paste an image URL here or upload one below, then save the main form once.</p>
+      <p className="mt-2 text-sm leading-6 text-stone-600">
+        {uploadEnabled
+          ? "Paste an image URL here or upload one below, then save the main form once."
+          : "Paste an image URL here. Upload storage is not configured yet, so uploads are disabled."}
+      </p>
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <label
           htmlFor={fileId}
-          className={`inline-flex cursor-pointer items-center rounded-full border border-stone-300 px-4 py-3 text-sm font-medium text-stone-800 transition ${
-            uploading ? "pointer-events-none opacity-60" : "hover:bg-stone-100"
+          className={`inline-flex items-center rounded-full border border-stone-300 px-4 py-3 text-sm font-medium text-stone-800 transition ${
+            uploading || !uploadEnabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-stone-100"
           }`}
         >
           {uploading ? "Uploading..." : "Upload image"}
@@ -50,6 +56,7 @@ export function ImageField({
           type="file"
           accept="image/*"
           className="hidden"
+          disabled={!uploadEnabled}
           onChange={async (event) => {
             const file = event.target.files?.[0];
             if (!file) return;
@@ -82,7 +89,7 @@ export function ImageField({
             }
           }}
         />
-        <span className="text-sm text-stone-600">Paste a URL or upload directly.</span>
+        <span className="text-sm text-stone-600">{uploadEnabled ? "Paste a URL or upload directly." : "URL entry is available now."}</span>
       </div>
       {message ? <p className="mt-3 text-sm leading-6 text-stone-600">{message}</p> : null}
       <div className="mt-4">

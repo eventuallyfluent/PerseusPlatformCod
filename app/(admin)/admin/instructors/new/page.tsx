@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { saveInstructorAction } from "@/app/(admin)/admin/actions";
 
 export default function NewInstructorPage() {
+  const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
   return (
     <AdminShell title="New instructor" description="Structured bio fields drive the public page.">
       <Card>
@@ -22,6 +23,7 @@ export default function NewInstructorPage() {
               label="Image URL"
               previewLabel="Instructor image preview"
               uploadFolder="instructors"
+              uploadEnabled={uploadEnabled}
             />
           </div>
           <label>

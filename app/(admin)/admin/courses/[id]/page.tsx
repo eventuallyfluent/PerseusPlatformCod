@@ -18,6 +18,7 @@ function formatLessonType(type: string) {
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
   const [course, instructors, upsellCourses, upsellBundles] = await Promise.all([
     prisma.course.findUnique({
       where: { id },
@@ -82,6 +83,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   defaultValue={course.heroImageUrl}
                   previewLabel="Current cover preview"
                   uploadFolder="courses"
+                  uploadEnabled={uploadEnabled}
                 />
                 <label>Sales video URL<input name="salesVideoUrl" defaultValue={course.salesVideoUrl ?? ""} /></label>
                 <label>SEO title<input name="seoTitle" defaultValue={course.seoTitle ?? ""} /></label>

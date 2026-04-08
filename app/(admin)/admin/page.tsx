@@ -127,7 +127,7 @@ export default async function AdminOverviewPage() {
                   <Link href={page.path} className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100">
                     View page
                   </Link>
-                  <Link href={editHref} className="rounded-full bg-stone-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-stone-800">
+                  <Link href={editHref} className="rounded-full bg-stone-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-stone-800" prefetch={false}>
                     Manage
                   </Link>
                 </div>

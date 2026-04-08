@@ -8,8 +8,16 @@ import { deleteCollectionAction, saveCollectionAction, saveCollectionCoursesActi
 
 export const dynamic = "force-dynamic";
 
-export default async function CollectionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CollectionDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ saved?: string }>;
+}) {
   const { id } = await params;
+  const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const [collection, courses] = await Promise.all([
     prisma.collection.findUnique({
       where: { id },
@@ -30,6 +38,13 @@ export default async function CollectionDetailPage({ params }: { params: Promise
   }
 
   const selectedCourseIds = new Set(collection.courses.map((item) => item.courseId));
+  const saved = resolvedSearchParams?.saved ?? "";
+  const feedbackMessage =
+    saved === "details"
+      ? "Collection details saved."
+      : saved === "courses"
+        ? "Collection courses saved."
+        : "";
 
   return (
     <AdminShell
@@ -38,6 +53,7 @@ export default async function CollectionDetailPage({ params }: { params: Promise
     >
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <Card className="space-y-8 bg-white p-8">
+          {feedbackMessage ? <p className="rounded-[18px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedbackMessage}</p> : null}
           <form id="collection-details-form" action={saveCollectionAction} className="space-y-8">
             <input type="hidden" name="id" value={collection.id} />
             <div className="grid gap-4 md:grid-cols-2">
@@ -72,6 +88,7 @@ export default async function CollectionDetailPage({ params }: { params: Promise
               defaultValue={collection.imageUrl}
               previewLabel="Current collection image"
               uploadFolder="collections"
+              uploadEnabled={uploadEnabled}
             />
             <label className="block">
               Description

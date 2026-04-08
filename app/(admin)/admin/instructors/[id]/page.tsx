@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function InstructorDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
   const instructor = await prisma.instructor.findUnique({
     where: { id },
     include: { courses: true },
@@ -38,6 +39,7 @@ export default async function InstructorDetailPage({ params }: { params: Promise
               defaultValue={instructor.imageUrl}
               previewLabel="Current image preview"
               uploadFolder="instructors"
+              uploadEnabled={uploadEnabled}
             />
           </div>
           <label>

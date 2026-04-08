@@ -25,6 +25,12 @@ type LessonRecord = CourseWithRelations["modules"][number]["lessons"][number] & 
 };
 
 function LessonMedia({ lesson, focus = false }: { lesson: LessonRecord; focus?: boolean }) {
+  const supportsVideoSurface = lesson.type === "VIDEO" || lesson.type === "MIXED";
+
+  if (!supportsVideoSurface && !lesson.videoUrl) {
+    return null;
+  }
+
   return lesson.videoUrl ? (
     <div className={focus ? "h-full min-h-0" : undefined}>
       <StreamableEmbed url={lesson.videoUrl} title={lesson.title} focus={focus} />

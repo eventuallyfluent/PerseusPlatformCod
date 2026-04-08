@@ -7,6 +7,7 @@ import { saveBundleAction } from "@/app/(admin)/admin/actions";
 export const dynamic = "force-dynamic";
 
 export default function NewBundlePage() {
+  const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
   return (
     <AdminShell title="New bundle" description="A bundle sells multiple existing courses through one public page and checkout flow.">
       <ProductFormShell
@@ -98,6 +99,7 @@ export default function NewBundlePage() {
             label="Bundle cover image URL"
             previewLabel="Cover preview"
             uploadFolder="bundles"
+            uploadEnabled={uploadEnabled}
           />
           <label>
             Sales video URL

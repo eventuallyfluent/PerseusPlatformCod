@@ -137,7 +137,7 @@ export default async function AdminProductsPage() {
                       Preview
                     </Link>
                   ) : null}
-                  <Link href={product.editHref} className="underline">
+                  <Link href={product.editHref} className="underline" prefetch={false}>
                     Edit
                   </Link>
                 </td>

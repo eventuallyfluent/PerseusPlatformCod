@@ -41,7 +41,7 @@ export default async function AdminCoursesPage() {
                 <td>{course.price.toString()} {course.currency}</td>
                 <td>{course.updatedAt.toLocaleDateString()}</td>
                 <td>
-                  <Link href={`/admin/courses/${course.id}`} className="underline">
+                  <Link href={`/admin/courses/${course.id}`} className="underline" prefetch={false}>
                     Edit
                   </Link>
                 </td>

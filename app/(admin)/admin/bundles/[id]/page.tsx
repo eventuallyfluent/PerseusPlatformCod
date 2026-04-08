@@ -14,6 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function BundleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
   const [bundle, allCourses, upsellCourses, upsellBundles] = await Promise.all([
     prisma.bundle.findUnique({
       where: { id },
@@ -74,6 +75,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
                 defaultValue={bundle.heroImageUrl}
                 previewLabel="Current cover preview"
                 uploadFolder="bundles"
+                uploadEnabled={uploadEnabled}
               />
               <label>Sales video URL<input name="salesVideoUrl" defaultValue={bundle.salesVideoUrl ?? ""} /></label>
               <label>SEO title<input name="seoTitle" defaultValue={bundle.seoTitle ?? ""} /></label>

@@ -9,6 +9,7 @@ import { saveCourseAction } from "@/app/(admin)/admin/actions";
 export const dynamic = "force-dynamic";
 
 export default async function NewCoursePage() {
+  const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
   const instructors = await prisma.instructor.findMany({
     orderBy: { name: "asc" },
   });
@@ -146,6 +147,7 @@ export default async function NewCoursePage() {
             label="Course cover image URL"
             previewLabel="Cover preview"
             uploadFolder="courses"
+            uploadEnabled={uploadEnabled}
           />
           <label>
             Sales video URL

@@ -41,7 +41,7 @@ export default async function AdminBundlesPage() {
                 <td>{bundle.price.toString()} {bundle.currency}</td>
                 <td>{bundle.updatedAt.toLocaleDateString()}</td>
                 <td>
-                  <Link href={`/admin/bundles/${bundle.id}`} className="underline">
+                  <Link href={`/admin/bundles/${bundle.id}`} className="underline" prefetch={false}>
                     Edit
                   </Link>
                 </td>

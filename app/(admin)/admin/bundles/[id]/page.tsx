@@ -12,9 +12,16 @@ import { deleteBundleAction, deleteFaqAction, deleteTestimonialAction, saveBundl
 
 export const dynamic = "force-dynamic";
 
-export default async function BundleDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function BundleDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ saved?: string }>;
+}) {
   const { id } = await params;
   const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const [bundle, allCourses, upsellCourses, upsellBundles] = await Promise.all([
     prisma.bundle.findUnique({
       where: { id },
@@ -44,11 +51,14 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
   const previewOffer = getPrimaryOffer(bundle.offers);
   const salesPageConfig = parseSalesPageConfig(bundle.salesPageConfig);
   const upsellTarget = bundle.upsellCourseId ? `course:${bundle.upsellCourseId}` : bundle.upsellBundleId ? `bundle:${bundle.upsellBundleId}` : "";
+  const saved = resolvedSearchParams?.saved ?? "";
+  const feedbackMessage = saved === "details" ? "Bundle details saved." : saved === "courses" ? "Included courses saved." : "";
 
   return (
     <AdminShell title={bundle.title} description="One product record controls the bundle page, included courses, pricing, and access.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <Card className="space-y-8 bg-white p-8">
+          {feedbackMessage ? <p className="rounded-[18px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedbackMessage}</p> : null}
           <div className="space-y-4 border-b border-[var(--border)] pb-6">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
             <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the product once and let the page generate from it.</h2>

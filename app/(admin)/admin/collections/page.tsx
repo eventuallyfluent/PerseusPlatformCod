@@ -51,7 +51,7 @@ export default async function AdminCollectionsPage() {
                   <Link href={`/courses?collection=${encodeURIComponent(collection.slug)}`} className="underline">
                     View in store
                   </Link>
-                  <Link href={`/admin/collections/${collection.id}`} className="underline">
+                  <Link href={`/admin/collections/${collection.id}`} className="underline" prefetch={false}>
                     Edit
                   </Link>
                 </td>

@@ -278,7 +278,7 @@ export async function saveCourseAction(formData: FormData) {
   revalidatePath("/");
   revalidatePath(`/admin/courses/${course.id}`);
   revalidatePath(`/course/${course.slug}`);
-  redirect(`/admin/courses/${course.id}`);
+  redirect(`/admin/courses/${course.id}?saved=details`);
 }
 
 export async function saveBundleAction(formData: FormData) {
@@ -318,7 +318,7 @@ export async function saveBundleAction(formData: FormData) {
   revalidatePath(`/bundle/${bundle.slug}`);
   revalidatePath("/admin/bundles");
   revalidatePath(`/admin/bundles/${bundle.id}`);
-  redirect(`/admin/bundles/${bundle.id}`);
+  redirect(`/admin/bundles/${bundle.id}?saved=details`);
 }
 
 export async function addModuleAction(formData: FormData) {
@@ -416,7 +416,7 @@ export async function saveInstructorAction(formData: FormData) {
   revalidatePath(`/instructors/${instructor.slug}`);
   revalidatePath("/courses");
   revalidatePath("/");
-  redirect(`/admin/instructors/${instructor.id}`);
+  redirect(`/admin/instructors/${instructor.id}?saved=details`);
 }
 
 export async function saveOfferAction(formData: FormData) {
@@ -694,6 +694,7 @@ export async function saveBundleCoursesAction(formData: FormData) {
   }
 
   revalidatePath(`/admin/bundles/${bundleId}`);
+  redirect(`/admin/bundles/${bundleId}?saved=courses`);
 }
 
 export async function deleteBundleAction(formData: FormData) {

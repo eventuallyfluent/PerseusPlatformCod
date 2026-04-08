@@ -7,9 +7,16 @@ import { deleteInstructorAction, saveInstructorAction } from "@/app/(admin)/admi
 
 export const dynamic = "force-dynamic";
 
-export default async function InstructorDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function InstructorDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ saved?: string }>;
+}) {
   const { id } = await params;
   const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const instructor = await prisma.instructor.findUnique({
     where: { id },
     include: { courses: true },
@@ -21,6 +28,7 @@ export default async function InstructorDetailPage({ params }: { params: Promise
 
   return (
     <AdminShell title={instructor.name} description="Edit public instructor details and linked course list.">
+      {resolvedSearchParams?.saved === "details" ? <p className="rounded-[18px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">Instructor details saved.</p> : null}
       <Card>
         <form action={saveInstructorAction} className="grid gap-4 md:grid-cols-2">
           <input type="hidden" name="id" value={instructor.id} />

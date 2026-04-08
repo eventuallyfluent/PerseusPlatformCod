@@ -16,7 +16,7 @@ export default async function AdminCollectionsPage() {
   return (
     <AdminShell
       title="Collections"
-      description="Create real collection pages, add images and descriptions, then assign any courses into each collection."
+      description="Create collections, give each one its image and description, then assign the courses that belong in it."
     >
       <div className="flex items-center justify-between gap-4">
         <div className="text-sm text-stone-600">
@@ -48,8 +48,8 @@ export default async function AdminCollectionsPage() {
                 <td>{collection.courses.length}</td>
                 <td>{collection.updatedAt.toLocaleDateString()}</td>
                 <td className="space-x-3">
-                  <Link href={`/collections/${collection.slug}`} className="underline">
-                    View
+                  <Link href={`/courses?collection=${encodeURIComponent(collection.slug)}`} className="underline">
+                    View in store
                   </Link>
                   <Link href={`/admin/collections/${collection.id}`} className="underline">
                     Edit

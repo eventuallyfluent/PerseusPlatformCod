@@ -141,7 +141,7 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
         platformHeading: "Platform",
         platformLinks: [
           { label: "Courses", href: "/courses" },
-          { label: "Collections", href: "/collections" },
+          { label: "Instructors", href: "/instructors" },
           { label: "FAQ", href: "/faq" },
           { label: "Login", href: "/login" },
         ],

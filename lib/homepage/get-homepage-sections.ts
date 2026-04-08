@@ -48,13 +48,15 @@ export async function getHomepageSections(): Promise<HomepageSectionRecord[]> {
 
     if (type === "FOOTER" && existing) {
       const payload = existing.payload as HomepageFooterPayload;
-      const normalizedLinks = payload.platformLinks.map((link) =>
-        link.label === "Courses" && link.href.startsWith("/course/")
-          ? { ...link, href: "/courses" }
-          : link.label === "Collections" && link.href.startsWith("/bundle/")
-            ? { ...link, href: "/collections" }
-            : link,
-      );
+      const normalizedLinks = payload.platformLinks
+        .map((link) =>
+          link.label === "Courses" && link.href.startsWith("/course/")
+            ? { ...link, href: "/courses" }
+            : link.label === "Collections"
+              ? { ...link, label: "Instructors", href: "/instructors" }
+              : link,
+        )
+        .filter((link, index, items) => items.findIndex((candidate) => candidate.label === link.label && candidate.href === link.href) === index);
 
       return {
         type,

@@ -11,11 +11,15 @@ export async function SiteFooter() {
   }
 
   const payload = footerSection.payload as HomepageFooterPayload;
-  const platformLinks = payload.platformLinks.map((link) =>
-    link.label === "Courses" && link.href.startsWith("/course/")
-      ? { ...link, href: "/courses" }
-      : link,
-  );
+  const platformLinks = payload.platformLinks
+    .map((link) =>
+      link.label === "Courses" && link.href.startsWith("/course/")
+        ? { ...link, href: "/courses" }
+        : link.label === "Collections"
+          ? { ...link, label: "Instructors", href: "/instructors" }
+          : link,
+    )
+    .filter((link, index, items) => items.findIndex((candidate) => candidate.label === link.label && candidate.href === link.href) === index);
 
   return (
     <footer className="mt-auto mx-auto w-full max-w-7xl px-6 py-16">

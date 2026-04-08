@@ -33,7 +33,7 @@ export default async function CollectionDetailPage({ params }: { params: Promise
   return (
     <AdminShell
       title={collection.title}
-      description="Edit the collection page details here, then assign the courses that belong inside this collection."
+      description="Edit the collection details here, then assign the courses that belong inside this collection."
     >
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <Card className="space-y-8 bg-white p-8">
@@ -101,8 +101,8 @@ export default async function CollectionDetailPage({ params }: { params: Promise
               >
                 Save collection changes
               </button>
-              <Link href={`/collections/${collection.slug}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
-                View collection page
+              <Link href={`/courses?collection=${encodeURIComponent(collection.slug)}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
+                View in store
               </Link>
               <form action={deleteCollectionAction}>
                 <input type="hidden" name="collectionId" value={collection.id} />

@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export function CheckoutForm({ offerId, initialCouponCode = "" }: { offerId: string; initialCouponCode?: string }) {
+export function CheckoutForm({
+  offerId,
+  initialCouponCode = "",
+  initialUpsellFromOfferId = "",
+}: {
+  offerId: string;
+  initialCouponCode?: string;
+  initialUpsellFromOfferId?: string;
+}) {
   const [pending, setPending] = useState(false);
   const [couponCode, setCouponCode] = useState(initialCouponCode);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +51,7 @@ export function CheckoutForm({ offerId, initialCouponCode = "" }: { offerId: str
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ offerId, couponCode }),
+              body: JSON.stringify({ offerId, couponCode, upsellFromOfferId: initialUpsellFromOfferId || undefined }),
             });
             const data = await response.json();
 

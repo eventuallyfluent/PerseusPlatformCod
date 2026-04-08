@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { ImageField } from "@/components/admin/image-field";
 import { Card } from "@/components/ui/card";
 import { deleteInstructorAction, saveInstructorAction } from "@/app/(admin)/admin/actions";
 
@@ -30,10 +31,15 @@ export default async function InstructorDetailPage({ params }: { params: Promise
             Slug
             <input name="slug" defaultValue={instructor.slug} required />
           </label>
-          <label>
-            Image URL
-            <input name="imageUrl" defaultValue={instructor.imageUrl ?? ""} />
-          </label>
+          <div className="md:col-span-2">
+            <ImageField
+              name="imageUrl"
+              label="Image URL"
+              defaultValue={instructor.imageUrl}
+              previewLabel="Current image preview"
+              uploadFolder="instructors"
+            />
+          </div>
           <label>
             Website URL
             <input name="websiteUrl" defaultValue={instructor.websiteUrl ?? ""} />
@@ -70,17 +76,6 @@ export default async function InstructorDetailPage({ params }: { params: Promise
             Telegram URL
             <input name="telegramUrl" defaultValue={instructor.telegramUrl ?? ""} />
           </label>
-          <div className="md:col-span-2 rounded-[24px] border border-stone-200 bg-stone-50 p-4">
-            <p className="mb-3 text-sm font-medium text-stone-900">Current image preview</p>
-            <div
-              className="h-56 rounded-[20px] border border-stone-200 bg-stone-100 bg-cover bg-center"
-              style={{
-                backgroundImage: instructor.imageUrl
-                  ? `linear-gradient(180deg, rgba(28,25,23,0.12), rgba(28,25,23,0.42)), url(${instructor.imageUrl})`
-                  : "linear-gradient(135deg, #f5f5f4, #e7e5e4)",
-              }}
-            />
-          </div>
           <div className="md:col-span-2">
             <div className="flex flex-wrap gap-3">
               <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">Save instructor</button>

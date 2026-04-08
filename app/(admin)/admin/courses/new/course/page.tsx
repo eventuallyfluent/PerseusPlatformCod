@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { ImageField } from "@/components/admin/image-field";
 import { Card } from "@/components/ui/card";
 import { ProductFormSection, ProductFormShell } from "@/components/admin/product-form-shell";
 import { saveCourseAction } from "@/app/(admin)/admin/actions";
@@ -140,10 +141,12 @@ export default async function NewCoursePage() {
           title="Media and SEO"
           description="Add supporting media now if you have it. Canonical page metadata will derive from this record."
         >
-          <label>
-            Course cover image URL
-            <input name="heroImageUrl" placeholder="https://..." />
-          </label>
+          <ImageField
+            name="heroImageUrl"
+            label="Course cover image URL"
+            previewLabel="Cover preview"
+            uploadFolder="courses"
+          />
           <label>
             Sales video URL
             <input name="salesVideoUrl" placeholder="https://streamable.com/..." />

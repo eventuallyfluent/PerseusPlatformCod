@@ -15,7 +15,7 @@ import { getPaymentConnector } from "@/lib/payments/adapter-registry";
 import { encryptGatewayCredentialValue, isEncryptedGatewayCredentialValue } from "@/lib/payments/gateway-credentials";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
 import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSectionPayloadMap } from "@/lib/homepage/sections";
-import { CourseStatus, type HomepageSectionType } from "@prisma/client";
+import { CouponScope, CourseStatus, type HomepageSectionType } from "@prisma/client";
 
 function toArray(value: FormDataEntryValue | null) {
   return String(value ?? "")
@@ -62,6 +62,11 @@ function parseUpsellSelection(value: FormDataEntryValue | null) {
     upsellCourseId: kind === "course" ? id : null,
     upsellBundleId: kind === "bundle" ? id : null,
   };
+}
+
+function parseOptionalNumber(value: FormDataEntryValue | null) {
+  const raw = String(value ?? "").trim();
+  return raw ? Number(raw) : undefined;
 }
 
 function getDefaultHomepagePayload(type: HomepageSectionType) {
@@ -175,6 +180,7 @@ export async function saveCollectionAction(formData: FormData) {
 
   revalidatePath("/collections");
   revalidatePath(`/collections/${collection.slug}`);
+  revalidatePath("/courses");
   revalidatePath("/");
   revalidatePath("/admin/collections");
   redirect(`/admin/collections/${collection.id}`);
@@ -212,6 +218,7 @@ export async function saveCollectionCoursesAction(formData: FormData) {
 
   revalidatePath("/collections");
   revalidatePath(`/collections/${collection.slug}`);
+  revalidatePath("/courses");
   revalidatePath("/");
   revalidatePath(`/admin/collections/${collectionId}`);
 }
@@ -224,6 +231,7 @@ export async function deleteCollectionAction(formData: FormData) {
   });
 
   revalidatePath("/collections");
+  revalidatePath("/courses");
   revalidatePath("/");
   revalidatePath("/admin/collections");
   redirect("/admin/collections");
@@ -252,6 +260,10 @@ export async function saveCourseAction(formData: FormData) {
     currency: String(formData.get("currency") ?? "USD"),
     compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
     ...upsell,
+    upsellDiscountType: String(formData.get("upsellDiscountType") ?? "NONE"),
+    upsellDiscountValue: parseOptionalNumber(formData.get("upsellDiscountValue")),
+    upsellHeadline: String(formData.get("upsellHeadline") ?? ""),
+    upsellBody: String(formData.get("upsellBody") ?? ""),
     legacyCourseId: String(formData.get("legacyCourseId") ?? ""),
     legacySlug: String(formData.get("legacySlug") ?? ""),
     legacyUrl: String(formData.get("legacyUrl") ?? ""),
@@ -289,10 +301,19 @@ export async function saveBundleAction(formData: FormData) {
     currency: String(formData.get("currency") ?? "USD"),
     compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
     ...upsell,
+    upsellDiscountType: String(formData.get("upsellDiscountType") ?? "NONE"),
+    upsellDiscountValue: parseOptionalNumber(formData.get("upsellDiscountValue")),
+    upsellHeadline: String(formData.get("upsellHeadline") ?? ""),
+    upsellBody: String(formData.get("upsellBody") ?? ""),
     legacyUrl: String(formData.get("legacyUrl") ?? ""),
   });
 
   const bundle = id ? await updateBundle(id, payload) : await createBundle(payload);
+  revalidatePath("/admin/bundles");
+  revalidatePath("/admin/products");
+  revalidatePath("/courses");
+  revalidatePath("/");
+  revalidatePath(`/bundle/${bundle.slug}`);
   revalidatePath("/admin/bundles");
   revalidatePath(`/admin/bundles/${bundle.id}`);
   redirect(`/admin/bundles/${bundle.id}`);
@@ -389,6 +410,10 @@ export async function saveInstructorAction(formData: FormData) {
   );
 
   revalidatePath("/admin/instructors");
+  revalidatePath("/instructors");
+  revalidatePath(`/instructors/${instructor.slug}`);
+  revalidatePath("/courses");
+  revalidatePath("/");
   redirect(`/admin/instructors/${instructor.id}`);
 }
 
@@ -442,6 +467,9 @@ export async function deleteOfferAction(formData: FormData) {
 export async function saveCouponAction(formData: FormData) {
   const couponId = String(formData.get("couponId") ?? "");
   const code = String(formData.get("code") ?? "").trim().toUpperCase();
+  const scope = String(formData.get("scope") ?? "TOTAL_ORDER").trim();
+  const productTarget = String(formData.get("productTarget") ?? "").trim();
+  const collectionId = String(formData.get("collectionId") ?? "").trim();
   const discountType = String(formData.get("discountType") ?? "").trim();
   const amountOffRaw = String(formData.get("amountOff") ?? "").trim();
   const percentOffRaw = String(formData.get("percentOff") ?? "").trim();
@@ -450,6 +478,10 @@ export async function saveCouponAction(formData: FormData) {
 
   if (!code) {
     redirect("/admin/coupons?error=code");
+  }
+
+  if (!["TOTAL_ORDER", "PRODUCT", "COLLECTION"].includes(scope)) {
+    redirect("/admin/coupons?error=scope");
   }
 
   if (discountType !== "amount" && discountType !== "percent") {
@@ -467,13 +499,35 @@ export async function saveCouponAction(formData: FormData) {
     redirect("/admin/coupons?error=percent");
   }
 
+  let courseId: string | null = null;
+  let bundleId: string | null = null;
+
+  if (scope === "PRODUCT") {
+    const [kind, id] = productTarget.split(":");
+
+    if (!id || (kind !== "course" && kind !== "bundle")) {
+      redirect("/admin/coupons?error=product");
+    }
+
+    courseId = kind === "course" ? id : null;
+    bundleId = kind === "bundle" ? id : null;
+  }
+
+  if (scope === "COLLECTION" && !collectionId) {
+    redirect("/admin/coupons?error=collection");
+  }
+
   const payload = {
-    code,
-    amountOff: discountType === "amount" ? amountOff : null,
-    percentOff: discountType === "percent" ? percentOff : null,
-    isActive: Boolean(formData.get("isActive")),
-    expiresAt: expiresAtRaw ? new Date(expiresAtRaw) : null,
-  };
+      code,
+      scope: scope as CouponScope,
+      courseId,
+      bundleId,
+      collectionId: scope === "COLLECTION" ? collectionId : null,
+      amountOff: discountType === "amount" ? amountOff : null,
+      percentOff: discountType === "percent" ? percentOff : null,
+      isActive: Boolean(formData.get("isActive")),
+      expiresAt: expiresAtRaw ? new Date(expiresAtRaw) : null,
+    };
 
   if (couponId) {
     await prisma.coupon.update({

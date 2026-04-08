@@ -41,11 +41,11 @@ export default async function ImportsPage() {
               Download Course CSV
             </Link>
             <p className="text-sm text-stone-700">Filename: <span className="font-medium text-stone-950">course-package-template.csv</span></p>
-            <p className="text-sm leading-7 text-stone-700">One row = one lesson. Repeat course-level fields on every row. Include instructor slug/name, and add testimonial columns including rating on any rows where you want imported Payhip reviews.</p>
+            <p className="text-sm leading-7 text-stone-700">This template is intentionally row-per-lesson. Repeat course fields on every row. Only fill testimonial columns on rows where you are importing a review. Blank testimonial columns are valid.</p>
           </div>
 
           <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">
-            legacy_course_id, slug, title, instructor_slug, instructor_name, testimonial_name, testimonial_quote, testimonial_rating, module_position, module_title, lesson_position, lesson_title...
+            Course fields repeat on each lesson row so one CSV can create the full course structure in order.
           </p>
 
           <form action="/api/imports/course-package" method="post" encType="multipart/form-data" className="grid gap-3">

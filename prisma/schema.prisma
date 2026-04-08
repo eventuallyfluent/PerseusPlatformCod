@@ -79,6 +79,18 @@ enum HomepageSectionType {
   FOOTER
 }
 
+enum UpsellDiscountType {
+  NONE
+  AMOUNT
+  PERCENT
+}
+
+enum CouponScope {
+  TOTAL_ORDER
+  PRODUCT
+  COLLECTION
+}
+
 model User {
   id             String        @id @default(cuid())
   email          String        @unique
@@ -133,6 +145,10 @@ model Course {
   compareAtPrice   Decimal?       @db.Decimal(10, 2)
   upsellCourseId   String?
   upsellBundleId   String?
+  upsellDiscountType  UpsellDiscountType @default(NONE)
+  upsellDiscountValue Decimal?          @db.Decimal(10, 2)
+  upsellHeadline      String?
+  upsellBody          String?
   legacyCourseId   String?        @unique
   legacySlug       String?
   legacyUrl        String?        @unique
@@ -176,6 +192,10 @@ model Bundle {
   compareAtPrice   Decimal?       @db.Decimal(10, 2)
   upsellCourseId   String?
   upsellBundleId   String?
+  upsellDiscountType  UpsellDiscountType @default(NONE)
+  upsellDiscountValue Decimal?          @db.Decimal(10, 2)
+  upsellHeadline      String?
+  upsellBody          String?
   legacyUrl        String?        @unique
   publicPath       String?        @unique
   seoTitle         String?
@@ -358,12 +378,16 @@ model Subscription {
 }
 
 model Coupon {
-  id         String   @id @default(cuid())
-  code       String   @unique
-  amountOff  Decimal? @db.Decimal(10, 2)
-  percentOff Int?
-  isActive   Boolean  @default(true)
-  expiresAt  DateTime?
+  id           String      @id @default(cuid())
+  code         String      @unique
+  scope        CouponScope @default(TOTAL_ORDER)
+  courseId     String?
+  bundleId     String?
+  collectionId String?
+  amountOff    Decimal?    @db.Decimal(10, 2)
+  percentOff   Int?
+  isActive     Boolean     @default(true)
+  expiresAt    DateTime?
 }
 
 model FAQ {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { ImageField } from "@/components/admin/image-field";
 import { Card } from "@/components/ui/card";
 import { deleteCollectionAction, saveCollectionAction, saveCollectionCoursesAction } from "@/app/(admin)/admin/actions";
 
@@ -64,26 +65,18 @@ export default async function CollectionDetailPage({ params }: { params: Promise
                   <option value="gateway">Gateway</option>
                 </select>
               </label>
-              <label>
-                Image URL
-                <input name="imageUrl" defaultValue={collection.imageUrl ?? ""} />
-              </label>
             </div>
+            <ImageField
+              name="imageUrl"
+              label="Collection image URL"
+              defaultValue={collection.imageUrl}
+              previewLabel="Current collection image"
+              uploadFolder="collections"
+            />
             <label className="block">
               Description
               <textarea name="description" rows={5} defaultValue={collection.description} required />
             </label>
-            <div className="rounded-[24px] border border-stone-200 bg-stone-50 p-4">
-              <p className="mb-3 text-sm font-medium text-stone-900">Current collection image</p>
-              <div
-                className="h-56 rounded-[20px] border border-stone-200 bg-stone-100 bg-cover bg-center"
-                style={{
-                  backgroundImage: collection.imageUrl
-                    ? `linear-gradient(180deg, rgba(28,25,23,0.12), rgba(28,25,23,0.42)), url(${collection.imageUrl})`
-                    : "linear-gradient(135deg, #f5f5f4, #e7e5e4)",
-                }}
-              />
-            </div>
             <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
               Save collection
             </button>

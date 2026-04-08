@@ -7,6 +7,7 @@ export async function getOfferById(id: string) {
       course: {
         include: {
           instructor: true,
+          collectionCourses: true,
           upsellCourse: {
             include: {
               instructor: true,

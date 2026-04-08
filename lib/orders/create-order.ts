@@ -1,18 +1,23 @@
 import { OrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { getOfferById } from "@/lib/offers/get-offer-by-id";
+import { resolveAppliedUpsellDiscount } from "@/lib/offers/upsell-config";
 import { buildCheckoutPricing } from "@/lib/payments/pricing";
 
-export async function createOrder(input: { offerId: string; userId?: string | null; couponCode?: string | null }) {
+export async function createOrder(input: { offerId: string; userId?: string | null; couponCode?: string | null; upsellFromOfferId?: string | null }) {
   const offer = await getOfferById(input.offerId);
 
   if (!offer || !offer.isPublished) {
     throw new Error("Offer not available");
   }
 
+  const upsellDiscount = await resolveAppliedUpsellDiscount(offer, input.upsellFromOfferId);
+
   const pricing = await buildCheckoutPricing({
     baseAmount: offer.price,
     couponCode: input.couponCode,
+    upsellDiscountAmount: upsellDiscount?.discountAmount ?? 0,
+    offer,
   });
 
   return prisma.order.create({

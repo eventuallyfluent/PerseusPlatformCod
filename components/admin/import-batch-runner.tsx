@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 type ImportBatchRunnerProps = {
   batchId: string;
@@ -11,7 +10,6 @@ type ImportBatchRunnerProps = {
 };
 
 export function ImportBatchRunner({ batchId, isProcessing, initialProcessedCount, initialTotalCount }: ImportBatchRunnerProps) {
-  const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [processedCount, setProcessedCount] = useState(initialProcessedCount);
   const [totalCount, setTotalCount] = useState(initialTotalCount);
@@ -32,17 +30,19 @@ export function ImportBatchRunner({ batchId, isProcessing, initialProcessedCount
 
         const response = await fetch(`/api/imports/batches/${batchId}/process`, {
           method: "POST",
+          cache: "no-store",
         });
 
         if (!response.ok) {
-          setMessage("Processing stopped. Refresh to inspect the batch report.");
-          router.refresh();
+          setMessage("Processing stopped. Reloading the batch report...");
+          window.location.reload();
           return;
         }
 
         const data = (await response.json()) as {
           status: string;
           hasMore: boolean;
+          error?: string;
           executionSummary?: {
             processedCount?: number;
             totalCount?: number;
@@ -55,8 +55,8 @@ export function ImportBatchRunner({ batchId, isProcessing, initialProcessedCount
         setTotalCount(nextTotal);
 
         if (!data.hasMore || data.status !== "PROCESSING") {
-          setMessage(null);
-          router.refresh();
+          setMessage(data.error ? `Processing stopped: ${data.error}` : null);
+          window.location.reload();
           return;
         }
       }
@@ -67,7 +67,7 @@ export function ImportBatchRunner({ batchId, isProcessing, initialProcessedCount
     return () => {
       cancelled = true;
     };
-  }, [batchId, initialProcessedCount, initialTotalCount, isProcessing, router]);
+  }, [batchId, initialProcessedCount, initialTotalCount, isProcessing]);
 
   if (!isProcessing) {
     return null;

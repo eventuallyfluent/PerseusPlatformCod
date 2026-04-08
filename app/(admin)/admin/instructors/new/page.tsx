@@ -1,4 +1,5 @@
 import { AdminShell } from "@/components/admin/admin-shell";
+import { ImageField } from "@/components/admin/image-field";
 import { Card } from "@/components/ui/card";
 import { saveInstructorAction } from "@/app/(admin)/admin/actions";
 
@@ -15,10 +16,14 @@ export default function NewInstructorPage() {
             Slug
             <input name="slug" required />
           </label>
-          <label>
-            Image URL
-            <input name="imageUrl" />
-          </label>
+          <div className="md:col-span-2">
+            <ImageField
+              name="imageUrl"
+              label="Image URL"
+              previewLabel="Instructor image preview"
+              uploadFolder="instructors"
+            />
+          </div>
           <label>
             Website URL
             <input name="websiteUrl" />

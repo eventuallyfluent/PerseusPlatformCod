@@ -1,4 +1,4 @@
-import { CourseStatus, ImportType, LessonStatus, LessonType, OfferType } from "@prisma/client";
+import { CourseStatus, ImportType, LessonStatus, LessonType, OfferType, UpsellDiscountType } from "@prisma/client";
 import { z } from "zod";
 import type { SalesPageSectionKey } from "@/types";
 
@@ -88,6 +88,10 @@ export const courseInputSchema = z.object({
   compareAtPrice: z.coerce.number().min(0).optional(),
   upsellCourseId: z.string().nullable().optional(),
   upsellBundleId: z.string().nullable().optional(),
+  upsellDiscountType: z.nativeEnum(UpsellDiscountType).default(UpsellDiscountType.NONE),
+  upsellDiscountValue: z.coerce.number().min(0.01).optional(),
+  upsellHeadline: z.string().optional(),
+  upsellBody: z.string().optional(),
   legacyCourseId: z.string().optional(),
   legacySlug: z.string().optional(),
   legacyUrl: z.string().optional(),
@@ -113,6 +117,10 @@ export const bundleInputSchema = z.object({
   compareAtPrice: z.coerce.number().min(0).optional(),
   upsellCourseId: z.string().nullable().optional(),
   upsellBundleId: z.string().nullable().optional(),
+  upsellDiscountType: z.nativeEnum(UpsellDiscountType).default(UpsellDiscountType.NONE),
+  upsellDiscountValue: z.coerce.number().min(0.01).optional(),
+  upsellHeadline: z.string().optional(),
+  upsellBody: z.string().optional(),
   legacyUrl: z.string().optional(),
 });
 
@@ -150,6 +158,7 @@ export const offerInputSchema = z.object({
 export const checkoutSessionSchema = z.object({
   offerId: z.string().min(1),
   couponCode: z.string().optional(),
+  upsellFromOfferId: z.string().optional(),
 });
 
 export const gatewayConnectionSchema = z.object({

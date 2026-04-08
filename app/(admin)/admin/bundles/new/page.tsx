@@ -1,4 +1,5 @@
 import { AdminShell } from "@/components/admin/admin-shell";
+import { ImageField } from "@/components/admin/image-field";
 import { Card } from "@/components/ui/card";
 import { ProductFormSection, ProductFormShell } from "@/components/admin/product-form-shell";
 import { saveBundleAction } from "@/app/(admin)/admin/actions";
@@ -92,10 +93,12 @@ export default function NewBundlePage() {
           title="Media and SEO"
           description="Use media only if it strengthens the bundle promise. Search metadata can stay blank until final polish."
         >
-          <label>
-            Bundle cover image URL
-            <input name="heroImageUrl" placeholder="https://..." />
-          </label>
+          <ImageField
+            name="heroImageUrl"
+            label="Bundle cover image URL"
+            previewLabel="Cover preview"
+            uploadFolder="bundles"
+          />
           <label>
             Sales video URL
             <input name="salesVideoUrl" placeholder="https://streamable.com/..." />

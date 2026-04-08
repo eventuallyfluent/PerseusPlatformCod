@@ -1,4 +1,5 @@
 import { AdminShell } from "@/components/admin/admin-shell";
+import { ImageField } from "@/components/admin/image-field";
 import { Card } from "@/components/ui/card";
 import { saveCollectionAction } from "@/app/(admin)/admin/actions";
 
@@ -37,11 +38,13 @@ export default function NewCollectionPage() {
                 <option value="gateway">Gateway</option>
               </select>
             </label>
-            <label>
-              Image URL
-              <input name="imageUrl" placeholder="https://..." />
-            </label>
           </div>
+          <ImageField
+            name="imageUrl"
+            label="Collection image URL"
+            previewLabel="Collection image preview"
+            uploadFolder="collections"
+          />
           <label className="block">
             Description
             <textarea name="description" rows={5} required />

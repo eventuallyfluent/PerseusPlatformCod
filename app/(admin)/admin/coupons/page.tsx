@@ -12,12 +12,29 @@ export default async function CouponsPage({
   searchParams?: Promise<{ saved?: string; error?: string }>;
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const coupons = await prisma.coupon.findMany({
-    orderBy: [{ isActive: "desc" }, { code: "asc" }],
-  });
+  const [coupons, courses, bundles, collections] = await Promise.all([
+    prisma.coupon.findMany({
+      orderBy: [{ isActive: "desc" }, { code: "asc" }],
+    }),
+    prisma.course.findMany({
+      orderBy: { title: "asc" },
+      select: { id: true, title: true },
+    }),
+    prisma.bundle.findMany({
+      orderBy: { title: "asc" },
+      select: { id: true, title: true },
+    }),
+    prisma.collection.findMany({
+      orderBy: { title: "asc" },
+      select: { id: true, title: true },
+    }),
+  ]);
 
   const saved = resolvedSearchParams?.saved ?? "";
   const error = resolvedSearchParams?.error ?? "";
+  const courseOptions = courses.map((course) => ({ value: `course:${course.id}`, label: `Course: ${course.title}` }));
+  const bundleOptions = bundles.map((bundle) => ({ value: `bundle:${bundle.id}`, label: `Bundle: ${bundle.title}` }));
+  const collectionOptions = collections.map((collection) => ({ value: collection.id, label: collection.title }));
 
   const feedbackMessage =
     saved === "created"
@@ -28,29 +45,50 @@ export default async function CouponsPage({
           ? "Coupon deleted."
           : error === "code"
             ? "Add a coupon code."
+            : error === "scope"
+              ? "Choose where the coupon applies."
             : error === "discountType"
               ? "Choose either amount off or percentage off."
               : error === "amount"
                 ? "Amount off must be greater than 0."
                 : error === "percent"
                   ? "Percentage off must be between 1 and 100."
+                  : error === "product"
+                    ? "Choose the specific product this coupon applies to."
+                    : error === "collection"
+                      ? "Choose the specific collection this coupon applies to."
                   : "";
+
+  function describeScope(coupon: (typeof coupons)[number]) {
+    if (coupon.scope === "PRODUCT") {
+      const course = courses.find((item) => item.id === coupon.courseId);
+      const bundle = bundles.find((item) => item.id === coupon.bundleId);
+      return course ? `Specific product · ${course.title}` : bundle ? `Specific product · ${bundle.title}` : "Specific product";
+    }
+
+    if (coupon.scope === "COLLECTION") {
+      const collection = collections.find((item) => item.id === coupon.collectionId);
+      return collection ? `Specific collection · ${collection.title}` : "Specific collection";
+    }
+
+    return "Total order amount";
+  }
 
   return (
     <AdminShell title="Coupons" description="Simple discount codes for course and bundle checkout.">
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
-        <Card className="space-y-4 bg-white p-6">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,520px)_minmax(0,1fr)]">
+        <Card className="space-y-5 bg-white p-6">
           <div className="space-y-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">New coupon</p>
-            <h2 className="text-2xl leading-none tracking-[-0.03em] text-stone-950">Create a discount code.</h2>
+            <h2 className="text-2xl leading-none tracking-[-0.03em] text-stone-950">Add new coupon code.</h2>
           </div>
           {feedbackMessage ? (
             <p className={`rounded-[18px] px-4 py-3 text-sm ${error ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700"}`}>{feedbackMessage}</p>
           ) : null}
-          <CouponForm action={saveCouponAction} />
-          <div>
+          <CouponForm action={saveCouponAction} courseOptions={courseOptions} bundleOptions={bundleOptions} collectionOptions={collectionOptions} />
+          <div className="flex justify-end">
             <button form="new-coupon-form" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
-              Save coupon
+              Create coupon
             </button>
           </div>
         </Card>
@@ -65,6 +103,9 @@ export default async function CouponsPage({
                   <div>
                     <p className="text-lg font-semibold text-stone-950">{coupon.code}</p>
                     <p className="text-sm text-stone-600">
+                      {describeScope(coupon)}
+                    </p>
+                    <p className="text-sm text-stone-600">
                       {coupon.amountOff ? `$${coupon.amountOff.toString()} off` : coupon.percentOff ? `${coupon.percentOff}% off` : "No discount set"}
                     </p>
                   </div>
@@ -76,10 +117,16 @@ export default async function CouponsPage({
                   action={saveCouponAction}
                   couponId={coupon.id}
                   defaultCode={coupon.code}
+                  defaultScope={coupon.scope}
+                  defaultProductTarget={coupon.courseId ? `course:${coupon.courseId}` : coupon.bundleId ? `bundle:${coupon.bundleId}` : ""}
+                  defaultCollectionId={coupon.collectionId ?? ""}
                   defaultAmountOff={coupon.amountOff?.toString() ?? ""}
                   defaultPercentOff={coupon.percentOff?.toString() ?? ""}
                   defaultExpiresAt={coupon.expiresAt ? coupon.expiresAt.toISOString().slice(0, 10) : ""}
                   defaultIsActive={coupon.isActive}
+                  courseOptions={courseOptions}
+                  bundleOptions={bundleOptions}
+                  collectionOptions={collectionOptions}
                 />
                 <div className="flex flex-wrap gap-3">
                   <button form={`coupon-form-${coupon.id}`} className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">

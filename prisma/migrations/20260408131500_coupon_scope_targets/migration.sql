@@ -1,0 +1,7 @@
+CREATE TYPE "CouponScope" AS ENUM ('TOTAL_ORDER', 'PRODUCT', 'COLLECTION');
+
+ALTER TABLE "Coupon"
+ADD COLUMN "scope" "CouponScope" NOT NULL DEFAULT 'TOTAL_ORDER',
+ADD COLUMN "courseId" TEXT,
+ADD COLUMN "bundleId" TEXT,
+ADD COLUMN "collectionId" TEXT;

@@ -37,6 +37,14 @@ export async function updateBundle(bundleId: string, input: unknown) {
       publicPath: desiredPath,
       heroImageUrl: data.heroImageUrl === "" ? null : data.heroImageUrl,
       salesVideoUrl: data.salesVideoUrl === "" ? null : data.salesVideoUrl,
+      upsellDiscountValue:
+        data.upsellDiscountType === "NONE"
+          ? null
+          : data.upsellDiscountValue === undefined
+            ? undefined
+            : data.upsellDiscountValue,
+      upsellHeadline: data.upsellHeadline === "" ? null : data.upsellHeadline,
+      upsellBody: data.upsellBody === "" ? null : data.upsellBody,
       legacyUrl: data.legacyUrl === "" ? null : data.legacyUrl,
     },
     include: bundleInclude,

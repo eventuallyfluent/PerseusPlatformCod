@@ -1,5 +1,17 @@
 import { Decimal } from "@prisma/client/runtime/library";
 import { resolveCoupon } from "@/lib/coupons/resolve-coupon";
+import type { Prisma } from "@prisma/client";
+
+type PricingOffer = Prisma.OfferGetPayload<{
+  include: {
+    course: {
+      include: {
+        collectionCourses: true;
+      };
+    };
+    bundle: true;
+  };
+}>;
 
 function toNumber(value: Decimal | number | string) {
   return typeof value === "number" ? value : Number(value);
@@ -12,27 +24,33 @@ function roundCurrency(amount: number) {
 export async function buildCheckoutPricing(input: {
   baseAmount: Decimal | number | string;
   couponCode?: string | null;
+  upsellDiscountAmount?: number;
+  offer?: PricingOffer | null;
 }) {
   const baseAmount = roundCurrency(toNumber(input.baseAmount));
-  const coupon = await resolveCoupon(input.couponCode);
+  const upsellDiscountAmount = roundCurrency(Math.min(baseAmount, input.upsellDiscountAmount ?? 0));
+  const couponBaseAmount = roundCurrency(baseAmount - upsellDiscountAmount);
+  const coupon = await resolveCoupon(input.couponCode, input.offer);
 
   if (!coupon) {
     return {
       baseAmount,
-      totalAmount: baseAmount,
+      totalAmount: couponBaseAmount,
       discountAmount: 0,
+      upsellDiscountAmount,
       coupon: null,
     };
   }
 
   const amountOff = coupon.amountOff ? toNumber(coupon.amountOff) : 0;
-  const percentOff = coupon.percentOff ? (baseAmount * coupon.percentOff) / 100 : 0;
-  const discountAmount = roundCurrency(Math.min(baseAmount, amountOff || percentOff));
+  const percentOff = coupon.percentOff ? (couponBaseAmount * coupon.percentOff) / 100 : 0;
+  const discountAmount = roundCurrency(Math.min(couponBaseAmount, amountOff || percentOff));
 
   return {
     baseAmount,
-    totalAmount: roundCurrency(baseAmount - discountAmount),
+    totalAmount: roundCurrency(couponBaseAmount - discountAmount),
     discountAmount,
+    upsellDiscountAmount,
     coupon,
   };
 }

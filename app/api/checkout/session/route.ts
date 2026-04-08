@@ -14,6 +14,7 @@ export async function POST(request: Request) {
       userId: session?.user?.id,
       customerEmail: session?.user?.email ?? undefined,
       couponCode: input.couponCode,
+      upsellFromOfferId: input.upsellFromOfferId,
     });
 
     return NextResponse.json(checkout);

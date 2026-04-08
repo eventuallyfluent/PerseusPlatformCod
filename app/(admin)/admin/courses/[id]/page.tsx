@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { ImageField } from "@/components/admin/image-field";
 import { ProductFormSection } from "@/components/admin/product-form-shell";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
@@ -75,22 +76,16 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 <label>Includes<textarea name="includes" rows={4} defaultValue={(course.includes as string[] | null)?.join("\n") ?? ""} /></label>
               </ProductFormSection>
               <ProductFormSection title="Media and SEO" description="Hero media and search.">
-                <label>Course cover image URL<input name="heroImageUrl" defaultValue={course.heroImageUrl ?? ""} /></label>
+                <ImageField
+                  name="heroImageUrl"
+                  label="Course cover image URL"
+                  defaultValue={course.heroImageUrl}
+                  previewLabel="Current cover preview"
+                  uploadFolder="courses"
+                />
                 <label>Sales video URL<input name="salesVideoUrl" defaultValue={course.salesVideoUrl ?? ""} /></label>
                 <label>SEO title<input name="seoTitle" defaultValue={course.seoTitle ?? ""} /></label>
                 <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} /></label>
-              <div className="lg:col-span-2 rounded-[24px] border border-stone-200 bg-stone-50 p-4">
-                <p className="mb-3 text-sm font-medium text-stone-900">Current cover preview</p>
-                <div
-                  className="h-48 rounded-[20px] border border-stone-200 bg-stone-100 bg-cover bg-center"
-                    style={{
-                      backgroundImage: course.heroImageUrl
-                        ? `linear-gradient(180deg, rgba(28,25,23,0.12), rgba(28,25,23,0.42)), url(${course.heroImageUrl})`
-                        : "linear-gradient(135deg, #f5f5f4, #e7e5e4)",
-                    }}
-                  />
-                  <p className="mt-4 text-sm leading-7 text-stone-600">Change the image URL here, then use the main course save button at the top or bottom of the page.</p>
-                </div>
               </ProductFormSection>
               <ProductFormSection title="Pricing" description="Set the live course price here. Coupons apply discounts at checkout.">
                 <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={course.price.toString()} /></label>
@@ -112,7 +107,21 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                     ))}
                   </select>
                 </label>
-                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">Checkout reads the course price directly. Use coupons for discounts and one optional upsell instead of separate offer management.</div>
+                <label>
+                  Upsell discount type
+                  <select name="upsellDiscountType" defaultValue={course.upsellDiscountType}>
+                    <option value="NONE">No upsell discount</option>
+                    <option value="AMOUNT">Amount off</option>
+                    <option value="PERCENT">Percent off</option>
+                  </select>
+                </label>
+                <label>
+                  Upsell discount value
+                  <input name="upsellDiscountValue" type="number" min="0.01" step="0.01" defaultValue={course.upsellDiscountValue?.toString() ?? ""} />
+                </label>
+                <label className="lg:col-span-2">Upsell headline<input name="upsellHeadline" defaultValue={course.upsellHeadline ?? ""} placeholder="Optional override for the upsell title" /></label>
+                <label className="lg:col-span-2">Upsell body<textarea name="upsellBody" rows={3} defaultValue={course.upsellBody ?? ""} placeholder="Explain the discounted follow-up offer clearly." /></label>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">Checkout reads the course price directly. Use coupons for discounts and configure one optional upsell with its own discounted follow-up offer.</div>
               </ProductFormSection>
               <ProductFormSection title="Sales page" description="CTA copy and section visibility.">
                 <label>Hero metadata line<input name="salesPage.heroMetadataLine" defaultValue={salesPageConfig.heroMetadataLine ?? ""} /></label>

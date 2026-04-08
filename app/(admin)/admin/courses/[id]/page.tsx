@@ -57,7 +57,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
               <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the product once and let the page generate from it.</h2>
             </div>
-            <form action={saveCourseAction} className="space-y-8">
+            <form id="course-details-form" action={saveCourseAction} className="space-y-8">
               <input type="hidden" name="id" value={course.id} />
               <ProductFormSection title="Core identity" description="Title, route, owner, and status.">
                 <label>Title<input name="title" defaultValue={course.title} required /></label>
@@ -79,16 +79,24 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 <label>Sales video URL<input name="salesVideoUrl" defaultValue={course.salesVideoUrl ?? ""} /></label>
                 <label>SEO title<input name="seoTitle" defaultValue={course.seoTitle ?? ""} /></label>
                 <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} /></label>
-                <div className="lg:col-span-2 rounded-[24px] border border-stone-200 bg-stone-50 p-4">
-                  <p className="mb-3 text-sm font-medium text-stone-900">Current cover preview</p>
-                  <div
-                    className="h-48 rounded-[20px] border border-stone-200 bg-stone-100 bg-cover bg-center"
+              <div className="lg:col-span-2 rounded-[24px] border border-stone-200 bg-stone-50 p-4">
+                <p className="mb-3 text-sm font-medium text-stone-900">Current cover preview</p>
+                <div
+                  className="h-48 rounded-[20px] border border-stone-200 bg-stone-100 bg-cover bg-center"
                     style={{
                       backgroundImage: course.heroImageUrl
                         ? `linear-gradient(180deg, rgba(28,25,23,0.12), rgba(28,25,23,0.42)), url(${course.heroImageUrl})`
                         : "linear-gradient(135deg, #f5f5f4, #e7e5e4)",
                     }}
                   />
+                  <div className="mt-4">
+                    <button
+                      className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50"
+                      type="submit"
+                    >
+                      Save cover image changes
+                    </button>
+                  </div>
                 </div>
               </ProductFormSection>
               <ProductFormSection title="Pricing" description="Set the live course price here. Coupons apply discounts at checkout.">
@@ -166,6 +174,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           <Card className="space-y-4 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product status</p>
             <div className="grid gap-3 text-sm text-stone-700">
+              <button
+                className="w-full rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50"
+                type="submit"
+                form="course-details-form"
+              >
+                Save course changes
+              </button>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{course.status}</span></div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Public path</span><span className="mt-1 block break-all text-base text-stone-950">{resolveCoursePublicPath(course)}</span></div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Generated pages</span><span className="mt-1 block text-base text-stone-950">{course.pages.length}</span></div>

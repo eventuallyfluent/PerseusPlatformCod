@@ -51,7 +51,7 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
             <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the product once and let the page generate from it.</h2>
           </div>
-          <form action={saveBundleAction} className="space-y-8">
+          <form id="bundle-details-form" action={saveBundleAction} className="space-y-8">
             <input type="hidden" name="id" value={bundle.id} />
             <ProductFormSection title="Core identity" description="Title, route, and status.">
               <label>Title<input name="title" defaultValue={bundle.title} required /></label>
@@ -79,10 +79,18 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
                     backgroundImage: bundle.heroImageUrl
                       ? `linear-gradient(180deg, rgba(28,25,23,0.12), rgba(28,25,23,0.42)), url(${bundle.heroImageUrl})`
                       : "linear-gradient(135deg, #f5f5f4, #e7e5e4)",
-                  }}
-                />
-              </div>
-            </ProductFormSection>
+                    }}
+                  />
+                  <div className="mt-4">
+                    <button
+                      className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50"
+                      type="submit"
+                    >
+                      Save cover image changes
+                    </button>
+                  </div>
+                </div>
+              </ProductFormSection>
             <ProductFormSection title="Pricing" description="Set the live bundle price here. Coupons apply discounts at checkout.">
               <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={bundle.price.toString()} /></label>
               <label>Currency<input name="currency" defaultValue={bundle.currency} /></label>
@@ -127,6 +135,13 @@ export default async function BundleDetailPage({ params }: { params: Promise<{ i
           <Card className="space-y-4 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product status</p>
             <div className="grid gap-3 text-sm text-stone-700">
+              <button
+                className="w-full rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50"
+                type="submit"
+                form="bundle-details-form"
+              >
+                Save bundle changes
+              </button>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{bundle.status}</span></div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Public path</span><span className="mt-1 block break-all text-base text-stone-950">{resolveBundlePublicPath(bundle)}</span></div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Included courses</span><span className="mt-1 block text-base text-stone-950">{bundle.courses.length} course{bundle.courses.length === 1 ? "" : "s"}</span></div>

@@ -52,7 +52,16 @@ export default async function BundleDetailPage({
   const salesPageConfig = parseSalesPageConfig(bundle.salesPageConfig);
   const upsellTarget = bundle.upsellCourseId ? `course:${bundle.upsellCourseId}` : bundle.upsellBundleId ? `bundle:${bundle.upsellBundleId}` : "";
   const saved = resolvedSearchParams?.saved ?? "";
-  const feedbackMessage = saved === "details" ? "Bundle details saved." : saved === "courses" ? "Included courses saved." : "";
+  const feedbackMessage =
+    saved === "details"
+      ? "Bundle details saved."
+      : saved === "courses"
+        ? "Included courses saved."
+        : saved === "faq"
+          ? "FAQ updated."
+          : saved === "reviews"
+            ? "Reviews updated."
+            : "";
 
   return (
     <AdminShell title={bundle.title} description="One product record controls the bundle page, included courses, pricing, and access.">

@@ -56,7 +56,20 @@ export default async function CourseDetailPage({
   const previewOffer = getPrimaryOffer(course.offers);
   const salesPageConfig = parseSalesPageConfig(course.salesPageConfig);
   const upsellTarget = course.upsellCourseId ? `course:${course.upsellCourseId}` : course.upsellBundleId ? `bundle:${course.upsellBundleId}` : "";
-  const feedbackMessage = resolvedSearchParams?.saved === "details" ? "Course details saved." : "";
+  const feedbackMessage =
+    resolvedSearchParams?.saved === "details"
+      ? "Course details saved."
+      : resolvedSearchParams?.saved === "curriculum"
+        ? "Curriculum updated."
+        : resolvedSearchParams?.saved === "faq"
+          ? "FAQ updated."
+          : resolvedSearchParams?.saved === "reviews"
+            ? "Reviews updated."
+            : resolvedSearchParams?.saved === "page"
+              ? "Sales page regenerated."
+              : resolvedSearchParams?.saved === "status"
+                ? "Course status updated."
+                : "";
 
   return (
     <AdminShell title={course.title} description="One product record controls the page, curriculum, pricing, and delivery.">

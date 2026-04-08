@@ -348,6 +348,7 @@ export async function addModuleAction(formData: FormData) {
   }
 
   revalidatePath(`/admin/courses/${courseId}`);
+  redirect(`/admin/courses/${courseId}?saved=curriculum`);
 }
 
 export async function addLessonAction(formData: FormData) {
@@ -389,6 +390,7 @@ export async function addLessonAction(formData: FormData) {
   }
 
   revalidatePath(`/admin/courses/${courseId}`);
+  redirect(`/admin/courses/${courseId}?saved=curriculum`);
 }
 
 export async function saveInstructorAction(formData: FormData) {
@@ -580,9 +582,11 @@ export async function saveFaqAction(formData: FormData) {
 
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
+    redirect(`/admin/courses/${courseId}?saved=faq`);
   }
   if (bundleId) {
     revalidatePath(`/admin/bundles/${bundleId}`);
+    redirect(`/admin/bundles/${bundleId}?saved=faq`);
   }
 }
 
@@ -597,9 +601,11 @@ export async function deleteFaqAction(formData: FormData) {
 
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
+    redirect(`/admin/courses/${courseId}?saved=faq`);
   }
   if (bundleId) {
     revalidatePath(`/admin/bundles/${bundleId}`);
+    redirect(`/admin/bundles/${bundleId}?saved=faq`);
   }
 }
 
@@ -631,9 +637,11 @@ export async function saveTestimonialAction(formData: FormData) {
 
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
+    redirect(`/admin/courses/${courseId}?saved=reviews`);
   }
   if (bundleId) {
     revalidatePath(`/admin/bundles/${bundleId}`);
+    redirect(`/admin/bundles/${bundleId}?saved=reviews`);
   }
 }
 
@@ -648,9 +656,11 @@ export async function deleteTestimonialAction(formData: FormData) {
 
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
+    redirect(`/admin/courses/${courseId}?saved=reviews`);
   }
   if (bundleId) {
     revalidatePath(`/admin/bundles/${bundleId}`);
+    redirect(`/admin/bundles/${bundleId}?saved=reviews`);
   }
 }
 
@@ -658,7 +668,7 @@ export async function regeneratePageAction(formData: FormData) {
   const courseId = String(formData.get("courseId"));
   await regenerateCoursePage(courseId, true);
   revalidatePath(`/admin/courses/${courseId}`);
-  redirect(`/admin/courses/${courseId}`);
+  redirect(`/admin/courses/${courseId}?saved=page`);
 }
 
 export async function deleteCourseAction(formData: FormData) {
@@ -735,6 +745,7 @@ export async function deleteModuleAction(formData: FormData) {
   });
 
   revalidatePath(`/admin/courses/${courseId}`);
+  redirect(`/admin/courses/${courseId}?saved=curriculum`);
 }
 
 export async function deleteLessonAction(formData: FormData) {
@@ -746,6 +757,7 @@ export async function deleteLessonAction(formData: FormData) {
   });
 
   revalidatePath(`/admin/courses/${courseId}`);
+  redirect(`/admin/courses/${courseId}?saved=curriculum`);
 }
 
 export async function saveGatewayCredentialsAction(formData: FormData) {
@@ -865,5 +877,5 @@ export async function setCourseStatusAction(formData: FormData) {
 
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
-  redirect(`/admin/courses/${courseId}`);
+  redirect(`/admin/courses/${courseId}?saved=status`);
 }

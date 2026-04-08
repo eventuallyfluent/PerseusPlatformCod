@@ -7,7 +7,6 @@ import { saveHomepageSectionAction } from "@/app/(admin)/admin/actions";
 import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
 import {
   stringifyLinkLines,
-  type HomepageCollectionItem,
   type HomepageCollectionsPayload,
   type HomepageEmailSignupPayload,
   type HomepageFooterPayload,
@@ -112,27 +111,12 @@ function SectionFrame({
   );
 }
 
-function ensureCollectionItems(items: HomepageCollectionItem[]) {
-  return Array.from({ length: Math.max(4, items.length + 1) }, (_, index) => {
-    return (
-      items[index] ?? {
-        eyebrow: "",
-        title: "",
-        description: "",
-        imageUrl: "",
-        tone: "arcane" as const,
-        courseSlugs: [],
-      }
-    );
-  });
-}
-
 function linkLines(items: HomepageLinkItem[]) {
   return stringifyLinkLines(items);
 }
 
 export default async function SettingsPage() {
-  const [sections, approvedTestimonials, courses] = await Promise.all([
+  const [sections, approvedTestimonials, collectionRecords] = await Promise.all([
     getHomepageSections(),
     prisma.testimonial.findMany({
       where: { isApproved: true },
@@ -143,13 +127,12 @@ export default async function SettingsPage() {
       orderBy: [{ position: "asc" }],
       take: 12,
     }),
-    prisma.course.findMany({
-      orderBy: { title: "asc" },
+    prisma.collection.findMany({
+      orderBy: [{ position: "asc" }, { title: "asc" }],
       select: {
         id: true,
         title: true,
         slug: true,
-        status: true,
       },
     }),
   ]);
@@ -191,7 +174,7 @@ export default async function SettingsPage() {
         <SectionFrame
           type="COLLECTIONS"
           title="Collections"
-          description="Curated study groupings. Desktop renders them in rows of three, based on this ordered item list."
+          description="Control the homepage collections section here. Real collections are created and edited in Admin → Collections."
           position={collections.position}
           enabled={collections.enabled}
         >
@@ -200,60 +183,28 @@ export default async function SettingsPage() {
             <TextInput name="title" label="Title" defaultValue={collectionsPayload.title} />
           </div>
           <TextArea name="description" label="Description" defaultValue={collectionsPayload.description} rows={3} />
-          <div className="space-y-4">
-            {ensureCollectionItems(collectionsPayload.items).map((item, index) => (
-              <div key={index} className="space-y-4 rounded-2xl border border-stone-200 p-4">
-                <div className="grid gap-4 lg:grid-cols-3">
-                  <TextInput name={`itemEyebrow:${index}`} label={`Collection ${index + 1} eyebrow`} defaultValue={item.eyebrow} />
-                  <TextInput name={`itemTitle:${index}`} label={`Collection ${index + 1} title`} defaultValue={item.title} />
-                  <label className="space-y-2">
-                    <span className="text-sm font-medium text-stone-900">Tone</span>
-                    <select
-                      name={`itemTone:${index}`}
-                      defaultValue={item.tone}
-                      className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-400"
-                    >
-                      <option value="arcane">Arcane</option>
-                      <option value="discipline">Discipline</option>
-                      <option value="gateway">Gateway</option>
-                    </select>
-                  </label>
-                </div>
-                <TextInput
-                  name={`itemImageUrl:${index}`}
-                  label={`Collection ${index + 1} image URL`}
-                  defaultValue={item.imageUrl ?? ""}
-                />
-                <TextArea
-                  name={`itemDescription:${index}`}
-                  label={`Collection ${index + 1} description`}
-                  defaultValue={item.description}
-                  rows={3}
-                />
-                <div className="space-y-2">
-                  <span className="text-sm font-medium text-stone-900">Courses in collection {index + 1}</span>
-                  <div className="grid gap-3 rounded-2xl border border-stone-200 bg-stone-50 p-4 md:grid-cols-2">
-                    {courses.map((course) => (
-                      <label key={`${index}-${course.id}`} className="flex items-start gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3">
-                        <input
-                          className="mt-1 w-auto"
-                          type="checkbox"
-                          name={`itemCourseSlugs:${index}`}
-                          value={course.slug}
-                          defaultChecked={item.courseSlugs.includes(course.slug)}
-                        />
-                        <span className="space-y-1">
-                          <span className="block text-sm font-semibold text-stone-950">{course.title}</span>
-                          <span className="block text-xs uppercase tracking-[0.22em] text-stone-500">
-                            {course.slug} · {course.status}
-                          </span>
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="rounded-2xl border border-stone-200 p-4">
+            <p className="text-sm font-medium text-stone-900">Featured homepage collections</p>
+            <p className="mt-1 text-sm leading-6 text-stone-600">
+              Create collections from the collections admin area, then choose which ones should appear on the homepage.
+            </p>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {collectionRecords.map((collection) => (
+                <label key={collection.id} className="flex items-start gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3">
+                  <input
+                    className="mt-1 w-auto"
+                    type="checkbox"
+                    name="featuredCollectionIds"
+                    value={collection.id}
+                    defaultChecked={(collectionsPayload.featuredCollectionIds ?? []).includes(collection.id)}
+                  />
+                  <span className="space-y-1">
+                    <span className="block text-sm font-semibold text-stone-950">{collection.title}</span>
+                    <span className="block text-xs uppercase tracking-[0.22em] text-stone-500">{collection.slug}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
         </SectionFrame>
 
@@ -345,24 +296,9 @@ export default async function SettingsPage() {
           <div className="grid gap-4 lg:grid-cols-2">
             <TextInput name="platformHeading" label="Platform heading" defaultValue={footerPayload.platformHeading} />
             <TextInput name="legalHeading" label="Legal heading" defaultValue={footerPayload.legalHeading} />
-            <TextArea
-              name="platformLinks"
-              label="Platform links"
-              defaultValue={linkLines(footerPayload.platformLinks)}
-              rows={5}
-            />
-            <TextArea
-              name="legalLinks"
-              label="Legal links"
-              defaultValue={linkLines(footerPayload.legalLinks)}
-              rows={5}
-            />
-            <TextArea
-              name="socialLabels"
-              label="Social labels"
-              defaultValue={footerPayload.socialLabels.join("\n")}
-              rows={4}
-            />
+            <TextArea name="platformLinks" label="Platform links" defaultValue={linkLines(footerPayload.platformLinks)} rows={5} />
+            <TextArea name="legalLinks" label="Legal links" defaultValue={linkLines(footerPayload.legalLinks)} rows={5} />
+            <TextArea name="socialLabels" label="Social labels" defaultValue={footerPayload.socialLabels.join("\n")} rows={4} />
             <div className="grid gap-4">
               <TextArea name="bottomLeftText" label="Bottom-left text" defaultValue={footerPayload.bottomLeftText} rows={2} />
               <TextArea name="bottomRightText" label="Bottom-right text" defaultValue={footerPayload.bottomRightText} rows={2} />

@@ -17,12 +17,95 @@ export type ImportContext = {
 
 type PackageRow = Record<string, string | number | boolean | undefined>;
 
+const COURSE_PACKAGE_CARRY_FIELDS = [
+  "legacy_course_id",
+  "slug",
+  "legacy_slug",
+  "legacy_url",
+  "title",
+  "subtitle",
+  "short_description",
+  "long_description",
+  "learning_outcomes",
+  "who_its_for",
+  "includes",
+  "hero_image_url",
+  "sales_video_url",
+  "instructor_slug",
+  "instructor_name",
+  "seo_title",
+  "seo_description",
+  "status",
+  "price",
+  "currency",
+  "compare_at_price",
+  "testimonial_name",
+  "testimonial_email",
+  "testimonial_quote",
+  "testimonial_rating",
+  "testimonial_position",
+] as const;
+
+const COURSE_PACKAGE_MODULE_FIELDS = ["module_position", "module_title"] as const;
+
 function humanizeSlug(slug: string) {
   return slug
     .split(/[-_]+/)
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function normalizeCoursePackageRows(rows: Record<string, string>[]) {
+  const normalizedRows: Record<string, string>[] = [];
+  const currentCourse: Record<string, string> = {};
+  const currentModule: Record<string, string> = {};
+
+  for (const row of rows) {
+    const normalizedRow: Record<string, string> = { ...row };
+
+    for (const field of COURSE_PACKAGE_CARRY_FIELDS) {
+      const rawValue = String(row[field] ?? "");
+      if (rawValue.trim()) {
+        currentCourse[field] = rawValue;
+      } else if (field in currentCourse) {
+        normalizedRow[field] = currentCourse[field];
+      }
+    }
+
+    for (const field of COURSE_PACKAGE_MODULE_FIELDS) {
+      const rawValue = String(row[field] ?? "");
+      if (rawValue.trim()) {
+        currentModule[field] = rawValue;
+      } else if (field in currentModule) {
+        normalizedRow[field] = currentModule[field];
+      }
+    }
+
+    const normalizedInstructorSlug = String(normalizedRow.instructor_slug ?? "").trim();
+    const normalizedInstructorName = String(normalizedRow.instructor_name ?? "").trim();
+
+    if (!normalizedInstructorSlug && !normalizedInstructorName) {
+      normalizedRow.instructor_slug = "perseus-staff";
+      normalizedRow.instructor_name = "Perseus Staff";
+      currentCourse.instructor_slug = "perseus-staff";
+      currentCourse.instructor_name = "Perseus Staff";
+    } else if (!normalizedInstructorSlug && normalizedInstructorName) {
+      const derivedSlug = normalizedInstructorName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      normalizedRow.instructor_slug = derivedSlug || "perseus-staff";
+      currentCourse.instructor_slug = normalizedRow.instructor_slug;
+    } else if (normalizedInstructorSlug && !normalizedInstructorName) {
+      normalizedRow.instructor_name = humanizeSlug(normalizedInstructorSlug);
+      currentCourse.instructor_name = normalizedRow.instructor_name;
+    }
+
+    normalizedRows.push(normalizedRow);
+  }
+
+  return normalizedRows;
 }
 
 async function enrichCourseValidation(
@@ -310,7 +393,8 @@ function buildSummary(
 }
 
 export async function dryRunImport(type: ImportType, csvContent: string, context?: ImportContext) {
-  const rows = parseCsv<Record<string, string>>(csvContent);
+  const parsedRows = parseCsv<Record<string, string>>(csvContent);
+  const rows = type === ImportType.COURSE_PACKAGE ? normalizeCoursePackageRows(parsedRows) : parsedRows;
 
   let validation: ImportValidationResult<Record<string, unknown>>;
 

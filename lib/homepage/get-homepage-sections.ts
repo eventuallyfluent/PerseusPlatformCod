@@ -4,6 +4,7 @@ import {
   HOMEPAGE_SECTION_ORDER,
   type HomepageFooterPayload,
   type HomepageHeroPayload,
+  type HomepageCollectionsPayload,
   type HomepageSectionRecord,
 } from "@/lib/homepage/sections";
 
@@ -50,7 +51,9 @@ export async function getHomepageSections(): Promise<HomepageSectionRecord[]> {
       const normalizedLinks = payload.platformLinks.map((link) =>
         link.label === "Courses" && link.href.startsWith("/course/")
           ? { ...link, href: "/courses" }
-          : link,
+          : link.label === "Collections" && link.href.startsWith("/bundle/")
+            ? { ...link, href: "/collections" }
+            : link,
       );
 
       return {
@@ -60,6 +63,23 @@ export async function getHomepageSections(): Promise<HomepageSectionRecord[]> {
         payload: {
           ...payload,
           platformLinks: normalizedLinks,
+        },
+      };
+    }
+
+    if (type === "COLLECTIONS" && existing) {
+      const payload = existing.payload as HomepageCollectionsPayload & { items?: unknown[] };
+      const fallbackPayload = fallback.payload as HomepageCollectionsPayload;
+
+      return {
+        type,
+        enabled: existing.enabled,
+        position: existing.position,
+        payload: {
+          eyebrow: payload.eyebrow ?? fallbackPayload.eyebrow,
+          title: payload.title ?? fallbackPayload.title,
+          description: payload.description ?? fallbackPayload.description,
+          featuredCollectionIds: Array.isArray(payload.featuredCollectionIds) ? payload.featuredCollectionIds : [],
         },
       };
     }

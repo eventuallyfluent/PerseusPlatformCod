@@ -86,30 +86,14 @@ export async function saveHomepageSectionAction(formData: FormData) {
       secondaryCtaHref: String(formData.get("secondaryCtaHref") ?? ""),
     };
   } else if (type === "COLLECTIONS") {
-    const itemIndexes = [...new Set(
-      Array.from(formData.keys())
-        .filter((key) => key.startsWith("itemTitle:"))
-        .map((key) => Number(key.split(":")[1]))
-        .filter((index) => Number.isFinite(index)),
-    )].sort((left, right) => left - right);
-
     payload = {
       eyebrow: String(formData.get("eyebrow") ?? ""),
       title: String(formData.get("title") ?? ""),
       description: String(formData.get("description") ?? ""),
-      items: itemIndexes
-        .map((index) => ({
-          eyebrow: String(formData.get(`itemEyebrow:${index}`) ?? ""),
-          title: String(formData.get(`itemTitle:${index}`) ?? ""),
-          description: String(formData.get(`itemDescription:${index}`) ?? ""),
-          imageUrl: String(formData.get(`itemImageUrl:${index}`) ?? ""),
-          tone: String(formData.get(`itemTone:${index}`) ?? "arcane") as "arcane" | "discipline" | "gateway",
-          courseSlugs: formData
-            .getAll(`itemCourseSlugs:${index}`)
-            .map((value) => String(value).trim())
-            .filter(Boolean),
-        }))
-        .filter((item) => item.title),
+      featuredCollectionIds: formData
+        .getAll("featuredCollectionIds")
+        .map((value) => String(value).trim())
+        .filter(Boolean),
     };
   } else if (type === "TESTIMONIES") {
     payload = {
@@ -166,6 +150,83 @@ export async function saveHomepageSectionAction(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/admin/settings");
+}
+
+export async function saveCollectionAction(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const payload = {
+    slug: String(formData.get("slug") ?? "").trim(),
+    eyebrow: String(formData.get("eyebrow") ?? "").trim() || null,
+    title: String(formData.get("title") ?? "").trim(),
+    description: String(formData.get("description") ?? "").trim(),
+    imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
+    tone: String(formData.get("tone") ?? "arcane").trim() || "arcane",
+    position: Number(formData.get("position") ?? 1),
+  };
+
+  const collection = id
+    ? await prisma.collection.update({
+        where: { id },
+        data: payload,
+      })
+    : await prisma.collection.create({
+        data: payload,
+      });
+
+  revalidatePath("/collections");
+  revalidatePath(`/collections/${collection.slug}`);
+  revalidatePath("/");
+  revalidatePath("/admin/collections");
+  redirect(`/admin/collections/${collection.id}`);
+}
+
+export async function saveCollectionCoursesAction(formData: FormData) {
+  const collectionId = String(formData.get("collectionId") ?? "");
+  const courseIds = formData
+    .getAll("courseIds")
+    .map((value) => String(value))
+    .filter(Boolean);
+
+  await prisma.collectionCourse.deleteMany({
+    where: { collectionId },
+  });
+
+  if (courseIds.length > 0) {
+    await prisma.collectionCourse.createMany({
+      data: courseIds.map((courseId, index) => ({
+        collectionId,
+        courseId,
+        position: index + 1,
+      })),
+    });
+  }
+
+  const collection = await prisma.collection.findUnique({
+    where: { id: collectionId },
+    select: { slug: true },
+  });
+
+  if (!collection) {
+    redirect("/admin/collections");
+  }
+
+  revalidatePath("/collections");
+  revalidatePath(`/collections/${collection.slug}`);
+  revalidatePath("/");
+  revalidatePath(`/admin/collections/${collectionId}`);
+}
+
+export async function deleteCollectionAction(formData: FormData) {
+  const collectionId = String(formData.get("collectionId") ?? "");
+
+  await prisma.collection.delete({
+    where: { id: collectionId },
+  });
+
+  revalidatePath("/collections");
+  revalidatePath("/");
+  revalidatePath("/admin/collections");
+  redirect("/admin/collections");
 }
 
 export async function saveCourseAction(formData: FormData) {

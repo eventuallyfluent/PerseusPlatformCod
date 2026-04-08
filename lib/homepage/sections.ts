@@ -10,20 +10,11 @@ export type HomepageHeroPayload = {
   secondaryCtaHref: string;
 };
 
-export type HomepageCollectionItem = {
-  eyebrow: string;
-  title: string;
-  description: string;
-  imageUrl?: string;
-  tone: "arcane" | "discipline" | "gateway";
-  courseSlugs: string[];
-};
-
 export type HomepageCollectionsPayload = {
   eyebrow: string;
   title: string;
   description: string;
-  items: HomepageCollectionItem[];
+  featuredCollectionIds?: string[];
 };
 
 export type HomepageTestimoniesPayload = {
@@ -110,32 +101,7 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
         eyebrow: "Collections",
         title: "Perseus study collections",
         description: "Enter the academy through a collection of courses that feels closest to your current line of study.",
-        items: [
-          {
-            eyebrow: "Collection 01",
-            title: "Hermetic foundations",
-            description: "Courses for students entering Perseus through symbolic language, tarot structure, and practical occult study.",
-            imageUrl: "",
-            tone: "arcane",
-            courseSlugs: ["meta-magick-tarot"],
-          },
-          {
-            eyebrow: "Collection 02",
-            title: "Discipline and practice",
-            description: "Courses oriented around consistency, internal development, and direct application rather than scattered theory.",
-            imageUrl: "",
-            tone: "discipline",
-            courseSlugs: ["meta-magick-tarot"],
-          },
-          {
-            eyebrow: "Collection 03",
-            title: "Gateway entry",
-            description: "The clearest starting points for new students who want a structured way into the academy and its study portal.",
-            imageUrl: "",
-            tone: "gateway",
-            courseSlugs: ["meta-magick-tarot"],
-          },
-        ],
+        featuredCollectionIds: [],
       },
     },
     {
@@ -175,7 +141,7 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
         platformHeading: "Platform",
         platformLinks: [
           { label: "Courses", href: "/courses" },
-          { label: "Collections", href: "/bundle/ritual-library-bundle" },
+          { label: "Collections", href: "/collections" },
           { label: "FAQ", href: "/faq" },
           { label: "Login", href: "/login" },
         ],

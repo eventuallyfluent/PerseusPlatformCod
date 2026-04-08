@@ -6,6 +6,7 @@ const links = [
   { href: "/admin/products", label: "Products" },
   { href: "/admin/courses", label: "Courses" },
   { href: "/admin/bundles", label: "Bundles" },
+  { href: "/admin/collections", label: "Collections" },
   { href: "/admin/instructors", label: "Instructors" },
   { href: "/admin/coupons", label: "Coupons" },
   { href: "/admin/orders", label: "Orders" },

@@ -2,9 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
+import { resolveCollectionPublicPath } from "@/lib/urls/resolve-collection-path";
 import { Button } from "@/components/ui/button";
 import type {
-  HomepageCollectionItem,
   HomepageCollectionsPayload,
   HomepageEmailSignupPayload,
   HomepageHeroPayload,
@@ -82,6 +82,7 @@ function CollectionPanel({
   description,
   imageUrl,
   tone,
+  href,
   courses,
 }: {
   eyebrow: string;
@@ -89,6 +90,7 @@ function CollectionPanel({
   description: string;
   imageUrl?: string;
   tone: CollectionTone;
+  href: string;
   courses: HomepageCourse[];
 }) {
   const toneVar =
@@ -113,6 +115,9 @@ function CollectionPanel({
         <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[rgba(240,234,248,0.76)]">{eyebrow}</p>
         <h2 className="mt-5 font-serif text-4xl leading-none tracking-[-0.04em] text-[var(--portal-text)]">{title}</h2>
         <p className="mt-5 max-w-sm text-base leading-8 text-[rgba(240,234,248,0.76)]">{description}</p>
+        <Link href={href} className="mt-5 inline-flex text-sm font-semibold text-[var(--premium)]">
+          View collection
+        </Link>
       </div>
       <div className="flex flex-1 flex-col gap-4 p-6">
         {courses.length > 0 ? (
@@ -158,7 +163,16 @@ function CollectionsSection({
   collections,
 }: {
   payload: HomepageCollectionsPayload;
-  collections: Array<HomepageCollectionItem & { courses: HomepageCourse[] }>;
+  collections: Array<{
+    id: string;
+    slug: string;
+    eyebrow: string | null;
+    title: string;
+    description: string;
+    imageUrl: string | null;
+    tone: string;
+    courses: HomepageCourse[];
+  }>;
 }) {
   return (
     <section className="mx-auto max-w-7xl px-6 py-16">
@@ -171,12 +185,13 @@ function CollectionsSection({
       <div className="grid gap-6 xl:grid-cols-3">
         {collections.map((collection, index) => (
           <CollectionPanel
-            key={`${collection.title}-${index}`}
-            eyebrow={collection.eyebrow}
+            key={`${collection.id}-${index}`}
+            eyebrow={collection.eyebrow ?? `Collection ${index + 1}`}
             title={collection.title}
             description={collection.description}
-            imageUrl={collection.imageUrl}
-            tone={collection.tone}
+            imageUrl={collection.imageUrl ?? undefined}
+            tone={(collection.tone as CollectionTone) ?? "arcane"}
+            href={resolveCollectionPublicPath(collection)}
             courses={collection.courses}
           />
         ))}
@@ -255,28 +270,34 @@ export default async function HomePage() {
   const testimoniesPayload =
     testimoniesSection?.type === "TESTIMONIES" ? (testimoniesSection.payload as HomepageTestimoniesPayload) : null;
 
-  const allCollectionSlugs = collectionsPayload ? collectionsPayload.items.flatMap((item) => item.courseSlugs) : [];
-
-  const uniqueSlugs = [...new Set(allCollectionSlugs)];
-  const collectionCourses =
-    uniqueSlugs.length > 0
-      ? await prisma.course.findMany({
-          where: {
-            status: "PUBLISHED",
-            slug: { in: uniqueSlugs },
+  const featuredCollectionIds = collectionsPayload?.featuredCollectionIds ?? [];
+  const collectionRecords = collectionsPayload
+    ? await prisma.collection.findMany({
+        where: featuredCollectionIds.length > 0 ? { id: { in: featuredCollectionIds } } : undefined,
+        include: {
+          courses: {
+            orderBy: { position: "asc" },
+            include: {
+              course: {
+                select: {
+                  id: true,
+                  title: true,
+                  slug: true,
+                  subtitle: true,
+                  publicPath: true,
+                  legacyUrl: true,
+                  price: true,
+                  currency: true,
+                  status: true,
+                },
+              },
+            },
           },
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            subtitle: true,
-            publicPath: true,
-            legacyUrl: true,
-            price: true,
-            currency: true,
-          },
-        })
-      : [];
+        },
+        orderBy: [{ position: "asc" }, { title: "asc" }],
+        take: featuredCollectionIds.length > 0 ? undefined : 3,
+      })
+    : [];
 
   const selectedTestimonialIds = testimoniesPayload?.selectedTestimonialIds ?? [];
   const approvedTestimonials = testimoniesPayload
@@ -293,23 +314,6 @@ export default async function HomePage() {
         take: selectedTestimonialIds.length > 0 ? selectedTestimonialIds.length : 6,
       })
     : [];
-
-  const coursesBySlug = new Map(
-    collectionCourses.map((course, index) => [
-      course.slug,
-      {
-        id: course.id,
-        title: course.title,
-        slug: course.slug,
-        subtitle: course.subtitle,
-        publicPath: course.publicPath,
-        legacyUrl: course.legacyUrl,
-        priceLabel: formatPrice(course.price.toString(), course.currency),
-        statusLabel: index === 0 ? "Featured" : "Open now",
-        ctaLabel: "Enroll now",
-      } satisfies HomepageCourse,
-    ]),
-  );
 
   const approvedTestimonialsById = new Map(
     approvedTestimonials.map((testimonial) => [
@@ -342,12 +346,39 @@ export default async function HomePage() {
 
     if (section.type === "COLLECTIONS") {
       const payload = section.payload as HomepageCollectionsPayload;
-      const collections = payload.items.map((item) => ({
-        ...item,
-        courses: item.courseSlugs.map((slug) => coursesBySlug.get(slug)).filter(Boolean) as HomepageCourse[],
-      }));
+      const collections =
+        featuredCollectionIds.length > 0
+          ? featuredCollectionIds
+              .map((id) => collectionRecords.find((collection) => collection.id === id))
+              .filter((item): item is (typeof collectionRecords)[number] => Boolean(item))
+          : collectionRecords;
 
-      return <CollectionsSection key={section.type} payload={payload} collections={collections} />;
+      return (
+        <CollectionsSection
+          key={section.type}
+          payload={payload}
+          collections={collections.map((collection) => ({
+            id: collection.id,
+            slug: collection.slug,
+            eyebrow: collection.eyebrow,
+            title: collection.title,
+            description: collection.description,
+            imageUrl: collection.imageUrl,
+            tone: collection.tone,
+            courses: collection.courses.map(({ course }, index) => ({
+              id: course.id,
+              title: course.title,
+              slug: course.slug,
+              subtitle: course.subtitle,
+              publicPath: course.publicPath,
+              legacyUrl: course.legacyUrl,
+              priceLabel: formatPrice(course.price.toString(), course.currency),
+              statusLabel: index === 0 ? "Featured" : course.status === "PUBLISHED" ? "Open now" : "Draft",
+              ctaLabel: "View course",
+            })),
+          }))}
+        />
+      );
     }
 
     if (section.type === "TESTIMONIES") {

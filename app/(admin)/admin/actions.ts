@@ -355,7 +355,7 @@ export async function addLessonAction(formData: FormData) {
   const courseId = String(formData.get("courseId"));
   const moduleId = String(formData.get("moduleId"));
   const lessonId = String(formData.get("lessonId") ?? "");
-  const data = lessonInputSchema.parse({
+  const parsed = lessonInputSchema.safeParse({
     title: formData.get("title"),
     slug: formData.get("slug"),
     position: formData.get("position"),
@@ -369,24 +369,34 @@ export async function addLessonAction(formData: FormData) {
     durationLabel: formData.get("durationLabel"),
   });
 
-  if (lessonId) {
-    await prisma.lesson.update({
-      where: { id: lessonId },
-      data: {
-        ...data,
-        videoUrl: data.videoUrl || null,
-        downloadUrl: data.downloadUrl || null,
-      },
-    });
-  } else {
-    await prisma.lesson.create({
-      data: {
-        moduleId,
-        ...data,
-        videoUrl: data.videoUrl || null,
-        downloadUrl: data.downloadUrl || null,
-      },
-    });
+  if (!parsed.success) {
+    redirect(`/admin/courses/${courseId}?error=lesson`);
+  }
+
+  const data = parsed.data;
+
+  try {
+    if (lessonId) {
+      await prisma.lesson.update({
+        where: { id: lessonId },
+        data: {
+          ...data,
+          videoUrl: data.videoUrl || null,
+          downloadUrl: data.downloadUrl || null,
+        },
+      });
+    } else {
+      await prisma.lesson.create({
+        data: {
+          moduleId,
+          ...data,
+          videoUrl: data.videoUrl || null,
+          downloadUrl: data.downloadUrl || null,
+        },
+      });
+    }
+  } catch {
+    redirect(`/admin/courses/${courseId}?error=lesson`);
   }
 
   revalidatePath(`/admin/courses/${courseId}`);

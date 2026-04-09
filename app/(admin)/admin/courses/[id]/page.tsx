@@ -70,7 +70,12 @@ export default async function CourseDetailPage({
               : resolvedSearchParams?.saved === "status"
                 ? "Course status updated."
                 : "";
-  const errorMessage = resolvedSearchParams?.error === "lesson" ? "Lesson changes could not be saved. Check the lesson fields and try again." : "";
+  const errorMessage =
+    resolvedSearchParams?.error === "lesson"
+      ? "Lesson changes could not be saved. Check the lesson fields and try again."
+      : resolvedSearchParams?.error === "details"
+        ? "Course changes could not be saved. Check the form fields and try again."
+        : "";
 
   return (
     <AdminShell title={course.title} description="One product record controls the page, curriculum, pricing, and delivery.">

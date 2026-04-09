@@ -271,7 +271,18 @@ export async function saveCourseAction(formData: FormData) {
     legacyUrl: String(formData.get("legacyUrl") ?? ""),
   };
 
-  const course = id ? await updateCourse(id, payload) : await createCourse(payload);
+  let course;
+
+  try {
+    course = id ? await updateCourse(id, payload) : await createCourse(payload);
+  } catch {
+    if (id) {
+      redirect(`/admin/courses/${id}?error=details`);
+    }
+
+    redirect("/admin/courses/new/course?error=details");
+  }
+
   revalidatePath("/admin/courses");
   revalidatePath("/admin/products");
   revalidatePath("/courses");
@@ -310,7 +321,18 @@ export async function saveBundleAction(formData: FormData) {
     legacyUrl: String(formData.get("legacyUrl") ?? ""),
   });
 
-  const bundle = id ? await updateBundle(id, payload) : await createBundle(payload);
+  let bundle;
+
+  try {
+    bundle = id ? await updateBundle(id, payload) : await createBundle(payload);
+  } catch {
+    if (id) {
+      redirect(`/admin/bundles/${id}?error=details`);
+    }
+
+    redirect("/admin/bundles/new?error=details");
+  }
+
   revalidatePath("/admin/bundles");
   revalidatePath("/admin/products");
   revalidatePath("/courses");

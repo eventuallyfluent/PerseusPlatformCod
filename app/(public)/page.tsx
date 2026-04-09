@@ -4,6 +4,7 @@ import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { resolveCollectionPublicPath } from "@/lib/urls/resolve-collection-path";
 import { Button } from "@/components/ui/button";
+import { HardLink } from "@/components/ui/hard-link";
 import type {
   HomepageCollectionsPayload,
   HomepageEmailSignupPayload,
@@ -52,7 +53,7 @@ type CollectionTone = "arcane" | "discipline" | "gateway";
 
 function CollectionCourseRow({ course }: { course: HomepageCourse }) {
   return (
-    <Link
+    <HardLink
       href={resolveCoursePublicPath(course)}
       className="flex items-start justify-between gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] p-4 transition hover:border-[var(--border-strong)] hover:bg-[rgba(51,51,84,0.98)]"
     >
@@ -72,7 +73,7 @@ function CollectionCourseRow({ course }: { course: HomepageCourse }) {
         <p className="text-lg font-semibold text-[var(--portal-text)]">{course.priceLabel ?? "View"}</p>
         <p className="mt-3 text-sm font-semibold text-[var(--accent-lavender)]">{course.ctaLabel}</p>
       </div>
-    </Link>
+    </HardLink>
   );
 }
 

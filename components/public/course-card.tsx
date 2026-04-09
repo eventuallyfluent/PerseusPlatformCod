@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { Course } from "@prisma/client";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { Badge } from "@/components/ui/badge";
+import { HardLink } from "@/components/ui/hard-link";
 
 type CourseCardProps = {
   course: Pick<Course, "title" | "slug" | "subtitle" | "heroImageUrl" | "publicPath" | "legacyUrl"> & {
@@ -20,8 +20,8 @@ export function CourseCard({ course }: CourseCardProps) {
         : "linear-gradient(135deg, #17396f, #2758a5)";
 
   return (
-    <Link href={resolveCoursePublicPath(course)} className="group block">
-      <article className="h-full overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--portal-panel-strong)] text-white transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-soft)]">
+    <HardLink href={resolveCoursePublicPath(course)} className="group block">
+      <article className="flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--portal-panel-strong)] text-white transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-soft)]">
         <div
           className="h-72 bg-cover bg-center transition duration-500 group-hover:scale-[1.02]"
           style={{
@@ -30,17 +30,41 @@ export function CourseCard({ course }: CourseCardProps) {
               : cardTone,
           }}
         />
-        <div className="space-y-5 p-7">
+        <div className="flex flex-1 flex-col p-7">
           <div className="flex items-center justify-between gap-4">
             <Badge variant="portal">{course.statusLabel ?? "Featured"}</Badge>
             <Badge variant="premium">{course.priceLabel?.toLowerCase() === "free" ? "Free" : "Premium"}</Badge>
           </div>
-          <div className="space-y-3">
+          <div className="mt-5 space-y-3">
             <p className="text-sm text-[var(--portal-muted)]">Perseus course</p>
-            <h3 className="max-w-sm text-4xl leading-none tracking-[-0.04em]">{course.title}</h3>
-            {course.subtitle ? <p className="max-w-sm text-base leading-8 text-[var(--portal-muted)]">{course.subtitle}</p> : null}
+            <h3
+              className="max-w-sm min-h-[7.5rem] text-4xl leading-none tracking-[-0.04em]"
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {course.title}
+            </h3>
+            {course.subtitle ? (
+              <p
+                className="max-w-sm min-h-[4rem] text-base leading-8 text-[var(--portal-muted)]"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                {course.subtitle}
+              </p>
+            ) : (
+              <div className="min-h-[4rem]" />
+            )}
           </div>
-          <div className="flex items-center justify-between gap-4 border-t border-[var(--portal-border)] pt-4">
+          <div className="mt-auto flex items-center justify-between gap-4 border-t border-[var(--portal-border)] pt-4">
             <div>
               <p className="text-xs uppercase tracking-[0.24em] text-[var(--portal-muted)]">Access path</p>
               <p className="mt-2 text-3xl font-semibold">{course.priceLabel ?? "View offer"}</p>
@@ -51,6 +75,6 @@ export function CourseCard({ course }: CourseCardProps) {
           </div>
         </div>
       </article>
-    </Link>
+    </HardLink>
   );
 }

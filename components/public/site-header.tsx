@@ -29,13 +29,13 @@ export async function SiteHeader() {
           <Link href="/faq" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
             FAQ
           </Link>
-          <Link href="/dashboard" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
+          <Link href="/dashboard" prefetch={false} className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
             Dashboard
           </Link>
           {session?.user ? (
             <>
               {session.user.isAdmin ? (
-                <Link href="/admin" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
+                <Link href="/admin" prefetch={false} className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
                   Admin
                 </Link>
               ) : null}

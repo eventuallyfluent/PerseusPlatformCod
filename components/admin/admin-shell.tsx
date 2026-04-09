@@ -26,6 +26,7 @@ export function AdminShell({ children, title, description }: PropsWithChildren<{
             <Link
               key={link.href}
               href={link.href}
+              prefetch={false}
               className="block rounded-2xl px-4 py-3 text-sm font-semibold text-stone-800 transition hover:bg-white hover:text-stone-950 focus:bg-white focus:text-stone-950"
             >
               {link.label}
@@ -43,6 +44,7 @@ export function AdminShell({ children, title, description }: PropsWithChildren<{
             <div className="flex flex-wrap gap-2">
               <Link
                 href="/dashboard"
+                prefetch={false}
                 className="inline-flex items-center rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
               >
                 Learner Dashboard

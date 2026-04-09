@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { ImageField } from "@/components/admin/image-field";
 import { Card } from "@/components/ui/card";
+import { HardLink } from "@/components/ui/hard-link";
 import { deleteCollectionAction, saveCollectionAction, saveCollectionCoursesAction } from "@/app/(admin)/admin/actions";
 
 export const dynamic = "force-dynamic";
@@ -118,9 +118,9 @@ export default async function CollectionDetailPage({
               >
                 Save collection changes
               </button>
-              <Link href={`/courses?collection=${encodeURIComponent(collection.slug)}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
+              <HardLink href={`/courses?collection=${encodeURIComponent(collection.slug)}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
                 View in store
-              </Link>
+              </HardLink>
               <form action={deleteCollectionAction}>
                 <input type="hidden" name="collectionId" value={collection.id} />
                 <button className="w-full rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" type="submit">

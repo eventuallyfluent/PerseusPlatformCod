@@ -52,8 +52,8 @@ export default async function NewCoursePage({
               </p>
               <div className="flex flex-wrap gap-4 text-sm">
                 <Link href="/api/imports/templates/course-package" className="font-medium text-stone-950 underline">
-                Download course migration CSV
-              </Link>
+                  Download course migration CSV
+                </Link>
               </div>
               <p className="text-xs leading-6 text-stone-500">
                 One row = one lesson. Repeat the course-level fields on every row. Add testimonial columns, including rating, on any rows where you want imported Payhip reviews.

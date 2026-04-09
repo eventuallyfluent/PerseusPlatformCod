@@ -5,6 +5,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { ImageField } from "@/components/admin/image-field";
 import { ProductFormSection } from "@/components/admin/product-form-shell";
+import { HardLink } from "@/components/ui/hard-link";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
@@ -75,6 +76,18 @@ export default async function CourseDetailPage({
       ? "Lesson changes could not be saved. Check the lesson fields and try again."
       : resolvedSearchParams?.error === "details"
         ? "Course changes could not be saved. Check the form fields and try again."
+        : resolvedSearchParams?.error === "curriculum"
+          ? "Curriculum changes could not be saved. Check the module or lesson fields and try again."
+          : resolvedSearchParams?.error === "faq"
+            ? "FAQ changes could not be saved. Try that section again."
+            : resolvedSearchParams?.error === "reviews"
+              ? "Review changes could not be saved. Try that section again."
+              : resolvedSearchParams?.error === "page"
+                ? "The sales page could not be regenerated. Try again."
+                : resolvedSearchParams?.error === "status"
+                  ? "The course status could not be updated. Try again."
+                  : resolvedSearchParams?.error === "delete"
+                    ? "The course could not be deleted. Remove dependent records first and try again."
         : "";
 
   return (
@@ -228,37 +241,43 @@ export default async function CourseDetailPage({
               <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#media-seo">Media and SEO</a>
               <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#pricing-checkout">Pricing and checkout</a>
               <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#sales-page">Sales page</a>
+              <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#curriculum">Curriculum</a>
+              <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#social-proof">Reviews and FAQ</a>
+              <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#publish">Publish and preview</a>
               <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#migration-urls">Migration and URLs</a>
             </div>
-            <p className="text-sm leading-6 text-stone-600">Use this page as one repeatable flow: set the product identity, write the sales copy, set pricing, then build the curriculum below.</p>
+            <p className="text-sm leading-6 text-stone-600">Use this page as one repeatable builder: identity, copy, media, pricing, curriculum, proof, then publish.</p>
           </Card>
-          <Card className="space-y-3 bg-white p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Actions</p>
-            <div className="grid gap-3">
-              <form action={regeneratePageAction}><input type="hidden" name="courseId" value={course.id} /><button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">Regenerate page</button></form>
-              <Link href={resolveCoursePublicPath(course)} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">View public page</Link>
-              {previewOffer ? <Link href={`/checkout/${previewOffer.id}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">Preview checkout</Link> : null}
-              {course.modules[0]?.lessons[0] ? (
-                <Link href={`/learn/${course.slug}/${course.modules[0].lessons[0].slug}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
-                  Preview learner view
-                </Link>
-              ) : null}
-              <form action={setCourseStatusAction}><input type="hidden" name="courseId" value={course.id} /><input type="hidden" name="status" value="PUBLISHED" /><button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">Publish</button></form>
-              <form action={setCourseStatusAction}><input type="hidden" name="courseId" value={course.id} /><input type="hidden" name="status" value="DRAFT" /><button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">Unpublish</button></form>
-              <form action={deleteCourseAction}><input type="hidden" name="courseId" value={course.id} /><button className="w-full rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" type="submit">Delete course</button></form>
-            </div>
-          </Card>
+          <div id="publish">
+            <Card className="space-y-3 bg-white p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Actions</p>
+              <div className="grid gap-3">
+                <form action={regeneratePageAction}><input type="hidden" name="courseId" value={course.id} /><button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">Regenerate page</button></form>
+                <HardLink href={resolveCoursePublicPath(course)} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">View public page</HardLink>
+                {previewOffer ? <HardLink href={`/checkout/${previewOffer.id}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">Preview checkout</HardLink> : null}
+                {course.modules[0]?.lessons[0] ? (
+                  <HardLink href={`/learn/${course.slug}/${course.modules[0].lessons[0].slug}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
+                    Preview learner view
+                  </HardLink>
+                ) : null}
+                <form action={setCourseStatusAction}><input type="hidden" name="courseId" value={course.id} /><input type="hidden" name="status" value="PUBLISHED" /><button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">Publish</button></form>
+                <form action={setCourseStatusAction}><input type="hidden" name="courseId" value={course.id} /><input type="hidden" name="status" value="DRAFT" /><button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">Unpublish</button></form>
+                <form action={deleteCourseAction}><input type="hidden" name="courseId" value={course.id} /><button className="w-full rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" type="submit">Delete course</button></form>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
 
       <div className="grid gap-6">
-        <Card className="space-y-4 bg-white">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-stone-950">Curriculum</h2>
-            <p className="text-sm text-stone-600">Build modules and lessons here.</p>
-          </div>
-          {course.modules.map((module) => (
-            <details key={module.id} className="rounded-[24px] border border-stone-200 bg-stone-50 p-4" open>
+        <div id="curriculum">
+          <Card className="space-y-4 bg-white">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold text-stone-950">Curriculum</h2>
+              <p className="text-sm text-stone-600">Work top to bottom: add a module, add lessons inside it, then save each lesson once after changing content, preview, or embed fields.</p>
+            </div>
+            {course.modules.map((module) => (
+              <details key={module.id} className="rounded-[24px] border border-stone-200 bg-stone-50 p-4" open>
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">Module {module.position}</p>
@@ -273,7 +292,7 @@ export default async function CourseDetailPage({
                   <label>Module title<input name="title" defaultValue={module.title} /></label>
                   <label>Position<input name="position" type="number" min="1" defaultValue={module.position} /></label>
                   <div className="flex flex-wrap items-end gap-3">
-                    <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Save</button>
+                    <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Save module</button>
                     <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteModuleAction} name="moduleId" value={module.id}>Delete</button>
                   </div>
                 </form>
@@ -345,30 +364,35 @@ export default async function CourseDetailPage({
                         <span className="mt-1 block text-xs leading-5 text-stone-500">Paste either a direct video URL or the iframe embed code.</span>
                       </label>
                     </div>
-                    <button className="w-fit rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Add lesson</button>
+                    <button className="w-fit rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Create lesson</button>
                   </form>
                 </details>
               </div>
             </details>
           ))}
-          <details className="rounded-[24px] border border-dashed border-stone-200 p-4">
-            <summary className="cursor-pointer text-sm font-semibold text-stone-950">Add module</summary>
-            <form action={addModuleAction} className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_120px_auto]">
-              <input type="hidden" name="courseId" value={course.id} />
-              <label>Module title<input name="title" /></label>
-              <label>Position<input name="position" type="number" min="1" /></label>
-              <button className="w-fit rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Add module</button>
-            </form>
-          </details>
-        </Card>
-        <Card className="space-y-6 bg-white">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-stone-950">FAQ and reviews</h2>
-            <p className="text-sm text-stone-600">Keep public proof and objections inside the same product editor.</p>
-          </div>
-          <div className="space-y-3 text-sm text-stone-700">
-            <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">Live price: {course.price.toString()} {course.currency}{course.compareAtPrice ? ` · compare-at ${course.compareAtPrice.toString()} ${course.currency}` : ""}</div>
-            <p className="pt-2 text-sm font-semibold uppercase tracking-[0.24em] text-stone-500">FAQ</p>
+            <details className="rounded-[24px] border border-dashed border-stone-200 p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-stone-950">Add module</summary>
+              <form action={addModuleAction} className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_120px_auto]">
+                <input type="hidden" name="courseId" value={course.id} />
+                <label>Module title<input name="title" /></label>
+                <label>Position<input name="position" type="number" min="1" /></label>
+                <button className="w-fit rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Create module</button>
+              </form>
+            </details>
+          </Card>
+        </div>
+        <div id="social-proof">
+          <Card className="space-y-6 bg-white">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold text-stone-950">FAQ and reviews</h2>
+              <p className="text-sm text-stone-600">Keep public proof and objections inside the same product editor.</p>
+            </div>
+            <div className="space-y-3 text-sm text-stone-700">
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                Live price: {course.price.toString()} {course.currency}
+                {course.compareAtPrice ? ` · compare-at ${course.compareAtPrice.toString()} ${course.currency}` : ""}
+              </div>
+              <p className="pt-2 text-sm font-semibold uppercase tracking-[0.24em] text-stone-500">FAQ</p>
             <form action={saveFaqAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
               <input type="hidden" name="courseId" value={course.id} />
               <label>Question<input name="question" /></label>
@@ -416,6 +440,7 @@ export default async function CourseDetailPage({
             ))}
           </div>
         </Card>
+        </div>
       </div>
     </AdminShell>
   );

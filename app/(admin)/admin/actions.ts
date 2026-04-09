@@ -247,9 +247,13 @@ export async function saveCollectionCoursesAction(formData: FormData) {
 export async function deleteCollectionAction(formData: FormData) {
   const collectionId = String(formData.get("collectionId") ?? "");
 
-  await prisma.collection.delete({
-    where: { id: collectionId },
-  });
+  try {
+    await prisma.collection.delete({
+      where: { id: collectionId },
+    });
+  } catch {
+    redirect(`/admin/collections/${collectionId}?error=details`);
+  }
 
   revalidatePath("/collections");
   revalidatePath("/courses");
@@ -374,27 +378,37 @@ export async function saveBundleAction(formData: FormData) {
 export async function addModuleAction(formData: FormData) {
   const courseId = String(formData.get("courseId"));
   const moduleId = String(formData.get("moduleId") ?? "");
-  const data = moduleInputSchema.parse({
+  const parsed = moduleInputSchema.safeParse({
     title: formData.get("title"),
     position: formData.get("position"),
   });
 
-  if (moduleId) {
-    await prisma.module.update({
-      where: { id: moduleId },
-      data: {
-        title: data.title,
-        position: data.position,
-      },
-    });
-  } else {
-    await prisma.module.create({
-      data: {
-        courseId,
-        title: data.title,
-        position: data.position,
-      },
-    });
+  if (!parsed.success) {
+    redirect(`/admin/courses/${courseId}?error=curriculum`);
+  }
+
+  const data = parsed.data;
+
+  try {
+    if (moduleId) {
+      await prisma.module.update({
+        where: { id: moduleId },
+        data: {
+          title: data.title,
+          position: data.position,
+        },
+      });
+    } else {
+      await prisma.module.create({
+        data: {
+          courseId,
+          title: data.title,
+          position: data.position,
+        },
+      });
+    }
+  } catch {
+    redirect(`/admin/courses/${courseId}?error=curriculum`);
   }
 
   revalidatePath(`/admin/courses/${courseId}`);
@@ -603,15 +617,19 @@ export async function saveCouponAction(formData: FormData) {
       expiresAt: expiresAtRaw ? new Date(expiresAtRaw) : null,
     };
 
-  if (couponId) {
-    await prisma.coupon.update({
-      where: { id: couponId },
-      data: payload,
-    });
-  } else {
-    await prisma.coupon.create({
-      data: payload,
-    });
+  try {
+    if (couponId) {
+      await prisma.coupon.update({
+        where: { id: couponId },
+        data: payload,
+      });
+    } else {
+      await prisma.coupon.create({
+        data: payload,
+      });
+    }
+  } catch {
+    redirect("/admin/coupons?error=save");
   }
 
   revalidatePath("/admin/coupons");
@@ -620,9 +638,13 @@ export async function saveCouponAction(formData: FormData) {
 
 export async function deleteCouponAction(formData: FormData) {
   const couponId = String(formData.get("couponId") ?? "");
-  await prisma.coupon.delete({
-    where: { id: couponId },
-  });
+  try {
+    await prisma.coupon.delete({
+      where: { id: couponId },
+    });
+  } catch {
+    redirect("/admin/coupons?error=delete");
+  }
   revalidatePath("/admin/coupons");
   redirect("/admin/coupons?saved=deleted");
 }
@@ -639,15 +661,24 @@ export async function saveFaqAction(formData: FormData) {
     position: Number(formData.get("position") ?? 1),
   };
 
-  if (faqId) {
-    await prisma.fAQ.update({
-      where: { id: faqId },
-      data: payload,
-    });
-  } else {
-    await prisma.fAQ.create({
-      data: payload,
-    });
+  try {
+    if (faqId) {
+      await prisma.fAQ.update({
+        where: { id: faqId },
+        data: payload,
+      });
+    } else {
+      await prisma.fAQ.create({
+        data: payload,
+      });
+    }
+  } catch {
+    if (courseId) {
+      redirect(`/admin/courses/${courseId}?error=faq`);
+    }
+    if (bundleId) {
+      redirect(`/admin/bundles/${bundleId}?error=faq`);
+    }
   }
 
   if (courseId) {
@@ -665,9 +696,18 @@ export async function deleteFaqAction(formData: FormData) {
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
 
-  await prisma.fAQ.delete({
-    where: { id: faqId },
-  });
+  try {
+    await prisma.fAQ.delete({
+      where: { id: faqId },
+    });
+  } catch {
+    if (courseId) {
+      redirect(`/admin/courses/${courseId}?error=faq`);
+    }
+    if (bundleId) {
+      redirect(`/admin/bundles/${bundleId}?error=faq`);
+    }
+  }
 
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
@@ -694,15 +734,24 @@ export async function saveTestimonialAction(formData: FormData) {
     isApproved: Boolean(formData.get("isApproved")),
   };
 
-  if (testimonialId) {
-    await prisma.testimonial.update({
-      where: { id: testimonialId },
-      data: payload,
-    });
-  } else {
-    await prisma.testimonial.create({
-      data: payload,
-    });
+  try {
+    if (testimonialId) {
+      await prisma.testimonial.update({
+        where: { id: testimonialId },
+        data: payload,
+      });
+    } else {
+      await prisma.testimonial.create({
+        data: payload,
+      });
+    }
+  } catch {
+    if (courseId) {
+      redirect(`/admin/courses/${courseId}?error=reviews`);
+    }
+    if (bundleId) {
+      redirect(`/admin/bundles/${bundleId}?error=reviews`);
+    }
   }
 
   if (courseId) {
@@ -720,9 +769,18 @@ export async function deleteTestimonialAction(formData: FormData) {
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
 
-  await prisma.testimonial.delete({
-    where: { id: testimonialId },
-  });
+  try {
+    await prisma.testimonial.delete({
+      where: { id: testimonialId },
+    });
+  } catch {
+    if (courseId) {
+      redirect(`/admin/courses/${courseId}?error=reviews`);
+    }
+    if (bundleId) {
+      redirect(`/admin/bundles/${bundleId}?error=reviews`);
+    }
+  }
 
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
@@ -736,7 +794,11 @@ export async function deleteTestimonialAction(formData: FormData) {
 
 export async function regeneratePageAction(formData: FormData) {
   const courseId = String(formData.get("courseId"));
-  await regenerateCoursePage(courseId, true);
+  try {
+    await regenerateCoursePage(courseId, true);
+  } catch {
+    redirect(`/admin/courses/${courseId}?error=page`);
+  }
   revalidatePath(`/admin/courses/${courseId}`);
   redirect(`/admin/courses/${courseId}?saved=page`);
 }
@@ -744,9 +806,13 @@ export async function regeneratePageAction(formData: FormData) {
 export async function deleteCourseAction(formData: FormData) {
   const courseId = String(formData.get("courseId"));
 
-  await prisma.course.delete({
-    where: { id: courseId },
-  });
+  try {
+    await prisma.course.delete({
+      where: { id: courseId },
+    });
+  } catch {
+    redirect(`/admin/courses/${courseId}?error=delete`);
+  }
 
   revalidatePath("/admin/courses");
   redirect("/admin/courses");
@@ -759,18 +825,22 @@ export async function saveBundleCoursesAction(formData: FormData) {
     .map((value) => String(value))
     .filter(Boolean);
 
-  await prisma.bundleCourse.deleteMany({
-    where: { bundleId },
-  });
-
-  if (courseIds.length > 0) {
-    await prisma.bundleCourse.createMany({
-      data: courseIds.map((courseId, index) => ({
-        bundleId,
-        courseId,
-        position: index + 1,
-      })),
+  try {
+    await prisma.bundleCourse.deleteMany({
+      where: { bundleId },
     });
+
+    if (courseIds.length > 0) {
+      await prisma.bundleCourse.createMany({
+        data: courseIds.map((courseId, index) => ({
+          bundleId,
+          courseId,
+          position: index + 1,
+        })),
+      });
+    }
+  } catch {
+    redirect(`/admin/bundles/${bundleId}?error=courses`);
   }
 
   revalidatePath(`/admin/bundles/${bundleId}`);
@@ -780,9 +850,13 @@ export async function saveBundleCoursesAction(formData: FormData) {
 export async function deleteBundleAction(formData: FormData) {
   const bundleId = String(formData.get("bundleId") ?? "");
 
-  await prisma.bundle.delete({
-    where: { id: bundleId },
-  });
+  try {
+    await prisma.bundle.delete({
+      where: { id: bundleId },
+    });
+  } catch {
+    redirect(`/admin/bundles/${bundleId}?error=delete`);
+  }
 
   revalidatePath("/admin/bundles");
   redirect("/admin/bundles");
@@ -798,9 +872,13 @@ export async function deleteInstructorAction(formData: FormData) {
     redirect(`/admin/instructors/${instructorId}?error=delete`);
   }
 
-  await prisma.instructor.delete({
-    where: { id: instructorId },
-  });
+  try {
+    await prisma.instructor.delete({
+      where: { id: instructorId },
+    });
+  } catch {
+    redirect(`/admin/instructors/${instructorId}?error=delete`);
+  }
 
   revalidatePath("/admin/instructors");
   redirect("/admin/instructors");
@@ -810,9 +888,13 @@ export async function deleteModuleAction(formData: FormData) {
   const courseId = String(formData.get("courseId"));
   const moduleId = String(formData.get("moduleId"));
 
-  await prisma.module.delete({
-    where: { id: moduleId },
-  });
+  try {
+    await prisma.module.delete({
+      where: { id: moduleId },
+    });
+  } catch {
+    redirect(`/admin/courses/${courseId}?error=curriculum`);
+  }
 
   revalidatePath(`/admin/courses/${courseId}`);
   redirect(`/admin/courses/${courseId}?saved=curriculum`);
@@ -822,9 +904,13 @@ export async function deleteLessonAction(formData: FormData) {
   const courseId = String(formData.get("courseId"));
   const lessonId = String(formData.get("lessonId"));
 
-  await prisma.lesson.delete({
-    where: { id: lessonId },
-  });
+  try {
+    await prisma.lesson.delete({
+      where: { id: lessonId },
+    });
+  } catch {
+    redirect(`/admin/courses/${courseId}?error=curriculum`);
+  }
 
   revalidatePath(`/admin/courses/${courseId}`);
   redirect(`/admin/courses/${courseId}?saved=curriculum`);
@@ -940,10 +1026,14 @@ export async function setCourseStatusAction(formData: FormData) {
   const courseId = String(formData.get("courseId") ?? formData.get("id") ?? "");
   const status = String(formData.get("status") ?? CourseStatus.DRAFT) as CourseStatus;
 
-  await prisma.course.update({
-    where: { id: courseId },
-    data: { status },
-  });
+  try {
+    await prisma.course.update({
+      where: { id: courseId },
+      data: { status },
+    });
+  } catch {
+    redirect(`/admin/courses/${courseId}?error=status`);
+  }
 
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);

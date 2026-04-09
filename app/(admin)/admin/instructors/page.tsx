@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { HardLink } from "@/components/ui/hard-link";
 
 export const dynamic = "force-dynamic";
 
@@ -13,9 +13,9 @@ export default async function InstructorsPage() {
   return (
     <AdminShell title="Instructors" description="Manage instructor bios, social links, and public profile pages.">
       <div className="flex justify-end">
-        <Link href="/admin/instructors/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+        <HardLink href="/admin/instructors/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
           New instructor
-        </Link>
+        </HardLink>
       </div>
       <Card className="overflow-hidden p-0">
         <table>
@@ -34,9 +34,9 @@ export default async function InstructorsPage() {
                 <td>{instructor.slug}</td>
                 <td>{instructor.updatedAt.toLocaleDateString()}</td>
                 <td>
-                  <Link href={`/admin/instructors/${instructor.id}`} className="underline" prefetch={false}>
+                  <HardLink href={`/admin/instructors/${instructor.id}`} className="underline">
                     Edit
-                  </Link>
+                  </HardLink>
                 </td>
               </tr>
             ))}

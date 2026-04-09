@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { ImageField } from "@/components/admin/image-field";
 import { ProductFormSection } from "@/components/admin/product-form-shell";
+import { HardLink } from "@/components/ui/hard-link";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
@@ -63,13 +63,24 @@ export default async function BundleDetailPage({
             ? "Reviews updated."
             : "";
   const errorMessage = resolvedSearchParams?.error === "details" ? "Bundle changes could not be saved. Check the form fields and try again." : "";
+  const detailedErrorMessage =
+    errorMessage ||
+    (resolvedSearchParams?.error === "courses"
+      ? "Included courses could not be saved. Try that section again."
+      : resolvedSearchParams?.error === "faq"
+        ? "FAQ changes could not be saved. Try that section again."
+        : resolvedSearchParams?.error === "reviews"
+          ? "Review changes could not be saved. Try that section again."
+          : resolvedSearchParams?.error === "delete"
+            ? "The bundle could not be deleted. Remove dependent records first and try again."
+            : "");
 
   return (
     <AdminShell title={bundle.title} description="One product record controls the bundle page, included courses, pricing, and access.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <Card className="space-y-8 bg-white p-8">
           {feedbackMessage ? <p className="rounded-[18px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedbackMessage}</p> : null}
-          {errorMessage ? <p className="rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">{errorMessage}</p> : null}
+          {detailedErrorMessage ? <p className="rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">{detailedErrorMessage}</p> : null}
           <div className="space-y-4 border-b border-[var(--border)] pb-6">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
             <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the product once and let the page generate from it.</h2>
@@ -176,8 +187,8 @@ export default async function BundleDetailPage({
           <Card className="space-y-3 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Actions</p>
             <div className="grid gap-3">
-              <Link href={resolveBundlePublicPath(bundle)} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">View public page</Link>
-              {previewOffer ? <Link href={`/checkout/${previewOffer.id}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">Preview checkout</Link> : null}
+              <HardLink href={resolveBundlePublicPath(bundle)} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">View public page</HardLink>
+              {previewOffer ? <HardLink href={`/checkout/${previewOffer.id}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">Preview checkout</HardLink> : null}
               <button className="rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteBundleAction} form="bundle-editor-actions" name="bundleId" value={bundle.id}>Delete bundle</button>
             </div>
           </Card>

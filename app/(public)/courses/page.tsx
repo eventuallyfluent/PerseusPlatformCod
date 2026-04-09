@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { CourseCard } from "@/components/public/course-card";
+import { HardLink } from "@/components/ui/hard-link";
+import { resolveCollectionPublicPath } from "@/lib/urls/resolve-collection-path";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +38,13 @@ export default async function CoursesIndexPage({
         id: true,
         slug: true,
         title: true,
+        imageUrl: true,
+        description: true,
+        _count: {
+          select: {
+            courses: true,
+          },
+        },
       },
     }),
     prisma.instructor.findMany({
@@ -116,6 +125,79 @@ export default async function CoursesIndexPage({
           Use search and filters to move through the full store without forcing everything into one long list.
         </p>
       </div>
+
+      <section className="mt-10 space-y-6">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-4 text-sm text-[var(--portal-text)]">
+          <HardLink
+            href="/courses"
+            className={`font-medium transition ${selectedCollection ? "text-[var(--foreground-soft)] hover:text-[var(--portal-text)]" : "text-[var(--accent-lavender)] underline underline-offset-4"}`}
+          >
+            All Courses
+          </HardLink>
+          {collections.map((collection) => {
+            const active = selectedCollection?.id === collection.id;
+
+            return (
+              <HardLink
+                key={collection.id}
+                href={resolveCollectionPublicPath(collection)}
+                className={`font-medium transition ${active ? "text-[var(--accent-lavender)] underline underline-offset-4" : "text-[var(--foreground-soft)] hover:text-[var(--portal-text)]"}`}
+              >
+                {collection.title}
+              </HardLink>
+            );
+          })}
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {collections.map((collection) => {
+            const active = selectedCollection?.id === collection.id;
+
+            return (
+              <HardLink
+                key={collection.id}
+                href={resolveCollectionPublicPath(collection)}
+                className="group block"
+              >
+                <article
+                  className={`overflow-hidden rounded-[30px] border bg-[var(--perseus-collection-panel)] shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1 ${
+                    active ? "border-[var(--accent)]" : "border-[var(--border)]"
+                  }`}
+                >
+                  <div
+                    className="h-52 bg-cover bg-center"
+                    style={{
+                      backgroundImage: collection.imageUrl
+                        ? `linear-gradient(180deg, rgba(13,15,29,0.18), rgba(13,15,29,0.62)), url(${collection.imageUrl})`
+                        : "linear-gradient(135deg,#1c1534,#302555)",
+                    }}
+                  />
+                  <div className="space-y-3 p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <h2 className="text-2xl leading-none tracking-[-0.03em] text-[var(--portal-text)]">{collection.title}</h2>
+                      <span className="rounded-full border border-[var(--border)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--foreground-soft)]">
+                        {collection._count.courses} course{collection._count.courses === 1 ? "" : "s"}
+                      </span>
+                    </div>
+                    <p
+                      className="min-h-[3.5rem] text-sm leading-7 text-[var(--foreground-soft)]"
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {collection.description || "Browse the full collection."}
+                    </p>
+                    <p className="text-sm font-semibold text-[var(--accent-lavender)]">{active ? "Viewing collection" : "Open collection"}</p>
+                  </div>
+                </article>
+              </HardLink>
+            );
+          })}
+        </div>
+      </section>
 
       <form className="mt-10 rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-6 shadow-[var(--shadow-soft)]">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_220px]">

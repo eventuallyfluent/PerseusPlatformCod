@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
+import { HardLink } from "@/components/ui/hard-link";
 
 function PerseusMark() {
   return (
@@ -18,26 +18,26 @@ export async function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[rgba(13,13,26,0.84)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-3 text-[var(--foreground)]">
+        <HardLink href="/" className="flex items-center gap-3 text-[var(--foreground)]">
           <PerseusMark />
           <div className="space-y-1">
             <span className="block text-sm font-semibold uppercase tracking-[0.28em] text-[var(--foreground)]">Perseus Arcane Academy</span>
             <span className="block text-[11px] uppercase tracking-[0.34em] text-[var(--foreground-soft)]">Structured magical training</span>
           </div>
-        </Link>
+        </HardLink>
         <nav className="flex items-center gap-2 text-sm text-[var(--foreground)] sm:gap-4">
-          <Link href="/faq" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
+          <HardLink href="/faq" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
             FAQ
-          </Link>
-          <Link href="/dashboard" prefetch={false} className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
+          </HardLink>
+          <HardLink href="/dashboard" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
             Dashboard
-          </Link>
+          </HardLink>
           {session?.user ? (
             <>
               {session.user.isAdmin ? (
-                <Link href="/admin" prefetch={false} className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
+                <HardLink href="/admin" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
                   Admin
-                </Link>
+                </HardLink>
               ) : null}
               <span className="hidden rounded-full border border-[var(--accent-soft)] bg-[rgba(255,255,255,0.05)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white lg:inline-flex">
                 {session.user.name ?? session.user.email}
@@ -54,9 +54,9 @@ export async function SiteHeader() {
               </form>
             </>
           ) : (
-            <Link href="/login">
+            <HardLink href="/login">
               <Button className="px-5 py-2.5">Student login</Button>
-            </Link>
+            </HardLink>
           )}
         </nav>
       </div>

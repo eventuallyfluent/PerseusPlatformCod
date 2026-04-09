@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { PropsWithChildren } from "react";
+import { HardLink } from "@/components/ui/hard-link";
 
 const links = [
   { href: "/admin", label: "Overview" },
@@ -23,14 +23,13 @@ export function AdminShell({ children, title, description }: PropsWithChildren<{
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-stone-950">Admin</h2>
         <nav className="space-y-2">
           {links.map((link) => (
-            <Link
+            <HardLink
               key={link.href}
               href={link.href}
-              prefetch={false}
               className="block rounded-2xl px-4 py-3 text-sm font-semibold text-stone-800 transition hover:bg-white hover:text-stone-950 focus:bg-white focus:text-stone-950"
             >
               {link.label}
-            </Link>
+            </HardLink>
           ))}
         </nav>
       </aside>
@@ -42,19 +41,18 @@ export function AdminShell({ children, title, description }: PropsWithChildren<{
               {description ? <p className="max-w-3xl text-sm leading-7 text-stone-600">{description}</p> : null}
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link
+              <HardLink
                 href="/dashboard"
-                prefetch={false}
                 className="inline-flex items-center rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
               >
                 Learner Dashboard
-              </Link>
-              <Link
+              </HardLink>
+              <HardLink
                 href="/"
                 className="inline-flex items-center rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
               >
                 View Storefront
-              </Link>
+              </HardLink>
             </div>
           </div>
         </header>

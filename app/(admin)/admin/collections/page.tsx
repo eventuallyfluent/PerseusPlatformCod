@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { HardLink } from "@/components/ui/hard-link";
 
 export const dynamic = "force-dynamic";
 
@@ -22,9 +22,9 @@ export default async function AdminCollectionsPage() {
         <div className="text-sm text-stone-600">
           {collections.length} collection{collections.length === 1 ? "" : "s"}
         </div>
-        <Link href="/admin/collections/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+        <HardLink href="/admin/collections/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
           Add collection
-        </Link>
+        </HardLink>
       </div>
 
       <Card className="overflow-hidden p-0">
@@ -48,12 +48,12 @@ export default async function AdminCollectionsPage() {
                 <td>{collection.courses.length}</td>
                 <td>{collection.updatedAt.toLocaleDateString()}</td>
                 <td className="space-x-3">
-                  <Link href={`/courses?collection=${encodeURIComponent(collection.slug)}`} className="underline">
+                  <HardLink href={`/courses?collection=${encodeURIComponent(collection.slug)}`} className="underline">
                     View in store
-                  </Link>
-                  <Link href={`/admin/collections/${collection.id}`} className="underline" prefetch={false}>
+                  </HardLink>
+                  <HardLink href={`/admin/collections/${collection.id}`} className="underline">
                     Edit
-                  </Link>
+                  </HardLink>
                 </td>
               </tr>
             ))}

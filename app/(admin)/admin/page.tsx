@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { OrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { HardLink } from "@/components/ui/hard-link";
 
 export const dynamic = "force-dynamic";
 
@@ -79,12 +79,12 @@ export default async function AdminOverviewPage() {
         <Card className="border-stone-200 bg-white text-stone-950">
           <p className="text-sm text-stone-600">Catalog actions</p>
           <div className="mt-4 flex flex-wrap gap-3">
-            <Link href="/admin/products" className="rounded-full border border-stone-200 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100">
+            <HardLink href="/admin/products" className="rounded-full border border-stone-200 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100">
               All products
-            </Link>
-            <Link href="/admin/courses/new" className="rounded-full bg-stone-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-stone-800">
+            </HardLink>
+            <HardLink href="/admin/courses/new" className="rounded-full bg-stone-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-stone-800">
               Add product
-            </Link>
+            </HardLink>
           </div>
         </Card>
       </div>
@@ -95,9 +95,9 @@ export default async function AdminOverviewPage() {
             <h2 className="text-lg font-semibold text-stone-950">Latest products</h2>
             <p className="text-sm text-stone-600">Open a product or jump straight into editing.</p>
           </div>
-          <Link href="/admin/products" className="text-sm font-medium text-stone-950 underline underline-offset-4">
+          <HardLink href="/admin/products" className="text-sm font-medium text-stone-950 underline underline-offset-4">
             Manage all products
-          </Link>
+          </HardLink>
         </div>
         <div className="grid gap-3">
           {latestProducts.map((page) => {
@@ -124,12 +124,12 @@ export default async function AdminOverviewPage() {
                   <p className="text-sm text-stone-600">{priceSummary}</p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <Link href={page.path} className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100">
+                  <HardLink href={page.path} className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100">
                     View page
-                  </Link>
-                  <Link href={editHref} className="rounded-full bg-stone-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-stone-800" prefetch={false}>
+                  </HardLink>
+                  <HardLink href={editHref} className="rounded-full bg-stone-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-stone-800">
                     Manage
-                  </Link>
+                  </HardLink>
                 </div>
               </div>
             );

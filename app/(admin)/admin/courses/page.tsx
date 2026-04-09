@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { HardLink } from "@/components/ui/hard-link";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +16,9 @@ export default async function AdminCoursesPage() {
   return (
     <AdminShell title="Courses" description="Create, edit, publish, and manage course pricing from one product screen.">
       <div className="flex justify-end">
-        <Link href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+        <HardLink href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
           Add new product
-        </Link>
+        </HardLink>
       </div>
       <Card className="overflow-hidden p-0">
         <table>
@@ -41,9 +41,9 @@ export default async function AdminCoursesPage() {
                 <td>{course.price.toString()} {course.currency}</td>
                 <td>{course.updatedAt.toLocaleDateString()}</td>
                 <td>
-                  <Link href={`/admin/courses/${course.id}`} className="underline" prefetch={false}>
+                  <HardLink href={`/admin/courses/${course.id}`} className="underline">
                     Edit
-                  </Link>
+                  </HardLink>
                 </td>
               </tr>
             ))}

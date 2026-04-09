@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
+import { HardLink } from "@/components/ui/hard-link";
 
 export const dynamic = "force-dynamic";
 
@@ -97,9 +97,9 @@ export default async function AdminProductsPage() {
             {bundles.length} bundle{bundles.length === 1 ? "" : "s"}
           </span>
         </div>
-        <Link href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+        <HardLink href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
           Add product
-        </Link>
+        </HardLink>
       </div>
 
       <Card className="overflow-hidden p-0">
@@ -129,17 +129,17 @@ export default async function AdminProductsPage() {
                 <td>{product.price}</td>
                 <td>{product.updatedAt.toLocaleDateString()}</td>
                 <td className="space-x-3">
-                  <Link href={product.viewHref} className="underline">
+                  <HardLink href={product.viewHref} className="underline">
                     View
-                  </Link>
+                  </HardLink>
                   {product.previewHref ? (
-                    <Link href={product.previewHref} className="underline">
+                    <HardLink href={product.previewHref} className="underline">
                       Preview
-                    </Link>
+                    </HardLink>
                   ) : null}
-                  <Link href={product.editHref} className="underline" prefetch={false}>
+                  <HardLink href={product.editHref} className="underline">
                     Edit
-                  </Link>
+                  </HardLink>
                 </td>
               </tr>
             ))}

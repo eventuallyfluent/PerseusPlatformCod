@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { HardLink } from "@/components/ui/hard-link";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +16,9 @@ export default async function AdminBundlesPage() {
   return (
     <AdminShell title="Bundles" description="Bundle pricing now lives directly on the bundle product.">
       <div className="flex justify-end">
-        <Link href="/admin/bundles/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+        <HardLink href="/admin/bundles/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
           New bundle
-        </Link>
+        </HardLink>
       </div>
       <Card className="overflow-hidden p-0">
         <table>
@@ -41,9 +41,9 @@ export default async function AdminBundlesPage() {
                 <td>{bundle.price.toString()} {bundle.currency}</td>
                 <td>{bundle.updatedAt.toLocaleDateString()}</td>
                 <td>
-                  <Link href={`/admin/bundles/${bundle.id}`} className="underline" prefetch={false}>
+                  <HardLink href={`/admin/bundles/${bundle.id}`} className="underline">
                     Edit
-                  </Link>
+                  </HardLink>
                 </td>
               </tr>
             ))}

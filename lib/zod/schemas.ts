@@ -2,7 +2,21 @@ import { CourseStatus, ImportType, LessonStatus, LessonType, OfferType, UpsellDi
 import { z } from "zod";
 import type { SalesPageSectionKey } from "@/types";
 
-const optionalUrl = z.string().url().optional().or(z.literal(""));
+function normalizeIframeSrc(value: unknown) {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  const iframeSrcMatch = trimmed.match(/src=["']([^"']+)["']/i);
+  return iframeSrcMatch?.[1]?.trim() || trimmed;
+}
+
+const optionalUrl = z.preprocess(normalizeIframeSrc, z.string().url().optional().or(z.literal("")));
 const optionalDateString = z.string().optional().or(z.literal(""));
 const optionalCsvNumber = z.preprocess((value) => {
   if (value === "" || value === null || value === undefined) {

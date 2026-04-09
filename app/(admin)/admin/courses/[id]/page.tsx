@@ -280,7 +280,11 @@ export default async function CourseDetailPage({
                         </div>
                         <div className="grid gap-3 md:grid-cols-2">
                           <label>Text content<textarea name="content" rows={3} defaultValue={lesson.content ?? ""} /></label>
-                          <label>Video embed URL<input name="videoUrl" defaultValue={lesson.videoUrl ?? ""} /></label>
+                          <label>
+                            Video embed URL
+                            <input name="videoUrl" defaultValue={lesson.videoUrl ?? ""} />
+                            <span className="mt-1 block text-xs leading-5 text-stone-500">Paste either a direct video URL or the iframe embed code.</span>
+                          </label>
                         </div>
                         <details className="rounded-[18px] border border-stone-200 bg-stone-50 px-4 py-3">
                           <summary className="cursor-pointer text-sm font-medium text-stone-700">Advanced lesson fields</summary>
@@ -316,7 +320,11 @@ export default async function CourseDetailPage({
                     </div>
                     <div className="grid gap-3 md:grid-cols-2">
                       <label>Text content<textarea name="content" rows={3} /></label>
-                      <label>Video embed URL<input name="videoUrl" /></label>
+                      <label>
+                        Video embed URL
+                        <input name="videoUrl" />
+                        <span className="mt-1 block text-xs leading-5 text-stone-500">Paste either a direct video URL or the iframe embed code.</span>
+                      </label>
                     </div>
                     <button className="w-fit rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Add lesson</button>
                   </form>

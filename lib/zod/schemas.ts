@@ -12,8 +12,23 @@ function normalizeIframeSrc(value: unknown) {
     return "";
   }
 
-  const iframeSrcMatch = trimmed.match(/src=["']([^"']+)["']/i);
-  return iframeSrcMatch?.[1]?.trim() || trimmed;
+  const iframeSrcMatch = trimmed.match(/(?:src|data-src)=["']([^"']+)["']/i);
+  const extracted = iframeSrcMatch?.[1]?.trim() || trimmed;
+  const decoded = extracted
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#39;/gi, "'")
+    .trim();
+
+  if (decoded.startsWith("//")) {
+    return `https:${decoded}`;
+  }
+
+  if (/^www\./i.test(decoded)) {
+    return `https://${decoded}`;
+  }
+
+  return decoded;
 }
 
 const optionalUrl = z.preprocess(normalizeIframeSrc, z.string().url().optional().or(z.literal("")));

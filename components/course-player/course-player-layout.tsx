@@ -157,12 +157,7 @@ export function CoursePlayerLayout({
   }
 
   const activeLessonNumber = activeIndex + 1;
-  const modeBadge = publicPreview ? "Public preview" : previewMode ? "Admin preview" : "Enrolled learner";
-  const modeCopy = publicPreview
-    ? "This preview is watch-only. Completion tracking and member-only resources stay hidden until enrollment."
-    : previewMode
-      ? "This mirrors the learner experience for review. Progress and completion are not recorded in admin preview."
-      : `Lesson ${activeLessonNumber} of ${lessons.length} · ${activeLesson.moduleTitle}`;
+  const modeCopy = publicPreview ? "This preview is watch-only. Completion tracking and member-only resources stay hidden until enrollment." : null;
 
   return (
     <>
@@ -245,12 +240,14 @@ export function CoursePlayerLayout({
         <div className="space-y-6 lg:h-[calc(100svh-6.25rem)]">
           <div className="space-y-5 rounded-[30px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-8 text-[var(--portal-text)] shadow-[0_20px_40px_rgba(10,11,24,0.24)]">
             <div className="space-y-4">
-              <div className="rounded-[22px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-5 py-4">
-                <div className="flex flex-wrap items-center gap-3">
-                  <Badge variant={publicPreview ? "warning" : previewMode ? "premium" : "success"}>{modeBadge}</Badge>
-                  <p className="text-sm leading-7 text-[var(--portal-muted)]">{modeCopy}</p>
+              {publicPreview ? (
+                <div className="rounded-[22px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-5 py-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Badge variant="warning">Public preview</Badge>
+                    <p className="text-sm leading-7 text-[var(--portal-muted)]">{modeCopy}</p>
+                  </div>
                 </div>
-              </div>
+              ) : null}
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--portal-muted)]">{course.title}</p>
@@ -259,6 +256,7 @@ export function CoursePlayerLayout({
                   <div className="flex flex-wrap items-center gap-3 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--portal-muted)]">
                     <span>{getLessonTypeLabel(activeLesson)}</span>
                     {activeLesson.durationLabel ? <span>{activeLesson.durationLabel}</span> : null}
+                    {!publicPreview ? <span>{`Lesson ${activeLessonNumber} of ${lessons.length}`}</span> : null}
                     {!publicPreview && activeLesson.isCompleted ? <span className="text-[#f7d481]">Completed</span> : null}
                   </div>
                 </div>
@@ -275,23 +273,19 @@ export function CoursePlayerLayout({
                   Download lesson resource
                 </a>
               ) : null}
-              {!publicPreview && !previewMode ? (
+              {!publicPreview ? (
                 <form action={markLessonCompleteAction} className="pt-1 pb-3">
                   <input type="hidden" name="lessonId" value={activeLesson.id} />
                   <input type="hidden" name="courseSlug" value={course.slug} />
                   <input type="hidden" name="lessonSlug" value={activeLesson.slug} />
                   <button
-                    className="inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[var(--accent)] px-6 py-4 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(143,44,255,0.18)] transition hover:bg-[var(--accent-strong)]"
+                    className="inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[var(--accent)] px-6 py-4 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(143,44,255,0.18)] transition hover:bg-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-60"
                     type="submit"
+                    disabled={previewMode}
                   >
                     {activeLesson.isCompleted ? "Lesson completed" : "Mark as complete"}
                   </button>
                 </form>
-              ) : null}
-              {previewMode && !publicPreview ? (
-                <div className="rounded-[20px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-5 py-4 text-sm leading-7 text-[var(--portal-muted)]">
-                  Admin preview mirrors the learner view, but completion and progress tracking stay disabled here.
-                </div>
               ) : null}
             </div>
           </div>

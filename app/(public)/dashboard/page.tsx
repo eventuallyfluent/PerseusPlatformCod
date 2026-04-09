@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { requireSession } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { getDashboardCourseState } from "@/lib/courses/dashboard-progress";
 import { Badge } from "@/components/ui/badge";
+import { HardLink } from "@/components/ui/hard-link";
 
 export const dynamic = "force-dynamic";
 
@@ -94,8 +94,8 @@ export default async function DashboardPage() {
                 <p className="mt-3 text-4xl">{hydratedCourseStates.reduce((sum, item) => sum + item.state.completionCount, 0)}</p>
               </div>
               <div className="rounded-[28px] border border-[var(--portal-border)] bg-[var(--portal-panel-strong)] p-6 text-[var(--portal-text)]">
-                <p className="text-[11px] uppercase tracking-[0.32em] text-[var(--portal-muted)]">On drip</p>
-                <p className="mt-3 text-4xl">{hydratedCourseStates.filter((item) => item.state.nextLockedLesson).length}</p>
+                <p className="text-[11px] uppercase tracking-[0.32em] text-[var(--portal-muted)]">Ready to continue</p>
+                <p className="mt-3 text-4xl">{hydratedCourseStates.filter((item) => item.state.nextLesson && item.state.completionCount > 0).length}</p>
               </div>
             </section>
 
@@ -116,22 +116,47 @@ export default async function DashboardPage() {
                     <div className="mt-5 h-2 rounded-full bg-[rgba(255,255,255,0.08)]">
                       <div className="h-2 rounded-full bg-[var(--accent)]" style={{ width: `${state.completionPercent}%` }} />
                     </div>
+                    <div className="mt-5 rounded-[24px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-5 py-4">
+                      {state.nextLesson ? (
+                        <div className="space-y-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--portal-muted)]">
+                            {state.completionCount > 0 ? "Next lesson" : "Start here"}
+                          </p>
+                          <p className="text-lg leading-tight text-white">{state.nextLesson.title}</p>
+                          <p className="text-sm text-[var(--portal-muted)]">
+                            {state.nextLesson.moduleTitle}
+                            {state.nextLesson.durationLabel ? ` · ${state.nextLesson.durationLabel}` : ""}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--portal-muted)]">Course complete</p>
+                          <p className="text-lg leading-tight text-white">Every available lesson in this course is complete.</p>
+                        </div>
+                      )}
+                      {state.nextLockedLesson ? (
+                        <p className="mt-3 text-sm text-[var(--portal-muted)]">
+                          Upcoming drip lesson: {state.nextLockedLesson.title}
+                          {state.nextLockedLesson.dripDays !== null ? ` · unlocks after ${state.nextLockedLesson.dripDays} day${state.nextLockedLesson.dripDays === 1 ? "" : "s"}` : ""}
+                        </p>
+                      ) : null}
+                    </div>
                     <div className="mt-6 flex flex-wrap gap-3">
                       {state.nextLesson ? (
-                        <Link
+                        <HardLink
                           href={`/learn/${enrollment.course.slug}/${state.nextLesson.slug}`}
                           className="inline-flex rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
                         >
                           {state.completionCount > 0 ? "Continue course" : "Open course"}
-                        </Link>
+                        </HardLink>
                       ) : null}
                       {!enrollment.course.testimonials.some((testimonial) => testimonial.email === session.user.email) ? (
-                        <Link
+                        <HardLink
                           href={`/course/${enrollment.course.slug}#leave-review`}
                           className="inline-flex rounded-full border border-[var(--portal-border)] px-5 py-3 text-sm font-semibold text-[var(--portal-text)] transition hover:bg-[rgba(255,255,255,0.06)]"
                         >
                           Leave review
-                        </Link>
+                        </HardLink>
                       ) : null}
                     </div>
                   </article>

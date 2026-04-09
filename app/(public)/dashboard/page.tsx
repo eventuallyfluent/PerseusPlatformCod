@@ -122,7 +122,7 @@ export default async function DashboardPage() {
                           href={`/learn/${enrollment.course.slug}/${state.nextLesson.slug}`}
                           className="inline-flex rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
                         >
-                          Open course
+                          {state.completionCount > 0 ? "Continue course" : "Open course"}
                         </Link>
                       ) : null}
                       {!enrollment.course.testimonials.some((testimonial) => testimonial.email === session.user.email) ? (

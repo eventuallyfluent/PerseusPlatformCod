@@ -22,8 +22,8 @@ function OfferButtons({ offers, primaryLabel }: { offers: SalesPageOfferSummary[
     <div className="flex flex-wrap gap-3">
       {offers.map((offer) => (
         <Link key={offer.offerId} href={offer.checkoutUrl}>
-          <Button className="min-w-[260px] bg-[linear-gradient(135deg,var(--accent),#c16bff)] shadow-[0_22px_44px_rgba(143,44,255,0.28)]">
-            {primaryLabel} - {offer.price}
+          <Button className="min-w-[240px] bg-[linear-gradient(135deg,var(--accent),#c16bff)] px-6 shadow-[0_18px_34px_rgba(143,44,255,0.24)]">
+            {primaryLabel} {offer.price}
           </Button>
         </Link>
       ))}
@@ -33,12 +33,12 @@ function OfferButtons({ offers, primaryLabel }: { offers: SalesPageOfferSummary[
 
 function SectionIntro({ eyebrow, title, body }: { eyebrow: string; title: string; body?: string | null }) {
   return (
-    <div className="mx-auto max-w-3xl space-y-4 text-center">
+    <div className="mx-auto max-w-3xl space-y-3 text-center">
       <div className="flex justify-center">
         <Badge variant="accent">{eyebrow}</Badge>
       </div>
-      <h2 className="text-5xl leading-none tracking-[-0.05em] text-[var(--foreground)]">{title}</h2>
-      {body ? <p className="text-lg leading-8 text-[#d2c6ee]">{body}</p> : null}
+      <h2 className="text-4xl leading-none tracking-[-0.045em] text-[var(--foreground)] lg:text-[3.1rem]">{title}</h2>
+      {body ? <p className="text-base leading-8 text-[#d2c6ee]">{body}</p> : null}
     </div>
   );
 }
@@ -90,12 +90,12 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
 
     if (section === "curriculum" && payload.productType === "course") {
       return (
-        <section key={section} id="curriculum" className="mx-auto max-w-7xl space-y-8 px-6">
+        <section key={section} id="curriculum" className="mx-auto max-w-7xl space-y-7 px-6">
           <SectionIntro eyebrow={payload.curriculumSection.eyebrow} title={payload.curriculumSection.title} body={payload.curriculumSection.body} />
           <div className="grid gap-5">
             {payload.curriculumSection.modules.map((module, index) => (
-              <div key={module.moduleTitle} className="overflow-hidden rounded-[30px] border border-[var(--border)] bg-[rgba(21,18,40,0.97)] text-white shadow-[0_24px_60px_rgba(18,20,41,0.12)]">
-                <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--portal-border)] px-6 py-5">
+              <div key={module.moduleTitle} className="overflow-hidden rounded-[30px] border border-[var(--border)] bg-[rgba(21,18,40,0.97)] text-white shadow-[0_20px_48px_rgba(18,20,41,0.12)]">
+                <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--portal-border)] px-6 py-4">
                   <div className="space-y-3">
                     <Badge variant="portal">Module {index + 1}</Badge>
                     <h3 className="text-3xl leading-none tracking-[-0.03em]">{module.moduleTitle}</h3>
@@ -108,9 +108,9 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                   {module.lessons.map((lesson, lessonIndex) => (
                     <li
                       key={`${module.moduleTitle}-${lesson.title}`}
-                      className="grid gap-3 border-t border-[rgba(88,97,130,0.18)] px-6 py-4 first:border-t-0 lg:grid-cols-[72px_1fr_auto]"
+                      className="grid gap-3 border-t border-[rgba(88,97,130,0.18)] px-6 py-4 first:border-t-0 lg:grid-cols-[88px_1fr_auto]"
                     >
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8f86b4]">
+                      <div className="pt-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8f86b4]">
                         Lesson {lessonIndex + 1}
                       </div>
                       <div className="space-y-2">
@@ -121,7 +121,7 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                           {lesson.dripDays ? <Badge variant="accent">Day {lesson.dripDays}</Badge> : null}
                         </div>
                         {lesson.isPreview && lesson.previewHref ? (
-                          <Link href={lesson.previewHref} className="inline-flex text-sm font-semibold text-[#f4d27a] underline underline-offset-4">
+                          <Link href={lesson.previewHref} className="inline-flex rounded-full border border-[rgba(244,210,122,0.26)] bg-[rgba(244,210,122,0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#f4d27a]">
                             Watch preview
                           </Link>
                         ) : null}
@@ -239,12 +239,12 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
     if (section === "pricing") {
       return (
         <section key={section} className="mx-auto max-w-7xl px-6">
-          <div className="rounded-[38px] bg-[rgba(19,20,40,0.98)] px-8 py-10 text-white shadow-[0_34px_70px_rgba(18,20,41,0.18)]">
-            <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-end">
+          <div className="rounded-[38px] bg-[rgba(19,20,40,0.98)] px-8 py-9 text-white shadow-[0_28px_60px_rgba(18,20,41,0.16)]">
+            <div className="grid gap-7 lg:grid-cols-[1fr_0.9fr] lg:items-end">
               <div>
                 <Badge variant="premium">{payload.pricingSection.badge}</Badge>
-                <h2 className="mt-4 max-w-2xl text-5xl leading-none tracking-[-0.05em]">{payload.pricingSection.headline}</h2>
-                <p className="mt-4 max-w-xl text-base leading-8 text-[#bdb3da]">{payload.pricingSection.body}</p>
+                <h2 className="mt-4 max-w-2xl text-4xl leading-none tracking-[-0.045em] lg:text-[3.25rem]">{payload.pricingSection.headline}</h2>
+                <p className="mt-3 max-w-xl text-base leading-8 text-[#bdb3da]">{payload.pricingSection.body}</p>
               </div>
               <div className="grid gap-3">
                 {payload.pricingSection.offers.map((offer) => (
@@ -267,10 +267,10 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                 ))}
               </div>
             </div>
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[rgba(143,44,255,0.18)] bg-[linear-gradient(135deg,rgba(143,44,255,0.14),rgba(212,168,70,0.12))] p-6">
+            <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[rgba(143,44,255,0.18)] bg-[linear-gradient(135deg,rgba(143,44,255,0.12),rgba(212,168,70,0.10))] p-6">
               <div className="max-w-2xl">
-                <h3 className="text-4xl leading-none tracking-[-0.04em]">{payload.finalCta.label}</h3>
-                <p className="mt-4 text-base leading-8 text-[#ece3ff]">{payload.finalCta.body}</p>
+                <h3 className="text-3xl leading-none tracking-[-0.04em] lg:text-[2.45rem]">{payload.finalCta.label}</h3>
+                <p className="mt-3 text-base leading-8 text-[#ece3ff]">{payload.finalCta.body}</p>
               </div>
               <OfferButtons offers={payload.pricingSection.offers} primaryLabel={payload.hero.primaryCtaLabel} />
             </div>
@@ -283,7 +283,7 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
   };
 
   return (
-    <div className="space-y-20">
+    <div className="space-y-16">
       <section className="px-6">
         <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[42px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,#150a2f,#110a24)] px-8 py-12 text-white shadow-[0_34px_80px_rgba(10,11,24,0.28)] lg:px-12 lg:py-16">
           <div

@@ -39,30 +39,30 @@ export default async function CheckoutPage({
       : priceLabel;
 
   return (
-    <div className="mx-auto flex min-h-[calc(100svh-5.5rem)] w-full max-w-6xl items-center px-6 py-5">
-      <div className="grid w-full gap-6 lg:grid-cols-[0.82fr_1.18fr]">
-        <section className="rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,#160b30,#110a24)] px-8 py-8 text-white shadow-[0_28px_70px_rgba(14,12,30,0.26)]">
+    <div className="mx-auto flex min-h-[calc(100svh-5.5rem)] w-full max-w-6xl items-center px-6 py-4">
+      <div className="grid w-full gap-5 lg:grid-cols-[0.76fr_1.24fr]">
+        <section className="rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,#160b30,#110a24)] px-8 py-7 text-white shadow-[0_24px_60px_rgba(14,12,30,0.24)]">
           <p className="text-[11px] uppercase tracking-[0.34em] text-[rgba(228,216,255,0.74)]">{productKind}</p>
-          <h1 className="mt-4 max-w-lg text-3xl leading-[0.98] tracking-[-0.045em] lg:text-[2.85rem]">{productTitle}</h1>
+          <h1 className="mt-4 max-w-lg text-3xl leading-[0.98] tracking-[-0.045em] lg:text-[2.55rem]">{productTitle}</h1>
           <p className="mt-4 max-w-lg text-sm leading-7 text-[rgba(236,229,255,0.78)]">
-            One clear checkout step. Coupon support, secure hosted payment, and access immediately after purchase.
+            One clear checkout step with hosted payment and access immediately after purchase.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[rgba(228,216,255,0.74)]">
-            <span className="rounded-full border border-white/10 px-4 py-2">Secure checkout</span>
-            <span className="rounded-full border border-white/10 px-4 py-2">Instant enrollment</span>
-            <span className="rounded-full border border-white/10 px-4 py-2">Coupon support</span>
+          <div className="mt-5 flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[rgba(228,216,255,0.74)]">
+            <span className="rounded-full border border-white/10 px-4 py-2">Secure</span>
+            <span className="rounded-full border border-white/10 px-4 py-2">Hosted payment</span>
+            <span className="rounded-full border border-white/10 px-4 py-2">Immediate access</span>
           </div>
         </section>
 
-        <section className="rounded-[34px] border border-[rgba(255,255,255,0.08)] bg-[rgba(19,21,42,0.92)] px-8 py-8 shadow-[0_28px_70px_rgba(14,12,30,0.18)]">
+        <section className="rounded-[34px] border border-[rgba(255,255,255,0.08)] bg-[rgba(19,21,42,0.92)] px-8 py-7 shadow-[0_24px_60px_rgba(14,12,30,0.16)]">
           <div className="space-y-2">
             <p className="text-[11px] uppercase tracking-[0.3em] text-[rgba(228,216,255,0.58)]">Checkout</p>
-            <p className="text-sm leading-7 text-[rgba(236,229,255,0.76)]">Review the product, apply a coupon if needed, then continue into secure hosted payment.</p>
+            <p className="text-sm leading-7 text-[rgba(236,229,255,0.76)]">Review the offer, apply a coupon if needed, then continue to payment.</p>
           </div>
           {query.status === "cancelled" ? (
             <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Checkout was cancelled. You can try again at any time.</p>
           ) : null}
-          <div className="mt-5 grid gap-3 rounded-[26px] bg-white px-5 py-5 text-sm text-stone-700 shadow-[0_18px_34px_rgba(15,23,42,0.08)]">
+          <div className="mt-5 grid gap-3 rounded-[24px] bg-white px-5 py-4 text-sm text-stone-700 shadow-[0_16px_28px_rgba(15,23,42,0.07)]">
             <div className="flex items-center justify-between gap-4">
               <span className="text-stone-500">Product</span>
               <span className="max-w-[20rem] text-right font-medium text-stone-950 [overflow-wrap:anywhere]">{productTitle}</span>
@@ -92,7 +92,7 @@ export default async function CheckoutPage({
           </div>
 
           {upsell ? (
-            <div className="mt-5 rounded-[26px] border border-[rgba(212,168,70,0.22)] bg-[linear-gradient(135deg,rgba(212,168,70,0.12),rgba(143,44,255,0.12))] px-5 py-5">
+            <div className="mt-5 rounded-[24px] border border-[rgba(212,168,70,0.22)] bg-[linear-gradient(135deg,rgba(212,168,70,0.10),rgba(143,44,255,0.10))] px-5 py-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#f2c45e]">Optional upsell</p>

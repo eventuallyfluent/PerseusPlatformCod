@@ -34,11 +34,12 @@ export function CourseSalesPage({
   const faqJsonLd = payload.faqSection.items.length > 0 ? buildFaqStructuredData({ faqs: payload.faqSection.items }) : null;
 
   const reviewSlot = (
-    <div id="leave-review" className="mx-auto max-w-5xl rounded-[30px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)]">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-2">
-          <h3 className="text-3xl leading-none tracking-[-0.03em]">Customer Reviews</h3>
-          <p className="text-sm leading-7 text-[#d2c6ee]">Reviews from students go live after approval.</p>
+    <div id="leave-review" className="mx-auto max-w-5xl rounded-[32px] border border-[var(--portal-border)] bg-[rgba(17,18,37,0.98)] p-6 text-white shadow-[0_20px_48px_rgba(18,20,41,0.14)] lg:p-7">
+      <div className="flex flex-wrap items-start justify-between gap-5">
+        <div className="max-w-2xl space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#b8add7]">Student reviews</p>
+          <h3 className="text-3xl leading-none tracking-[-0.03em]">What learners say after joining.</h3>
+          <p className="text-sm leading-7 text-[#d2c6ee]">Verified student reviews are published after approval.</p>
         </div>
         {isLoggedIn ? (
           <a href="#leave-review-form">
@@ -55,7 +56,7 @@ export function CourseSalesPage({
           Sign in with your learner email to leave a review.
         </p>
       ) : canLeaveReview ? (
-        <form id="leave-review-form" action={submitCourseReviewAction} className="mt-6 grid gap-4">
+        <form id="leave-review-form" action={submitCourseReviewAction} className="mt-6 grid gap-4 rounded-[24px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] p-5">
           <input type="hidden" name="courseId" value={course.id} />
           <input type="hidden" name="courseSlug" value={course.slug} />
           <div className="space-y-2">

@@ -66,6 +66,8 @@ export default async function CourseDetailPage({
           ? "FAQ updated."
           : resolvedSearchParams?.saved === "reviews"
             ? "Reviews updated."
+            : resolvedSearchParams?.saved === "offer"
+              ? "Checkout offer updated."
             : resolvedSearchParams?.saved === "page"
               ? "Sales page regenerated."
               : resolvedSearchParams?.saved === "status"
@@ -86,6 +88,8 @@ export default async function CourseDetailPage({
                 ? "The sales page could not be regenerated. Try again."
                 : resolvedSearchParams?.error === "status"
                   ? "The course status could not be updated. Try again."
+                  : resolvedSearchParams?.error === "offer"
+                    ? "The checkout offer could not be updated. Try again."
                   : resolvedSearchParams?.error === "delete"
                     ? "The course could not be deleted. Remove dependent records first and try again."
         : "";

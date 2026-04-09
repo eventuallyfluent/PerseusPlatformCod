@@ -61,6 +61,8 @@ export default async function BundleDetailPage({
           ? "FAQ updated."
           : saved === "reviews"
             ? "Reviews updated."
+            : saved === "offer"
+              ? "Checkout offer updated."
             : "";
   const errorMessage = resolvedSearchParams?.error === "details" ? "Bundle changes could not be saved. Check the form fields and try again." : "";
   const detailedErrorMessage =
@@ -71,6 +73,8 @@ export default async function BundleDetailPage({
         ? "FAQ changes could not be saved. Try that section again."
         : resolvedSearchParams?.error === "reviews"
           ? "Review changes could not be saved. Try that section again."
+          : resolvedSearchParams?.error === "offer"
+            ? "The checkout offer could not be updated. Try again."
           : resolvedSearchParams?.error === "delete"
             ? "The bundle could not be deleted. Remove dependent records first and try again."
             : "");

@@ -6,8 +6,13 @@ import { saveBundleAction } from "@/app/(admin)/admin/actions";
 
 export const dynamic = "force-dynamic";
 
-export default function NewBundlePage() {
+export default async function NewBundlePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
   const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   return (
     <AdminShell title="New bundle" description="A bundle sells multiple existing courses through one public page and checkout flow.">
       <ProductFormShell
@@ -37,6 +42,9 @@ export default function NewBundlePage() {
           </>
         }
       >
+        {resolvedSearchParams?.error === "details" ? (
+          <p className="rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">Bundle could not be created. Check the form fields and try again.</p>
+        ) : null}
         <ProductFormSection
           title="Core identity"
           description="These fields define the bundle name, route, and publish state before the included course list is attached."

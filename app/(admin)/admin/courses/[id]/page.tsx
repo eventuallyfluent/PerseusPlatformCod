@@ -90,7 +90,7 @@ export default async function CourseDetailPage({
             </div>
             <form id="course-details-form" action={saveCourseAction} className="space-y-8">
               <input type="hidden" name="id" value={course.id} />
-              <ProductFormSection title="Core identity" description="Title, route, owner, and status.">
+              <ProductFormSection id="core-identity" title="Core identity" description="Title, route, owner, and status.">
                 <label>Title<input name="title" defaultValue={course.title} required /></label>
                 <label>Slug<input name="slug" defaultValue={course.slug} required /></label>
                 <label>Subtitle<input name="subtitle" defaultValue={course.subtitle ?? ""} /></label>
@@ -98,14 +98,14 @@ export default async function CourseDetailPage({
                 <label>Status<select name="status" defaultValue={course.status}><option value="DRAFT">DRAFT</option><option value="PUBLISHED">PUBLISHED</option><option value="ARCHIVED">ARCHIVED</option></select></label>
                 <div className="hidden md:block" />
               </ProductFormSection>
-              <ProductFormSection title="Sales copy" description="Core page copy.">
+              <ProductFormSection id="sales-copy" title="Sales copy" description="Core page copy.">
                 <label className="lg:col-span-2">Short description<textarea name="shortDescription" rows={4} defaultValue={course.shortDescription ?? ""} /></label>
                 <label className="lg:col-span-2">Long description<textarea name="longDescription" rows={6} defaultValue={course.longDescription ?? ""} /></label>
                 <label className="lg:col-span-2">Outcomes<textarea name="learningOutcomes" rows={4} defaultValue={(course.learningOutcomes as string[] | null)?.join("\n") ?? ""} /></label>
                 <label>Who it&apos;s for<textarea name="whoItsFor" rows={4} defaultValue={(course.whoItsFor as string[] | null)?.join("\n") ?? ""} /></label>
                 <label>Includes<textarea name="includes" rows={4} defaultValue={(course.includes as string[] | null)?.join("\n") ?? ""} /></label>
               </ProductFormSection>
-              <ProductFormSection title="Media and SEO" description="Hero media and search.">
+              <ProductFormSection id="media-seo" title="Media and SEO" description="Hero media and search.">
                 <ImageField
                   name="heroImageUrl"
                   label="Course cover image URL"
@@ -118,7 +118,7 @@ export default async function CourseDetailPage({
                 <label>SEO title<input name="seoTitle" defaultValue={course.seoTitle ?? ""} /></label>
                 <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} /></label>
               </ProductFormSection>
-              <ProductFormSection title="Pricing" description="Set the live course price here. Coupons apply discounts at checkout.">
+              <ProductFormSection id="pricing-checkout" title="Pricing" description="Set the live course price here. Coupons apply discounts at checkout.">
                 <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={course.price.toString()} /></label>
                 <label>Currency<input name="currency" defaultValue={course.currency} /></label>
                 <label>Compare-at price<input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={course.compareAtPrice?.toString() ?? ""} /></label>
@@ -154,7 +154,7 @@ export default async function CourseDetailPage({
                 <label className="lg:col-span-2">Upsell body<textarea name="upsellBody" rows={3} defaultValue={course.upsellBody ?? ""} placeholder="Explain the discounted follow-up offer clearly." /></label>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">Checkout reads the course price directly. Use coupons for discounts and configure one optional upsell with its own discounted follow-up offer.</div>
               </ProductFormSection>
-              <ProductFormSection title="Sales page" description="CTA copy and section visibility.">
+              <ProductFormSection id="sales-page" title="Sales page" description="CTA copy and section visibility.">
                 <label>Hero metadata line<input name="salesPage.heroMetadataLine" defaultValue={salesPageConfig.heroMetadataLine ?? ""} /></label>
                 <label>Primary CTA label<input name="salesPage.primaryCtaLabel" defaultValue={salesPageConfig.primaryCtaLabel ?? ""} /></label>
                 <label>Secondary CTA label<input name="salesPage.secondaryCtaLabel" defaultValue={salesPageConfig.secondaryCtaLabel ?? ""} /></label>
@@ -166,7 +166,7 @@ export default async function CourseDetailPage({
                 <label className="lg:col-span-2">Section order<textarea name="salesPage.sectionOrder" rows={7} defaultValue={(salesPageConfig.sectionOrder ?? ["description", "highlights", "curriculum", "instructor", "testimonials", "faqs", "pricing"]).join("\n")} /></label>
                 <label className="lg:col-span-2">Hidden sections<textarea name="salesPage.hiddenSections" rows={7} defaultValue={(salesPageConfig.hiddenSections ?? []).join("\n")} /></label>
               </ProductFormSection>
-              <ProductFormSection title="Migration and preserved URLs" description="Only use these when preserving an old live route.">
+              <ProductFormSection id="migration-urls" title="Migration and preserved URLs" description="Only use these when preserving an old live route.">
                 <label>Legacy course ID<input name="legacyCourseId" defaultValue={course.legacyCourseId ?? ""} /></label>
                 <label>Legacy slug<input name="legacySlug" defaultValue={course.legacySlug ?? ""} /></label>
                 <label className="md:col-span-2">Legacy URL<input name="legacyUrl" defaultValue={course.legacyUrl ?? ""} /></label>
@@ -219,6 +219,18 @@ export default async function CourseDetailPage({
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Generated pages</span><span className="mt-1 block text-base text-stone-950">{course.pages.length}</span></div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Curriculum</span><span className="mt-1 block text-base text-stone-950">{course.modules.length} module{course.modules.length === 1 ? "" : "s"}</span></div>
             </div>
+          </Card>
+          <Card className="space-y-3 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Builder flow</p>
+            <div className="grid gap-2 text-sm">
+              <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#core-identity">Core identity</a>
+              <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#sales-copy">Sales copy</a>
+              <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#media-seo">Media and SEO</a>
+              <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#pricing-checkout">Pricing and checkout</a>
+              <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#sales-page">Sales page</a>
+              <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#migration-urls">Migration and URLs</a>
+            </div>
+            <p className="text-sm leading-6 text-stone-600">Use this page as one repeatable flow: set the product identity, write the sales copy, set pricing, then build the curriculum below.</p>
           </Card>
           <Card className="space-y-3 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Actions</p>

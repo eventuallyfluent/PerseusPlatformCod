@@ -13,7 +13,7 @@ export default async function CollectionDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ saved?: string }>;
+  searchParams?: Promise<{ saved?: string; error?: string }>;
 }) {
   const { id } = await params;
   const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
@@ -45,6 +45,12 @@ export default async function CollectionDetailPage({
       : saved === "courses"
         ? "Collection courses saved."
         : "";
+  const errorMessage =
+    resolvedSearchParams?.error === "details"
+      ? "Collection changes could not be saved. Check the fields and try again."
+      : resolvedSearchParams?.error === "courses"
+        ? "Collection course assignments could not be saved. Try again."
+        : "";
 
   return (
     <AdminShell
@@ -54,6 +60,7 @@ export default async function CollectionDetailPage({
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <Card className="space-y-8 bg-white p-8">
           {feedbackMessage ? <p className="rounded-[18px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedbackMessage}</p> : null}
+          {errorMessage ? <p className="rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">{errorMessage}</p> : null}
           <form id="collection-details-form" action={saveCollectionAction} className="space-y-8">
             <input type="hidden" name="id" value={collection.id} />
             <div className="grid gap-4 md:grid-cols-2">

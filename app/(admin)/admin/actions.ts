@@ -138,23 +138,28 @@ export async function saveHomepageSectionAction(formData: FormData) {
     payload = getDefaultHomepagePayload(type);
   }
 
-  await prisma.homepageSection.upsert({
-    where: { type },
-    update: {
-      enabled,
-      position,
-      payload: JSON.parse(JSON.stringify(payload)),
-    },
-    create: {
-      type,
-      enabled,
-      position,
-      payload: JSON.parse(JSON.stringify(payload)),
-    },
-  });
+  try {
+    await prisma.homepageSection.upsert({
+      where: { type },
+      update: {
+        enabled,
+        position,
+        payload: JSON.parse(JSON.stringify(payload)),
+      },
+      create: {
+        type,
+        enabled,
+        position,
+        payload: JSON.parse(JSON.stringify(payload)),
+      },
+    });
+  } catch {
+    redirect(`/admin/settings?error=${type.toLowerCase()}`);
+  }
 
   revalidatePath("/");
   revalidatePath("/admin/settings");
+  redirect(`/admin/settings?saved=${type.toLowerCase()}`);
 }
 
 export async function saveCollectionAction(formData: FormData) {
@@ -169,14 +174,24 @@ export async function saveCollectionAction(formData: FormData) {
     position: Number(formData.get("position") ?? 1),
   };
 
-  const collection = id
-    ? await prisma.collection.update({
-        where: { id },
-        data: payload,
-      })
-    : await prisma.collection.create({
-        data: payload,
-      });
+  let collection;
+
+  try {
+    collection = id
+      ? await prisma.collection.update({
+          where: { id },
+          data: payload,
+        })
+      : await prisma.collection.create({
+          data: payload,
+        });
+  } catch {
+    if (id) {
+      redirect(`/admin/collections/${id}?error=details`);
+    }
+
+    redirect("/admin/collections/new?error=details");
+  }
 
   revalidatePath("/collections");
   revalidatePath(`/collections/${collection.slug}`);
@@ -194,18 +209,22 @@ export async function saveCollectionCoursesAction(formData: FormData) {
     .map((value) => String(value))
     .filter(Boolean);
 
-  await prisma.collectionCourse.deleteMany({
-    where: { collectionId },
-  });
-
-  if (courseIds.length > 0) {
-    await prisma.collectionCourse.createMany({
-      data: courseIds.map((courseId, index) => ({
-        collectionId,
-        courseId,
-        position: index + 1,
-      })),
+  try {
+    await prisma.collectionCourse.deleteMany({
+      where: { collectionId },
     });
+
+    if (courseIds.length > 0) {
+      await prisma.collectionCourse.createMany({
+        data: courseIds.map((courseId, index) => ({
+          collectionId,
+          courseId,
+          position: index + 1,
+        })),
+      });
+    }
+  } catch {
+    redirect(`/admin/collections/${collectionId}?error=courses`);
   }
 
   const collection = await prisma.collection.findUnique({
@@ -295,7 +314,7 @@ export async function saveCourseAction(formData: FormData) {
 export async function saveBundleAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const upsell = parseUpsellSelection(formData.get("upsellTarget"));
-  const payload = bundleInputSchema.parse({
+  const parsed = bundleInputSchema.safeParse({
     slug: String(formData.get("slug") ?? ""),
     title: String(formData.get("title") ?? ""),
     subtitle: String(formData.get("subtitle") ?? ""),
@@ -321,6 +340,15 @@ export async function saveBundleAction(formData: FormData) {
     legacyUrl: String(formData.get("legacyUrl") ?? ""),
   });
 
+  if (!parsed.success) {
+    if (id) {
+      redirect(`/admin/bundles/${id}?error=details`);
+    }
+
+    redirect("/admin/bundles/new?error=details");
+  }
+
+  const payload = parsed.data;
   let bundle;
 
   try {
@@ -427,23 +455,33 @@ export async function addLessonAction(formData: FormData) {
 
 export async function saveInstructorAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
-  const instructor = await upsertInstructor(
-    {
-      slug: String(formData.get("slug") ?? ""),
-      name: String(formData.get("name") ?? ""),
-      imageUrl: String(formData.get("imageUrl") ?? ""),
-      shortBio: String(formData.get("shortBio") ?? ""),
-      longBio: String(formData.get("longBio") ?? ""),
-      websiteUrl: String(formData.get("websiteUrl") ?? ""),
-      youtubeUrl: String(formData.get("youtubeUrl") ?? ""),
-      instagramUrl: String(formData.get("instagramUrl") ?? ""),
-      xUrl: String(formData.get("xUrl") ?? ""),
-      facebookUrl: String(formData.get("facebookUrl") ?? ""),
-      discordUrl: String(formData.get("discordUrl") ?? ""),
-      telegramUrl: String(formData.get("telegramUrl") ?? ""),
-    },
-    id || undefined,
-  );
+  let instructor;
+
+  try {
+    instructor = await upsertInstructor(
+      {
+        slug: String(formData.get("slug") ?? ""),
+        name: String(formData.get("name") ?? ""),
+        imageUrl: String(formData.get("imageUrl") ?? ""),
+        shortBio: String(formData.get("shortBio") ?? ""),
+        longBio: String(formData.get("longBio") ?? ""),
+        websiteUrl: String(formData.get("websiteUrl") ?? ""),
+        youtubeUrl: String(formData.get("youtubeUrl") ?? ""),
+        instagramUrl: String(formData.get("instagramUrl") ?? ""),
+        xUrl: String(formData.get("xUrl") ?? ""),
+        facebookUrl: String(formData.get("facebookUrl") ?? ""),
+        discordUrl: String(formData.get("discordUrl") ?? ""),
+        telegramUrl: String(formData.get("telegramUrl") ?? ""),
+      },
+      id || undefined,
+    );
+  } catch {
+    if (id) {
+      redirect(`/admin/instructors/${id}?error=details`);
+    }
+
+    redirect("/admin/instructors/new?error=details");
+  }
 
   revalidatePath("/admin/instructors");
   revalidatePath("/instructors");
@@ -757,7 +795,7 @@ export async function deleteInstructorAction(formData: FormData) {
   });
 
   if (courseCount > 0) {
-    throw new Error("Cannot delete an instructor with linked courses.");
+    redirect(`/admin/instructors/${instructorId}?error=delete`);
   }
 
   await prisma.instructor.delete({

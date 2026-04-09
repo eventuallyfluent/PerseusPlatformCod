@@ -8,8 +8,13 @@ import { saveCourseAction } from "@/app/(admin)/admin/actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewCoursePage() {
+export default async function NewCoursePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
   const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const instructors = await prisma.instructor.findMany({
     orderBy: { name: "asc" },
   });
@@ -71,7 +76,11 @@ export default async function NewCoursePage() {
           </>
         }
       >
+        {resolvedSearchParams?.error === "details" ? (
+          <p className="rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">Course could not be created. Check the form fields and try again.</p>
+        ) : null}
         <ProductFormSection
+          id="core-identity"
           title="Core identity"
           description="These fields define the course name, path, instructor ownership, and initial publish state."
         >
@@ -112,6 +121,7 @@ export default async function NewCoursePage() {
         </ProductFormSection>
 
         <ProductFormSection
+          id="sales-copy"
           title="Sales copy"
           description="These are the structured fields the generated sales page uses for hero, description, outcomes, and audience sections."
         >
@@ -139,6 +149,7 @@ export default async function NewCoursePage() {
         </ProductFormSection>
 
         <ProductFormSection
+          id="media-seo"
           title="Media and SEO"
           description="Add supporting media now if you have it. Canonical page metadata will derive from this record."
         >
@@ -164,6 +175,7 @@ export default async function NewCoursePage() {
         </ProductFormSection>
 
         <ProductFormSection
+          id="migration-urls"
           title="Migration and URL preservation"
           description="Use these only when importing or recreating an existing Payhip path. Exact legacy paths are preserved intentionally."
         >

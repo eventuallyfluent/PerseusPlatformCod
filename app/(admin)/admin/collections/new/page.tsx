@@ -5,14 +5,20 @@ import { saveCollectionAction } from "@/app/(admin)/admin/actions";
 
 export const dynamic = "force-dynamic";
 
-export default function NewCollectionPage() {
+export default async function NewCollectionPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
   const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   return (
     <AdminShell
       title="New collection"
       description="Create a collection page with its own image, description, and course grouping."
     >
       <Card className="max-w-4xl bg-white p-8">
+        {resolvedSearchParams?.error === "details" ? <p className="mb-6 rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">Collection could not be created. Check the form fields and try again.</p> : null}
         <form action={saveCollectionAction} className="space-y-8">
           <div className="grid gap-4 md:grid-cols-2">
             <label>

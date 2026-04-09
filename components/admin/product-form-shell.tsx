@@ -46,12 +46,13 @@ export function ProductFormShell({
 }
 
 export function ProductFormSection({
+  id,
   title,
   description,
   children,
-}: PropsWithChildren<{ title: string; description: string }>) {
+}: PropsWithChildren<{ id?: string; title: string; description: string }>) {
   return (
-    <section className="space-y-5 border-b border-[var(--border)] pb-8 last:border-b-0 last:pb-0">
+    <section id={id} className="scroll-mt-24 space-y-5 border-b border-[var(--border)] pb-8 last:border-b-0 last:pb-0">
       <div className="space-y-2">
         <h3 className="text-lg font-semibold text-stone-950">{title}</h3>
         <p className="text-sm leading-7 text-stone-700">{description}</p>

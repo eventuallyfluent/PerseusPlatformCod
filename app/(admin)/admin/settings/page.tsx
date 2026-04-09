@@ -115,7 +115,12 @@ function linkLines(items: HomepageLinkItem[]) {
   return stringifyLinkLines(items);
 }
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ saved?: string; error?: string }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const [sections, approvedTestimonials, collectionRecords] = await Promise.all([
     getHomepageSections(),
     prisma.testimonial.findMany({
@@ -147,10 +152,13 @@ export default async function SettingsPage() {
   const emailSignupPayload = emailSignup.payload as HomepageEmailSignupPayload;
   const footer = sections.find((section) => section.type === "FOOTER")!;
   const footerPayload = footer.payload as HomepageFooterPayload;
+  const feedbackMessage = resolvedSearchParams?.saved ? "Homepage section saved." : resolvedSearchParams?.error ? "Homepage section could not be saved. Try again." : "";
+  const feedbackTone = resolvedSearchParams?.error ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700";
 
   return (
     <AdminShell title="Homepage Settings" description="Edit, reorder, and toggle the five public homepage sections.">
       <div className="space-y-6">
+        {feedbackMessage ? <p className={`rounded-[18px] px-4 py-3 text-sm ${feedbackTone}`}>{feedbackMessage}</p> : null}
         <SectionFrame
           type="HERO"
           title="Hero"

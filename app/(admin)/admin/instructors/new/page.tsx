@@ -3,11 +3,17 @@ import { ImageField } from "@/components/admin/image-field";
 import { Card } from "@/components/ui/card";
 import { saveInstructorAction } from "@/app/(admin)/admin/actions";
 
-export default function NewInstructorPage() {
+export default async function NewInstructorPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
   const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   return (
     <AdminShell title="New instructor" description="Structured bio fields drive the public page.">
       <Card>
+        {resolvedSearchParams?.error === "details" ? <p className="mb-6 rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">Instructor could not be created. Check the form fields and try again.</p> : null}
         <form action={saveInstructorAction} className="grid gap-4 md:grid-cols-2">
           <label>
             Name

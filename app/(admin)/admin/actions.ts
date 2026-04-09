@@ -509,27 +509,41 @@ export async function saveOfferAction(formData: FormData) {
   const offerId = String(formData.get("id") ?? "");
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
-  await upsertOffer({
-    courseId: courseId || undefined,
-    bundleId: bundleId || undefined,
-    name: String(formData.get("name") ?? ""),
-    type: String(formData.get("type") ?? "ONE_TIME"),
-    price: Number(formData.get("price") ?? 0),
-    currency: String(formData.get("currency") ?? "USD"),
-    compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
-    isPublished: Boolean(formData.get("isPublished")),
-    checkoutPath: String(formData.get("checkoutPath") ?? ""),
-  }, offerId || undefined);
+  try {
+    await upsertOffer(
+      {
+        courseId: courseId || undefined,
+        bundleId: bundleId || undefined,
+        name: String(formData.get("name") ?? ""),
+        type: String(formData.get("type") ?? "ONE_TIME"),
+        price: Number(formData.get("price") ?? 0),
+        currency: String(formData.get("currency") ?? "USD"),
+        compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
+        isPublished: Boolean(formData.get("isPublished")),
+        checkoutPath: String(formData.get("checkoutPath") ?? ""),
+      },
+      offerId || undefined,
+    );
+  } catch {
+    if (courseId) {
+      redirect(`/admin/courses/${courseId}?error=offer`);
+    }
+    if (bundleId) {
+      redirect(`/admin/bundles/${bundleId}?error=offer`);
+    }
+    redirect("/admin/coupons?error=offer");
+  }
 
   revalidatePath("/admin/offers");
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
-    redirect(`/admin/courses/${courseId}`);
+    redirect(`/admin/courses/${courseId}?saved=offer`);
   }
   if (bundleId) {
     revalidatePath(`/admin/bundles/${bundleId}`);
-    redirect(`/admin/bundles/${bundleId}`);
+    redirect(`/admin/bundles/${bundleId}?saved=offer`);
   }
+  redirect("/admin/coupons?saved=offer");
 }
 
 export async function deleteOfferAction(formData: FormData) {
@@ -537,19 +551,30 @@ export async function deleteOfferAction(formData: FormData) {
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
 
-  await prisma.offer.delete({
-    where: { id: offerId },
-  });
+  try {
+    await prisma.offer.delete({
+      where: { id: offerId },
+    });
+  } catch {
+    if (courseId) {
+      redirect(`/admin/courses/${courseId}?error=offer`);
+    }
+    if (bundleId) {
+      redirect(`/admin/bundles/${bundleId}?error=offer`);
+    }
+    redirect("/admin/coupons?error=offer");
+  }
 
   revalidatePath("/admin/offers");
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
-    redirect(`/admin/courses/${courseId}`);
+    redirect(`/admin/courses/${courseId}?saved=offer`);
   }
   if (bundleId) {
     revalidatePath(`/admin/bundles/${bundleId}`);
-    redirect(`/admin/bundles/${bundleId}`);
+    redirect(`/admin/bundles/${bundleId}?saved=offer`);
   }
+  redirect("/admin/coupons?saved=offer");
 }
 
 export async function saveCouponAction(formData: FormData) {
@@ -920,20 +945,10 @@ export async function saveGatewayCredentialsAction(formData: FormData) {
   const provider = String(formData.get("provider") ?? "").trim();
 
   if (!provider) {
-    throw new Error("Provider is required");
+    redirect("/admin/gateways?connection=failed&message=Provider%20is%20required.");
   }
 
   const connector = getPaymentConnector(provider);
-  const credentialEntries = connector.credentialFields.map((field) => {
-    const value = String(formData.get(`credential:${field.key}`) ?? "").trim();
-
-    if (field.required && !value) {
-      throw new Error(`${field.label} is required`);
-    }
-
-    return [field.key, value] as const;
-  });
-
   const existingGateway = await prisma.gateway.findUnique({
     where: { provider },
   });
@@ -948,41 +963,55 @@ export async function saveGatewayCredentialsAction(formData: FormData) {
     },
   });
 
-  await prisma.$transaction([
-    prisma.gateway.updateMany({
-      where: {
-        id: {
-          not: gateway.id,
-        },
-      },
-      data: {
-        isActive: false,
-      },
-    }),
-    prisma.gateway.update({
-      where: { id: gateway.id },
-      data: { isActive: true },
-    }),
-    ...credentialEntries.map(([key, value]) =>
-      prisma.gatewayCredential.upsert({
+  const credentialEntries = connector.credentialFields.map((field) => {
+    const value = String(formData.get(`credential:${field.key}`) ?? "").trim();
+
+    if (field.required && !value) {
+      redirect(`/admin/gateways/${gateway.id}?connection=failed&message=${encodeURIComponent(`${field.label} is required.`)}`);
+    }
+
+    return [field.key, value] as const;
+  });
+
+  try {
+    await prisma.$transaction([
+      prisma.gateway.updateMany({
         where: {
-          gatewayId_key: {
-            gatewayId: gateway.id,
-            key,
+          id: {
+            not: gateway.id,
           },
         },
-        update: { valueEncrypted: encryptGatewayCredentialValue(value) },
-        create: {
-          gatewayId: gateway.id,
-          key,
-          valueEncrypted: encryptGatewayCredentialValue(value),
+        data: {
+          isActive: false,
         },
       }),
-    ),
-  ]);
+      prisma.gateway.update({
+        where: { id: gateway.id },
+        data: { isActive: true },
+      }),
+      ...credentialEntries.map(([key, value]) =>
+        prisma.gatewayCredential.upsert({
+          where: {
+            gatewayId_key: {
+              gatewayId: gateway.id,
+              key,
+            },
+          },
+          update: { valueEncrypted: encryptGatewayCredentialValue(value) },
+          create: {
+            gatewayId: gateway.id,
+            key,
+            valueEncrypted: encryptGatewayCredentialValue(value),
+          },
+        }),
+      ),
+    ]);
+  } catch {
+    redirect(`/admin/gateways/${provider}?connection=failed&message=Credentials%20could%20not%20be%20saved.`);
+  }
 
   revalidatePath("/admin/gateways");
-  redirect(`/admin/gateways/${gateway.id}`);
+  redirect(`/admin/gateways/${gateway.id}?connection=saved`);
 }
 
 export async function testGatewayConnectionAction(formData: FormData) {

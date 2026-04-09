@@ -29,14 +29,7 @@ export function CheckoutForm({
         />
       </label>
       {error ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p> : null}
-      <div className="grid gap-3 rounded-[22px] border border-white/10 bg-white/6 p-4 text-sm leading-7 text-[rgba(236,229,255,0.76)]">
-        <p>Payment is completed on the active hosted checkout provider. Discounts are validated before redirect.</p>
-        <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-[rgba(236,229,255,0.62)]">
-          <span>Secure checkout</span>
-          <span>Instant enrollment</span>
-          <span>Coupon support</span>
-        </div>
-      </div>
+      <p className="text-sm leading-6 text-[rgba(236,229,255,0.74)]">Coupons are validated before redirect. Payment finishes on the active hosted checkout provider.</p>
       <Button
         type="button"
         className="w-full justify-center rounded-full bg-[linear-gradient(135deg,#d4a846,#8f2cff)] py-6 text-base font-semibold text-white shadow-[0_18px_34px_rgba(143,44,255,0.24)] hover:opacity-95"

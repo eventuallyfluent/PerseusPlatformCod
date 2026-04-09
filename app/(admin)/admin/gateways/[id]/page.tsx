@@ -31,6 +31,8 @@ export default async function GatewayDetailPage({
   const connectionMessage =
     query.connection === "ok"
       ? { tone: "emerald", text: "Connection test succeeded." }
+      : query.connection === "saved"
+        ? { tone: "emerald", text: "Gateway credentials saved." }
       : query.connection === "failed"
         ? { tone: "rose", text: decodeURIComponent(query.message ?? "Connection test failed.") }
         : null;

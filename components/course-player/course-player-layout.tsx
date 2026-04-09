@@ -184,9 +184,10 @@ export function CoursePlayerLayout({
                       >
                         <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] opacity-70">
                           <span>Lesson {lessonIndex + 1}</span>
-                          <span>{lesson.durationLabel ?? "Open"}</span>
+                          <span>Open</span>
                         </span>
                         <span className="mt-1 block font-semibold">{lesson.title}</span>
+                        {lesson.durationLabel ? <span className="mt-2 block text-[11px] uppercase tracking-[0.2em] opacity-60">{lesson.durationLabel}</span> : null}
                         {completed ? <span className="mt-2 inline-flex rounded-full border border-[rgba(212,168,70,0.36)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#f7d481]">Completed</span> : null}
                       </Link>
                     ) : (
@@ -238,7 +239,14 @@ export function CoursePlayerLayout({
                     type="submit"
                     disabled={previewMode}
                   >
-                    {activeLesson.isCompleted ? "Marked complete" : "Mark as complete"}
+                    {activeLesson.isCompleted ? (
+                      <span className="inline-flex items-center gap-2">
+                        <span aria-hidden="true">✓</span>
+                        <span>Marked complete</span>
+                      </span>
+                    ) : (
+                      "Mark as complete"
+                    )}
                   </button>
                 </form>
               ) : null}

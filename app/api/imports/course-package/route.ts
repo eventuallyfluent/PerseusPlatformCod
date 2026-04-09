@@ -20,12 +20,12 @@ export async function POST(request: Request) {
     batch = await createImportBatch("COURSE_PACKAGE", file.name, csvContent, dryRun);
   } catch (error) {
     const failedBatch = await createFailedImportBatch("COURSE_PACKAGE", file.name, csvContent, error);
-    return NextResponse.redirect(new URL(`/admin/imports/${failedBatch.id}`, request.url));
+    return NextResponse.redirect(new URL(`/admin/imports/${failedBatch.id}`, request.url), { status: 303 });
   }
 
   if (!dryRun) {
-    return NextResponse.redirect(new URL(`/admin/imports/${batch.id}`, request.url));
+    return NextResponse.redirect(new URL(`/admin/imports/${batch.id}`, request.url), { status: 303 });
   }
 
-  return NextResponse.redirect(new URL(`/admin/imports/${batch.id}`, request.url));
+  return NextResponse.redirect(new URL(`/admin/imports/${batch.id}`, request.url), { status: 303 });
 }

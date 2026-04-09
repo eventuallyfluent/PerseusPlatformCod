@@ -11,8 +11,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ bat
     batch = await startImportBatch(batchId);
   } catch (error) {
     const failedBatch = await markImportBatchFailed(batchId, error);
-    return NextResponse.redirect(new URL(`/admin/imports/${failedBatch.id}`, request.url));
+    return NextResponse.redirect(new URL(`/admin/imports/${failedBatch.id}`, request.url), { status: 303 });
   }
 
-  return NextResponse.redirect(new URL(`/admin/imports/${batch.id}`, request.url));
+  return NextResponse.redirect(new URL(`/admin/imports/${batch.id}`, request.url), { status: 303 });
 }

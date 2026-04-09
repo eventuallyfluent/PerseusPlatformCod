@@ -29,8 +29,8 @@ export async function POST(request: Request) {
     const failedBatch = await createFailedImportBatch("COURSE_STUDENTS", file.name, csvContent, error, {
       targetCourseId: courseId,
     });
-    return NextResponse.redirect(new URL(`/admin/imports/${failedBatch.id}`, request.url));
+    return NextResponse.redirect(new URL(`/admin/imports/${failedBatch.id}`, request.url), { status: 303 });
   }
 
-  return NextResponse.redirect(new URL(`/admin/imports/${batch.id}`, request.url));
+  return NextResponse.redirect(new URL(`/admin/imports/${batch.id}`, request.url), { status: 303 });
 }

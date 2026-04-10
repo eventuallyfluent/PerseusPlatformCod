@@ -1,9 +1,5 @@
-import { prisma } from "@/lib/db/prisma";
+import { getActiveGatewayRecord } from "@/lib/payments/gateway-queries";
 
 export async function getActiveGateway() {
-  return prisma.gateway.findFirst({
-    where: { isActive: true },
-    include: { credentials: true },
-    orderBy: { updatedAt: "desc" },
-  });
+  return getActiveGatewayRecord();
 }

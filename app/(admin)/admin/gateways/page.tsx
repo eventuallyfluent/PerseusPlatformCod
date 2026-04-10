@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { listPaymentConnectors, findPaymentConnector } from "@/lib/payments/adapter-registry";
@@ -6,6 +5,7 @@ import { evaluateGatewayPolicy, summarizeGatewayCapabilities } from "@/lib/payme
 import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
 import { createGatewayProfileAction } from "@/app/(admin)/admin/actions";
 import { HardLink } from "@/components/ui/hard-link";
+import { listGatewayRecords } from "@/lib/payments/gateway-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -15,10 +15,7 @@ export default async function GatewaysPage({
   searchParams: Promise<{ connection?: string; message?: string }>;
 }) {
   const query = await searchParams;
-  const gatewayRows = await prisma.gateway.findMany({
-    include: { credentials: true, webhookEvents: true },
-    orderBy: [{ isActive: "desc" }, { updatedAt: "desc" }],
-  });
+  const gatewayRows = await listGatewayRecords();
   const provisionedProviders = new Set(gatewayRows.map((gateway) => gateway.provider));
   const availableNativeConnectors = listPaymentConnectors().filter((connector) => !provisionedProviders.has(connector.provider));
 
@@ -37,6 +34,9 @@ export default async function GatewaysPage({
     query.connection === "failed"
       ? { tone: "rose", text: decodeURIComponent(query.message ?? "Gateway update failed.") }
       : null;
+  const compatWarning = gatewayRows.some((gateway) => gateway.schemaCompatMode === "legacy")
+    ? "The deployed database is still on the older gateway schema. Viewing works, but the new generic gateway and bank-transfer fields stay limited until the latest migration runs."
+    : null;
 
   return (
     <AdminShell title="Gateways" description="Provider-neutral payment layer. Native connectors, generic API profiles, and bank transfer live in the same admin surface.">
@@ -50,6 +50,7 @@ export default async function GatewaysPage({
           {connectionMessage ? (
             <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{connectionMessage.text}</p>
           ) : null}
+          {compatWarning ? <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{compatWarning}</p> : null}
           <form action={createGatewayProfileAction} className="grid gap-4">
             <label className="grid gap-2 text-sm text-stone-700">
               <span className="font-medium text-stone-950">Display name</span>

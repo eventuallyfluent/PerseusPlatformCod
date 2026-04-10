@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { saveGatewayConfigurationAction, testGatewayConnectionAction } from "@/app/(admin)/admin/actions";
@@ -7,6 +6,7 @@ import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
 import { evaluateGatewayPolicy, summarizeGatewayCapabilities } from "@/lib/payments/policy";
 import { getGatewayCredentialLines, resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
+import { getGatewayRecordById } from "@/lib/payments/gateway-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +19,7 @@ export default async function GatewayDetailPage({
 }) {
   const { id } = await params;
   const query = await searchParams;
-  const gateway = await prisma.gateway.findUnique({
-    where: { id },
-    include: { credentials: true, webhookEvents: true },
-  });
+  const gateway = await getGatewayRecordById(id);
 
   if (!gateway) {
     notFound();
@@ -48,6 +45,10 @@ export default async function GatewayDetailPage({
           : query.connection === "failed"
             ? { tone: "rose", text: decodeURIComponent(query.message ?? "Gateway update failed.") }
             : null;
+  const compatWarning =
+    gateway.schemaCompatMode === "legacy"
+      ? "This environment is still reading the older gateway schema. Core native credentials remain visible, but the new generic gateway fields will stay limited until the latest migration runs."
+      : null;
 
   return (
     <AdminShell title={gateway.displayName} description="Gateway identity, capability truth, credentials, and checkout behavior are all configured here.">
@@ -62,6 +63,7 @@ export default async function GatewayDetailPage({
               {connectionMessage.text}
             </p>
           ) : null}
+          {compatWarning ? <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{compatWarning}</p> : null}
           <form action={saveGatewayConfigurationAction} className="grid gap-4">
             <input type="hidden" name="gatewayId" value={gateway.id} />
             <label className="grid gap-2 text-sm text-stone-700">

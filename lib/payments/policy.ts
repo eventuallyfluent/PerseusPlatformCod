@@ -66,6 +66,7 @@ export function evaluateGatewayPolicy(capabilities: GatewayCapabilities): Gatewa
 export function summarizeGatewayCapabilities(capabilities: GatewayCapabilities) {
   return [
     capabilities.supportsHostedCheckout ? "Hosted checkout" : null,
+    capabilities.supportsManualConfirmation ? "Manual confirmation" : null,
     capabilities.supportsSubscriptions ? "Subscriptions" : null,
     capabilities.supportsRefunds ? "Refunds" : null,
     capabilities.supportsPaymentPlans ? "Payment plans" : null,

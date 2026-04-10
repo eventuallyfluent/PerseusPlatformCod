@@ -1,8 +1,6 @@
 import { OrderStatus, PaymentStatus, SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
-import { ensureEnrollment } from "@/lib/enrollments/ensure-enrollment";
-import { sendOnboardingEmail } from "@/lib/email/send-onboarding-email";
-import { sendPurchaseConfirmation } from "@/lib/email/send-purchase-confirmation";
+import { fulfillPaidOrder } from "@/lib/payments/fulfill-paid-order";
 import type { CanonicalPaymentEvent } from "@/types";
 
 type EventContext = {
@@ -56,6 +54,42 @@ export async function handleCanonicalEvent(context: EventContext) {
     return;
   }
 
+  if (context.canonicalEvent === "payment.authorized") {
+    await prisma.payment.updateMany({
+      where: {
+        orderId: order.id,
+        externalPaymentId: context.externalEventId ?? order.externalOrderId ?? undefined,
+      },
+      data: {
+        status: PaymentStatus.AUTHORIZED,
+        rawEvent: JSON.parse(JSON.stringify(context.payload)),
+      },
+    });
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { status: OrderStatus.UNDER_REVIEW },
+    });
+  }
+
+  if (context.canonicalEvent === "payment.under_review") {
+    await prisma.payment.updateMany({
+      where: {
+        orderId: order.id,
+        externalPaymentId: context.externalEventId ?? order.externalOrderId ?? undefined,
+      },
+      data: {
+        status: PaymentStatus.UNDER_REVIEW,
+        rawEvent: JSON.parse(JSON.stringify(context.payload)),
+      },
+    });
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { status: OrderStatus.UNDER_REVIEW },
+    });
+  }
+
   if (context.canonicalEvent === "payment.succeeded") {
     const existingPayment = await prisma.payment.findFirst({
       where: {
@@ -63,11 +97,6 @@ export async function handleCanonicalEvent(context: EventContext) {
         externalPaymentId: context.externalEventId,
         status: PaymentStatus.SUCCEEDED,
       },
-    });
-
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { status: OrderStatus.PAID },
     });
 
     if (!existingPayment) {
@@ -84,24 +113,8 @@ export async function handleCanonicalEvent(context: EventContext) {
       });
     }
 
-    if (order.userId && !existingPayment) {
-      const courseIds = order.offer.courseId
-        ? [order.offer.courseId]
-        : order.offer.bundle?.courses.map((item) => item.courseId) ?? [];
-
-      await Promise.all(courseIds.map((courseId) => ensureEnrollment(order.userId!, courseId)));
-
-      const purchaseTitle = order.offer.course?.title ?? order.offer.bundle?.title ?? order.offer.name;
-      await sendPurchaseConfirmation({
-        to: order.user?.email ?? "",
-        courseTitle: purchaseTitle,
-        amount: order.totalAmount.toString(),
-        currency: order.currency,
-      });
-      await sendOnboardingEmail({
-        to: order.user?.email ?? "",
-        courseTitle: purchaseTitle,
-      });
+    if (!existingPayment) {
+      await fulfillPaidOrder(order.id);
     }
   }
 

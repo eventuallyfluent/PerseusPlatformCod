@@ -57,6 +57,7 @@ export const stripeConnector: PaymentGatewayConnector = {
     requiresBusinessIdentity: false,
     mayRequireManualReview: false,
     suitableForHighRisk: false,
+    supportsManualConfirmation: false,
   },
   async createCheckoutSession(input) {
     const stripe = await getStripeClient();

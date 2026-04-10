@@ -217,6 +217,8 @@ export type BundleSalesPagePayload = SalesPageBasePayload & {
 
 export type CanonicalPaymentEvent =
   | "payment.succeeded"
+  | "payment.authorized"
+  | "payment.under_review"
   | "payment.failed"
   | "subscription.started"
   | "subscription.renewed"
@@ -248,13 +250,16 @@ export type GatewayCapabilities = {
   requiresBusinessIdentity: boolean;
   mayRequireManualReview: boolean;
   suitableForHighRisk: boolean;
+  supportsManualConfirmation: boolean;
 };
 
-export type GatewayCheckoutModel = "hosted_redirect" | "embedded_hosted_form" | "direct_api";
+export type GatewayKind = "native" | "generic_api" | "bank_transfer";
+
+export type GatewayCheckoutModel = "hosted_redirect" | "embedded_hosted_form" | "direct_api" | "manual_instructions";
 
 export type GatewayTaxModel = "merchant_of_record" | "gateway_tax_engine" | "external_tax_service" | "unsupported";
 
-export type GatewaySettlementBehavior = "instant" | "asynchronous" | "manual_review_possible";
+export type GatewaySettlementBehavior = "instant" | "asynchronous" | "manual_review_possible" | "manual_confirmation";
 
 export type GatewayPolicyEvaluation = {
   allowed: boolean;
@@ -303,6 +308,24 @@ export interface PaymentGatewayConnector {
     payload: unknown;
   }>;
 }
+
+export type GatewayExecutionMode = "redirect" | "manual_instructions";
+
+export type ResolvedGatewayDefinition = {
+  id: string;
+  provider: string;
+  displayName: string;
+  kind: GatewayKind;
+  isActive: boolean;
+  isNativeAdapter: boolean;
+  checkoutModel: GatewayCheckoutModel;
+  taxModel: GatewayTaxModel;
+  settlementBehavior: GatewaySettlementBehavior;
+  checkoutUrlTemplate?: string | null;
+  instructionsMarkdown?: string | null;
+  webhookInstructions?: string | null;
+  capabilities: GatewayCapabilities;
+};
 
 export type DryRunResult<Row> = {
   validRows: Row[];

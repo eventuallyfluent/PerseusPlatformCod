@@ -17,12 +17,16 @@ export function CheckoutForm({
   initialCouponCode = "",
   initialUpsellFromOfferId = "",
   initialQuote,
+  submitLabel = "Continue to payment",
+  paymentNote = "Discounts are verified before redirect. Payment finishes on the active hosted checkout provider.",
   children,
 }: {
   offerId: string;
   initialCouponCode?: string;
   initialUpsellFromOfferId?: string;
   initialQuote: CheckoutQuote;
+  submitLabel?: string;
+  paymentNote?: string;
   children?: React.ReactNode;
 }) {
   const [pending, setPending] = useState(false);
@@ -116,7 +120,7 @@ export function CheckoutForm({
         </div>
       </div>
       {children}
-      <p className="text-sm leading-6 text-[rgba(236,229,255,0.74)]">Discounts are verified before redirect. Payment finishes on the active hosted checkout provider.</p>
+      <p className="text-sm leading-6 text-[rgba(236,229,255,0.74)]">{paymentNote}</p>
       <Button
         type="button"
         className="w-full justify-center rounded-full bg-[linear-gradient(135deg,#d4a846,#8f2cff)] py-6 text-base font-semibold text-white shadow-[0_18px_34px_rgba(143,44,255,0.24)] hover:opacity-95"
@@ -154,7 +158,7 @@ export function CheckoutForm({
           }
         }}
       >
-        {pending ? "Redirecting..." : "Continue to payment"}
+        {pending ? "Redirecting..." : submitLabel}
       </Button>
     </div>
   );

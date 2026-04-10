@@ -11,11 +11,13 @@ import { regenerateCoursePage } from "@/lib/sales-pages/regenerate-course-page";
 import { upsertInstructor } from "@/lib/instructors/upsert-instructor";
 import { upsertOffer } from "@/lib/offers/upsert-offer";
 import { bundleInputSchema, moduleInputSchema, lessonInputSchema } from "@/lib/zod/schemas";
-import { getPaymentConnector } from "@/lib/payments/adapter-registry";
+import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { encryptGatewayCredentialValue, isEncryptedGatewayCredentialValue } from "@/lib/payments/gateway-credentials";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
+import { fulfillPaidOrder } from "@/lib/payments/fulfill-paid-order";
 import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSectionPayloadMap } from "@/lib/homepage/sections";
-import { CouponScope, CourseStatus, type HomepageSectionType } from "@prisma/client";
+import { CouponScope, CourseStatus, OrderStatus, PaymentStatus, type HomepageSectionType } from "@prisma/client";
+import type { GatewayCapabilities, GatewayCheckoutModel, GatewayKind, GatewaySettlementBehavior, GatewayTaxModel } from "@/types";
 
 function toArray(value: FormDataEntryValue | null) {
   return String(value ?? "")
@@ -67,6 +69,112 @@ function parseUpsellSelection(value: FormDataEntryValue | null) {
 function parseOptionalNumber(value: FormDataEntryValue | null) {
   const raw = String(value ?? "").trim();
   return raw ? Number(raw) : undefined;
+}
+
+function parseBooleanField(formData: FormData, name: string) {
+  return formData.get(name) === "on";
+}
+
+function slugifyProvider(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function parseCredentialTextarea(value: FormDataEntryValue | null) {
+  return String(value ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const separatorIndex = line.indexOf("=");
+      if (separatorIndex <= 0) {
+        return null;
+      }
+
+      const key = line.slice(0, separatorIndex).trim();
+      const rawValue = line.slice(separatorIndex + 1).trim();
+
+      if (!key || !rawValue) {
+        return null;
+      }
+
+      return [key, rawValue] as const;
+    })
+    .filter((entry): entry is readonly [string, string] => Boolean(entry));
+}
+
+function getGatewayDefaults(kind: GatewayKind): {
+  checkoutModel: GatewayCheckoutModel;
+  taxModel: GatewayTaxModel;
+  settlementBehavior: GatewaySettlementBehavior;
+  capabilities: Pick<
+    GatewayCapabilities,
+    | "supportsSubscriptions"
+    | "supportsRefunds"
+    | "supportsPaymentPlans"
+    | "supportsHostedCheckout"
+    | "supportsTaxCalculation"
+    | "supportsHostedTaxCollection"
+    | "taxRequiresExternalConfiguration"
+    | "actsAsMerchantOfRecord"
+    | "requiresBillingAddress"
+    | "requiresShippingAddress"
+    | "requiresBusinessIdentity"
+    | "mayRequireManualReview"
+    | "suitableForHighRisk"
+    | "supportsManualConfirmation"
+  >;
+  instructionsMarkdown?: string;
+} {
+  if (kind === "bank_transfer") {
+    return {
+      checkoutModel: "manual_instructions",
+      taxModel: "external_tax_service",
+      settlementBehavior: "manual_confirmation",
+      capabilities: {
+        supportsSubscriptions: false,
+        supportsRefunds: true,
+        supportsPaymentPlans: false,
+        supportsHostedCheckout: false,
+        supportsTaxCalculation: false,
+        supportsHostedTaxCollection: false,
+        taxRequiresExternalConfiguration: true,
+        actsAsMerchantOfRecord: false,
+        requiresBillingAddress: true,
+        requiresShippingAddress: false,
+        requiresBusinessIdentity: false,
+        mayRequireManualReview: true,
+        suitableForHighRisk: true,
+        supportsManualConfirmation: true,
+      },
+      instructionsMarkdown:
+        "Send the transfer using the bank details below and include the order reference exactly as shown. Access is granted after the payment is confirmed.",
+    };
+  }
+
+  return {
+    checkoutModel: "hosted_redirect",
+    taxModel: "external_tax_service",
+    settlementBehavior: "asynchronous",
+    capabilities: {
+      supportsSubscriptions: false,
+      supportsRefunds: true,
+      supportsPaymentPlans: false,
+      supportsHostedCheckout: true,
+      supportsTaxCalculation: false,
+      supportsHostedTaxCollection: false,
+      taxRequiresExternalConfiguration: true,
+      actsAsMerchantOfRecord: false,
+      requiresBillingAddress: true,
+      requiresShippingAddress: false,
+      requiresBusinessIdentity: false,
+      mayRequireManualReview: true,
+      suitableForHighRisk: true,
+      supportsManualConfirmation: true,
+    },
+  };
 }
 
 function getDefaultHomepagePayload(type: HomepageSectionType) {
@@ -941,56 +1049,169 @@ export async function deleteLessonAction(formData: FormData) {
   redirect(`/admin/courses/${courseId}?saved=curriculum`);
 }
 
-export async function saveGatewayCredentialsAction(formData: FormData) {
-  const provider = String(formData.get("provider") ?? "").trim();
+export async function createGatewayProfileAction(formData: FormData) {
+  const displayName = String(formData.get("displayName") ?? "").trim();
+  const kind = (String(formData.get("kind") ?? "generic_api").trim() || "generic_api") as GatewayKind;
+  const provider = slugifyProvider(String(formData.get("provider") ?? displayName));
 
-  if (!provider) {
-    redirect("/admin/gateways?connection=failed&message=Provider%20is%20required.");
+  if (!displayName || !provider) {
+    redirect("/admin/gateways?connection=failed&message=Gateway%20name%20and%20provider%20slug%20are%20required.");
   }
 
-  const connector = getPaymentConnector(provider);
-  const existingGateway = await prisma.gateway.findUnique({
+  const existing = await prisma.gateway.findUnique({
     where: { provider },
   });
 
-  const gateway = await prisma.gateway.upsert({
-    where: { provider },
-    update: { isActive: true },
-    create: {
+  if (existing) {
+    redirect(`/admin/gateways/${existing.id}?connection=failed&message=${encodeURIComponent("A gateway with this provider slug already exists.")}`);
+  }
+
+  const defaults = getGatewayDefaults(kind === "bank_transfer" ? "bank_transfer" : "generic_api");
+
+  const gateway = await prisma.gateway.create({
+    data: {
       provider,
-      displayName: existingGateway?.displayName ?? connector.displayName,
-      isActive: true,
+      displayName,
+      kind: kind === "bank_transfer" ? "bank_transfer" : "generic_api",
+      isNativeAdapter: false,
+      checkoutModel: defaults.checkoutModel,
+      taxModel: defaults.taxModel,
+      settlementBehavior: defaults.settlementBehavior,
+      supportsSubscriptions: defaults.capabilities.supportsSubscriptions,
+      supportsRefunds: defaults.capabilities.supportsRefunds,
+      supportsPaymentPlans: defaults.capabilities.supportsPaymentPlans,
+      supportsHostedCheckout: defaults.capabilities.supportsHostedCheckout,
+      supportsTaxCalculation: defaults.capabilities.supportsTaxCalculation,
+      supportsHostedTaxCollection: defaults.capabilities.supportsHostedTaxCollection,
+      taxRequiresExternalConfiguration: defaults.capabilities.taxRequiresExternalConfiguration,
+      actsAsMerchantOfRecord: defaults.capabilities.actsAsMerchantOfRecord,
+      requiresBillingAddress: defaults.capabilities.requiresBillingAddress,
+      requiresShippingAddress: defaults.capabilities.requiresShippingAddress,
+      requiresBusinessIdentity: defaults.capabilities.requiresBusinessIdentity,
+      mayRequireManualReview: defaults.capabilities.mayRequireManualReview,
+      supportsManualConfirmation: defaults.capabilities.supportsManualConfirmation,
+      suitableForHighRisk: defaults.capabilities.suitableForHighRisk,
+      instructionsMarkdown: defaults.instructionsMarkdown,
     },
   });
 
-  const credentialEntries = connector.credentialFields.map((field) => {
-    const value = String(formData.get(`credential:${field.key}`) ?? "").trim();
+  revalidatePath("/admin/gateways");
+  redirect(`/admin/gateways/${gateway.id}?connection=created`);
+}
 
-    if (field.required && !value) {
-      redirect(`/admin/gateways/${gateway.id}?connection=failed&message=${encodeURIComponent(`${field.label} is required.`)}`);
-    }
+export async function saveGatewayConfigurationAction(formData: FormData) {
+  const gatewayId = String(formData.get("gatewayId") ?? "").trim();
 
-    return [field.key, value] as const;
+  if (!gatewayId) {
+    redirect("/admin/gateways?connection=failed&message=Gateway%20ID%20is%20required.");
+  }
+
+  const gateway = await prisma.gateway.findUnique({
+    where: { id: gatewayId },
+    include: { credentials: true },
   });
 
+  if (!gateway) {
+    redirect("/admin/gateways?connection=missing");
+  }
+
+  const connector = findPaymentConnector(gateway.provider);
+  const isNativeGateway = gateway.kind === "native" && Boolean(connector);
+  const displayName = String(formData.get("displayName") ?? gateway.displayName).trim() || gateway.displayName;
+  const isActive = parseBooleanField(formData, "isActive");
+  const nextKind = isNativeGateway ? "native" : ((String(formData.get("kind") ?? gateway.kind) || gateway.kind) as GatewayKind);
+  const defaults = getGatewayDefaults(nextKind === "bank_transfer" ? "bank_transfer" : "generic_api");
+
+  const checkoutModel = (String(formData.get("checkoutModel") ?? gateway.checkoutModel).trim() || gateway.checkoutModel) as GatewayCheckoutModel;
+  const taxModel = (String(formData.get("taxModel") ?? gateway.taxModel).trim() || gateway.taxModel) as GatewayTaxModel;
+  const settlementBehavior = (String(formData.get("settlementBehavior") ?? gateway.settlementBehavior).trim() || gateway.settlementBehavior) as GatewaySettlementBehavior;
+
+  const credentialMap = new Map<string, string>();
+
+  if (connector) {
+    for (const field of connector.credentialFields) {
+      const value = String(formData.get(`credential:${field.key}`) ?? "").trim();
+
+      if (field.required && !value) {
+        redirect(`/admin/gateways/${gateway.id}?connection=failed&message=${encodeURIComponent(`${field.label} is required.`)}`);
+      }
+
+      if (value) {
+        credentialMap.set(field.key, value);
+      }
+    }
+  }
+
+  for (const [key, value] of parseCredentialTextarea(formData.get("genericCredentials"))) {
+    credentialMap.set(key, value);
+  }
+
+  const credentialEntries = Array.from(credentialMap.entries());
+  const shouldReplaceCredentials = !connector && formData.has("genericCredentials");
+  const nextCheckoutModel = nextKind === "bank_transfer" ? "manual_instructions" : checkoutModel;
+  const nextSettlementBehavior = nextKind === "bank_transfer" ? "manual_confirmation" : settlementBehavior;
+
   try {
-    await prisma.$transaction([
-      prisma.gateway.updateMany({
-        where: {
-          id: {
-            not: gateway.id,
+    await prisma.$transaction(async (tx) => {
+      if (isActive) {
+        await tx.gateway.updateMany({
+          where: {
+            id: {
+              not: gateway.id,
+            },
           },
-        },
-        data: {
-          isActive: false,
-        },
-      }),
-      prisma.gateway.update({
+          data: {
+            isActive: false,
+          },
+        });
+      }
+
+      await tx.gateway.update({
         where: { id: gateway.id },
-        data: { isActive: true },
-      }),
-      ...credentialEntries.map(([key, value]) =>
-        prisma.gatewayCredential.upsert({
+        data: {
+          displayName,
+          description: String(formData.get("description") ?? "").trim() || null,
+          isActive,
+          kind: isNativeGateway ? "native" : nextKind,
+          isNativeAdapter: isNativeGateway,
+          checkoutModel: nextCheckoutModel,
+          taxModel: nextKind === "bank_transfer" ? defaults.taxModel : taxModel,
+          settlementBehavior: nextSettlementBehavior,
+          supportsSubscriptions: isNativeGateway ? connector!.capabilities.supportsSubscriptions : parseBooleanField(formData, "supportsSubscriptions"),
+          supportsRefunds: isNativeGateway ? connector!.capabilities.supportsRefunds : parseBooleanField(formData, "supportsRefunds"),
+          supportsPaymentPlans: isNativeGateway ? connector!.capabilities.supportsPaymentPlans : parseBooleanField(formData, "supportsPaymentPlans"),
+          supportsHostedCheckout: isNativeGateway ? connector!.capabilities.supportsHostedCheckout : nextKind === "bank_transfer" ? false : parseBooleanField(formData, "supportsHostedCheckout"),
+          supportsTaxCalculation: isNativeGateway ? connector!.capabilities.supportsTaxCalculation : parseBooleanField(formData, "supportsTaxCalculation"),
+          supportsHostedTaxCollection: isNativeGateway ? connector!.capabilities.supportsHostedTaxCollection : parseBooleanField(formData, "supportsHostedTaxCollection"),
+          taxRequiresExternalConfiguration: isNativeGateway ? connector!.capabilities.taxRequiresExternalConfiguration : parseBooleanField(formData, "taxRequiresExternalConfiguration"),
+          actsAsMerchantOfRecord: isNativeGateway ? connector!.capabilities.actsAsMerchantOfRecord : parseBooleanField(formData, "actsAsMerchantOfRecord"),
+          requiresBillingAddress: isNativeGateway ? connector!.capabilities.requiresBillingAddress : parseBooleanField(formData, "requiresBillingAddress"),
+          requiresShippingAddress: isNativeGateway ? connector!.capabilities.requiresShippingAddress : parseBooleanField(formData, "requiresShippingAddress"),
+          requiresBusinessIdentity: isNativeGateway ? connector!.capabilities.requiresBusinessIdentity : parseBooleanField(formData, "requiresBusinessIdentity"),
+          mayRequireManualReview: isNativeGateway ? connector!.capabilities.mayRequireManualReview : nextKind === "bank_transfer" ? true : parseBooleanField(formData, "mayRequireManualReview"),
+          supportsManualConfirmation: isNativeGateway ? connector!.capabilities.supportsManualConfirmation : nextKind === "bank_transfer" ? true : parseBooleanField(formData, "supportsManualConfirmation"),
+          suitableForHighRisk: isNativeGateway ? connector!.capabilities.suitableForHighRisk : nextKind === "bank_transfer" ? true : parseBooleanField(formData, "suitableForHighRisk"),
+          checkoutUrlTemplate:
+            nextKind === "bank_transfer" ? null : String(formData.get("checkoutUrlTemplate") ?? "").trim() || null,
+          instructionsMarkdown:
+            String(formData.get("instructionsMarkdown") ?? "").trim() || (nextKind === "bank_transfer" ? defaults.instructionsMarkdown ?? null : null),
+          webhookInstructions: String(formData.get("webhookInstructions") ?? "").trim() || null,
+        },
+      });
+
+      if (shouldReplaceCredentials) {
+        await tx.gatewayCredential.deleteMany({
+          where: {
+            gatewayId: gateway.id,
+            key: {
+              notIn: credentialEntries.map(([key]) => key),
+            },
+          },
+        });
+      }
+
+      for (const [key, value] of credentialEntries) {
+        await tx.gatewayCredential.upsert({
           where: {
             gatewayId_key: {
               gatewayId: gateway.id,
@@ -1003,15 +1224,20 @@ export async function saveGatewayCredentialsAction(formData: FormData) {
             key,
             valueEncrypted: encryptGatewayCredentialValue(value),
           },
-        }),
-      ),
-    ]);
+        });
+      }
+    });
   } catch {
-    redirect(`/admin/gateways/${provider}?connection=failed&message=Credentials%20could%20not%20be%20saved.`);
+    redirect(`/admin/gateways/${gateway.id}?connection=failed&message=Gateway%20configuration%20could%20not%20be%20saved.`);
   }
 
   revalidatePath("/admin/gateways");
+  revalidatePath(`/admin/gateways/${gateway.id}`);
   redirect(`/admin/gateways/${gateway.id}?connection=saved`);
+}
+
+export async function saveGatewayCredentialsAction(formData: FormData) {
+  return saveGatewayConfigurationAction(formData);
 }
 
 export async function testGatewayConnectionAction(formData: FormData) {
@@ -1025,8 +1251,13 @@ export async function testGatewayConnectionAction(formData: FormData) {
     redirect("/admin/gateways?connection=missing");
   }
 
+  const connector = findPaymentConnector(gateway.provider);
+
+  if (!connector) {
+    redirect(`/admin/gateways/${gateway.id}?connection=failed&message=${encodeURIComponent("This gateway uses manual or custom configuration. Automatic connection testing is not available yet.")}`);
+  }
+
   try {
-    const connector = getPaymentConnector(gateway.provider);
     const credentials = getGatewayCredentialMap(gateway.credentials);
 
     await connector.testConnection({
@@ -1049,6 +1280,73 @@ export async function testGatewayConnectionAction(formData: FormData) {
     const message = error instanceof Error ? encodeURIComponent(error.message) : "Connection failed";
     redirect(`/admin/gateways/${gateway.id}?connection=failed&message=${message}`);
   }
+}
+
+export async function confirmManualPaymentAction(formData: FormData) {
+  const paymentId = String(formData.get("paymentId") ?? "").trim();
+
+  if (!paymentId) {
+    redirect("/admin/orders?error=payment");
+  }
+
+  const payment = await prisma.payment.findUnique({
+    where: { id: paymentId },
+  });
+
+  if (!payment) {
+    redirect("/admin/orders?error=payment");
+  }
+
+  await prisma.payment.update({
+    where: { id: payment.id },
+    data: {
+      status: PaymentStatus.SUCCEEDED,
+      rawEvent: {
+        source: "manual_confirmation",
+        confirmedAt: new Date().toISOString(),
+      },
+    },
+  });
+
+  await fulfillPaidOrder(payment.orderId);
+
+  revalidatePath("/admin/orders");
+  redirect("/admin/orders?saved=payment");
+}
+
+export async function failManualPaymentAction(formData: FormData) {
+  const paymentId = String(formData.get("paymentId") ?? "").trim();
+
+  if (!paymentId) {
+    redirect("/admin/orders?error=payment");
+  }
+
+  const payment = await prisma.payment.findUnique({
+    where: { id: paymentId },
+  });
+
+  if (!payment) {
+    redirect("/admin/orders?error=payment");
+  }
+
+  await prisma.payment.update({
+    where: { id: payment.id },
+    data: {
+      status: PaymentStatus.FAILED,
+      rawEvent: {
+        source: "manual_confirmation",
+        failedAt: new Date().toISOString(),
+      },
+    },
+  });
+
+  await prisma.order.update({
+    where: { id: payment.orderId },
+    data: { status: OrderStatus.FAILED },
+  });
+
+  revalidatePath("/admin/orders");
+  redirect("/admin/orders?saved=payment");
 }
 
 export async function setCourseStatusAction(formData: FormData) {

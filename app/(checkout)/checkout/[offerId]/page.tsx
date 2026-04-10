@@ -5,7 +5,8 @@ import { currencyFormatter } from "@/lib/utils";
 import { getOfferById } from "@/lib/offers/get-offer-by-id";
 import { buildConfiguredUpsell, resolveAppliedUpsellDiscount } from "@/lib/offers/upsell-config";
 import { getActiveGateway } from "@/lib/payments/active-gateway";
-import { getPaymentConnector } from "@/lib/payments/adapter-registry";
+import { findPaymentConnector } from "@/lib/payments/adapter-registry";
+import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
 import { evaluateGatewayPolicy } from "@/lib/payments/policy";
 
 export const dynamic = "force-dynamic";
@@ -27,8 +28,9 @@ export default async function CheckoutPage({
 
   const productTitle = offer.course?.title ?? offer.bundle?.title ?? offer.name;
   const activeGateway = await getActiveGateway();
-  const activeConnector = activeGateway ? getPaymentConnector(activeGateway.provider) : null;
-  const gatewayPolicy = activeConnector ? evaluateGatewayPolicy(activeConnector.capabilities) : null;
+  const activeConnector = activeGateway ? findPaymentConnector(activeGateway.provider) : null;
+  const activeGatewayDefinition = activeGateway ? resolveGatewayDefinition(activeGateway, activeConnector) : null;
+  const gatewayPolicy = activeGatewayDefinition ? evaluateGatewayPolicy(activeGatewayDefinition.capabilities) : null;
   const bundleCourseCount = offer.bundle?.courses.length ?? 0;
   const productMeta = offer.course
     ? { label: "Instructor", value: offer.course.instructor.name }
@@ -50,6 +52,19 @@ export default async function CheckoutPage({
     totalLabel: discountedPriceLabel,
     couponCode: null,
   };
+  const paymentHeadline =
+    activeGatewayDefinition?.kind === "bank_transfer"
+      ? "Review the offer, check any discount, then continue to the transfer instructions."
+      : "Review the offer, check any discount, then continue to payment.";
+  const paymentNote =
+    activeGatewayDefinition?.kind === "bank_transfer"
+      ? "Discounts are verified before the order is created. Bank transfer orders stay pending until payment is manually confirmed."
+      : activeGatewayDefinition?.kind === "generic_api"
+        ? "Discounts are verified before redirect. Payment then continues through the configured gateway profile."
+        : "Discounts are verified before redirect. Payment finishes on the active hosted checkout provider.";
+  const submitLabel = activeGatewayDefinition?.kind === "bank_transfer" ? "Continue to transfer instructions" : "Continue to payment";
+  const checkoutChipLabel = activeGatewayDefinition?.kind === "bank_transfer" ? "Manual confirmation" : "Hosted payment";
+  const accessChipLabel = activeGatewayDefinition?.kind === "bank_transfer" ? "Access after confirmation" : "Immediate access";
 
   return (
     <div className="mx-auto flex min-h-[calc(100svh-5.5rem)] w-full max-w-6xl items-center px-6 py-4">
@@ -60,15 +75,15 @@ export default async function CheckoutPage({
           <p className="mt-4 max-w-lg text-sm leading-7 text-[rgba(236,229,255,0.78)]">Hosted checkout, immediate access after purchase, and one clear payment step.</p>
           <div className="mt-5 flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[rgba(228,216,255,0.74)]">
             <span className="rounded-full border border-white/10 px-4 py-2">Secure</span>
-            <span className="rounded-full border border-white/10 px-4 py-2">Hosted payment</span>
-            <span className="rounded-full border border-white/10 px-4 py-2">Immediate access</span>
+            <span className="rounded-full border border-white/10 px-4 py-2">{checkoutChipLabel}</span>
+            <span className="rounded-full border border-white/10 px-4 py-2">{accessChipLabel}</span>
           </div>
         </section>
 
         <section className="rounded-[34px] border border-[rgba(255,255,255,0.08)] bg-[rgba(19,21,42,0.92)] px-8 py-7 shadow-[0_24px_60px_rgba(14,12,30,0.16)]">
           <div className="space-y-2">
             <p className="text-[11px] uppercase tracking-[0.3em] text-[rgba(228,216,255,0.58)]">Checkout</p>
-            <p className="text-sm leading-7 text-[rgba(236,229,255,0.76)]">Review the offer, check any discount, then continue to payment.</p>
+            <p className="text-sm leading-7 text-[rgba(236,229,255,0.76)]">{paymentHeadline}</p>
           </div>
           {gatewayPolicy ? (
             <p className={`mt-5 rounded-2xl px-4 py-3 text-sm ${gatewayPolicy.tone === "success" ? "bg-emerald-50 text-emerald-700" : gatewayPolicy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
@@ -111,7 +126,13 @@ export default async function CheckoutPage({
 
           <div className="mt-5">
             {gatewayPolicy?.allowed ? (
-            <CheckoutForm offerId={offer.id} initialUpsellFromOfferId={query.upsellFrom ?? ""} initialQuote={initialQuote}>
+            <CheckoutForm
+              offerId={offer.id}
+              initialUpsellFromOfferId={query.upsellFrom ?? ""}
+              initialQuote={initialQuote}
+              submitLabel={submitLabel}
+              paymentNote={paymentNote}
+            >
               {upsell ? (
                 <div className="rounded-[24px] border border-[rgba(212,168,70,0.22)] bg-[linear-gradient(135deg,rgba(212,168,70,0.10),rgba(143,44,255,0.10))] px-5 py-4">
                   <div className="flex items-start justify-between gap-4">

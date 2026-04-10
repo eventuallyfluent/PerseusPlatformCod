@@ -41,6 +41,7 @@ export const creemConnector: PaymentGatewayConnector = {
     requiresBusinessIdentity: false,
     mayRequireManualReview: true,
     suitableForHighRisk: true,
+    supportsManualConfirmation: false,
   },
   async createCheckoutSession() {
     throw new Error("Creem connector is registered but requires live API credentials for checkout");

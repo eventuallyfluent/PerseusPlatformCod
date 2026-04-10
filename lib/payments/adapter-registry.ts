@@ -9,8 +9,12 @@ const connectors = new Map<string, PaymentGatewayConnector>([
   ["creem", creemConnector],
 ]);
 
+export function findPaymentConnector(provider: string) {
+  return connectors.get(provider) ?? null;
+}
+
 export function getPaymentConnector(provider: string) {
-  const adapter = connectors.get(provider);
+  const adapter = findPaymentConnector(provider);
 
   if (!adapter) {
     throw new Error(`No adapter registered for ${provider}`);

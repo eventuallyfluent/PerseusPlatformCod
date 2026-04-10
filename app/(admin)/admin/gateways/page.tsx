@@ -1,56 +1,114 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
-import { listPaymentConnectors } from "@/lib/payments/adapter-registry";
+import { listPaymentConnectors, findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { evaluateGatewayPolicy, summarizeGatewayCapabilities } from "@/lib/payments/policy";
+import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
+import { createGatewayProfileAction } from "@/app/(admin)/admin/actions";
+import { HardLink } from "@/components/ui/hard-link";
 
 export const dynamic = "force-dynamic";
 
-export default async function GatewaysPage() {
+export default async function GatewaysPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ connection?: string; message?: string }>;
+}) {
+  const query = await searchParams;
   const gatewayRows = await prisma.gateway.findMany({
     include: { credentials: true, webhookEvents: true },
+    orderBy: [{ isActive: "desc" }, { updatedAt: "desc" }],
   });
-  const installedConnectors = listPaymentConnectors();
-  const gateways = installedConnectors.map((connector) => {
-    const gateway = gatewayRows.find((item) => item.provider === connector.provider);
+  const provisionedProviders = new Set(gatewayRows.map((gateway) => gateway.provider));
+  const availableNativeConnectors = listPaymentConnectors().filter((connector) => !provisionedProviders.has(connector.provider));
+
+  const gateways = gatewayRows.map((gateway) => {
+    const connector = findPaymentConnector(gateway.provider);
+    const definition = resolveGatewayDefinition(gateway, connector);
 
     return {
-      id: gateway?.id,
-      provider: connector.provider,
-      displayName: gateway?.displayName ?? connector.displayName,
-      isActive: gateway?.isActive ?? false,
-      credentialsCount: gateway?.credentials.length ?? 0,
-      webhookEventsCount: gateway?.webhookEvents.length ?? 0,
-      capabilities: connector.capabilities,
-      policy: evaluateGatewayPolicy(connector.capabilities),
+      ...gateway,
+      definition,
+      policy: evaluateGatewayPolicy(definition.capabilities),
     };
   });
 
+  const connectionMessage =
+    query.connection === "failed"
+      ? { tone: "rose", text: decodeURIComponent(query.message ?? "Gateway update failed.") }
+      : null;
+
   return (
-    <AdminShell title="Gateways" description="Provider-neutral checkout framework. Installed connectors can be configured and activated without rewriting commerce logic.">
-      <div className="grid gap-6 md:grid-cols-2">
-        {gateways.map((gateway) => (
-          <Card key={gateway.provider} className="space-y-3">
-            <h2 className="text-lg font-semibold text-stone-950">{gateway.displayName}</h2>
-            <p className="text-sm text-stone-600">Status: {gateway.isActive ? "Active" : "Inactive"}</p>
-            <p className="text-sm text-stone-600">Credentials: {gateway.credentialsCount} saved</p>
-            <p className="text-sm text-stone-600">Webhook events: {gateway.webhookEventsCount}</p>
-            <p className="text-sm text-stone-600">Capabilities: {summarizeGatewayCapabilities(gateway.capabilities)}</p>
-            <p className="text-sm text-stone-600">Checkout model: {gateway.capabilities.checkoutModel.replaceAll("_", " ")}</p>
-            <p className="text-sm text-stone-600">Tax model: {gateway.capabilities.taxModel.replaceAll("_", " ")}</p>
-            <p className={`rounded-2xl px-4 py-3 text-sm ${gateway.policy.tone === "success" ? "bg-emerald-50 text-emerald-700" : gateway.policy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
-              <span className="font-medium">{gateway.policy.heading}.</span> {gateway.policy.detail}
-            </p>
-            {gateway.id ? (
-              <Link href={`/admin/gateways/${gateway.id}`} className="text-sm font-medium text-stone-950 underline">
-                Configure
-              </Link>
-            ) : (
-              <p className="text-sm text-stone-500">Run the seed or save credentials to provision this connector in the database.</p>
-            )}
-          </Card>
-        ))}
+    <AdminShell title="Gateways" description="Provider-neutral payment layer. Native connectors, generic API profiles, and bank transfer live in the same admin surface.">
+      <div className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
+        <Card className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">Create gateway</p>
+            <h2 className="text-lg font-semibold text-stone-950">Add a generic API or bank transfer profile</h2>
+            <p className="text-sm text-stone-600">This creates a real gateway record in the database, so the platform is not limited to the hardcoded native adapters.</p>
+          </div>
+          {connectionMessage ? (
+            <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{connectionMessage.text}</p>
+          ) : null}
+          <form action={createGatewayProfileAction} className="grid gap-4">
+            <label className="grid gap-2 text-sm text-stone-700">
+              <span className="font-medium text-stone-950">Display name</span>
+              <input name="displayName" required className="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-950" placeholder="NMI High-Risk" />
+            </label>
+            <label className="grid gap-2 text-sm text-stone-700">
+              <span className="font-medium text-stone-950">Provider slug</span>
+              <input name="provider" className="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-950" placeholder="nmi-high-risk" />
+              <span className="text-xs text-stone-500">Lowercase slug used internally. Leave blank to derive from the name.</span>
+            </label>
+            <label className="grid gap-2 text-sm text-stone-700">
+              <span className="font-medium text-stone-950">Gateway kind</span>
+              <select name="kind" defaultValue="generic_api" className="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-950">
+                <option value="generic_api">Generic API gateway</option>
+                <option value="bank_transfer">Bank transfer</option>
+              </select>
+            </label>
+            <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">Create gateway profile</button>
+          </form>
+          {availableNativeConnectors.length > 0 ? (
+            <div className="rounded-2xl bg-stone-50 px-4 py-4 text-sm text-stone-600">
+              <p className="font-medium text-stone-950">Available native connectors</p>
+              <p className="mt-1">{availableNativeConnectors.map((connector) => connector.displayName).join(", ")}</p>
+            </div>
+          ) : null}
+        </Card>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          {gateways.map((gateway) => (
+            <Card key={gateway.id} className="space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
+                  {gateway.definition.kind.replaceAll("_", " ")}
+                </span>
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${gateway.isActive ? "bg-emerald-50 text-emerald-700" : "bg-stone-100 text-stone-600"}`}>
+                  {gateway.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold text-stone-950">{gateway.displayName}</h2>
+                <p className="text-sm text-stone-500">{gateway.provider}</p>
+              </div>
+              <div className="grid gap-2 text-sm text-stone-600">
+                <div>Capabilities: {summarizeGatewayCapabilities(gateway.definition.capabilities) || "Manual configuration"}</div>
+                <div>Checkout model: {gateway.definition.checkoutModel.replaceAll("_", " ")}</div>
+                <div>Tax model: {gateway.definition.taxModel.replaceAll("_", " ")}</div>
+                <div>Settlement: {gateway.definition.settlementBehavior.replaceAll("_", " ")}</div>
+                <div>Credentials stored: {gateway.credentials.length}</div>
+                <div>Webhook events: {gateway.webhookEvents.length}</div>
+              </div>
+              <p className={`rounded-2xl px-4 py-3 text-sm ${gateway.policy.tone === "success" ? "bg-emerald-50 text-emerald-700" : gateway.policy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
+                <span className="font-medium">{gateway.policy.heading}.</span> {gateway.policy.detail}
+              </p>
+              <HardLink href={`/admin/gateways/${gateway.id}`} className="inline-flex text-sm font-medium text-stone-950 underline">
+                Configure gateway
+              </HardLink>
+            </Card>
+          ))}
+        </div>
       </div>
     </AdminShell>
   );

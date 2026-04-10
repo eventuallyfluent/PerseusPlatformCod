@@ -34,6 +34,8 @@ enum OfferType {
 
 enum OrderStatus {
   PENDING
+  AWAITING_PAYMENT
+  UNDER_REVIEW
   PAID
   FAILED
   REFUNDED
@@ -42,6 +44,9 @@ enum OrderStatus {
 
 enum PaymentStatus {
   PENDING
+  AWAITING_BANK_TRANSFER
+  UNDER_REVIEW
+  AUTHORIZED
   SUCCEEDED
   FAILED
   REFUNDED
@@ -432,16 +437,39 @@ model GeneratedPage {
 }
 
 model Gateway {
-  id            String              @id @default(cuid())
-  provider      String              @unique
-  displayName   String
-  isActive      Boolean             @default(false)
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  credentials   GatewayCredential[]
-  webhookEvents WebhookEvent[]
-  payments      Payment[]
-  subscriptions Subscription[]
+  id                               String              @id @default(cuid())
+  provider                         String              @unique
+  displayName                      String
+  description                      String?
+  kind                             String              @default("native")
+  isNativeAdapter                  Boolean             @default(true)
+  isActive                         Boolean             @default(false)
+  checkoutModel                    String              @default("hosted_redirect")
+  taxModel                         String              @default("external_tax_service")
+  settlementBehavior               String              @default("asynchronous")
+  supportsSubscriptions            Boolean             @default(false)
+  supportsRefunds                  Boolean             @default(false)
+  supportsPaymentPlans             Boolean             @default(false)
+  supportsHostedCheckout           Boolean             @default(false)
+  supportsTaxCalculation           Boolean             @default(false)
+  supportsHostedTaxCollection      Boolean             @default(false)
+  taxRequiresExternalConfiguration Boolean             @default(true)
+  actsAsMerchantOfRecord           Boolean             @default(false)
+  requiresBillingAddress           Boolean             @default(false)
+  requiresShippingAddress          Boolean             @default(false)
+  requiresBusinessIdentity         Boolean             @default(false)
+  mayRequireManualReview           Boolean             @default(false)
+  supportsManualConfirmation       Boolean             @default(false)
+  suitableForHighRisk              Boolean             @default(false)
+  checkoutUrlTemplate              String?
+  instructionsMarkdown             String?
+  webhookInstructions              String?
+  createdAt                        DateTime            @default(now())
+  updatedAt                        DateTime            @updatedAt
+  credentials                      GatewayCredential[]
+  webhookEvents                    WebhookEvent[]
+  payments                         Payment[]
+  subscriptions                    Subscription[]
 }
 
 model GatewayCredential {

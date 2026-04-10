@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { getPaymentConnector } from "@/lib/payments/adapter-registry";
+import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
 import { handleCanonicalEvent } from "@/lib/payments/events/handle-canonical-event";
 
@@ -17,7 +17,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ pro
   }
 
   const credentials = getGatewayCredentialMap(gateway.credentials);
-  const connector = getPaymentConnector(provider);
+  const connector = findPaymentConnector(provider);
+
+  if (!connector) {
+    return NextResponse.json({ error: "This gateway does not expose an automated webhook handler." }, { status: 400 });
+  }
   const verified = await connector.verifyWebhookSignature({
     headers: request.headers,
     rawBody,

@@ -1349,6 +1349,49 @@ export async function failManualPaymentAction(formData: FormData) {
   redirect("/admin/orders?saved=payment");
 }
 
+export async function setGatewayActiveStateAction(formData: FormData) {
+  const gatewayId = String(formData.get("gatewayId") ?? "").trim();
+  const makeActive = String(formData.get("makeActive") ?? "false") === "true";
+
+  if (!gatewayId) {
+    redirect("/admin/gateways?connection=failed&message=Gateway%20ID%20is%20required.");
+  }
+
+  const gateway = await prisma.gateway.findUnique({
+    where: { id: gatewayId },
+  });
+
+  if (!gateway) {
+    redirect("/admin/gateways?connection=failed&message=Gateway%20not%20found.");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    if (makeActive) {
+      await tx.gateway.updateMany({
+        where: {
+          id: {
+            not: gateway.id,
+          },
+        },
+        data: {
+          isActive: false,
+        },
+      });
+    }
+
+    await tx.gateway.update({
+      where: { id: gateway.id },
+      data: {
+        isActive: makeActive,
+      },
+    });
+  });
+
+  revalidatePath("/admin/gateways");
+  revalidatePath(`/admin/gateways/${gateway.id}`);
+  redirect(`/admin/gateways?connection=${makeActive ? "saved" : "deactivated"}`);
+}
+
 export async function setCourseStatusAction(formData: FormData) {
   const courseId = String(formData.get("courseId") ?? formData.get("id") ?? "");
   const status = String(formData.get("status") ?? CourseStatus.DRAFT) as CourseStatus;

@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { listPaymentConnectors, findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { evaluateGatewayPolicy, summarizeGatewayCapabilities } from "@/lib/payments/policy";
 import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
-import { createGatewayProfileAction } from "@/app/(admin)/admin/actions";
+import { createGatewayProfileAction, setGatewayActiveStateAction } from "@/app/(admin)/admin/actions";
 import { HardLink } from "@/components/ui/hard-link";
 import { listGatewayRecords } from "@/lib/payments/gateway-queries";
 
@@ -33,7 +33,11 @@ export default async function GatewaysPage({
   const connectionMessage =
     query.connection === "failed"
       ? { tone: "rose", text: decodeURIComponent(query.message ?? "Gateway update failed.") }
-      : null;
+      : query.connection === "saved"
+        ? { tone: "emerald", text: "Gateway activation updated." }
+        : query.connection === "deactivated"
+          ? { tone: "emerald", text: "Gateway deactivated." }
+          : null;
   const compatWarning = gatewayRows.some((gateway) => gateway.schemaCompatMode === "legacy")
     ? "The deployed database is still on the older gateway schema. Viewing works, but the new generic gateway and bank-transfer fields stay limited until the latest migration runs."
     : null;
@@ -48,7 +52,13 @@ export default async function GatewaysPage({
             <p className="text-sm text-stone-600">This creates a real gateway record in the database, so the platform is not limited to the hardcoded native adapters.</p>
           </div>
           {connectionMessage ? (
-            <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{connectionMessage.text}</p>
+            <p
+              className={`rounded-2xl px-4 py-3 text-sm ${
+                connectionMessage.tone === "emerald" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+              }`}
+            >
+              {connectionMessage.text}
+            </p>
           ) : null}
           {compatWarning ? <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{compatWarning}</p> : null}
           <form action={createGatewayProfileAction} className="grid gap-4">
@@ -104,9 +114,18 @@ export default async function GatewaysPage({
               <p className={`rounded-2xl px-4 py-3 text-sm ${gateway.policy.tone === "success" ? "bg-emerald-50 text-emerald-700" : gateway.policy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
                 <span className="font-medium">{gateway.policy.heading}.</span> {gateway.policy.detail}
               </p>
-              <HardLink href={`/admin/gateways/${gateway.id}`} className="inline-flex text-sm font-medium text-stone-950 underline">
-                Configure gateway
-              </HardLink>
+              <div className="flex flex-wrap gap-3">
+                <HardLink href={`/admin/gateways/${gateway.id}`} className="inline-flex text-sm font-medium text-stone-950 underline">
+                  Configure gateway
+                </HardLink>
+                <form action={setGatewayActiveStateAction}>
+                  <input type="hidden" name="gatewayId" value={gateway.id} />
+                  <input type="hidden" name="makeActive" value={gateway.isActive ? "false" : "true"} />
+                  <button className="rounded-full border border-stone-200 px-4 py-2 text-xs font-medium text-stone-700">
+                    {gateway.isActive ? "Deactivate" : "Make active"}
+                  </button>
+                </form>
+              </div>
             </Card>
           ))}
         </div>

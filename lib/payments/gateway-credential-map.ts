@@ -6,5 +6,13 @@ export function getGatewayCredentialMap(
     valueEncrypted: string;
   }>,
 ) {
-  return Object.fromEntries(credentials.map((credential) => [credential.key, decryptGatewayCredentialValue(credential.valueEncrypted) ?? ""]));
+  return Object.fromEntries(
+    credentials.map((credential) => {
+      try {
+        return [credential.key, decryptGatewayCredentialValue(credential.valueEncrypted) ?? ""];
+      } catch {
+        return [credential.key, ""];
+      }
+    }),
+  );
 }

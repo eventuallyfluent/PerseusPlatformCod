@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { listPaymentConnectors, findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { evaluateGatewayPolicy, summarizeGatewayCapabilities } from "@/lib/payments/policy";
 import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
-import { createGatewayProfileAction, setGatewayActiveStateAction } from "@/app/(admin)/admin/actions";
+import { createGatewayProfileAction } from "@/app/(admin)/admin/actions";
 import { HardLink } from "@/components/ui/hard-link";
 import { listGatewayRecords } from "@/lib/payments/gateway-queries";
 
@@ -78,7 +78,9 @@ export default async function GatewaysPage({
                 <option value="bank_transfer">Bank transfer</option>
               </select>
             </label>
-            <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">Create gateway profile</button>
+            <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" disabled={Boolean(compatWarning)}>
+              Create gateway profile
+            </button>
           </form>
           {availableNativeConnectors.length > 0 ? (
             <div className="rounded-2xl bg-stone-50 px-4 py-4 text-sm text-stone-600">
@@ -114,18 +116,9 @@ export default async function GatewaysPage({
               <p className={`rounded-2xl px-4 py-3 text-sm ${gateway.policy.tone === "success" ? "bg-emerald-50 text-emerald-700" : gateway.policy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
                 <span className="font-medium">{gateway.policy.heading}.</span> {gateway.policy.detail}
               </p>
-              <div className="flex flex-wrap gap-3">
-                <HardLink href={`/admin/gateways/${gateway.id}`} className="inline-flex text-sm font-medium text-stone-950 underline">
-                  Configure gateway
-                </HardLink>
-                <form action={setGatewayActiveStateAction}>
-                  <input type="hidden" name="gatewayId" value={gateway.id} />
-                  <input type="hidden" name="makeActive" value={gateway.isActive ? "false" : "true"} />
-                  <button className="rounded-full border border-stone-200 px-4 py-2 text-xs font-medium text-stone-700">
-                    {gateway.isActive ? "Deactivate" : "Make active"}
-                  </button>
-                </form>
-              </div>
+              <HardLink href={`/admin/gateways/${gateway.id}`} className="inline-flex text-sm font-medium text-stone-950 underline">
+                Configure gateway
+              </HardLink>
             </Card>
           ))}
         </div>

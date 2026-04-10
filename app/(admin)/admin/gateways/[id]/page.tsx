@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
-import { saveGatewayConfigurationAction, testGatewayConnectionAction } from "@/app/(admin)/admin/actions";
+import { saveGatewayConfigurationAction, setGatewayActiveStateAction, testGatewayConnectionAction } from "@/app/(admin)/admin/actions";
 import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
 import { evaluateGatewayPolicy, summarizeGatewayCapabilities } from "@/lib/payments/policy";
@@ -138,13 +138,10 @@ export default async function GatewayDetailPage({
                   <option value="manual_confirmation">Manual confirmation</option>
                 </select>
               </label>
-              <label className="flex items-center gap-3 rounded-2xl border border-stone-200 px-4 py-3 text-sm text-stone-700">
-                <input type="checkbox" name="isActive" defaultChecked={gateway.isActive} />
-                <span>
-                  <span className="font-medium text-stone-950">Active gateway</span>
-                  <span className="block text-xs text-stone-500">Only one gateway is active at a time.</span>
-                </span>
-              </label>
+              <div className="rounded-2xl border border-stone-200 px-4 py-3 text-sm text-stone-700">
+                <p className="font-medium text-stone-950">{gateway.isActive ? "Active gateway" : "Inactive gateway"}</p>
+                <p className="mt-1 text-xs text-stone-500">Use the button below to make this gateway active and automatically deselect the current one.</p>
+              </div>
             </div>
 
             {definition.kind !== "native" ? (
@@ -239,6 +236,15 @@ export default async function GatewayDetailPage({
 
             <div className="flex flex-wrap gap-3">
               <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">Save gateway</button>
+              <button
+                className="rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700"
+                type="submit"
+                formAction={setGatewayActiveStateAction}
+                name="makeActive"
+                value={gateway.isActive ? "false" : "true"}
+              >
+                {gateway.isActive ? "Deactivate gateway" : "Make active"}
+              </button>
               {connector ? (
                 <button
                   className="rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700"

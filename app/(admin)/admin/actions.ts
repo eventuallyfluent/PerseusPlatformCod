@@ -1058,45 +1058,53 @@ export async function createGatewayProfileAction(formData: FormData) {
     redirect("/admin/gateways?connection=failed&message=Gateway%20name%20and%20provider%20slug%20are%20required.");
   }
 
-  const existing = await prisma.gateway.findUnique({
-    where: { provider },
-  });
+  try {
+    const existing = await prisma.gateway.findUnique({
+      where: { provider },
+    });
 
-  if (existing) {
-    redirect(`/admin/gateways/${existing.id}?connection=failed&message=${encodeURIComponent("A gateway with this provider slug already exists.")}`);
+    if (existing) {
+      redirect(`/admin/gateways?connection=failed&message=${encodeURIComponent("A gateway with this provider slug already exists.")}`);
+    }
+
+    const defaults = getGatewayDefaults(kind === "bank_transfer" ? "bank_transfer" : "generic_api");
+
+    const gateway = await prisma.gateway.create({
+      data: {
+        provider,
+        displayName,
+        kind: kind === "bank_transfer" ? "bank_transfer" : "generic_api",
+        isNativeAdapter: false,
+        checkoutModel: defaults.checkoutModel,
+        taxModel: defaults.taxModel,
+        settlementBehavior: defaults.settlementBehavior,
+        supportsSubscriptions: defaults.capabilities.supportsSubscriptions,
+        supportsRefunds: defaults.capabilities.supportsRefunds,
+        supportsPaymentPlans: defaults.capabilities.supportsPaymentPlans,
+        supportsHostedCheckout: defaults.capabilities.supportsHostedCheckout,
+        supportsTaxCalculation: defaults.capabilities.supportsTaxCalculation,
+        supportsHostedTaxCollection: defaults.capabilities.supportsHostedTaxCollection,
+        taxRequiresExternalConfiguration: defaults.capabilities.taxRequiresExternalConfiguration,
+        actsAsMerchantOfRecord: defaults.capabilities.actsAsMerchantOfRecord,
+        requiresBillingAddress: defaults.capabilities.requiresBillingAddress,
+        requiresShippingAddress: defaults.capabilities.requiresShippingAddress,
+        requiresBusinessIdentity: defaults.capabilities.requiresBusinessIdentity,
+        mayRequireManualReview: defaults.capabilities.mayRequireManualReview,
+        supportsManualConfirmation: defaults.capabilities.supportsManualConfirmation,
+        suitableForHighRisk: defaults.capabilities.suitableForHighRisk,
+        instructionsMarkdown: defaults.instructionsMarkdown,
+      },
+    });
+
+    revalidatePath("/admin/gateways");
+    redirect(`/admin/gateways/${gateway.id}?connection=created`);
+  } catch {
+    redirect(
+      `/admin/gateways?connection=failed&message=${encodeURIComponent(
+        "This environment is not ready to create generic or bank-transfer gateway profiles yet. Apply the latest payment migration, then try again.",
+      )}`,
+    );
   }
-
-  const defaults = getGatewayDefaults(kind === "bank_transfer" ? "bank_transfer" : "generic_api");
-
-  const gateway = await prisma.gateway.create({
-    data: {
-      provider,
-      displayName,
-      kind: kind === "bank_transfer" ? "bank_transfer" : "generic_api",
-      isNativeAdapter: false,
-      checkoutModel: defaults.checkoutModel,
-      taxModel: defaults.taxModel,
-      settlementBehavior: defaults.settlementBehavior,
-      supportsSubscriptions: defaults.capabilities.supportsSubscriptions,
-      supportsRefunds: defaults.capabilities.supportsRefunds,
-      supportsPaymentPlans: defaults.capabilities.supportsPaymentPlans,
-      supportsHostedCheckout: defaults.capabilities.supportsHostedCheckout,
-      supportsTaxCalculation: defaults.capabilities.supportsTaxCalculation,
-      supportsHostedTaxCollection: defaults.capabilities.supportsHostedTaxCollection,
-      taxRequiresExternalConfiguration: defaults.capabilities.taxRequiresExternalConfiguration,
-      actsAsMerchantOfRecord: defaults.capabilities.actsAsMerchantOfRecord,
-      requiresBillingAddress: defaults.capabilities.requiresBillingAddress,
-      requiresShippingAddress: defaults.capabilities.requiresShippingAddress,
-      requiresBusinessIdentity: defaults.capabilities.requiresBusinessIdentity,
-      mayRequireManualReview: defaults.capabilities.mayRequireManualReview,
-      supportsManualConfirmation: defaults.capabilities.supportsManualConfirmation,
-      suitableForHighRisk: defaults.capabilities.suitableForHighRisk,
-      instructionsMarkdown: defaults.instructionsMarkdown,
-    },
-  });
-
-  revalidatePath("/admin/gateways");
-  redirect(`/admin/gateways/${gateway.id}?connection=created`);
 }
 
 export async function saveGatewayConfigurationAction(formData: FormData) {
@@ -1118,7 +1126,6 @@ export async function saveGatewayConfigurationAction(formData: FormData) {
   const connector = findPaymentConnector(gateway.provider);
   const isNativeGateway = gateway.kind === "native" && Boolean(connector);
   const displayName = String(formData.get("displayName") ?? gateway.displayName).trim() || gateway.displayName;
-  const isActive = parseBooleanField(formData, "isActive");
   const nextKind = isNativeGateway ? "native" : ((String(formData.get("kind") ?? gateway.kind) || gateway.kind) as GatewayKind);
   const defaults = getGatewayDefaults(nextKind === "bank_transfer" ? "bank_transfer" : "generic_api");
 
@@ -1153,25 +1160,11 @@ export async function saveGatewayConfigurationAction(formData: FormData) {
 
   try {
     await prisma.$transaction(async (tx) => {
-      if (isActive) {
-        await tx.gateway.updateMany({
-          where: {
-            id: {
-              not: gateway.id,
-            },
-          },
-          data: {
-            isActive: false,
-          },
-        });
-      }
-
       await tx.gateway.update({
         where: { id: gateway.id },
         data: {
           displayName,
           description: String(formData.get("description") ?? "").trim() || null,
-          isActive,
           kind: isNativeGateway ? "native" : nextKind,
           isNativeAdapter: isNativeGateway,
           checkoutModel: nextCheckoutModel,

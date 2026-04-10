@@ -37,16 +37,21 @@ export default async function CheckoutPage({
     appliedUpsellDiscount && appliedUpsellDiscount.discountAmount > 0
       ? currencyFormatter(Number(offer.price) - appliedUpsellDiscount.discountAmount, offer.currency)
       : priceLabel;
+  const initialQuote = {
+    baseLabel: priceLabel,
+    upsellDiscountLabel: appliedUpsellDiscount && appliedUpsellDiscount.discountAmount > 0 ? `-${currencyFormatter(appliedUpsellDiscount.discountAmount, offer.currency)}` : null,
+    couponDiscountLabel: null,
+    totalLabel: discountedPriceLabel,
+    couponCode: null,
+  };
 
   return (
     <div className="mx-auto flex min-h-[calc(100svh-5.5rem)] w-full max-w-6xl items-center px-6 py-4">
-      <div className="grid w-full gap-5 lg:grid-cols-[0.76fr_1.24fr]">
+      <div className="grid w-full gap-5 lg:grid-cols-[0.7fr_1.3fr]">
         <section className="rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,#160b30,#110a24)] px-8 py-7 text-white shadow-[0_24px_60px_rgba(14,12,30,0.24)]">
           <p className="text-[11px] uppercase tracking-[0.34em] text-[rgba(228,216,255,0.74)]">{productKind}</p>
           <h1 className="mt-4 max-w-lg text-3xl leading-[0.98] tracking-[-0.045em] lg:text-[2.55rem]">{productTitle}</h1>
-          <p className="mt-4 max-w-lg text-sm leading-7 text-[rgba(236,229,255,0.78)]">
-            One clear checkout step with hosted payment and access immediately after purchase.
-          </p>
+          <p className="mt-4 max-w-lg text-sm leading-7 text-[rgba(236,229,255,0.78)]">Hosted checkout, immediate access after purchase, and one clear payment step.</p>
           <div className="mt-5 flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[rgba(228,216,255,0.74)]">
             <span className="rounded-full border border-white/10 px-4 py-2">Secure</span>
             <span className="rounded-full border border-white/10 px-4 py-2">Hosted payment</span>
@@ -57,7 +62,7 @@ export default async function CheckoutPage({
         <section className="rounded-[34px] border border-[rgba(255,255,255,0.08)] bg-[rgba(19,21,42,0.92)] px-8 py-7 shadow-[0_24px_60px_rgba(14,12,30,0.16)]">
           <div className="space-y-2">
             <p className="text-[11px] uppercase tracking-[0.3em] text-[rgba(228,216,255,0.58)]">Checkout</p>
-            <p className="text-sm leading-7 text-[rgba(236,229,255,0.76)]">Review the offer, apply a coupon if needed, then continue to payment.</p>
+            <p className="text-sm leading-7 text-[rgba(236,229,255,0.76)]">Review the offer, check any discount, then continue to payment.</p>
           </div>
           {query.status === "cancelled" ? (
             <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Checkout was cancelled. You can try again at any time.</p>
@@ -91,28 +96,31 @@ export default async function CheckoutPage({
             ) : null}
           </div>
 
-          {upsell ? (
-            <div className="mt-5 rounded-[24px] border border-[rgba(212,168,70,0.22)] bg-[linear-gradient(135deg,rgba(212,168,70,0.10),rgba(143,44,255,0.10))] px-5 py-4">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#f2c45e]">Optional upsell</p>
-                  <h2 className="mt-2 text-xl leading-none tracking-[-0.03em] text-white">{upsell.title}</h2>
-                  <p className="mt-2 text-sm leading-7 text-[rgba(236,229,255,0.78)]">{upsell.subtitle}</p>
-                </div>
-                <div className="space-y-2 text-right">
-                  {upsell.savingsLabel ? <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#f2c45e]">{upsell.savingsLabel}</p> : null}
-                  <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white">{upsell.price}</span>
-                  {upsell.originalPrice !== upsell.price ? <p className="text-sm text-[rgba(236,229,255,0.62)] line-through">{upsell.originalPrice}</p> : null}
-                </div>
-              </div>
-              <Link href={upsell.href} className="mt-4 inline-flex rounded-full border border-white/14 bg-white px-5 py-3 text-sm font-semibold text-[var(--accent)] transition hover:bg-[rgba(255,255,255,0.92)]">
-                {upsell.label}
-              </Link>
-            </div>
-          ) : null}
-
           <div className="mt-5">
-            <CheckoutForm offerId={offer.id} initialUpsellFromOfferId={query.upsellFrom ?? ""} />
+            <CheckoutForm offerId={offer.id} initialUpsellFromOfferId={query.upsellFrom ?? ""} initialQuote={initialQuote}>
+              {upsell ? (
+                <div className="rounded-[24px] border border-[rgba(212,168,70,0.22)] bg-[linear-gradient(135deg,rgba(212,168,70,0.10),rgba(143,44,255,0.10))] px-5 py-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#f2c45e]">Optional upsell</p>
+                      <h2 className="mt-2 text-xl leading-none tracking-[-0.03em] text-white">{upsell.title}</h2>
+                      <p className="mt-2 text-sm leading-7 text-[rgba(236,229,255,0.78)]">{upsell.subtitle}</p>
+                    </div>
+                    <div className="space-y-2 text-right">
+                      {upsell.savingsLabel ? <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#f2c45e]">{upsell.savingsLabel}</p> : null}
+                      <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white">{upsell.price}</span>
+                      {upsell.originalPrice !== upsell.price ? <p className="text-sm text-[rgba(236,229,255,0.62)] line-through">{upsell.originalPrice}</p> : null}
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between gap-4">
+                    <p className="text-sm text-[rgba(236,229,255,0.72)]">Add this only if you want the discounted follow-up offer before paying.</p>
+                    <Link href={upsell.href} className="inline-flex rounded-full border border-white/14 bg-white px-5 py-3 text-sm font-semibold text-[var(--accent)] transition hover:bg-[rgba(255,255,255,0.92)]">
+                      {upsell.label}
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
+            </CheckoutForm>
           </div>
         </section>
       </div>

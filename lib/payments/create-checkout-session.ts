@@ -6,6 +6,7 @@ import { resolveAppliedUpsellDiscount } from "@/lib/offers/upsell-config";
 import { buildCheckoutPricing } from "@/lib/payments/pricing";
 import { getOfferById } from "@/lib/offers/get-offer-by-id";
 import { getActiveGateway } from "@/lib/payments/active-gateway";
+import { evaluateGatewayPolicy } from "@/lib/payments/policy";
 
 export async function createCheckoutSession(input: {
   offerId: string;
@@ -43,6 +44,12 @@ export async function createCheckoutSession(input: {
   });
 
   const connector = getPaymentConnector(gateway.provider);
+  const gatewayPolicy = evaluateGatewayPolicy(connector.capabilities);
+
+  if (!gatewayPolicy.allowed) {
+    throw new Error(gatewayPolicy.detail);
+  }
+
   const session = await connector.createCheckoutSession({
     offerId: input.offerId,
     orderId: order.id,

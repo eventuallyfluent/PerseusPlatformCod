@@ -236,6 +236,31 @@ export type GatewayCapabilities = {
   supportsRefunds: boolean;
   supportsPaymentPlans: boolean;
   supportsHostedCheckout: boolean;
+  checkoutModel: GatewayCheckoutModel;
+  taxModel: GatewayTaxModel;
+  settlementBehavior: GatewaySettlementBehavior;
+  supportsTaxCalculation: boolean;
+  supportsHostedTaxCollection: boolean;
+  taxRequiresExternalConfiguration: boolean;
+  actsAsMerchantOfRecord: boolean;
+  requiresBillingAddress: boolean;
+  requiresShippingAddress: boolean;
+  requiresBusinessIdentity: boolean;
+  mayRequireManualReview: boolean;
+  suitableForHighRisk: boolean;
+};
+
+export type GatewayCheckoutModel = "hosted_redirect" | "embedded_hosted_form" | "direct_api";
+
+export type GatewayTaxModel = "merchant_of_record" | "gateway_tax_engine" | "external_tax_service" | "unsupported";
+
+export type GatewaySettlementBehavior = "instant" | "asynchronous" | "manual_review_possible";
+
+export type GatewayPolicyEvaluation = {
+  allowed: boolean;
+  tone: "success" | "warning" | "danger";
+  heading: string;
+  detail: string;
 };
 
 export interface PaymentGatewayConnector {

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { listPaymentConnectors } from "@/lib/payments/adapter-registry";
+import { evaluateGatewayPolicy, summarizeGatewayCapabilities } from "@/lib/payments/policy";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export default async function GatewaysPage() {
       credentialsCount: gateway?.credentials.length ?? 0,
       webhookEventsCount: gateway?.webhookEvents.length ?? 0,
       capabilities: connector.capabilities,
+      policy: evaluateGatewayPolicy(connector.capabilities),
     };
   });
 
@@ -34,16 +36,11 @@ export default async function GatewaysPage() {
             <p className="text-sm text-stone-600">Status: {gateway.isActive ? "Active" : "Inactive"}</p>
             <p className="text-sm text-stone-600">Credentials: {gateway.credentialsCount} saved</p>
             <p className="text-sm text-stone-600">Webhook events: {gateway.webhookEventsCount}</p>
-            <p className="text-sm text-stone-600">
-              Capabilities:{" "}
-              {[
-                gateway.capabilities.supportsHostedCheckout ? "Hosted checkout" : null,
-                gateway.capabilities.supportsSubscriptions ? "Subscriptions" : null,
-                gateway.capabilities.supportsRefunds ? "Refunds" : null,
-                gateway.capabilities.supportsPaymentPlans ? "Payment plans" : null,
-              ]
-                .filter(Boolean)
-                .join(", ")}
+            <p className="text-sm text-stone-600">Capabilities: {summarizeGatewayCapabilities(gateway.capabilities)}</p>
+            <p className="text-sm text-stone-600">Checkout model: {gateway.capabilities.checkoutModel.replaceAll("_", " ")}</p>
+            <p className="text-sm text-stone-600">Tax model: {gateway.capabilities.taxModel.replaceAll("_", " ")}</p>
+            <p className={`rounded-2xl px-4 py-3 text-sm ${gateway.policy.tone === "success" ? "bg-emerald-50 text-emerald-700" : gateway.policy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
+              <span className="font-medium">{gateway.policy.heading}.</span> {gateway.policy.detail}
             </p>
             {gateway.id ? (
               <Link href={`/admin/gateways/${gateway.id}`} className="text-sm font-medium text-stone-950 underline">

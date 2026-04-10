@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { saveGatewayCredentialsAction, testGatewayConnectionAction } from "@/app/(admin)/admin/actions";
 import { getPaymentConnector } from "@/lib/payments/adapter-registry";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
+import { evaluateGatewayPolicy, summarizeGatewayCapabilities } from "@/lib/payments/policy";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ export default async function GatewayDetailPage({
   }
 
   const connector = getPaymentConnector(gateway.provider);
+  const policy = evaluateGatewayPolicy(connector.capabilities);
   const credentials = getGatewayCredentialMap(gateway.credentials);
   const connectionMessage =
     query.connection === "ok"
@@ -80,11 +82,22 @@ export default async function GatewayDetailPage({
         <p className="rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-600">
           {connector.getWebhookInstructions()}
         </p>
+        <p className={`rounded-2xl px-4 py-3 text-sm ${policy.tone === "success" ? "bg-emerald-50 text-emerald-700" : policy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
+          <span className="font-medium">{policy.heading}.</span> {policy.detail}
+        </p>
         <div className="grid gap-2 text-sm text-stone-600">
-          <div>Hosted checkout: {connector.capabilities.supportsHostedCheckout ? "Yes" : "No"}</div>
-          <div>Subscriptions: {connector.capabilities.supportsSubscriptions ? "Yes" : "No"}</div>
-          <div>Refunds: {connector.capabilities.supportsRefunds ? "Yes" : "No"}</div>
-          <div>Payment plans: {connector.capabilities.supportsPaymentPlans ? "Yes" : "No"}</div>
+          <div>Capabilities: {summarizeGatewayCapabilities(connector.capabilities)}</div>
+          <div>Checkout model: {connector.capabilities.checkoutModel.replaceAll("_", " ")}</div>
+          <div>Tax model: {connector.capabilities.taxModel.replaceAll("_", " ")}</div>
+          <div>Merchant of Record: {connector.capabilities.actsAsMerchantOfRecord ? "Yes" : "No"}</div>
+          <div>Tax calculation support: {connector.capabilities.supportsTaxCalculation ? "Yes" : "No"}</div>
+          <div>Hosted tax collection: {connector.capabilities.supportsHostedTaxCollection ? "Yes" : "No"}</div>
+          <div>External tax setup required: {connector.capabilities.taxRequiresExternalConfiguration ? "Yes" : "No"}</div>
+          <div>Settlement behavior: {connector.capabilities.settlementBehavior.replaceAll("_", " ")}</div>
+          <div>Manual review possible: {connector.capabilities.mayRequireManualReview ? "Yes" : "No"}</div>
+          <div>Billing address required: {connector.capabilities.requiresBillingAddress ? "Yes" : "No"}</div>
+          <div>Business identity required: {connector.capabilities.requiresBusinessIdentity ? "Yes" : "No"}</div>
+          <div>High-risk ready: {connector.capabilities.suitableForHighRisk ? "Yes" : "No"}</div>
           <div>Webhook events received: {gateway.webhookEvents.length}</div>
         </div>
       </Card>

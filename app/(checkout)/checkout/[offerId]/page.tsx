@@ -4,6 +4,9 @@ import { CheckoutForm } from "@/components/checkout/checkout-form";
 import { currencyFormatter } from "@/lib/utils";
 import { getOfferById } from "@/lib/offers/get-offer-by-id";
 import { buildConfiguredUpsell, resolveAppliedUpsellDiscount } from "@/lib/offers/upsell-config";
+import { getActiveGateway } from "@/lib/payments/active-gateway";
+import { getPaymentConnector } from "@/lib/payments/adapter-registry";
+import { evaluateGatewayPolicy } from "@/lib/payments/policy";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +26,9 @@ export default async function CheckoutPage({
   }
 
   const productTitle = offer.course?.title ?? offer.bundle?.title ?? offer.name;
+  const activeGateway = await getActiveGateway();
+  const activeConnector = activeGateway ? getPaymentConnector(activeGateway.provider) : null;
+  const gatewayPolicy = activeConnector ? evaluateGatewayPolicy(activeConnector.capabilities) : null;
   const bundleCourseCount = offer.bundle?.courses.length ?? 0;
   const productMeta = offer.course
     ? { label: "Instructor", value: offer.course.instructor.name }
@@ -64,6 +70,13 @@ export default async function CheckoutPage({
             <p className="text-[11px] uppercase tracking-[0.3em] text-[rgba(228,216,255,0.58)]">Checkout</p>
             <p className="text-sm leading-7 text-[rgba(236,229,255,0.76)]">Review the offer, check any discount, then continue to payment.</p>
           </div>
+          {gatewayPolicy ? (
+            <p className={`mt-5 rounded-2xl px-4 py-3 text-sm ${gatewayPolicy.tone === "success" ? "bg-emerald-50 text-emerald-700" : gatewayPolicy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
+              <span className="font-medium">{gatewayPolicy.heading}.</span> {gatewayPolicy.detail}
+            </p>
+          ) : (
+            <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">No active payment gateway is configured.</p>
+          )}
           {query.status === "cancelled" ? (
             <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Checkout was cancelled. You can try again at any time.</p>
           ) : null}
@@ -97,6 +110,7 @@ export default async function CheckoutPage({
           </div>
 
           <div className="mt-5">
+            {gatewayPolicy?.allowed ? (
             <CheckoutForm offerId={offer.id} initialUpsellFromOfferId={query.upsellFrom ?? ""} initialQuote={initialQuote}>
               {upsell ? (
                 <div className="rounded-[24px] border border-[rgba(212,168,70,0.22)] bg-[linear-gradient(135deg,rgba(212,168,70,0.10),rgba(143,44,255,0.10))] px-5 py-4">
@@ -121,6 +135,11 @@ export default async function CheckoutPage({
                 </div>
               ) : null}
             </CheckoutForm>
+            ) : (
+              <div className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-5 py-5 text-sm leading-7 text-[rgba(236,229,255,0.78)]">
+                Checkout is unavailable until a tax-capable gateway is active for the current commerce policy.
+              </div>
+            )}
           </div>
         </section>
       </div>

@@ -30,6 +30,18 @@ export const paypalConnector: PaymentGatewayConnector = {
     supportsRefunds: true,
     supportsPaymentPlans: false,
     supportsHostedCheckout: true,
+    checkoutModel: "hosted_redirect",
+    taxModel: "unsupported",
+    settlementBehavior: "asynchronous",
+    supportsTaxCalculation: false,
+    supportsHostedTaxCollection: false,
+    taxRequiresExternalConfiguration: true,
+    actsAsMerchantOfRecord: false,
+    requiresBillingAddress: true,
+    requiresShippingAddress: false,
+    requiresBusinessIdentity: false,
+    mayRequireManualReview: false,
+    suitableForHighRisk: false,
   },
   async createCheckoutSession() {
     throw new Error("PayPal connector is registered but requires live API credentials for checkout");

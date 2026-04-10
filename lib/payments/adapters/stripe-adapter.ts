@@ -45,6 +45,18 @@ export const stripeConnector: PaymentGatewayConnector = {
     supportsRefunds: true,
     supportsPaymentPlans: false,
     supportsHostedCheckout: true,
+    checkoutModel: "hosted_redirect",
+    taxModel: "gateway_tax_engine",
+    settlementBehavior: "asynchronous",
+    supportsTaxCalculation: true,
+    supportsHostedTaxCollection: true,
+    taxRequiresExternalConfiguration: true,
+    actsAsMerchantOfRecord: false,
+    requiresBillingAddress: true,
+    requiresShippingAddress: false,
+    requiresBusinessIdentity: false,
+    mayRequireManualReview: false,
+    suitableForHighRisk: false,
   },
   async createCheckoutSession(input) {
     const stripe = await getStripeClient();

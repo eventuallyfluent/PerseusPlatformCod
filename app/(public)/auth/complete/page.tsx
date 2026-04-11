@@ -1,21 +1,25 @@
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/guards";
-import { normalizeReturnPath } from "@/lib/auth/return-path";
+import { normalizeAdminReturnPath, normalizeLearnerReturnPath } from "@/lib/auth/return-path";
 
 export const dynamic = "force-dynamic";
 
-export default async function AuthCompletePage({ searchParams }: { searchParams: Promise<{ returnTo?: string }> }) {
+export default async function AuthCompletePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ returnTo?: string; audience?: string }>;
+}) {
   const session = await requireSession();
   const query = await searchParams;
-  const returnTo = normalizeReturnPath(query.returnTo, session.user.isAdmin ? "/admin" : "/dashboard");
+  const audience = query.audience === "admin" ? "admin" : "learner";
 
-  if (!session.user.isAdmin && query.returnTo) {
-    redirect(returnTo);
+  if (audience === "admin") {
+    if (!session.user.isAdmin) {
+      redirect("/login?error=admin-only");
+    }
+
+    redirect(normalizeAdminReturnPath(query.returnTo, "/admin"));
   }
 
-  if (session.user.isAdmin && query.returnTo && returnTo !== "/dashboard") {
-    redirect(returnTo);
-  }
-
-  redirect(session.user.isAdmin ? "/admin" : "/dashboard");
+  redirect(normalizeLearnerReturnPath(query.returnTo, "/dashboard"));
 }

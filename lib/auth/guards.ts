@@ -12,7 +12,11 @@ export async function requireSession() {
 }
 
 export async function requireAdmin() {
-  const session = await requireSession();
+  const session = await auth();
+
+  if (!session?.user?.email) {
+    redirect("/admin/login");
+  }
 
   if (!session.user.isAdmin) {
     redirect("/dashboard");

@@ -55,7 +55,7 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
     productType: "bundle",
     hero: {
       eyebrow: "Perseus bundle",
-      metadataLine: config.heroMetadataLine ?? `${bundle.courses.length} included courses • one checkout path`,
+      metadataLine: config.heroMetadataLine ?? `${bundle.courses.length} included courses`,
       title: bundle.title,
       subtitle: bundle.subtitle,
       imageUrl: bundle.heroImageUrl,
@@ -89,7 +89,7 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
     includedCoursesSection: {
       eyebrow: "Included courses",
       title: `All ${bundle.courses.length} courses included in this bundle.`,
-      body: "Buy once, then enter each included course through the normal learner dashboard and lesson flow. Every individual course below remains visible before purchase.",
+      body: "Get the full course set in one purchase. Every included course is listed below so you can see exactly what is inside the bundle.",
       courses: bundle.courses.map((item) => ({
         title: item.course.title,
         subtitle: item.course.subtitle,
@@ -118,18 +118,18 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
     },
     pricingSection: {
       eyebrow: "Pricing",
-      badge: config.pricingBadge || "Multiple enrollments",
-      headline: config.pricingHeadline || "One checkout. Multiple course enrollments.",
+      badge: config.pricingBadge || "Complete bundle access",
+      headline: config.pricingHeadline || "Get the full training bundle in one purchase.",
       body:
         config.pricingBody ||
-        "Bundle purchases keep commerce simple while preserving the same learner model underneath. Every included course unlocks as a normal enrollment.",
+        "Unlock every included course together and move through the material from your learner dashboard at your own pace.",
       offers,
     },
     finalCta: {
       label: config.finalCtaLabel || (offers.length > 0 ? "Unlock the full bundle" : "Bundle coming soon"),
       body:
         config.finalCtaBody ||
-        "A bundle should feel as clear as a single product: one decisive CTA, one purchase flow, and a clean transition into study.",
+        "Start with one purchase, then move straight into the full bundle from your learner dashboard.",
     },
     offers,
   };

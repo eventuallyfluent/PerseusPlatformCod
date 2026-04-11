@@ -30,15 +30,10 @@ export async function SiteHeader() {
             FAQ
           </HardLink>
           <HardLink href="/dashboard" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
-            Dashboard
+            My courses
           </HardLink>
           {session?.user ? (
             <>
-              {session.user.isAdmin ? (
-                <HardLink href="/admin" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
-                  Admin
-                </HardLink>
-              ) : null}
               <span className="hidden rounded-full border border-[var(--accent-soft)] bg-[rgba(255,255,255,0.05)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white lg:inline-flex">
                 {session.user.name ?? session.user.email}
               </span>

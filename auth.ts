@@ -3,10 +3,11 @@ import Resend from "next-auth/providers/resend";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db/prisma";
+import { isPreviewLoginEnabled } from "@/lib/auth/preview-login";
 import { isAdminEmail } from "@/lib/utils";
 
 const resendApiKey = process.env.AUTH_RESEND_KEY || process.env.RESEND_API_KEY;
-const previewLoginEnabled = !resendApiKey || process.env.AUTH_PREVIEW_LOGIN === "true";
+const previewLoginEnabled = isPreviewLoginEnabled();
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),

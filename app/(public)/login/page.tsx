@@ -1,12 +1,13 @@
 import { LoginForm } from "@/components/public/login-form";
-import { normalizeReturnPath } from "@/lib/auth/return-path";
+import { normalizeLearnerReturnPath } from "@/lib/auth/return-path";
+import { isPreviewLoginEnabled } from "@/lib/auth/preview-login";
 
 const emailEnabled = Boolean(process.env.AUTH_RESEND_KEY || process.env.RESEND_API_KEY);
-const previewEnabled = !emailEnabled || process.env.NEXT_PUBLIC_AUTH_PREVIEW_LOGIN === "true";
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ returnTo?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ returnTo?: string; error?: string }> }) {
   const query = await searchParams;
-  const redirectTo = `/auth/complete?returnTo=${encodeURIComponent(normalizeReturnPath(query.returnTo, "/dashboard"))}`;
+  const redirectTo = `/auth/complete?audience=learner&returnTo=${encodeURIComponent(normalizeLearnerReturnPath(query.returnTo, "/dashboard"))}`;
+  const errorMessage = query.error === "admin-only" ? "That sign-in is reserved for admin accounts. Use student login for course access." : null;
 
-  return <LoginForm previewEnabled={previewEnabled} emailEnabled={emailEnabled} redirectTo={redirectTo} />;
+  return <LoginForm previewEnabled={isPreviewLoginEnabled()} emailEnabled={emailEnabled} redirectTo={redirectTo} errorMessage={errorMessage} />;
 }

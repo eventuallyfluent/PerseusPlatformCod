@@ -1,6 +1,6 @@
 # Perseus Platform
 
-Perseus Platform is a single-tenant course and commerce system built to replace a Payhip-based setup with platform-owned checkout, generated sales pages, preserved migration URLs, and a calmer learner experience.
+Perseus Platform is a single-tenant course and commerce system built to replace a Payhip-based setup with platform-owned checkout, generated sales pages, preserved migration URLs, a separated admin backend, and a calmer learner experience.
 
 ## Stack
 
@@ -17,9 +17,9 @@ Perseus Platform is a single-tenant course and commerce system built to replace 
 - Generated course sales pages from structured course data
 - Course and bundle product flows
 - URL preservation and redirect handling for migrated paths
-- Gateway-connector payment architecture with Stripe, PayPal, and Creem connectors
+- Gateway-agnostic payment architecture with native connectors, generic API profiles, and bank transfer
 - CSV migration center with dry run, execution logs, and idempotent imports
-- Magic-link auth
+- Separate student and admin auth entry points
 - Dashboard and learner player
 - Admin CRUD for courses, bundles, instructors, offers, imports, gateways, orders, and students
 
@@ -62,6 +62,7 @@ Required:
 - `AUTH_SECRET`
 - `AUTH_EMAIL_FROM`
 - `ADMIN_EMAIL_ALLOWLIST`
+- `ADMIN_LOGIN_PASSWORD`
 
 Used when configured:
 
@@ -69,6 +70,17 @@ Used when configured:
 - `RESEND_API_KEY`
 - `CREDENTIAL_ENCRYPTION_KEY`
 - provider secrets stored through admin or env fallback where applicable
+
+## Auth entry points
+
+- Student/customer login: `/login`
+- Admin/backend login: `/admin/login`
+
+Current standard:
+
+- students use learner-safe login and land on `/dashboard`
+- admins use allowlisted email + password and land on `/admin`
+- admin magic-link can return later once email delivery is reliable again
 
 ## Deployment
 

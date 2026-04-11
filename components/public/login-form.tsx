@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { AuthEntryShell } from "@/components/public/auth-entry-shell";
@@ -18,8 +19,11 @@ export function LoginForm({
   mode?: "student" | "admin";
   errorMessage?: string | null;
 }) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [sent, setSent] = useState(false);
+  const [adminError, setAdminError] = useState<string | null>(null);
   const isAdmin = mode === "admin";
 
   return (
@@ -28,15 +32,53 @@ export function LoginForm({
       title={isAdmin ? "Open the admin workspace." : "Return to your study space."}
       description={
         isAdmin
-          ? "Use an approved admin email and we will send you a sign-in link for the backend."
+          ? "Use your approved admin email and password to enter the backend."
           : "Use the email connected to your course access and we will send you a sign-in link."
       }
       successMessage={sent ? "Check your email for the sign-in link." : null}
     >
-      {errorMessage ? (
-        <p className="rounded-[20px] bg-[rgba(183,28,28,0.08)] px-4 py-3 text-sm font-medium text-[#b42318]">{errorMessage}</p>
+      {errorMessage || adminError ? (
+        <p className="rounded-[20px] bg-[rgba(183,28,28,0.08)] px-4 py-3 text-sm font-medium text-[#b42318]">{errorMessage ?? adminError}</p>
       ) : null}
-      {emailEnabled ? (
+      {isAdmin ? (
+        <>
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">Admin sign in</p>
+            <p className="text-sm leading-7 text-[var(--foreground-soft)]">Use your approved admin email and the current backend password.</p>
+          </div>
+          <label>
+            Email address
+            <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" placeholder="you@example.com" />
+          </label>
+          <label>
+            Password
+            <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" placeholder="Password" />
+          </label>
+          <Button
+            type="button"
+            className="w-full justify-center"
+            onClick={async () => {
+              setAdminError(null);
+              const result = await signIn("admin-credentials", {
+                email,
+                password,
+                redirect: false,
+                redirectTo,
+              });
+
+              if (result?.error) {
+                setAdminError("Invalid admin email or password.");
+                return;
+              }
+
+              router.push(result?.url ?? redirectTo);
+              router.refresh();
+            }}
+          >
+            Sign in to admin
+          </Button>
+        </>
+      ) : emailEnabled ? (
         <>
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">Sign in</p>

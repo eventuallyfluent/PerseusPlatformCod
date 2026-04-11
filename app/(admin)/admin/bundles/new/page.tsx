@@ -82,7 +82,7 @@ export default async function NewBundlePage({
 
         <ProductFormSection
           title="Sales copy"
-          description="These structured fields feed the bundle landing page and explain why one purchase path is useful."
+          description="These structured fields feed the bundle landing page and explain what is included in the bundle."
         >
           <label className="md:col-span-2">
             Short description

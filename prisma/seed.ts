@@ -127,19 +127,19 @@ async function main() {
     create: {
       slug: "ritual-library-bundle",
       title: "Ritual Library Bundle",
-      subtitle: "A single purchase path for the core symbolic study stack.",
+      subtitle: "The core symbolic study stack in one bundle.",
       shortDescription: "Unlock the full starter library in one bundle and move through each course at your own pace.",
       longDescription:
-        "This bundle combines the foundational symbolic systems material into one clean path, keeping checkout simple while unlocking each included course inside the learner dashboard.",
+        "This bundle combines the foundational symbolic systems material into one clear purchase with access to every included course.",
       learningOutcomes: ["Build a core symbolic study library", "Move through multiple courses with one purchase"],
       whoItsFor: ["Students who want a guided starter library", "Readers who prefer one consolidated purchase"],
-      includes: ["Included course access", "Bundle pricing", "Single checkout flow"],
+      includes: ["Included course access", "Bundle savings", "One complete training bundle"],
       heroImageUrl: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=1200&q=80",
       salesVideoUrl: "https://streamable.com/e/example",
       status: CourseStatus.PUBLISHED,
       publicPath: "/bundle/ritual-library-bundle",
       seoTitle: "Ritual Library Bundle",
-      seoDescription: "A bundle that unlocks multiple Perseus courses through one purchase path.",
+      seoDescription: "A bundle that gives you the full Perseus starter library in one purchase.",
       courses: {
         create: [
           {

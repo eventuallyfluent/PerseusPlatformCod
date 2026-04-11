@@ -8,10 +8,39 @@ import { isAdminEmail } from "@/lib/utils";
 
 const resendApiKey = process.env.AUTH_RESEND_KEY || process.env.RESEND_API_KEY;
 const previewLoginEnabled = isPreviewLoginEnabled();
+const adminLoginPassword = process.env.ADMIN_LOGIN_PASSWORD ?? process.env.AUTH_ADMIN_PASSWORD;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
+    Credentials({
+      id: "admin-credentials",
+      name: "Admin Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const email = String(credentials?.email ?? "").trim().toLowerCase();
+        const password = String(credentials?.password ?? "");
+
+        if (!email || !password || !adminLoginPassword || !isAdminEmail(email) || password !== adminLoginPassword) {
+          return null;
+        }
+
+        return prisma.user.upsert({
+          where: { email },
+          update: {
+            emailVerified: new Date(),
+          },
+          create: {
+            email,
+            name: "Perseus Admin",
+            emailVerified: new Date(),
+          },
+        });
+      },
+    }),
     ...(previewLoginEnabled
       ? [
           Credentials({

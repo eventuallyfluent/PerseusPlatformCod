@@ -35,6 +35,7 @@ AUTH_EMAIL_FROM="Perseus Platform <no-reply@your-domain.com>"
 AUTH_RESEND_KEY="..."
 RESEND_API_KEY="..."
 ADMIN_EMAIL_ALLOWLIST="you@example.com"
+ADMIN_LOGIN_PASSWORD="strong-admin-password"
 ```
 
 Notes:
@@ -42,6 +43,7 @@ Notes:
 - `CREDENTIAL_ENCRYPTION_KEY` should be set in production. Do not leave it blank.
 - `AUTH_RESEND_KEY` and `RESEND_API_KEY` can be the same underlying Resend API key.
 - `NEXT_PUBLIC_APP_URL` must match the deployed Vercel URL or custom domain.
+- `ADMIN_LOGIN_PASSWORD` is the current backend password used at `/admin/login`.
 
 ## 3. Apply Prisma migrations
 
@@ -92,6 +94,7 @@ Set these in Vercel for `Preview` and `Production` as appropriate:
 - `AUTH_RESEND_KEY`
 - `RESEND_API_KEY`
 - `ADMIN_EMAIL_ALLOWLIST`
+- `ADMIN_LOGIN_PASSWORD`
 
 Optional provider env fallbacks if you choose to use them:
 
@@ -104,14 +107,14 @@ Verify:
 
 - `/`
 - `/login`
-- `/register`
+- `/admin/login`
 - one migrated course path such as `/b/OWFpo`
 - one bundle page
 - `/admin/products`
 - `/api/health`
 - `/api/imports/templates/courses`
 
-Then log into admin and configure:
+Then log into admin at `/admin/login` and configure:
 
 - gateway credentials
 - webhook settings
@@ -119,13 +122,13 @@ Then log into admin and configure:
 
 ## 8. Payment setup after deploy
 
-The platform supports multiple connectors, but real payment acceptance still depends on provider credentials and webhook setup.
+The platform supports native connectors, generic API gateway profiles, and bank transfer/manual confirmation. Real payment acceptance still depends on provider credentials, gateway setup quality, and webhook setup where automation is available.
 
 After deploy:
 
 1. Open `/admin/gateways`
-2. Save live or test credentials
-3. Use the test-connection action
+2. Save live or test credentials, or create a generic API / bank-transfer profile
+3. Use the test-connection action where the gateway supports it
 4. Configure provider webhooks to point to:
 
 ```text
@@ -137,6 +140,12 @@ Examples:
 - `stripe`
 - `paypal`
 - `creem`
+
+Notes:
+
+- native connectors have the strongest built-in automation
+- generic API gateways may rely on manual configuration and external webhook setup
+- bank transfer relies on manual payment confirmation in admin orders
 
 ## 9. Operational cautions
 
@@ -154,6 +163,6 @@ Examples:
 4. `npm run prisma:deploy`
 5. `npm run prisma:seed`
 6. Vercel deploy
-7. Admin login
+7. Admin login at `/admin/login`
 8. Gateway credential setup
 9. Real checkout/webhook verification

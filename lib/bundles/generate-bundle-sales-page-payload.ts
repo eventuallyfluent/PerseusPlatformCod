@@ -88,11 +88,12 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
     },
     includedCoursesSection: {
       eyebrow: "Included courses",
-      title: "Each course stays distinct. The purchase path becomes simpler.",
-      body: "Buy once, then enter each included course through the normal learner dashboard and lesson flow.",
+      title: `All ${bundle.courses.length} courses included in this bundle.`,
+      body: "Buy once, then enter each included course through the normal learner dashboard and lesson flow. Every individual course below remains visible before purchase.",
       courses: bundle.courses.map((item) => ({
         title: item.course.title,
         subtitle: item.course.subtitle,
+        imageUrl: item.course.heroImageUrl,
         instructorName: item.course.instructor.name,
         courseUrl: item.course.publicPath ?? item.course.legacyUrl ?? `/course/${item.course.slug}`,
       })),

@@ -3,6 +3,7 @@ import { ImageField } from "@/components/admin/image-field";
 import { Card } from "@/components/ui/card";
 import { ProductFormSection, ProductFormShell } from "@/components/admin/product-form-shell";
 import { saveBundleAction } from "@/app/(admin)/admin/actions";
+import { prisma } from "@/lib/db/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -13,12 +14,20 @@ export default async function NewBundlePage({
 }) {
   const uploadEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const allCourses = await prisma.course.findMany({
+    orderBy: { title: "asc" },
+    select: {
+      id: true,
+      title: true,
+      subtitle: true,
+    },
+  });
   return (
     <AdminShell title="New bundle" description="A bundle sells multiple existing courses through one public page and checkout flow.">
       <ProductFormShell
         eyebrow="Bundle setup"
         title="Create one sales container for multiple courses."
-        description="Bundles keep the course model intact while simplifying the buy path. Create the bundle shell first, then add included courses, pricing, FAQ, and testimonials from the bundle detail screen."
+        description="Create the bundle shell, choose the included courses, and set the live price in one first pass so the public page is meaningful immediately."
         submitLabel="Create bundle"
         action={saveBundleAction}
         aside={
@@ -27,7 +36,7 @@ export default async function NewBundlePage({
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">What happens next</p>
               <ul className="space-y-2 text-sm leading-7 text-stone-600">
                 <li>The bundle gets its own public path and generated sales page payload.</li>
-                <li>You choose the included courses from the bundle detail screen after creation.</li>
+                <li>You can choose the included courses now and refine them later on the bundle detail screen.</li>
                 <li>Purchases unlock each linked course as a normal enrollment.</li>
               </ul>
             </Card>
@@ -96,6 +105,42 @@ export default async function NewBundlePage({
             <textarea name="includes" rows={4} placeholder={"Included course access\nBundle pricing"} />
           </label>
           <div className="hidden md:block" />
+        </ProductFormSection>
+
+        <ProductFormSection
+          title="Pricing"
+          description="Set the real live bundle price now so the generated sales page and checkout are usable from first save."
+        >
+          <label>
+            Price
+            <input name="price" type="number" min="0" step="0.01" defaultValue="0" />
+          </label>
+          <label>
+            Currency
+            <input name="currency" defaultValue="USD" />
+          </label>
+          <label>
+            Compare-at price
+            <input name="compareAtPrice" type="number" min="0" step="0.01" />
+          </label>
+          <div className="hidden md:block" />
+        </ProductFormSection>
+
+        <ProductFormSection
+          title="Included courses"
+          description="Choose the courses this bundle unlocks. These are written on first save so the public bundle page can list every included course immediately."
+        >
+          <div className="md:col-span-2 grid gap-3">
+            {allCourses.map((course) => (
+              <label key={course.id} className="flex items-start gap-3 rounded-[20px] border border-stone-200 bg-white px-4 py-4 text-stone-700">
+                <input className="mt-1 w-auto" type="checkbox" name="courseIds" value={course.id} />
+                <span>
+                  <span className="block font-semibold text-stone-950">{course.title}</span>
+                  {course.subtitle ? <span className="block text-sm text-stone-700">{course.subtitle}</span> : null}
+                </span>
+              </label>
+            ))}
+          </div>
         </ProductFormSection>
 
         <ProductFormSection

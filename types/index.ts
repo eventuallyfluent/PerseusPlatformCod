@@ -209,6 +209,7 @@ export type BundleSalesPagePayload = SalesPageBasePayload & {
     courses: {
       title: string;
       subtitle?: string | null;
+      imageUrl?: string | null;
       instructorName?: string | null;
       courseUrl: string;
     }[];

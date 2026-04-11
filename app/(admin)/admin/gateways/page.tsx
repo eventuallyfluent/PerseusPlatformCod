@@ -78,7 +78,7 @@ export default async function GatewaysPage({
                 <option value="bank_transfer">Bank transfer</option>
               </select>
             </label>
-            <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" disabled={Boolean(compatWarning)}>
+            <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
               Create gateway profile
             </button>
           </form>

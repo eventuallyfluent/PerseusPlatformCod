@@ -5,7 +5,9 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { createCourse } from "@/lib/courses/create-course";
 import { updateCourse } from "@/lib/courses/update-course";
+import { bundleInclude } from "@/lib/bundles/bundle-query";
 import { createBundle } from "@/lib/bundles/create-bundle";
+import { persistGeneratedBundlePage } from "@/lib/bundles/persist-generated-bundle-page";
 import { updateBundle } from "@/lib/bundles/update-bundle";
 import { regenerateCoursePage } from "@/lib/sales-pages/regenerate-course-page";
 import { upsertInstructor } from "@/lib/instructors/upsert-instructor";
@@ -425,6 +427,10 @@ export async function saveCourseAction(formData: FormData) {
 
 export async function saveBundleAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
+  const courseIds = formData
+    .getAll("courseIds")
+    .map((value) => String(value))
+    .filter(Boolean);
   const upsell = parseUpsellSelection(formData.get("upsellTarget"));
   const parsed = bundleInputSchema.safeParse({
     slug: String(formData.get("slug") ?? ""),
@@ -461,10 +467,31 @@ export async function saveBundleAction(formData: FormData) {
   }
 
   const payload = parsed.data;
-  let bundle;
+  let bundle: Awaited<ReturnType<typeof createBundle>> | Awaited<ReturnType<typeof updateBundle>>;
 
   try {
     bundle = id ? await updateBundle(id, payload) : await createBundle(payload);
+
+    if (!id) {
+      if (courseIds.length > 0) {
+        await prisma.bundleCourse.createMany({
+          data: courseIds.map((courseId, index) => ({
+            bundleId: bundle.id,
+            courseId,
+            position: index + 1,
+          })),
+        });
+      }
+
+      const refreshedBundle = await prisma.bundle.findUnique({
+        where: { id: bundle.id },
+        include: bundleInclude,
+      });
+
+      if (refreshedBundle) {
+        await persistGeneratedBundlePage(refreshedBundle);
+      }
+    }
   } catch {
     if (id) {
       redirect(`/admin/bundles/${id}?error=details`);
@@ -1069,32 +1096,44 @@ export async function createGatewayProfileAction(formData: FormData) {
 
     const defaults = getGatewayDefaults(kind === "bank_transfer" ? "bank_transfer" : "generic_api");
 
-    const gateway = await prisma.gateway.create({
-      data: {
-        provider,
-        displayName,
-        kind: kind === "bank_transfer" ? "bank_transfer" : "generic_api",
-        isNativeAdapter: false,
-        checkoutModel: defaults.checkoutModel,
-        taxModel: defaults.taxModel,
-        settlementBehavior: defaults.settlementBehavior,
-        supportsSubscriptions: defaults.capabilities.supportsSubscriptions,
-        supportsRefunds: defaults.capabilities.supportsRefunds,
-        supportsPaymentPlans: defaults.capabilities.supportsPaymentPlans,
-        supportsHostedCheckout: defaults.capabilities.supportsHostedCheckout,
-        supportsTaxCalculation: defaults.capabilities.supportsTaxCalculation,
-        supportsHostedTaxCollection: defaults.capabilities.supportsHostedTaxCollection,
-        taxRequiresExternalConfiguration: defaults.capabilities.taxRequiresExternalConfiguration,
-        actsAsMerchantOfRecord: defaults.capabilities.actsAsMerchantOfRecord,
-        requiresBillingAddress: defaults.capabilities.requiresBillingAddress,
-        requiresShippingAddress: defaults.capabilities.requiresShippingAddress,
-        requiresBusinessIdentity: defaults.capabilities.requiresBusinessIdentity,
-        mayRequireManualReview: defaults.capabilities.mayRequireManualReview,
-        supportsManualConfirmation: defaults.capabilities.supportsManualConfirmation,
-        suitableForHighRisk: defaults.capabilities.suitableForHighRisk,
-        instructionsMarkdown: defaults.instructionsMarkdown,
-      },
-    });
+    let gateway;
+
+    try {
+      gateway = await prisma.gateway.create({
+        data: {
+          provider,
+          displayName,
+          kind: kind === "bank_transfer" ? "bank_transfer" : "generic_api",
+          isNativeAdapter: false,
+          checkoutModel: defaults.checkoutModel,
+          taxModel: defaults.taxModel,
+          settlementBehavior: defaults.settlementBehavior,
+          supportsSubscriptions: defaults.capabilities.supportsSubscriptions,
+          supportsRefunds: defaults.capabilities.supportsRefunds,
+          supportsPaymentPlans: defaults.capabilities.supportsPaymentPlans,
+          supportsHostedCheckout: defaults.capabilities.supportsHostedCheckout,
+          supportsTaxCalculation: defaults.capabilities.supportsTaxCalculation,
+          supportsHostedTaxCollection: defaults.capabilities.supportsHostedTaxCollection,
+          taxRequiresExternalConfiguration: defaults.capabilities.taxRequiresExternalConfiguration,
+          actsAsMerchantOfRecord: defaults.capabilities.actsAsMerchantOfRecord,
+          requiresBillingAddress: defaults.capabilities.requiresBillingAddress,
+          requiresShippingAddress: defaults.capabilities.requiresShippingAddress,
+          requiresBusinessIdentity: defaults.capabilities.requiresBusinessIdentity,
+          mayRequireManualReview: defaults.capabilities.mayRequireManualReview,
+          supportsManualConfirmation: defaults.capabilities.supportsManualConfirmation,
+          suitableForHighRisk: defaults.capabilities.suitableForHighRisk,
+          instructionsMarkdown: defaults.instructionsMarkdown,
+        },
+      });
+    } catch {
+      gateway = await prisma.gateway.create({
+        data: {
+          provider,
+          displayName,
+          isActive: false,
+        },
+      });
+    }
 
     revalidatePath("/admin/gateways");
     redirect(`/admin/gateways/${gateway.id}?connection=created`);

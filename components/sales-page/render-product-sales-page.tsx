@@ -143,9 +143,22 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
       return (
         <section key={section} id="included-courses" className="mx-auto max-w-7xl space-y-8 px-6">
           <SectionIntro eyebrow={payload.includedCoursesSection.eyebrow} title={payload.includedCoursesSection.title} body={payload.includedCoursesSection.body} />
+          <div className="flex justify-center">
+            <Badge variant="premium">{payload.includedCoursesSection.courses.length} individual courses</Badge>
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
             {payload.includedCoursesSection.courses.map((course, index) => (
               <div key={course.courseUrl} className="rounded-[28px] border border-[var(--portal-border)] bg-[rgba(19,20,40,0.96)] p-6 text-white shadow-[0_24px_60px_rgba(18,20,41,0.16)]">
+                <div
+                  className="h-48 rounded-[22px] bg-[linear-gradient(135deg,#1b0c34,#2e175f)] bg-cover bg-center"
+                  style={
+                    course.imageUrl
+                      ? {
+                          backgroundImage: `linear-gradient(180deg, rgba(12,9,24,0.16), rgba(12,9,24,0.38)), url(${course.imageUrl})`,
+                        }
+                      : undefined
+                  }
+                />
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#b8add7]">Included course {index + 1}</p>
                 <h3 className="mt-4 text-3xl leading-none tracking-[-0.03em] text-white">{course.title}</h3>
                 {course.subtitle ? <p className="mt-3 text-sm leading-7 text-[#d2c6ee]">{course.subtitle}</p> : null}

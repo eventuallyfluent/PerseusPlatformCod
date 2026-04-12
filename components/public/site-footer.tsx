@@ -11,7 +11,7 @@ export async function SiteFooter() {
   }
 
   const payload = footerSection.payload as HomepageFooterPayload;
-  const platformLinks = payload.platformLinks
+  const browseLinks = payload.platformLinks
     .map((link) =>
       link.label === "Courses" && link.href.startsWith("/course/")
         ? { ...link, href: "/courses" }
@@ -46,7 +46,7 @@ export async function SiteFooter() {
           <div className="space-y-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-lavender)]">{payload.platformHeading}</p>
             <nav className="flex flex-col gap-3 text-lg text-[var(--foreground-soft)]">
-              {platformLinks.map((link) => (
+              {browseLinks.map((link) => (
                 <Link key={`${link.label}-${link.href}`} href={link.href} className="transition hover:text-[var(--portal-text)]">
                   {link.label}
                 </Link>

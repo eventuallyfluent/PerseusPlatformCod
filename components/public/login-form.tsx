@@ -12,12 +12,14 @@ export function LoginForm({
   redirectTo,
   mode = "student",
   errorMessage,
+  adminPasswordConfigured = true,
 }: {
   previewEnabled: boolean;
   emailEnabled: boolean;
   redirectTo: string;
   mode?: "student" | "admin";
   errorMessage?: string | null;
+  adminPasswordConfigured?: boolean;
 }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -44,7 +46,11 @@ export function LoginForm({
         <>
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">Admin sign in</p>
-            <p className="text-sm leading-7 text-[var(--foreground-soft)]">Use your approved admin email and the current backend password.</p>
+            <p className="text-sm leading-7 text-[var(--foreground-soft)]">
+              {adminPasswordConfigured
+                ? "Use your approved admin email and the current backend password."
+                : "Backend sign-in is disabled until ADMIN_LOGIN_PASSWORD is configured."}
+            </p>
           </div>
           <label>
             Email address
@@ -57,6 +63,7 @@ export function LoginForm({
           <Button
             type="button"
             className="w-full justify-center"
+            disabled={!adminPasswordConfigured}
             onClick={async () => {
               setAdminError(null);
               const result = await signIn("admin-credentials", {

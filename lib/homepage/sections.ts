@@ -138,7 +138,7 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
         brandTitle: "Perseus Arcane Academy",
         brandSubtitle: "Structured magical training",
         brandDescription: "Ancient wisdom for the modern initiate. Structured courses in Hermetics, esoteric traditions, and martial arts.",
-        platformHeading: "Platform",
+        platformHeading: "Browse",
         platformLinks: [
           { label: "Courses", href: "/courses" },
           { label: "Instructors", href: "/instructors" },
@@ -153,7 +153,7 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
           { label: "GDPR Data Request", href: "#" },
         ],
         socialLabels: ["X", "IG", "YT", "TT"],
-        bottomLeftText: "© 2026 Perseus Arcane Academy. All rights reserved.",
+        bottomLeftText: "(c) 2026 Perseus Arcane Academy. All rights reserved.",
         bottomRightText: "Structured magical training",
       },
     },

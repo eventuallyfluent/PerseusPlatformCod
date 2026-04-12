@@ -18,7 +18,7 @@ export function CheckoutForm({
   initialUpsellFromOfferId = "",
   initialQuote,
   submitLabel = "Continue to payment",
-  paymentNote = "Discounts are verified before redirect. Payment finishes on the active hosted checkout provider.",
+  paymentNote = "Discounts are confirmed before redirect. Payment finishes through the active checkout provider.",
   children,
 }: {
   offerId: string;
@@ -98,12 +98,12 @@ export function CheckoutForm({
       <div className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] px-5 py-4 text-sm text-[rgba(236,229,255,0.84)]">
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-[rgba(236,229,255,0.62)]">Offer price</span>
+            <span className="text-[rgba(236,229,255,0.62)]">Price</span>
             <span className="font-semibold text-white">{quote.baseLabel}</span>
           </div>
           {quote.upsellDiscountLabel ? (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-[rgba(236,229,255,0.62)]">Upsell discount</span>
+              <span className="text-[rgba(236,229,255,0.62)]">Bundle discount</span>
               <span className="font-semibold text-emerald-300">{quote.upsellDiscountLabel}</span>
             </div>
           ) : null}

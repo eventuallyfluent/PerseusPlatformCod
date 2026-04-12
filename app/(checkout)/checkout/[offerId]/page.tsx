@@ -54,14 +54,14 @@ export default async function CheckoutPage({
   };
   const paymentHeadline =
     activeGatewayDefinition?.kind === "bank_transfer"
-      ? "Review the offer, check any discount, then continue to the transfer instructions."
-      : "Review the offer, check any discount, then continue to payment.";
+      ? "Review what is included, apply any discount, then continue to the transfer instructions."
+      : "Review what is included, apply any discount, then continue to payment.";
   const paymentNote =
     activeGatewayDefinition?.kind === "bank_transfer"
-      ? "Discounts are verified before the order is created. Bank transfer orders stay pending until payment is manually confirmed."
+      ? "Discounts are confirmed before the order is created. Access starts after the bank transfer is confirmed."
       : activeGatewayDefinition?.kind === "generic_api"
-        ? "Discounts are verified before redirect. Payment then continues through the configured gateway profile."
-        : "Discounts are verified before redirect. Payment finishes on the active hosted checkout provider.";
+        ? "Discounts are confirmed before redirect. Payment then continues through the configured payment provider."
+        : "Discounts are confirmed before redirect. Payment finishes through the active checkout provider.";
   const submitLabel = activeGatewayDefinition?.kind === "bank_transfer" ? "Continue to transfer instructions" : "Continue to payment";
   const checkoutChipLabel = activeGatewayDefinition?.kind === "bank_transfer" ? "Manual confirmation" : "Hosted payment";
   const accessChipLabel = activeGatewayDefinition?.kind === "bank_transfer" ? "Access after confirmation" : "Immediate access";
@@ -72,7 +72,11 @@ export default async function CheckoutPage({
         <section className="rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,#160b30,#110a24)] px-8 py-7 text-white shadow-[0_24px_60px_rgba(14,12,30,0.24)]">
           <p className="text-[11px] uppercase tracking-[0.34em] text-[rgba(228,216,255,0.74)]">{productKind}</p>
           <h1 className="mt-4 max-w-lg text-3xl leading-[0.98] tracking-[-0.045em] lg:text-[2.55rem]">{productTitle}</h1>
-          <p className="mt-4 max-w-lg text-sm leading-7 text-[rgba(236,229,255,0.78)]">Hosted checkout, immediate access after purchase, and one clear payment step.</p>
+          <p className="mt-4 max-w-lg text-sm leading-7 text-[rgba(236,229,255,0.78)]">
+            {activeGatewayDefinition?.kind === "bank_transfer"
+              ? "Review the offer now, then follow the transfer instructions to complete your purchase."
+              : "Review the offer now, then complete your purchase through one clear payment step."}
+          </p>
           <div className="mt-5 flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[rgba(228,216,255,0.74)]">
             <span className="rounded-full border border-white/10 px-4 py-2">Secure</span>
             <span className="rounded-full border border-white/10 px-4 py-2">{checkoutChipLabel}</span>
@@ -148,7 +152,7 @@ export default async function CheckoutPage({
                     </div>
                   </div>
                   <div className="mt-4 flex items-center justify-between gap-4">
-                    <p className="text-sm text-[rgba(236,229,255,0.72)]">Add this only if you want the discounted follow-up offer before paying.</p>
+                    <p className="text-sm text-[rgba(236,229,255,0.72)]">Add this only if you want the discounted follow-up offer before completing this purchase.</p>
                     <Link href={upsell.href} className="inline-flex rounded-full border border-white/14 bg-white px-5 py-3 text-sm font-semibold text-[var(--accent)] transition hover:bg-[rgba(255,255,255,0.92)]">
                       {upsell.label}
                     </Link>
@@ -158,7 +162,7 @@ export default async function CheckoutPage({
             </CheckoutForm>
             ) : (
               <div className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-5 py-5 text-sm leading-7 text-[rgba(236,229,255,0.78)]">
-                Checkout is unavailable until a tax-capable gateway is active for the current commerce policy.
+                Checkout is unavailable until an active payment gateway is fully configured for this storefront.
               </div>
             )}
           </div>

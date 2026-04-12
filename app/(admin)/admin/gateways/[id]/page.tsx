@@ -51,7 +51,7 @@ export default async function GatewayDetailPage({
       : null;
 
   return (
-    <AdminShell title={gateway.displayName} description="Gateway identity, capability truth, credentials, and checkout behavior are all configured here.">
+    <AdminShell title={gateway.displayName} description="Configure how this payment method behaves in checkout, what it requires operationally, and what still needs manual handling.">
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <Card className="space-y-4">
           {connectionMessage ? (
@@ -175,7 +175,7 @@ export default async function GatewayDetailPage({
                     className="rounded-2xl border border-stone-200 bg-white px-4 py-3 font-mono text-sm text-stone-950"
                     placeholder={"merchant_id=...\napi_key=...\nterminal_id=..."}
                   />
-                  <span className="text-xs text-stone-500">Use one `key=value` pair per line. This keeps arbitrary API-connected gateways configurable without code changes.</span>
+                  <span className="text-xs text-stone-500">Use one `key=value` pair per line. This is the operator fallback for API-connected gateways that do not have a dedicated native adapter yet.</span>
                 </label>
               </>
             ) : null}
@@ -263,7 +263,7 @@ export default async function GatewayDetailPage({
         <Card className="space-y-4">
           <div className="space-y-1">
             <h2 className="text-lg font-semibold text-stone-950">Capability truth</h2>
-            <p className="text-sm text-stone-600">This is what checkout and admin enforcement use for this gateway.</p>
+            <p className="text-sm text-stone-600">This is the checkout truth for this gateway: what is automated, what still requires setup, and where manual handling is expected.</p>
           </div>
           <p className={`rounded-2xl px-4 py-3 text-sm ${policy.tone === "success" ? "bg-emerald-50 text-emerald-700" : policy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
             <span className="font-medium">{policy.heading}.</span> {policy.detail}
@@ -288,6 +288,12 @@ export default async function GatewayDetailPage({
           <p className="rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-600">
             {gateway.webhookInstructions ?? connector?.getWebhookInstructions() ?? "Manual and generic gateways can rely on admin confirmation until webhook automation is wired."}
           </p>
+          <div className="rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-600">
+            <p className="font-medium text-stone-950">Operator note</p>
+            <p className="mt-1">
+              Native connectors are the strongest automation path. Generic API gateways may still depend on external documentation, provider-side setup, and manual verification. Bank transfer always depends on manual payment confirmation.
+            </p>
+          </div>
         </Card>
       </div>
     </AdminShell>

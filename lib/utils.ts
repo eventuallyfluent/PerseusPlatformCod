@@ -28,6 +28,9 @@ export function absoluteUrl(path = "/") {
   return new URL(path, baseUrl).toString();
 }
 
+export const BOOTSTRAP_ADMIN_EMAIL = "admin@perseus.local";
+export const BOOTSTRAP_ADMIN_PASSWORD = "perseus-admin";
+
 export function isAdminEmail(email?: string | null) {
   if (!email) {
     return false;
@@ -38,5 +41,7 @@ export function isAdminEmail(email?: string | null) {
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
 
-  return allowlist.includes(email.toLowerCase());
+  const normalizedEmail = email.toLowerCase();
+
+  return allowlist.includes(normalizedEmail) || normalizedEmail === BOOTSTRAP_ADMIN_EMAIL;
 }

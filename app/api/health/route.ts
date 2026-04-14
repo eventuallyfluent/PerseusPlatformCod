@@ -3,6 +3,7 @@ import { getActiveGatewayRecord } from "@/lib/payments/gateway-queries";
 import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
 import { evaluateGatewayOperationalReadiness } from "@/lib/payments/readiness";
+import { BOOTSTRAP_ADMIN_EMAIL } from "@/lib/utils";
 
 export async function GET() {
   await prisma.$queryRaw`SELECT 1`;
@@ -24,6 +25,8 @@ export async function GET() {
     auth: {
       adminPasswordConfigured: Boolean(process.env.ADMIN_LOGIN_PASSWORD ?? process.env.AUTH_ADMIN_PASSWORD),
       adminAllowlistConfigured: Boolean(process.env.ADMIN_EMAIL_ALLOWLIST?.trim()),
+      bootstrapAdminEnabled: true,
+      bootstrapAdminEmail: BOOTSTRAP_ADMIN_EMAIL,
     },
     payments: {
       activeGatewayProvider: activeGateway?.provider ?? null,

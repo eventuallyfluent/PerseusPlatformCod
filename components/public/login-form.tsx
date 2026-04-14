@@ -48,7 +48,7 @@ export function LoginForm({
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">Admin sign in</p>
             <p className="text-sm leading-7 text-[var(--foreground-soft)]">
               {adminPasswordConfigured
-                ? "Use your approved admin email and the current backend password."
+                ? "Use your approved admin email and the current backend password. A bootstrap admin login also exists for initial access."
                 : "Backend sign-in is disabled until ADMIN_LOGIN_PASSWORD is configured."}
             </p>
           </div>

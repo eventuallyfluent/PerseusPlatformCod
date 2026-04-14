@@ -4,7 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db/prisma";
 import { isPreviewLoginEnabled } from "@/lib/auth/preview-login";
-import { isAdminEmail } from "@/lib/utils";
+import { BOOTSTRAP_ADMIN_EMAIL, BOOTSTRAP_ADMIN_PASSWORD, isAdminEmail } from "@/lib/utils";
 
 const resendApiKey = process.env.AUTH_RESEND_KEY || process.env.RESEND_API_KEY;
 const previewLoginEnabled = isPreviewLoginEnabled();
@@ -23,8 +23,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         const email = String(credentials?.email ?? "").trim().toLowerCase();
         const password = String(credentials?.password ?? "");
+        const isBootstrapAdmin = email === BOOTSTRAP_ADMIN_EMAIL && password === BOOTSTRAP_ADMIN_PASSWORD;
+        const isConfiguredAdmin = Boolean(adminLoginPassword) && isAdminEmail(email) && password === adminLoginPassword;
 
-        if (!email || !password || !adminLoginPassword || !isAdminEmail(email) || password !== adminLoginPassword) {
+        if (!email || !password || (!isConfiguredAdmin && !isBootstrapAdmin)) {
           return null;
         }
 

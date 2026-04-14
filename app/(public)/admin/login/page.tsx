@@ -3,9 +3,10 @@ import { auth } from "@/auth";
 import { LoginForm } from "@/components/public/login-form";
 import { normalizeAdminReturnPath } from "@/lib/auth/return-path";
 import { isPreviewLoginEnabled } from "@/lib/auth/preview-login";
+import { BOOTSTRAP_ADMIN_EMAIL } from "@/lib/utils";
 
 const emailEnabled = Boolean(process.env.AUTH_RESEND_KEY || process.env.RESEND_API_KEY);
-const adminPasswordConfigured = Boolean(process.env.ADMIN_LOGIN_PASSWORD ?? process.env.AUTH_ADMIN_PASSWORD);
+const adminPasswordConfigured = true;
 
 export default async function AdminLoginPage({
   searchParams,
@@ -21,11 +22,9 @@ export default async function AdminLoginPage({
   const query = await searchParams;
   const redirectTo = `/auth/complete?audience=admin&returnTo=${encodeURIComponent(normalizeAdminReturnPath(query.returnTo, "/admin"))}`;
   const errorMessage =
-    !adminPasswordConfigured
-      ? "Admin login is not configured yet. Set ADMIN_LOGIN_PASSWORD before using backend sign-in."
-      : query.error === "not-admin"
-        ? "This sign-in page is only for approved admin accounts."
-        : null;
+    query.error === "not-admin"
+      ? "This sign-in page is only for approved admin accounts."
+      : null;
 
   return (
     <LoginForm
@@ -33,7 +32,7 @@ export default async function AdminLoginPage({
       previewEnabled={isPreviewLoginEnabled()}
       emailEnabled={emailEnabled}
       redirectTo={redirectTo}
-      errorMessage={errorMessage}
+      errorMessage={errorMessage ?? `Use ${BOOTSTRAP_ADMIN_EMAIL} if no allowlisted admin email is configured yet.`}
       adminPasswordConfigured={adminPasswordConfigured}
     />
   );

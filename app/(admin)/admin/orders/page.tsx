@@ -58,6 +58,24 @@ export default async function OrdersPage({
             const needsManualAction =
               latestPayment &&
               (latestPayment.status === "AWAITING_BANK_TRANSFER" || latestPayment.status === "UNDER_REVIEW" || latestPayment.status === "AUTHORIZED");
+            const actionLabel =
+              latestPayment?.status === "AWAITING_BANK_TRANSFER"
+                ? "Awaiting transfer confirmation"
+                : latestPayment?.status === "UNDER_REVIEW"
+                  ? "Under manual review"
+                  : latestPayment?.status === "AUTHORIZED"
+                    ? "Authorized, waiting for release"
+                    : latestPayment
+                      ? "No manual action"
+                      : "Awaiting payment record";
+            const gatewayMode =
+              latestPayment?.gateway.kind === "bank_transfer"
+                ? "Manual transfer"
+                : latestPayment?.gateway.kind === "generic_api"
+                  ? "Generic/manual gateway"
+                  : latestPayment?.gateway.kind === "native"
+                    ? "Native automation path"
+                    : "Unassigned";
 
             return (
               <div key={order.id} className="grid grid-cols-[0.9fr_1.2fr_1.4fr_0.8fr_0.8fr_1.1fr_1.2fr] gap-4 px-4 py-4 text-sm text-stone-700">
@@ -71,7 +89,10 @@ export default async function OrdersPage({
                 <div>{productTitle}</div>
                 <div className="font-medium text-stone-950">{order.status.replaceAll("_", " ")}</div>
                 <div>{latestPayment?.status.replaceAll("_", " ") ?? "None"}</div>
-                <div>{latestPayment?.gateway.displayName ?? "Unassigned"}</div>
+                <div className="space-y-1">
+                  <div>{latestPayment?.gateway.displayName ?? "Unassigned"}</div>
+                  <div className="text-xs text-stone-500">{gatewayMode}</div>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {needsManualAction ? (
                     <>
@@ -85,7 +106,7 @@ export default async function OrdersPage({
                       </form>
                     </>
                   ) : (
-                    <span className="text-xs text-stone-500">{latestPayment ? "No manual action" : "Awaiting payment record"}</span>
+                    <span className="text-xs text-stone-500">{actionLabel}</span>
                   )}
                 </div>
               </div>

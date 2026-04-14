@@ -8,6 +8,7 @@ import { getActiveGateway } from "@/lib/payments/active-gateway";
 import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
 import { evaluateGatewayPolicy } from "@/lib/payments/policy";
+import { evaluateGatewayOperationalReadiness } from "@/lib/payments/readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,14 @@ export default async function CheckoutPage({
   const activeConnector = activeGateway ? findPaymentConnector(activeGateway.provider) : null;
   const activeGatewayDefinition = activeGateway ? resolveGatewayDefinition(activeGateway, activeConnector) : null;
   const gatewayPolicy = activeGatewayDefinition ? evaluateGatewayPolicy(activeGatewayDefinition.capabilities) : null;
+  const gatewayReadiness =
+    activeGateway && activeGatewayDefinition
+      ? evaluateGatewayOperationalReadiness({
+          gateway: activeGateway,
+          definition: activeGatewayDefinition,
+          connector: activeConnector,
+        })
+      : null;
   const bundleCourseCount = offer.bundle?.courses.length ?? 0;
   const productMeta = offer.course
     ? { label: "Instructor", value: offer.course.instructor.name }
@@ -63,8 +72,19 @@ export default async function CheckoutPage({
         ? "Discounts are confirmed before redirect. Payment then continues through the configured payment provider."
         : "Discounts are confirmed before redirect. Payment finishes through the active checkout provider.";
   const submitLabel = activeGatewayDefinition?.kind === "bank_transfer" ? "Continue to transfer instructions" : "Continue to payment";
+  const pendingLabel =
+    activeGatewayDefinition?.kind === "bank_transfer"
+      ? "Preparing transfer instructions..."
+      : activeGatewayDefinition?.kind === "generic_api"
+        ? "Opening payment provider..."
+        : "Redirecting to payment...";
   const checkoutChipLabel = activeGatewayDefinition?.kind === "bank_transfer" ? "Manual confirmation" : "Hosted payment";
-  const accessChipLabel = activeGatewayDefinition?.kind === "bank_transfer" ? "Access after confirmation" : "Immediate access";
+  const accessChipLabel =
+    activeGatewayDefinition?.kind === "bank_transfer"
+      ? "Access after confirmation"
+      : activeGatewayDefinition?.capabilities.mayRequireManualReview
+        ? "Access after approval"
+        : "Immediate access";
 
   return (
     <div className="mx-auto flex min-h-[calc(100svh-5.5rem)] w-full max-w-6xl items-center px-6 py-4">
@@ -96,6 +116,19 @@ export default async function CheckoutPage({
           ) : (
             <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">No active payment gateway is configured.</p>
           )}
+          {gatewayReadiness ? (
+            <p
+              className={`mt-3 rounded-2xl px-4 py-3 text-sm ${
+                gatewayReadiness.status === "ready"
+                  ? "bg-emerald-50 text-emerald-700"
+                  : gatewayReadiness.status === "attention"
+                    ? "bg-amber-50 text-amber-800"
+                    : "bg-rose-50 text-rose-700"
+              }`}
+            >
+              <span className="font-medium">{gatewayReadiness.heading}.</span> {gatewayReadiness.detail}
+            </p>
+          ) : null}
           {query.status === "cancelled" ? (
             <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Checkout was cancelled. You can try again at any time.</p>
           ) : null}
@@ -135,6 +168,7 @@ export default async function CheckoutPage({
               initialUpsellFromOfferId={query.upsellFrom ?? ""}
               initialQuote={initialQuote}
               submitLabel={submitLabel}
+              pendingLabel={pendingLabel}
               paymentNote={paymentNote}
             >
               {upsell ? (
@@ -162,7 +196,7 @@ export default async function CheckoutPage({
             </CheckoutForm>
             ) : (
               <div className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-5 py-5 text-sm leading-7 text-[rgba(236,229,255,0.78)]">
-                Checkout is unavailable until an active payment gateway is fully configured for this storefront.
+                Checkout is unavailable until the active gateway is configured for a real payment path and passes the current payment policy.
               </div>
             )}
           </div>

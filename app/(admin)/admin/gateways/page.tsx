@@ -6,6 +6,8 @@ import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
 import { createGatewayProfileAction } from "@/app/(admin)/admin/actions";
 import { HardLink } from "@/components/ui/hard-link";
 import { listGatewayRecords } from "@/lib/payments/gateway-queries";
+import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
+import { evaluateGatewayOperationalReadiness } from "@/lib/payments/readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +29,12 @@ export default async function GatewaysPage({
       ...gateway,
       definition,
       policy: evaluateGatewayPolicy(definition.capabilities),
+      readiness: evaluateGatewayOperationalReadiness({
+        gateway,
+        definition,
+        connector,
+        credentials: getGatewayCredentialMap(gateway.credentials),
+      }),
     };
   });
 
@@ -113,6 +121,17 @@ export default async function GatewaysPage({
                 <div>Credentials stored: {gateway.credentials.length}</div>
                 <div>Webhook events: {gateway.webhookEvents.length}</div>
               </div>
+              <p
+                className={`rounded-2xl px-4 py-3 text-sm ${
+                  gateway.readiness.status === "ready"
+                    ? "bg-emerald-50 text-emerald-700"
+                    : gateway.readiness.status === "attention"
+                      ? "bg-amber-50 text-amber-800"
+                      : "bg-rose-50 text-rose-700"
+                }`}
+              >
+                <span className="font-medium">{gateway.readiness.heading}.</span> {gateway.readiness.detail}
+              </p>
               <p className={`rounded-2xl px-4 py-3 text-sm ${gateway.policy.tone === "success" ? "bg-emerald-50 text-emerald-700" : gateway.policy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
                 <span className="font-medium">{gateway.policy.heading}.</span> {gateway.policy.detail}
               </p>

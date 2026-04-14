@@ -7,6 +7,7 @@ import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
 import { evaluateGatewayPolicy, summarizeGatewayCapabilities } from "@/lib/payments/policy";
 import { getGatewayCredentialLines, resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
 import { getGatewayRecordById } from "@/lib/payments/gateway-queries";
+import { evaluateGatewayOperationalReadiness } from "@/lib/payments/readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,12 @@ export default async function GatewayDetailPage({
   const definition = resolveGatewayDefinition(gateway, connector);
   const policy = evaluateGatewayPolicy(definition.capabilities);
   const credentials = getGatewayCredentialMap(gateway.credentials);
+  const readiness = evaluateGatewayOperationalReadiness({
+    gateway,
+    definition,
+    connector,
+    credentials,
+  });
   const genericCredentialLines = getGatewayCredentialLines(
     Object.entries(credentials).map(([key, value]) => ({
       key,
@@ -268,6 +275,17 @@ export default async function GatewayDetailPage({
           <p className={`rounded-2xl px-4 py-3 text-sm ${policy.tone === "success" ? "bg-emerald-50 text-emerald-700" : policy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
             <span className="font-medium">{policy.heading}.</span> {policy.detail}
           </p>
+          <p
+            className={`rounded-2xl px-4 py-3 text-sm ${
+              readiness.status === "ready"
+                ? "bg-emerald-50 text-emerald-700"
+                : readiness.status === "attention"
+                  ? "bg-amber-50 text-amber-800"
+                  : "bg-rose-50 text-rose-700"
+            }`}
+          >
+            <span className="font-medium">{readiness.heading}.</span> {readiness.detail}
+          </p>
           <div className="grid gap-2 text-sm text-stone-600">
             <div>Capabilities: {summarizeGatewayCapabilities(definition.capabilities) || "Manual configuration"}</div>
             <div>Provider: {gateway.provider}</div>
@@ -285,6 +303,24 @@ export default async function GatewayDetailPage({
             <div>High-risk ready: {definition.capabilities.suitableForHighRisk ? "Yes" : "No"}</div>
             <div>Webhook events received: {gateway.webhookEvents.length}</div>
           </div>
+          {readiness.issues.length > 0 ? (
+            <div className="space-y-2">
+              {readiness.issues.map((issue) => (
+                <p
+                  key={`${issue.label}-${issue.detail}`}
+                  className={`rounded-2xl px-4 py-3 text-sm ${
+                    issue.tone === "success"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : issue.tone === "warning"
+                        ? "bg-amber-50 text-amber-800"
+                        : "bg-rose-50 text-rose-700"
+                  }`}
+                >
+                  <span className="font-medium">{issue.label}.</span> {issue.detail}
+                </p>
+              ))}
+            </div>
+          ) : null}
           <p className="rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-600">
             {gateway.webhookInstructions ?? connector?.getWebhookInstructions() ?? "Manual and generic gateways can rely on admin confirmation until webhook automation is wired."}
           </p>

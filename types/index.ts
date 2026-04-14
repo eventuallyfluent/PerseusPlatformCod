@@ -89,6 +89,11 @@ export type SalesPageConfig = {
   pricingBody?: string | null;
   finalCtaLabel?: string | null;
   finalCtaBody?: string | null;
+  thankYouEyebrow?: string | null;
+  thankYouHeadline?: string | null;
+  thankYouBody?: string | null;
+  thankYouSignedInLabel?: string | null;
+  thankYouSignedOutLabel?: string | null;
 };
 
 export type SalesPageOfferSummary = {
@@ -216,6 +221,25 @@ export type BundleSalesPagePayload = SalesPageBasePayload & {
   };
 };
 
+export type ProductThankYouPagePayload = {
+  version: "v1";
+  productType: "course" | "bundle";
+  eyebrow: string;
+  headline: string;
+  body: string;
+  productTitle: string;
+  productSubtitle?: string | null;
+  imageUrl?: string | null;
+  summaryLabel: string;
+  summaryValue: string;
+  items: Array<{
+    title: string;
+    subtitle?: string | null;
+  }>;
+  signedInActionLabel: string;
+  signedOutActionLabel: string;
+};
+
 export type CanonicalPaymentEvent =
   | "payment.succeeded"
   | "payment.authorized"
@@ -269,6 +293,21 @@ export type GatewayPolicyEvaluation = {
   detail: string;
 };
 
+export type GatewayOperationalIssue = {
+  tone: "success" | "warning" | "danger";
+  label: string;
+  detail: string;
+};
+
+export type GatewayOperationalReadiness = {
+  status: "ready" | "attention" | "blocked";
+  heading: string;
+  detail: string;
+  canRunCheckout: boolean;
+  webhookMode: "automated" | "manual" | "unavailable";
+  issues: GatewayOperationalIssue[];
+};
+
 export interface PaymentGatewayConnector {
   provider: string;
   displayName: string;
@@ -302,6 +341,8 @@ export interface PaymentGatewayConnector {
   parseWebhookEvent(input: {
     headers: Headers;
     rawBody: string;
+    secret?: string;
+    credentials?: Record<string, string>;
   }): Promise<{
     externalEventId?: string;
     eventType: string;

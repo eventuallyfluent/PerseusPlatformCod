@@ -35,6 +35,18 @@ Current truth:
 - native connectors are the strongest automation path
 - generic and bank-transfer flows may require manual operator handling
 
+Verified in the local commerce suite:
+
+- bundle fulfillment grants all included course enrollments
+- bank transfer creates awaiting-payment state and only grants access after manual confirmation
+- native webhook ingestion persists events, deduplicates duplicates, and fulfills paid orders on the verified native path
+
+Still provisional:
+
+- live provider-hosted checkout execution with real external credentials
+- Stripe webhook signature handling is code-hardened, but the verified native webhook suite currently runs against Creem in local checks
+- generic API gateways still depend on operator-supplied templates, credentials, and provider-side setup quality
+
 ## Public Product Direction
 
 Public pages should:
@@ -62,5 +74,5 @@ Customer-facing copy should focus on:
 
 1. keep auth stable and production-usable
 2. continue customer-facing copy cleanup
-3. tighten gateway/operator guidance
-4. replace reactive fixes with a maintained in-repo planning/state habit
+3. verify real hosted-checkout providers with live credentials
+4. keep gateway/operator guidance and planning state current

@@ -50,6 +50,8 @@ npm run prisma:deploy
 npm run prisma:seed
 npm run prisma:check
 npm run prisma:check:bundle-payment
+npm run prisma:check:bank-transfer
+npm run prisma:check:webhook
 ```
 
 ## Environment variables

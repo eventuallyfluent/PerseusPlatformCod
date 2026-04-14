@@ -16,9 +16,9 @@ import { bundleInputSchema, moduleInputSchema, lessonInputSchema } from "@/lib/z
 import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { encryptGatewayCredentialValue, isEncryptedGatewayCredentialValue } from "@/lib/payments/gateway-credentials";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
-import { fulfillPaidOrder } from "@/lib/payments/fulfill-paid-order";
+import { confirmManualPayment, failManualPayment } from "@/lib/payments/manual-payment";
 import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSectionPayloadMap } from "@/lib/homepage/sections";
-import { CouponScope, CourseStatus, OrderStatus, PaymentStatus, type HomepageSectionType } from "@prisma/client";
+import { CouponScope, CourseStatus, type HomepageSectionType } from "@prisma/client";
 import type { GatewayCapabilities, GatewayCheckoutModel, GatewayKind, GatewaySettlementBehavior, GatewayTaxModel } from "@/types";
 
 function toArray(value: FormDataEntryValue | null) {
@@ -47,6 +47,11 @@ function parseSalesPageConfig(formData: FormData) {
     pricingBody: String(formData.get("salesPage.pricingBody") ?? ""),
     finalCtaLabel: String(formData.get("salesPage.finalCtaLabel") ?? ""),
     finalCtaBody: String(formData.get("salesPage.finalCtaBody") ?? ""),
+    thankYouEyebrow: String(formData.get("salesPage.thankYouEyebrow") ?? ""),
+    thankYouHeadline: String(formData.get("salesPage.thankYouHeadline") ?? ""),
+    thankYouBody: String(formData.get("salesPage.thankYouBody") ?? ""),
+    thankYouSignedInLabel: String(formData.get("salesPage.thankYouSignedInLabel") ?? ""),
+    thankYouSignedOutLabel: String(formData.get("salesPage.thankYouSignedOutLabel") ?? ""),
   };
 }
 
@@ -1321,26 +1326,11 @@ export async function confirmManualPaymentAction(formData: FormData) {
     redirect("/admin/orders?error=payment");
   }
 
-  const payment = await prisma.payment.findUnique({
-    where: { id: paymentId },
-  });
-
-  if (!payment) {
+  try {
+    await confirmManualPayment(paymentId);
+  } catch {
     redirect("/admin/orders?error=payment");
   }
-
-  await prisma.payment.update({
-    where: { id: payment.id },
-    data: {
-      status: PaymentStatus.SUCCEEDED,
-      rawEvent: {
-        source: "manual_confirmation",
-        confirmedAt: new Date().toISOString(),
-      },
-    },
-  });
-
-  await fulfillPaidOrder(payment.orderId);
 
   revalidatePath("/admin/orders");
   redirect("/admin/orders?saved=payment");
@@ -1353,29 +1343,11 @@ export async function failManualPaymentAction(formData: FormData) {
     redirect("/admin/orders?error=payment");
   }
 
-  const payment = await prisma.payment.findUnique({
-    where: { id: paymentId },
-  });
-
-  if (!payment) {
+  try {
+    await failManualPayment(paymentId);
+  } catch {
     redirect("/admin/orders?error=payment");
   }
-
-  await prisma.payment.update({
-    where: { id: payment.id },
-    data: {
-      status: PaymentStatus.FAILED,
-      rawEvent: {
-        source: "manual_confirmation",
-        failedAt: new Date().toISOString(),
-      },
-    },
-  });
-
-  await prisma.order.update({
-    where: { id: payment.orderId },
-    data: { status: OrderStatus.FAILED },
-  });
 
   revalidatePath("/admin/orders");
   redirect("/admin/orders?saved=payment");

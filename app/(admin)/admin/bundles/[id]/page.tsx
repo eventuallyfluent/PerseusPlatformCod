@@ -6,7 +6,7 @@ import { ImageField } from "@/components/admin/image-field";
 import { ProductFormSection } from "@/components/admin/product-form-shell";
 import { HardLink } from "@/components/ui/hard-link";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
-import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
+import { resolveBundlePublicPath, resolveBundleThankYouPath } from "@/lib/urls/resolve-bundle-path";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 import { deleteBundleAction, deleteFaqAction, deleteTestimonialAction, saveBundleAction, saveBundleCoursesAction, saveFaqAction, saveTestimonialAction } from "@/app/(admin)/admin/actions";
 
@@ -49,6 +49,8 @@ export default async function BundleDetailPage({
   if (!bundle) notFound();
   const selectedCourseIds = new Set(bundle.courses.map((item) => item.courseId));
   const previewOffer = getPrimaryOffer(bundle.offers);
+  const publicPagePath = resolveBundlePublicPath(bundle);
+  const thankYouPagePath = resolveBundleThankYouPath(bundle);
   const salesPageConfig = parseSalesPageConfig(bundle.salesPageConfig);
   const upsellTarget = bundle.upsellCourseId ? `course:${bundle.upsellCourseId}` : bundle.upsellBundleId ? `bundle:${bundle.upsellBundleId}` : "";
   const saved = resolvedSearchParams?.saved ?? "";
@@ -153,7 +155,21 @@ export default async function BundleDetailPage({
               <label className="lg:col-span-2">Upsell body<textarea name="upsellBody" rows={3} defaultValue={bundle.upsellBody ?? ""} placeholder="Explain the discounted follow-up offer clearly." /></label>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">Checkout reads the bundle price directly. Use coupons for discounts and configure one optional upsell with its own discounted follow-up offer.</div>
             </ProductFormSection>
-            <ProductFormSection title="Sales page" description="Section order and CTA copy.">
+            <ProductFormSection title="Pages" description="Manage the public sales, checkout, and thank-you surfaces from one place.">
+              <div className="lg:col-span-2 grid gap-3 md:grid-cols-3">
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Sales page</span>
+                  <span className="mt-2 block break-all text-stone-950">{publicPagePath}</span>
+                </div>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Checkout page</span>
+                  <span className="mt-2 block break-all text-stone-950">{previewOffer ? `/checkout/${previewOffer.id}` : "Create an offer to preview checkout."}</span>
+                </div>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Thank-you page</span>
+                  <span className="mt-2 block break-all text-stone-950">{thankYouPagePath}</span>
+                </div>
+              </div>
               <label>Hero metadata line<input name="salesPage.heroMetadataLine" defaultValue={salesPageConfig.heroMetadataLine ?? ""} /></label>
               <label>Primary CTA label<input name="salesPage.primaryCtaLabel" defaultValue={salesPageConfig.primaryCtaLabel ?? ""} /></label>
               <label>Secondary CTA label<input name="salesPage.secondaryCtaLabel" defaultValue={salesPageConfig.secondaryCtaLabel ?? ""} /></label>
@@ -162,6 +178,11 @@ export default async function BundleDetailPage({
               <label className="lg:col-span-2">Pricing body<textarea name="salesPage.pricingBody" rows={3} defaultValue={salesPageConfig.pricingBody ?? ""} /></label>
               <label>Final CTA label<input name="salesPage.finalCtaLabel" defaultValue={salesPageConfig.finalCtaLabel ?? ""} /></label>
               <label className="lg:col-span-2">Final CTA body<textarea name="salesPage.finalCtaBody" rows={3} defaultValue={salesPageConfig.finalCtaBody ?? ""} /></label>
+              <label>Thank-you eyebrow<input name="salesPage.thankYouEyebrow" defaultValue={salesPageConfig.thankYouEyebrow ?? ""} /></label>
+              <label>Signed-in CTA label<input name="salesPage.thankYouSignedInLabel" defaultValue={salesPageConfig.thankYouSignedInLabel ?? ""} /></label>
+              <label>Signed-out CTA label<input name="salesPage.thankYouSignedOutLabel" defaultValue={salesPageConfig.thankYouSignedOutLabel ?? ""} /></label>
+              <label className="lg:col-span-2">Thank-you headline<input name="salesPage.thankYouHeadline" defaultValue={salesPageConfig.thankYouHeadline ?? ""} /></label>
+              <label className="lg:col-span-2">Thank-you body<textarea name="salesPage.thankYouBody" rows={3} defaultValue={salesPageConfig.thankYouBody ?? ""} /></label>
               <label className="lg:col-span-2">Section order<textarea name="salesPage.sectionOrder" rows={6} defaultValue={(salesPageConfig.sectionOrder ?? ["description", "highlights", "included-courses", "testimonials", "faqs", "pricing"]).join("\n")} /></label>
               <label className="lg:col-span-2">Hidden sections<textarea name="salesPage.hiddenSections" rows={6} defaultValue={(salesPageConfig.hiddenSections ?? []).join("\n")} /></label>
             </ProductFormSection>
@@ -183,7 +204,8 @@ export default async function BundleDetailPage({
                 Save bundle changes
               </button>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{bundle.status}</span></div>
-              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Public path</span><span className="mt-1 block break-all text-base text-stone-950">{resolveBundlePublicPath(bundle)}</span></div>
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Sales page</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Thank-you page</span><span className="mt-1 block break-all text-base text-stone-950">{thankYouPagePath}</span></div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Included courses</span><span className="mt-1 block text-base text-stone-950">{bundle.courses.length} course{bundle.courses.length === 1 ? "" : "s"}</span></div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Live price</span><span className="mt-1 block text-base text-stone-950">{bundle.price.toString()} {bundle.currency}</span></div>
             </div>
@@ -191,8 +213,9 @@ export default async function BundleDetailPage({
           <Card className="space-y-3 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Actions</p>
             <div className="grid gap-3">
-              <HardLink href={resolveBundlePublicPath(bundle)} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">View public page</HardLink>
+              <HardLink href={publicPagePath} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">View sales page</HardLink>
               {previewOffer ? <HardLink href={`/checkout/${previewOffer.id}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">Preview checkout</HardLink> : null}
+              <HardLink href={thankYouPagePath} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">View thank-you page</HardLink>
               <button className="rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteBundleAction} form="bundle-editor-actions" name="bundleId" value={bundle.id}>Delete bundle</button>
             </div>
           </Card>

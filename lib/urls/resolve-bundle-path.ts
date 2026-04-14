@@ -11,3 +11,7 @@ export function resolveBundlePublicPath(bundle: Pick<Bundle, "slug" | "publicPat
 
   return `/bundle/${bundle.slug}`;
 }
+
+export function resolveBundleThankYouPath(bundle: Pick<Bundle, "slug" | "publicPath" | "legacyUrl">) {
+  return `${resolveBundlePublicPath(bundle)}/purchased`;
+}

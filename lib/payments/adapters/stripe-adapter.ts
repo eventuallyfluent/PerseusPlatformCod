@@ -15,6 +15,12 @@ async function getStripeClient() {
   });
 }
 
+function getStripeWebhookClient() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY ?? "sk_test_placeholder", {
+    apiVersion: "2025-08-27.basil",
+  });
+}
+
 function mapStripeEvent(eventType: string): CanonicalPaymentEvent | undefined {
   switch (eventType) {
     case "checkout.session.completed":
@@ -122,23 +128,23 @@ export const stripeConnector: PaymentGatewayConnector = {
     }
 
     try {
-      const stripe = await getStripeClient();
+      const stripe = getStripeWebhookClient();
       stripe.webhooks.constructEvent(rawBody, signature, secret);
       return true;
     } catch {
       return false;
     }
   },
-  async parseWebhookEvent({ headers, rawBody }) {
+  async parseWebhookEvent({ headers, rawBody, secret }) {
     const signature = headers.get("stripe-signature");
-    const { webhookSecret: secret } = await getStripeConfig();
+    const resolvedSecret = secret || (await getStripeConfig()).webhookSecret;
 
-    if (!signature || !secret) {
+    if (!signature || !resolvedSecret) {
       throw new Error("Missing Stripe webhook configuration");
     }
 
-    const stripe = await getStripeClient();
-    const event = stripe.webhooks.constructEvent(rawBody, signature, secret);
+    const stripe = getStripeWebhookClient();
+    const event = stripe.webhooks.constructEvent(rawBody, signature, resolvedSecret);
 
     return {
       externalEventId: event.id,

@@ -1,5 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
+import { resolveCourseThankYouPath } from "@/lib/urls/resolve-course-path";
+import { resolveBundleThankYouPath } from "@/lib/urls/resolve-bundle-path";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +35,16 @@ export default async function BankTransferInstructionsPage({
     notFound();
   }
 
+  if (order.status === "PAID") {
+    if (order.offer.course) {
+      redirect(`${resolveCourseThankYouPath(order.offer.course)}?order=${order.id}`);
+    }
+
+    if (order.offer.bundle) {
+      redirect(`${resolveBundleThankYouPath(order.offer.bundle)}?order=${order.id}`);
+    }
+  }
+
   const productTitle = order.offer.course?.title ?? order.offer.bundle?.title ?? order.offer.name;
   const instructions = payment.gateway.instructionsMarkdown?.split("\n").filter(Boolean) ?? [];
 
@@ -45,6 +57,11 @@ export default async function BankTransferInstructionsPage({
           <p className="max-w-2xl text-sm leading-7 text-[rgba(236,229,255,0.76)]">
             Your order has been created for {productTitle}. Access is granted after the payment is confirmed in admin.
           </p>
+          <div className="flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[rgba(228,216,255,0.74)]">
+            <span className="rounded-full border border-white/10 px-4 py-2">Awaiting transfer</span>
+            <span className="rounded-full border border-white/10 px-4 py-2">Manual confirmation</span>
+            <span className="rounded-full border border-white/10 px-4 py-2">Access after payment review</span>
+          </div>
         </div>
 
         <div className="grid gap-4 rounded-[24px] bg-white px-5 py-5 text-sm text-stone-700 md:grid-cols-2">

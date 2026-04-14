@@ -32,10 +32,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ pro
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  const event = await connector.parseWebhookEvent({
-    headers: request.headers,
-    rawBody,
-  });
+  let event;
+
+  try {
+    event = await connector.parseWebhookEvent({
+      headers: request.headers,
+      rawBody,
+      secret: credentials.webhook_secret ?? credentials.webhook_id ?? "",
+      credentials,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Webhook payload could not be parsed.",
+      },
+      { status: 400 },
+    );
+  }
 
   if (event.externalEventId) {
     const existing = await prisma.webhookEvent.findFirst({
@@ -60,19 +73,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ pro
     },
   });
 
-  await handleCanonicalEvent({
-    canonicalEvent: event.canonicalEvent,
-    gatewayId: gateway.id,
-    externalEventId: event.externalEventId,
-    payload: event.payload,
-  });
+  try {
+    await handleCanonicalEvent({
+      canonicalEvent: event.canonicalEvent,
+      gatewayId: gateway.id,
+      externalEventId: event.externalEventId,
+      payload: event.payload,
+    });
 
-  await prisma.webhookEvent.update({
-    where: { id: webhookEvent.id },
-    data: {
-      processedAt: new Date(),
-    },
-  });
+    await prisma.webhookEvent.update({
+      where: { id: webhookEvent.id },
+      data: {
+        processedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Webhook processing failed.",
+      },
+      { status: 500 },
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }

@@ -11,3 +11,7 @@ export function resolveCoursePublicPath(course: Pick<Course, "slug" | "publicPat
 
   return `/course/${course.slug}`;
 }
+
+export function resolveCourseThankYouPath(course: Pick<Course, "slug" | "publicPath" | "legacyUrl">) {
+  return `${resolveCoursePublicPath(course)}/purchased`;
+}

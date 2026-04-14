@@ -165,4 +165,5 @@ Notes:
 6. Vercel deploy
 7. Admin login at `/admin/login`
 8. Gateway credential setup
-9. Real checkout/webhook verification
+9. Run `npm run prisma:check:bundle-payment` to exercise the current local commerce verification suite
+10. Real provider-hosted checkout verification with live credentials

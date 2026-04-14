@@ -14,6 +14,8 @@
     "prisma:seed": "node --env-file=.env --import tsx prisma/seed.ts",
     "prisma:check": "node --env-file=.env --import tsx prisma/sanity-check.ts",
     "prisma:check:bundle-payment": "node --env-file=.env --import tsx prisma/verify-bundle-payment.ts",
+    "prisma:check:bank-transfer": "node --env-file=.env --import tsx prisma/verify-bundle-payment.ts",
+    "prisma:check:webhook": "node --env-file=.env --import tsx prisma/verify-bundle-payment.ts",
     "prisma:check:imports": "node --env-file=.env --import tsx prisma/verify-imports.ts"
   },
   "dependencies": {

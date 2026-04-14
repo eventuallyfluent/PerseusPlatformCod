@@ -39,6 +39,11 @@ export function parseSalesPageConfig(value: unknown): SalesPageConfig {
     pricingBody: typeof source.pricingBody === "string" ? source.pricingBody : undefined,
     finalCtaLabel: typeof source.finalCtaLabel === "string" ? source.finalCtaLabel : undefined,
     finalCtaBody: typeof source.finalCtaBody === "string" ? source.finalCtaBody : undefined,
+    thankYouEyebrow: typeof source.thankYouEyebrow === "string" ? source.thankYouEyebrow : undefined,
+    thankYouHeadline: typeof source.thankYouHeadline === "string" ? source.thankYouHeadline : undefined,
+    thankYouBody: typeof source.thankYouBody === "string" ? source.thankYouBody : undefined,
+    thankYouSignedInLabel: typeof source.thankYouSignedInLabel === "string" ? source.thankYouSignedInLabel : undefined,
+    thankYouSignedOutLabel: typeof source.thankYouSignedOutLabel === "string" ? source.thankYouSignedOutLabel : undefined,
   };
 }
 

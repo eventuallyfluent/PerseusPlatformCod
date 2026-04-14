@@ -18,6 +18,7 @@ export function CheckoutForm({
   initialUpsellFromOfferId = "",
   initialQuote,
   submitLabel = "Continue to payment",
+  pendingLabel = "Redirecting...",
   paymentNote = "Discounts are confirmed before redirect. Payment finishes through the active checkout provider.",
   children,
 }: {
@@ -26,6 +27,7 @@ export function CheckoutForm({
   initialUpsellFromOfferId?: string;
   initialQuote: CheckoutQuote;
   submitLabel?: string;
+  pendingLabel?: string;
   paymentNote?: string;
   children?: React.ReactNode;
 }) {
@@ -103,7 +105,7 @@ export function CheckoutForm({
           </div>
           {quote.upsellDiscountLabel ? (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-[rgba(236,229,255,0.62)]">Bundle discount</span>
+              <span className="text-[rgba(236,229,255,0.62)]">Offer discount</span>
               <span className="font-semibold text-emerald-300">{quote.upsellDiscountLabel}</span>
             </div>
           ) : null}
@@ -158,7 +160,7 @@ export function CheckoutForm({
           }
         }}
       >
-        {pending ? "Redirecting..." : submitLabel}
+        {pending ? pendingLabel : submitLabel}
       </Button>
     </div>
   );

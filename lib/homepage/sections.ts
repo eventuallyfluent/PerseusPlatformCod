@@ -1,4 +1,5 @@
 import type { HomepageSectionType } from "@prisma/client";
+import { LEGAL_COMPANY, LEGAL_PAGE_LINKS } from "@/lib/legal/company";
 
 export type HomepageHeroPayload = {
   eyebrow: string;
@@ -146,15 +147,10 @@ export function defaultHomepageSections(): HomepageSectionRecord[] {
           { label: "Login", href: "/login" },
         ],
         legalHeading: "Legal",
-        legalLinks: [
-          { label: "Privacy Policy", href: "#" },
-          { label: "Terms of Service", href: "#" },
-          { label: "Cookie Policy", href: "#" },
-          { label: "GDPR Data Request", href: "#" },
-        ],
+        legalLinks: [...LEGAL_PAGE_LINKS],
         socialLabels: ["X", "IG", "YT", "TT"],
-        bottomLeftText: "(c) 2026 Perseus Arcane Academy. All rights reserved.",
-        bottomRightText: "Structured magical training",
+        bottomLeftText: `(c) 2026 ${LEGAL_COMPANY.legalName}, DBA ${LEGAL_COMPANY.dbaName}. All rights reserved.`,
+        bottomRightText: `Support: ${LEGAL_COMPANY.supportEmail}`,
       },
     },
   ];

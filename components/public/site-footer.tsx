@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
 import type { HomepageFooterPayload } from "@/lib/homepage/sections";
+import { LEGAL_PAGE_LINKS, resolveLegalLink } from "@/lib/legal/company";
 
 export async function SiteFooter() {
   const sections = await getHomepageSections();
@@ -19,6 +20,12 @@ export async function SiteFooter() {
           ? { ...link, label: "Instructors", href: "/instructors" }
           : link,
     )
+    .filter((link, index, items) => items.findIndex((candidate) => candidate.label === link.label && candidate.href === link.href) === index);
+  const legalLinks = [...payload.legalLinks, ...LEGAL_PAGE_LINKS]
+    .map((link) => ({
+      ...link,
+      href: resolveLegalLink(link.label, link.href),
+    }))
     .filter((link, index, items) => items.findIndex((candidate) => candidate.label === link.label && candidate.href === link.href) === index);
 
   return (
@@ -57,7 +64,7 @@ export async function SiteFooter() {
           <div className="space-y-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-lavender)]">{payload.legalHeading}</p>
             <div className="flex flex-col gap-3 text-lg text-[var(--foreground-soft)]">
-              {payload.legalLinks.map((link) => (
+              {legalLinks.map((link) => (
                 <Link key={`${link.label}-${link.href}`} href={link.href} className="transition hover:text-[var(--portal-text)]">
                   {link.label}
                 </Link>

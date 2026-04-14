@@ -3,5 +3,5 @@ import { requireAdmin } from "@/lib/auth/guards";
 
 export default async function AdminLayout({ children }: PropsWithChildren) {
   await requireAdmin();
-  return <div className="admin-theme">{children}</div>;
+  return <div className="admin-theme theme-admin-clean">{children}</div>;
 }

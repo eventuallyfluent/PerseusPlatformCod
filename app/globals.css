@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
-:root {
+:root,
+.theme-perseus-dark-1 {
+  --theme-name: "Perseus Dark Theme1";
   --background: #0d0d1a;
   --background-soft: #141426;
   --background-elevated: rgba(26, 26, 46, 0.92);
@@ -42,6 +44,133 @@
   --collection-arcane: linear-gradient(135deg, #34105f, #5e2da1);
   --collection-discipline: linear-gradient(135deg, #17396f, #2758a5);
   --collection-gateway: linear-gradient(135deg, #0c5f45, #158f6b);
+  --surface-canvas: var(--background);
+  --surface-canvas-soft: var(--background-soft);
+  --surface-panel: var(--card);
+  --surface-panel-strong: var(--card-strong);
+  --text-primary: var(--foreground);
+  --text-secondary: var(--foreground-soft);
+  --text-muted: var(--muted);
+  --status-success: var(--success);
+  --status-warning: var(--warning);
+  --status-danger: var(--danger);
+  --shadow-panel: var(--shadow-soft);
+  --shadow-brand: var(--shadow-glow);
+  --radius-panel: 30px;
+  --radius-card: 24px;
+  --radius-field: 20px;
+  --radius-pill: 999px;
+}
+
+.theme-perseus-light-1 {
+  --theme-name: "Perseus Light Theme1";
+  --background: #f4f0fb;
+  --background-soft: #ede6f8;
+  --background-elevated: rgba(255, 255, 255, 0.92);
+  --background-deep: #f8f4fc;
+  --background-deep-soft: #efe7f8;
+  --foreground: #231733;
+  --foreground-soft: #6d5886;
+  --muted: #8a73a2;
+  --card: rgba(255, 255, 255, 0.94);
+  --card-strong: rgba(247, 241, 252, 0.98);
+  --border: #d7c7ea;
+  --border-strong: #b89ed8;
+  --accent: #7b2fbe;
+  --accent-strong: #9b3fde;
+  --accent-soft: rgba(123, 47, 190, 0.1);
+  --accent-glow: rgba(123, 47, 190, 0.16);
+  --accent-lavender: #a855f7;
+  --premium: #c69232;
+  --premium-soft: rgba(198, 146, 50, 0.12);
+  --success: #158f6b;
+  --success-soft: rgba(21, 143, 107, 0.14);
+  --warning: #d08a08;
+  --warning-soft: rgba(208, 138, 8, 0.14);
+  --danger: #d44848;
+  --danger-soft: rgba(212, 72, 72, 0.14);
+  --shadow-soft: 0 20px 55px rgba(69, 43, 98, 0.1);
+  --shadow-glow: 0 12px 28px rgba(123, 47, 190, 0.12);
+  --portal-border: rgba(123, 47, 190, 0.12);
+  --portal-panel: rgba(255, 255, 255, 0.95);
+  --portal-panel-strong: rgba(245, 237, 252, 0.98);
+  --portal-text: #231733;
+  --portal-muted: #6d5886;
+  --perseus-logo-primary: #231733;
+  --perseus-logo-accent: #a855f7;
+  --perseus-logo-gold: #c69232;
+  --perseus-collection-panel: rgba(255, 255, 255, 0.96);
+  --perseus-collection-elevated: rgba(245, 237, 252, 0.98);
+  --perseus-hero-glow: rgba(123, 47, 190, 0.14);
+  --collection-arcane: linear-gradient(135deg, #d8c5f6, #f0e7ff);
+  --collection-discipline: linear-gradient(135deg, #cae2ff, #eef6ff);
+  --collection-gateway: linear-gradient(135deg, #c8f3e3, #ebfbf5);
+  --surface-canvas: var(--background);
+  --surface-canvas-soft: var(--background-soft);
+  --surface-panel: var(--card);
+  --surface-panel-strong: var(--card-strong);
+  --text-primary: var(--foreground);
+  --text-secondary: var(--foreground-soft);
+  --text-muted: var(--muted);
+  --status-success: var(--success);
+  --status-warning: var(--warning);
+  --status-danger: var(--danger);
+  --shadow-panel: var(--shadow-soft);
+  --shadow-brand: var(--shadow-glow);
+  --radius-panel: 30px;
+  --radius-card: 24px;
+  --radius-field: 20px;
+  --radius-pill: 999px;
+}
+
+.admin-theme,
+.theme-admin-clean {
+  min-height: 100vh;
+  --theme-name: "Admin Clean";
+  --background: #f4f1eb;
+  --background-soft: #eee7dc;
+  --background-elevated: rgba(255, 255, 255, 0.96);
+  --background-deep: #fbf8f2;
+  --background-deep-soft: #f3ede4;
+  --foreground: #1f1b17;
+  --foreground-soft: #665c53;
+  --muted: #847469;
+  --card: rgba(255, 255, 255, 0.96);
+  --card-strong: #f8f4ee;
+  --border: rgba(62, 47, 33, 0.12);
+  --border-strong: rgba(62, 47, 33, 0.2);
+  --accent: #7b2fbe;
+  --accent-strong: #8f3ad7;
+  --accent-soft: rgba(123, 47, 190, 0.08);
+  --accent-glow: rgba(123, 47, 190, 0.12);
+  --premium: #b98930;
+  --premium-soft: rgba(185, 137, 48, 0.14);
+  --success: #158f6b;
+  --success-soft: rgba(21, 143, 107, 0.12);
+  --warning: #d08a08;
+  --warning-soft: rgba(208, 138, 8, 0.12);
+  --danger: #d44848;
+  --danger-soft: rgba(212, 72, 72, 0.12);
+  --surface-canvas: var(--background);
+  --surface-canvas-soft: var(--background-soft);
+  --surface-panel: var(--card);
+  --surface-panel-strong: var(--card-strong);
+  --text-primary: var(--foreground);
+  --text-secondary: var(--foreground-soft);
+  --text-muted: var(--muted);
+  --status-success: var(--success);
+  --status-warning: var(--warning);
+  --status-danger: var(--danger);
+  --shadow-soft: 0 18px 42px rgba(44, 32, 24, 0.06);
+  --shadow-glow: 0 16px 30px rgba(123, 47, 190, 0.08);
+  --shadow-panel: var(--shadow-soft);
+  --shadow-brand: var(--shadow-glow);
+  --radius-panel: 28px;
+  --radius-card: 22px;
+  --radius-field: 18px;
+  --radius-pill: 999px;
+  background: linear-gradient(180deg, var(--background-deep) 0%, var(--background) 100%);
+  color: var(--text-primary);
 }
 
 * {
@@ -63,40 +192,58 @@ body {
     radial-gradient(circle at top, var(--perseus-hero-glow), transparent 22%),
     radial-gradient(circle at 70% 30%, rgba(212, 168, 85, 0.12), transparent 24%),
     linear-gradient(180deg, var(--background-deep) 0%, var(--background-deep-soft) 48%, var(--background) 100%);
-  color: var(--foreground);
+  color: var(--text-primary);
   font-family: var(--font-body), sans-serif;
   text-rendering: optimizeLegibility;
-}
-
-.admin-theme {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #fafaf9 0%, #f5f5f4 100%);
-  color: #1c1917;
 }
 
 .admin-theme input,
 .admin-theme textarea,
 .admin-theme select {
-  border-color: #d6d3d1;
-  background: #ffffff;
-  color: #1c1917;
+  border-color: var(--border);
+  background: var(--surface-panel);
+  color: var(--text-primary);
 }
 
 .admin-theme input:focus,
 .admin-theme textarea:focus,
 .admin-theme select:focus {
-  border-color: #7b2fbe;
-  box-shadow: 0 0 0 4px rgba(123, 47, 190, 0.12);
-  background: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(123, 47, 190, 0.1), 0 10px 24px rgba(123, 47, 190, 0.06);
+  background: var(--surface-panel);
 }
 
 .admin-theme label {
-  color: #44403c;
+  color: var(--text-secondary);
 }
 
 .admin-theme th,
 .admin-theme td {
-  border-bottom-color: #e7e5e4;
+  border-bottom-color: var(--border);
+}
+
+.admin-theme .bg-white,
+.admin-theme .bg-white\/95 {
+  background-color: var(--surface-panel) !important;
+}
+
+.admin-theme .border-stone-200,
+.admin-theme .border-stone-200\/80,
+.admin-theme .border-stone-300 {
+  border-color: var(--border) !important;
+}
+
+.admin-theme .text-stone-950,
+.admin-theme .text-stone-900,
+.admin-theme .text-stone-800 {
+  color: var(--text-primary) !important;
+}
+
+.admin-theme .text-stone-700,
+.admin-theme .text-stone-600,
+.admin-theme .text-stone-500,
+.admin-theme .text-stone-400 {
+  color: var(--text-secondary) !important;
 }
 
 body::before {
@@ -132,11 +279,11 @@ input,
 textarea,
 select {
   width: 100%;
-  border-radius: 20px;
+  border-radius: var(--radius-field);
   border: 1px solid var(--border);
-  background: rgba(37, 37, 64, 0.92);
+  background: var(--surface-panel-strong);
   padding: 1rem 1.1rem;
-  color: var(--foreground);
+  color: var(--text-primary);
   font: inherit;
   transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
 }
@@ -147,7 +294,7 @@ select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 4px rgba(123, 47, 190, 0.14), 0 10px 24px rgba(123, 47, 190, 0.08);
-  background: rgba(46, 46, 78, 0.98);
+  background: var(--surface-panel);
 }
 
 label {
@@ -155,7 +302,7 @@ label {
   gap: 0.6rem;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--foreground-soft);
+  color: var(--text-secondary);
 }
 
 table {

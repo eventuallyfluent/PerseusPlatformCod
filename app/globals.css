@@ -227,6 +227,12 @@ body {
   background-color: var(--surface-panel) !important;
 }
 
+.admin-theme .bg-stone-950,
+.admin-theme .bg-stone-900,
+.admin-theme .bg-stone-800 {
+  background-color: var(--accent) !important;
+}
+
 .admin-theme .border-stone-200,
 .admin-theme .border-stone-200\/80,
 .admin-theme .border-stone-300 {
@@ -244,6 +250,11 @@ body {
 .admin-theme .text-stone-500,
 .admin-theme .text-stone-400 {
   color: var(--text-secondary) !important;
+}
+
+.admin-theme .text-stone-50,
+.admin-theme .text-white {
+  color: #ffffff !important;
 }
 
 body::before {

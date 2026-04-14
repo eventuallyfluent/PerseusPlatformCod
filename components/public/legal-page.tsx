@@ -25,22 +25,22 @@ export function LegalPage({
         <p className="max-w-3xl text-base leading-8 text-[var(--foreground-soft)]">{summary}</p>
       </div>
 
-      <Card className="space-y-8 bg-white/95 p-6">
+      <Card className="space-y-8 p-6">
         <div className="flex flex-wrap gap-3 text-sm">
-          <Link href="/privacy" className="rounded-full border border-stone-200 px-4 py-2 text-stone-700">Privacy</Link>
-          <Link href="/terms" className="rounded-full border border-stone-200 px-4 py-2 text-stone-700">Terms</Link>
-          <Link href="/refund-policy" className="rounded-full border border-stone-200 px-4 py-2 text-stone-700">Refunds</Link>
-          <Link href="/fulfillment" className="rounded-full border border-stone-200 px-4 py-2 text-stone-700">Fulfillment</Link>
-          <Link href="/cookie-policy" className="rounded-full border border-stone-200 px-4 py-2 text-stone-700">Cookies</Link>
-          <Link href="/contact" className="rounded-full border border-stone-200 px-4 py-2 text-stone-700">Contact</Link>
-          <Link href="/payment-disclosures" className="rounded-full border border-stone-200 px-4 py-2 text-stone-700">Payment disclosures</Link>
+          <Link href="/privacy" className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 text-[var(--text-primary)] transition hover:bg-[var(--surface-panel)]">Privacy</Link>
+          <Link href="/terms" className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 text-[var(--text-primary)] transition hover:bg-[var(--surface-panel)]">Terms</Link>
+          <Link href="/refund-policy" className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 text-[var(--text-primary)] transition hover:bg-[var(--surface-panel)]">Refunds</Link>
+          <Link href="/fulfillment" className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 text-[var(--text-primary)] transition hover:bg-[var(--surface-panel)]">Fulfillment</Link>
+          <Link href="/cookie-policy" className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 text-[var(--text-primary)] transition hover:bg-[var(--surface-panel)]">Cookies</Link>
+          <Link href="/contact" className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 text-[var(--text-primary)] transition hover:bg-[var(--surface-panel)]">Contact</Link>
+          <Link href="/payment-disclosures" className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 text-[var(--text-primary)] transition hover:bg-[var(--surface-panel)]">Payment disclosures</Link>
         </div>
 
         <div className="space-y-8">
           {sections.map((section) => (
             <section key={section.title} className="space-y-3">
-              <h2 className="text-xl font-semibold text-stone-950">{section.title}</h2>
-              <div className="space-y-3 text-sm leading-7 text-stone-700">
+              <h2 className="text-xl font-semibold text-[var(--text-primary)]">{section.title}</h2>
+              <div className="space-y-3 text-sm leading-7 text-[var(--text-secondary)]">
                 {section.body.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}

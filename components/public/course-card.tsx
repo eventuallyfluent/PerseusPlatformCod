@@ -21,7 +21,7 @@ export function CourseCard({ course }: CourseCardProps) {
 
   return (
     <HardLink href={resolveCoursePublicPath(course)} className="group block">
-      <article className="flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--portal-panel-strong)] text-white transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-soft)]">
+      <article className="flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-panel)]">
         <div
           className="h-72 bg-cover bg-center transition duration-500 group-hover:scale-[1.02]"
           style={{
@@ -36,9 +36,9 @@ export function CourseCard({ course }: CourseCardProps) {
             <Badge variant="premium">{course.priceLabel?.toLowerCase() === "free" ? "Free" : "Premium"}</Badge>
           </div>
           <div className="mt-5 space-y-3">
-            <p className="text-sm text-[var(--portal-muted)]">Perseus course</p>
+            <p className="text-sm text-[var(--text-secondary)]">Perseus course</p>
             <h3
-              className="max-w-sm min-h-[7.5rem] text-4xl leading-none tracking-[-0.04em]"
+              className="max-w-sm min-h-[7.5rem] text-4xl leading-none tracking-[-0.04em] text-[var(--text-primary)]"
               style={{
                 display: "-webkit-box",
                 WebkitLineClamp: 3,
@@ -50,7 +50,7 @@ export function CourseCard({ course }: CourseCardProps) {
             </h3>
             {course.subtitle ? (
               <p
-                className="max-w-sm min-h-[4rem] text-base leading-8 text-[var(--portal-muted)]"
+                className="max-w-sm min-h-[4rem] text-base leading-8 text-[var(--text-secondary)]"
                 style={{
                   display: "-webkit-box",
                   WebkitLineClamp: 2,
@@ -64,12 +64,12 @@ export function CourseCard({ course }: CourseCardProps) {
               <div className="min-h-[4rem]" />
             )}
           </div>
-          <div className="mt-auto flex items-center justify-between gap-4 border-t border-[var(--portal-border)] pt-4">
+          <div className="mt-auto flex items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--portal-muted)]">Access path</p>
-              <p className="mt-2 text-3xl font-semibold">{course.priceLabel ?? "View offer"}</p>
+              <p className="text-xs uppercase tracking-[0.24em] text-[var(--text-secondary)]">Access path</p>
+              <p className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">{course.priceLabel ?? "View offer"}</p>
             </div>
-            <span className="rounded-full border border-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--accent-lavender)] transition group-hover:bg-[var(--accent-soft)]">
+            <span className="rounded-full border border-[var(--accent)] bg-[var(--accent-soft)] px-5 py-3 text-sm font-semibold text-[var(--accent)] transition group-hover:bg-[var(--surface-panel-strong)]">
               {course.ctaLabel ?? "Enroll now"}
             </span>
           </div>

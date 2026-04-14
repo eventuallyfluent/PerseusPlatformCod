@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
 import type { HomepageFooterPayload } from "@/lib/homepage/sections";
 import { LEGAL_PAGE_LINKS, resolveLegalLink } from "@/lib/legal/company";
+import { ThemeToggle } from "@/components/public/theme-toggle";
 
 export async function SiteFooter() {
   const sections = await getHomepageSections();
@@ -75,7 +76,10 @@ export async function SiteFooter() {
 
         <div className="flex flex-col gap-3 pt-6 text-sm text-[var(--foreground-soft)] sm:flex-row sm:items-center sm:justify-between">
           <p>{payload.bottomLeftText}</p>
-          <p>{payload.bottomRightText}</p>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <p>{payload.bottomRightText}</p>
+          </div>
         </div>
       </div>
     </footer>

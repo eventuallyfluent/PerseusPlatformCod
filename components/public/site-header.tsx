@@ -1,7 +1,6 @@
 import { auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { HardLink } from "@/components/ui/hard-link";
-import { ThemeToggle } from "@/components/public/theme-toggle";
 
 function PerseusMark() {
   return (
@@ -27,7 +26,6 @@ export async function SiteHeader() {
           </div>
         </HardLink>
         <nav className="flex items-center gap-2 text-sm text-[var(--foreground)] sm:gap-4">
-          <ThemeToggle />
           <HardLink href="/faq" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
             FAQ
           </HardLink>

@@ -29,12 +29,13 @@ export function ThemeToggle() {
     <button
       type="button"
       aria-label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
-      className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-panel-strong)]"
+      title={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
+      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition hover:bg-[var(--surface-panel-strong)]"
       onClick={() => {
         setTheme((currentTheme) => (currentTheme === "light" ? "dark" : "light"));
       }}
     >
-      Theme
+      <span aria-hidden="true" className="text-base leading-none">{theme === "light" ? "☾" : "☀"}</span>
     </button>
   );
 }

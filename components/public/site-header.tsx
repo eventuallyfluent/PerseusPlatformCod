@@ -16,25 +16,25 @@ export async function SiteHeader() {
   const session = await auth();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[rgba(13,13,26,0.84)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--header-surface)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <HardLink href="/" className="flex items-center gap-3 text-[var(--foreground)]">
+        <HardLink href="/" className="flex items-center gap-3 text-[var(--text-primary)]">
           <PerseusMark />
           <div className="space-y-1">
-            <span className="block text-sm font-semibold uppercase tracking-[0.28em] text-[var(--foreground)]">Perseus Arcane Academy</span>
-            <span className="block text-[11px] uppercase tracking-[0.34em] text-[var(--foreground-soft)]">Structured magical training</span>
+            <span className="block text-sm font-semibold uppercase tracking-[0.28em] text-[var(--text-primary)]">Perseus Arcane Academy</span>
+            <span className="block text-[11px] uppercase tracking-[0.34em] text-[var(--text-secondary)]">Structured magical training</span>
           </div>
         </HardLink>
-        <nav className="flex items-center gap-2 text-sm text-[var(--foreground)] sm:gap-4">
-          <HardLink href="/faq" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
+        <nav className="flex items-center gap-2 text-sm text-[var(--text-primary)] sm:gap-4">
+          <HardLink href="/faq" className="rounded-full px-3 py-2 text-[var(--text-primary)] transition hover:bg-[var(--accent-soft)] hover:text-[var(--text-primary)]">
             FAQ
           </HardLink>
-          <HardLink href="/dashboard" className="rounded-full px-3 py-2 text-[var(--foreground)] transition hover:bg-[var(--accent-soft)] hover:text-white">
+          <HardLink href="/dashboard" className="rounded-full px-3 py-2 text-[var(--text-primary)] transition hover:bg-[var(--accent-soft)] hover:text-[var(--text-primary)]">
             My courses
           </HardLink>
           {session?.user ? (
             <>
-              <span className="hidden rounded-full border border-[var(--accent-soft)] bg-[rgba(255,255,255,0.05)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white lg:inline-flex">
+              <span className="hidden rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-primary)] lg:inline-flex">
                 {session.user.name ?? session.user.email}
               </span>
               <form
@@ -43,7 +43,7 @@ export async function SiteHeader() {
                   await signOut({ redirectTo: "/" });
                 }}
               >
-                <Button type="submit" variant="ghost" className="border-white/12 bg-[rgba(255,255,255,0.08)] px-4 py-2 text-white hover:border-white/20 hover:bg-[rgba(255,255,255,0.16)] hover:text-white">
+                <Button type="submit" variant="ghost" className="px-4 py-2">
                   Sign out
                 </Button>
               </form>

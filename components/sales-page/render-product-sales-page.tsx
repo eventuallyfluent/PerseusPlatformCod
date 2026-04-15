@@ -305,18 +305,18 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
   return (
     <div className="space-y-16">
       <section className="px-6">
-        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[42px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,#150a2f,#110a24)] px-8 py-12 text-white shadow-[0_34px_80px_rgba(10,11,24,0.28)] lg:px-12 lg:py-16">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[42px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] px-8 py-12 text-[var(--hero-text-primary)] shadow-[0_34px_80px_rgba(10,11,24,0.18)] lg:px-12 lg:py-16">
           <div
             className="absolute inset-0 opacity-90"
             style={{
               backgroundImage: payload.hero.imageUrl
-                ? `radial-gradient(circle_at_20%_18%,rgba(168,102,255,0.24),transparent 24%),radial-gradient(circle_at_78%_24%,rgba(212,168,70,0.14),transparent 20%),linear-gradient(180deg, rgba(10,7,20,0.30), rgba(10,7,20,0.70)), url(${payload.hero.imageUrl})`
-                : "radial-gradient(circle_at_20%_18%,rgba(168,102,255,0.24),transparent 24%),radial-gradient(circle_at_78%_24%,rgba(212,168,70,0.14),transparent 20%),linear-gradient(135deg,#1b0c34,#2e175f)",
+                ? `radial-gradient(circle_at_20%_18%,rgba(168,102,255,0.24),transparent 24%),radial-gradient(circle_at_78%_24%,rgba(212,168,70,0.14),transparent 20%),var(--hero-media-overlay), url(${payload.hero.imageUrl})`
+                : "radial-gradient(circle_at_20%_18%,rgba(168,102,255,0.24),transparent 24%),radial-gradient(circle_at_78%_24%,rgba(212,168,70,0.14),transparent 20%),var(--hero-fallback-background)",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,7,23,0.22),rgba(11,7,23,0.82))]" />
+          <div className="absolute inset-0 bg-[var(--hero-shell-overlay)]" />
 
           <div className="relative mx-auto max-w-4xl text-center">
             <div className="flex flex-wrap items-center justify-center gap-3">
@@ -326,16 +326,16 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
 
             <div className="mt-10 space-y-6">
               {payload.hero.metadataLine ? (
-                <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[#b8add7]">{payload.hero.metadataLine}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--hero-text-muted)]">{payload.hero.metadataLine}</p>
               ) : null}
-              <h1 className="text-6xl leading-[0.9] tracking-[-0.06em] text-[#f2eaff] sm:text-7xl lg:text-[5.8rem]">{payload.hero.title}</h1>
-              {payload.hero.subtitle ? <p className="mx-auto max-w-3xl text-xl leading-9 text-[#d0c3ef]">{payload.hero.subtitle}</p> : null}
+              <h1 className="text-6xl leading-[0.9] tracking-[-0.06em] text-[var(--hero-text-primary)] sm:text-7xl lg:text-[5.8rem]">{payload.hero.title}</h1>
+              {payload.hero.subtitle ? <p className="mx-auto max-w-3xl text-xl leading-9 text-[var(--hero-text-secondary)]">{payload.hero.subtitle}</p> : null}
             </div>
 
             {payload.hero.primaryOffer ? (
               <div className="mt-10 flex flex-wrap items-end justify-center gap-x-4 gap-y-2">
-                <p className="text-5xl font-semibold text-white">{payload.hero.primaryOffer.price}</p>
-                {payload.hero.primaryOffer.compareAtPrice ? <p className="text-xl text-[#9a90bd] line-through">{payload.hero.primaryOffer.compareAtPrice}</p> : null}
+                <p className="text-5xl font-semibold text-[var(--hero-text-primary)]">{payload.hero.primaryOffer.price}</p>
+                {payload.hero.primaryOffer.compareAtPrice ? <p className="text-xl text-[var(--hero-price-muted)] line-through">{payload.hero.primaryOffer.compareAtPrice}</p> : null}
                 {payload.hero.primaryOffer.savingsLabel ? <Badge variant="premium">{payload.hero.primaryOffer.savingsLabel}</Badge> : null}
               </div>
             ) : null}
@@ -345,7 +345,7 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                 <Button className="min-w-[280px]">{payload.hero.primaryCtaLabel}</Button>
               </Link>
               <a href={payload.hero.secondaryCtaHref}>
-                <Button variant="secondary" className="min-w-[220px] border-white/15 bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.10)]">
+                <Button variant="secondary" className="min-w-[220px]">
                   {payload.hero.secondaryCtaLabel}
                 </Button>
               </a>

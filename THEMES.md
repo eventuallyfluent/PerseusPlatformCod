@@ -4,9 +4,14 @@
 - `Perseus Dark Theme1`
   Current public and student baseline.
 - `Perseus Light Theme1`
-  Reserved token track for future public and student light mode.
+  Active public and student light mode paired to the same semantic token contract.
 - `Admin Clean`
   Separate admin treatment focused on legibility and operational clarity.
+
+## Surface ownership
+- Public and learner surfaces use the Perseus dark/light theme track.
+- Admin surfaces use `Admin Clean` only.
+- Admin does not expose the public theme toggle.
 
 ## Typography
 - Display: `Cormorant Garamond`
@@ -50,6 +55,22 @@
   - `--radius-card`
   - `--radius-field`
   - `--radius-pill`
+
+## Required component rules
+- Shared public and learner components must use semantic theme tokens, not hardcoded dark or light colors.
+- Acceptable patterns:
+  - `var(--surface-panel)`
+  - `var(--surface-panel-strong)`
+  - `var(--text-primary)`
+  - `var(--text-secondary)`
+  - `var(--border)`
+  - `var(--border-strong)`
+- No new shared component should ship with:
+  - `text-white` as its normal tone
+  - raw dark RGBA panel backgrounds
+  - direct `stone-*` utility colors
+  - fixed `bg-white/...` panel styling
+- Theme-locked exceptions are allowed only for intentionally atmospheric hero sections or overlays.
 
 ## Admin Clean principles
 - Light, restrained, and readable

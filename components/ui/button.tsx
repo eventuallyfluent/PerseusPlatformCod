@@ -14,9 +14,9 @@ export function Button({ children, className, variant = "primary", ...props }: B
         variant === "primary" &&
           "bg-[var(--accent)] text-white shadow-[var(--shadow-glow)] hover:-translate-y-px hover:bg-[var(--accent-strong)] focus-visible:ring-[rgba(143,44,255,0.22)]",
         variant === "secondary" &&
-          "border border-[rgba(143,44,255,0.6)] bg-transparent text-[var(--accent)] hover:-translate-y-px hover:bg-[rgba(143,44,255,0.08)] focus-visible:ring-[rgba(143,44,255,0.16)]",
+          "border border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)] hover:-translate-y-px hover:bg-[var(--surface-panel-strong)] focus-visible:ring-[rgba(143,44,255,0.16)]",
         variant === "ghost" &&
-          "border border-[var(--border)] bg-white/50 text-[var(--foreground-soft)] hover:border-[var(--border-strong)] hover:bg-white/75 hover:text-[var(--foreground)] focus-visible:ring-[rgba(88,97,130,0.16)]",
+          "border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel-strong)] hover:text-[var(--text-primary)] focus-visible:ring-[rgba(88,97,130,0.16)]",
         variant === "premium" &&
           "bg-[var(--premium)] text-[#211607] shadow-[0_16px_36px_rgba(212,168,70,0.2)] hover:-translate-y-px hover:brightness-105 focus-visible:ring-[rgba(212,168,70,0.18)]",
         variant === "portal" &&

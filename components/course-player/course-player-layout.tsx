@@ -53,7 +53,7 @@ function LessonMedia({ lesson, focus = false }: { lesson: LessonRecord; focus?: 
     </div>
   ) : (
     <div
-      className={`flex w-full items-center justify-center rounded-[24px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] text-center text-[var(--portal-muted)] ${
+      className={`flex w-full items-center justify-center rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-center text-[var(--text-secondary)] ${
         focus ? "min-h-[72svh]" : "aspect-video max-h-[52svh]"
       }`}
     >
@@ -92,7 +92,7 @@ function FocusModeOverlay({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[80] bg-[rgba(7,8,16,0.96)] px-6 py-6 backdrop-blur-xl">
+    <div className="fixed inset-0 z-[80] bg-[rgba(7,8,16,0.9)] px-6 py-6 backdrop-blur-xl">
       <div className="mx-auto flex h-full w-full max-w-[1600px] flex-col gap-5">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-3">
@@ -102,19 +102,19 @@ function FocusModeOverlay({
           </div>
           <button
             type="button"
-            className="inline-flex items-center rounded-full border border-white/15 bg-[rgba(255,255,255,0.04)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white transition hover:bg-[rgba(255,255,255,0.1)]"
+            className="inline-flex items-center rounded-full border border-white/15 bg-[rgba(255,255,255,0.08)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white transition hover:bg-[rgba(255,255,255,0.14)]"
             onClick={onClose}
           >
             Exit focus mode
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-hidden rounded-[32px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
+        <div className="min-h-0 flex-1 overflow-hidden rounded-[32px] border border-white/10 bg-[rgba(255,255,255,0.06)] p-5">
           <div className="flex h-full min-h-0 flex-col">
             <div className="min-h-0 flex-1">
               <LessonMedia lesson={activeLesson} focus />
             </div>
             {activeLesson.content ? (
-              <div className="mt-5 max-w-4xl overflow-y-auto pr-2 text-base leading-8 text-[#ddd5f5]">{activeLesson.content}</div>
+              <div className="mt-5 max-w-4xl overflow-y-auto pr-2 text-base leading-8 text-[rgba(240,234,248,0.9)]">{activeLesson.content}</div>
             ) : null}
           </div>
         </div>
@@ -163,7 +163,7 @@ export function CoursePlayerLayout({
     <>
       <div className="grid gap-6 pb-4 lg:grid-cols-[340px_minmax(0,1fr)]">
         <aside className="space-y-4 lg:flex lg:h-[calc(100svh-6.25rem)] lg:flex-col lg:overflow-hidden">
-          <div className="space-y-5 rounded-[30px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-6 text-[var(--portal-text)] shadow-[0_20px_40px_rgba(10,11,24,0.24)] lg:flex-1 lg:overflow-y-auto">
+          <div className="space-y-5 rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:flex-1 lg:overflow-y-auto">
             {course.modules.map((module, moduleIndex) => (
               <div key={module.id} className="space-y-3">
                 <div>
@@ -184,7 +184,7 @@ export function CoursePlayerLayout({
 
                     if (publicPreview && !lesson.isPreview) {
                       return (
-                        <div key={lesson.id} className="rounded-[22px] border border-dashed border-[var(--portal-border)] bg-[rgba(255,255,255,0.02)] px-4 py-3 text-sm text-[#877ca7]">
+                        <div key={lesson.id} className="rounded-[22px] border border-dashed border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm text-[var(--text-muted)]">
                           <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em]">
                             <span>Members only</span>
                             <span>{lesson.durationLabel ?? "Included"}</span>
@@ -196,7 +196,7 @@ export function CoursePlayerLayout({
 
                     if (!unlocked) {
                       return (
-                        <div key={lesson.id} className="rounded-[22px] border border-dashed border-[var(--portal-border)] bg-[rgba(255,255,255,0.02)] px-4 py-3 text-sm text-[#877ca7]">
+                        <div key={lesson.id} className="rounded-[22px] border border-dashed border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm text-[var(--text-muted)]">
                           <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em]">
                             <span>Locked</span>
                             <span>{lesson.dripDays ?? 0} day drip</span>
@@ -214,8 +214,8 @@ export function CoursePlayerLayout({
                         href={lessonHref}
                         className={`block rounded-[22px] border px-4 py-3 text-sm transition ${
                           lesson.slug === activeLessonSlug
-                            ? "border-[rgba(143,44,255,0.45)] bg-[rgba(143,44,255,0.14)] text-white shadow-[0_14px_30px_rgba(28,25,23,0.16)]"
-                            : "border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] text-[#d9d1f2] hover:bg-[rgba(255,255,255,0.06)]"
+                            ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--text-primary)] shadow-[var(--shadow-brand)]"
+                            : "border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)] hover:text-[var(--text-primary)]"
                         }`}
                       >
                         <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] opacity-70">
@@ -238,10 +238,10 @@ export function CoursePlayerLayout({
         </aside>
 
         <div className="space-y-6 lg:h-[calc(100svh-6.25rem)]">
-          <div className="space-y-5 rounded-[30px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-8 text-[var(--portal-text)] shadow-[0_20px_40px_rgba(10,11,24,0.24)]">
+          <div className="space-y-5 rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] p-8 text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
             <div className="space-y-4">
               {publicPreview ? (
-                <div className="rounded-[22px] border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-5 py-4">
+                <div className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-5 py-4">
                   <div className="flex flex-wrap items-center gap-3">
                     <Badge variant="warning">Public preview</Badge>
                     <p className="text-sm leading-7 text-[var(--portal-muted)]">{modeCopy}</p>
@@ -257,7 +257,7 @@ export function CoursePlayerLayout({
                     <span>{getLessonTypeLabel(activeLesson)}</span>
                     {activeLesson.durationLabel ? <span>{activeLesson.durationLabel}</span> : null}
                     {!publicPreview ? <span>{`Lesson ${activeLessonNumber} of ${lessons.length}`}</span> : null}
-                    {!publicPreview && activeLesson.isCompleted ? <span className="text-[#f7d481]">Completed</span> : null}
+                    {!publicPreview && activeLesson.isCompleted ? <span className="text-[var(--premium)]">Completed</span> : null}
                   </div>
                 </div>
                 <FocusModeButton active={focusModeActive} onToggle={() => setFocusModeActive((value) => !value)} />
@@ -267,9 +267,9 @@ export function CoursePlayerLayout({
               </div>
             </div>
             <div className="space-y-6">
-              {activeLesson.content ? <div className="max-w-3xl text-base leading-8 text-[#ddd5f5]">{activeLesson.content}</div> : null}
+              {activeLesson.content ? <div className="max-w-3xl text-base leading-8 text-[var(--text-secondary)]">{activeLesson.content}</div> : null}
               {!publicPreview && activeLesson.downloadUrl ? (
-                <a className="inline-flex rounded-full border border-[var(--portal-border)] bg-[rgba(255,255,255,0.03)] px-5 py-3 text-sm font-semibold text-[#d9d1f2] transition hover:bg-[rgba(255,255,255,0.08)]" href={activeLesson.downloadUrl} target="_blank" rel="noreferrer">
+                <a className="inline-flex rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-5 py-3 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]" href={activeLesson.downloadUrl} target="_blank" rel="noreferrer">
                   Download lesson resource
                 </a>
               ) : null}

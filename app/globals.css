@@ -227,6 +227,18 @@ body {
   background-color: var(--surface-panel) !important;
 }
 
+.admin-theme .bg-stone-50,
+.admin-theme .bg-stone-100,
+.admin-theme .bg-stone-100\/80,
+.admin-theme .bg-stone-50\/80 {
+  background-color: var(--surface-panel-strong) !important;
+}
+
+.admin-theme .hover\:bg-stone-100:hover,
+.admin-theme .hover\:bg-stone-50:hover {
+  background-color: var(--surface-panel-strong) !important;
+}
+
 .admin-theme .bg-stone-950,
 .admin-theme .bg-stone-900,
 .admin-theme .bg-stone-800 {
@@ -235,7 +247,8 @@ body {
 
 .admin-theme .border-stone-200,
 .admin-theme .border-stone-200\/80,
-.admin-theme .border-stone-300 {
+.admin-theme .border-stone-300,
+.admin-theme .border-stone-100 {
   border-color: var(--border) !important;
 }
 

@@ -5,6 +5,7 @@ import { bundleInclude } from "@/lib/bundles/bundle-query";
 import { persistGeneratedBundlePage } from "@/lib/bundles/persist-generated-bundle-page";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
+import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 
 export async function createBundle(input: unknown) {
   const data = bundleInputSchema.parse(input);
@@ -36,6 +37,15 @@ export async function createBundle(input: unknown) {
     currency: bundle.currency,
     compareAtPrice: bundle.compareAtPrice?.toString() ?? null,
     status: bundle.status,
+  });
+
+  await syncAccessProduct({
+    bundleId: bundle.id,
+    slug: bundle.slug,
+    title: `${bundle.title} access`,
+    status: bundle.status,
+    description: bundle.shortDescription,
+    grantedCourseIds: [],
   });
 
   await persistGeneratedBundlePage(bundle);

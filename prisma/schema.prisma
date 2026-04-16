@@ -96,6 +96,13 @@ enum CouponScope {
   COLLECTION
 }
 
+enum AccessProductType {
+  COURSE_ACCESS
+  BUNDLE_ACCESS
+  MEMBERSHIP
+  FREE_REGISTRATION
+}
+
 model User {
   id             String        @id @default(cuid())
   email          String        @unique
@@ -168,9 +175,11 @@ model Course {
   bundleUpsells    Bundle[]       @relation("BundleUpsellCourse")
   modules          Module[]
   offers           Offer[]
+  accessProduct    AccessProduct?
   faqs             FAQ[]
   testimonials     Testimonial[]
   enrollments      Enrollment[]
+  accessProductGrants AccessProductGrant[]
   pages            GeneratedPage[]
   bundleCourses    BundleCourse[]
   collectionCourses CollectionCourse[]
@@ -211,6 +220,7 @@ model Bundle {
   upsellChildren   Bundle[]       @relation("BundleUpsellBundle")
   courses          BundleCourse[]
   offers           Offer[]
+  accessProduct    AccessProduct?
   faqs             FAQ[]
   testimonials     Testimonial[]
   pages            GeneratedPage[]
@@ -292,6 +302,7 @@ model Offer {
   id             String      @id @default(cuid())
   courseId       String?
   bundleId       String?
+  accessProductId String?
   name           String
   type           OfferType
   price          Decimal     @db.Decimal(10, 2)
@@ -302,6 +313,7 @@ model Offer {
   checkoutPath   String?     @unique
   course         Course?     @relation(fields: [courseId], references: [id], onDelete: Cascade)
   bundle         Bundle?     @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  accessProduct  AccessProduct? @relation(fields: [accessProductId], references: [id], onDelete: Cascade)
   prices         Price[]
   orders         Order[]
 }
@@ -434,6 +446,37 @@ model GeneratedPage {
   updatedAt        DateTime @updatedAt
   course           Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   bundle           Bundle?  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+}
+
+model AccessProduct {
+  id           String              @id @default(cuid())
+  slug         String              @unique
+  title        String
+  description  String?
+  type         AccessProductType
+  status       CourseStatus        @default(DRAFT)
+  checkoutMode String              @default("managed_checkout")
+  courseId     String?             @unique
+  bundleId     String?             @unique
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  course       Course?             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  bundle       Bundle?             @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  offers       Offer[]
+  grants       AccessProductGrant[]
+}
+
+model AccessProductGrant {
+  id              String        @id @default(cuid())
+  accessProductId String
+  courseId        String
+  position        Int           @default(1)
+  createdAt       DateTime      @default(now())
+  accessProduct   AccessProduct @relation(fields: [accessProductId], references: [id], onDelete: Cascade)
+  course          Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([accessProductId, courseId])
+  @@unique([accessProductId, position])
 }
 
 model Gateway {

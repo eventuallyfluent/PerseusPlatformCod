@@ -4,6 +4,7 @@ import { courseInputSchema } from "@/lib/zod/schemas";
 import { courseInclude } from "@/lib/courses/course-query";
 import { validatePublicPathAvailability } from "@/lib/urls/validate-public-path";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
+import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 
 export async function updateCourse(courseId: string, input: unknown) {
   const data = courseInputSchema.partial().parse(input);
@@ -58,6 +59,15 @@ export async function updateCourse(courseId: string, input: unknown) {
     currency: course.currency,
     compareAtPrice: course.compareAtPrice?.toString() ?? null,
     status: course.status,
+  });
+
+  await syncAccessProduct({
+    courseId: course.id,
+    slug: course.slug,
+    title: `${course.title} access`,
+    status: course.status,
+    description: course.shortDescription,
+    grantedCourseIds: [course.id],
   });
 
   await persistGeneratedPage(course);

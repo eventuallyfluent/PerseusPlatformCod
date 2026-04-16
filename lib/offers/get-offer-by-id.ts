@@ -82,6 +82,18 @@ export async function getOfferById(id: string) {
           },
         },
       },
+      accessProduct: {
+        include: {
+          grants: {
+            include: {
+              course: true,
+            },
+            orderBy: {
+              position: "asc",
+            },
+          },
+        },
+      },
       prices: true,
     },
   });

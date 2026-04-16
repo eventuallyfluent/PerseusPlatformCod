@@ -1,5 +1,6 @@
 import { CourseStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
+import { findAccessProductIdForOwner } from "@/lib/access-products/sync-access-product";
 
 function buildDefaultOfferName(title: string) {
   return `${title} access`;
@@ -23,12 +24,27 @@ export async function syncProductOffer(input: SyncProductOfferInput) {
     throw new Error("A synced product offer must belong to exactly one product.");
   }
 
-  const existing =
-    (await prisma.offer.findFirst({
-      where: {
+  const accessProductId = await findAccessProductIdForOwner({ courseId, bundleId });
+  const whereClause = accessProductId
+    ? {
+        OR: [
+          {
+            courseId: courseId ?? undefined,
+            bundleId: bundleId ?? undefined,
+          },
+          {
+            accessProductId,
+          },
+        ],
+      }
+    : {
         courseId: courseId ?? undefined,
         bundleId: bundleId ?? undefined,
-      },
+      };
+
+  const existing =
+    (await prisma.offer.findFirst({
+      where: whereClause,
       orderBy: [{ isDefault: "desc" }, { id: "asc" }],
       select: { id: true },
     })) ?? null;
@@ -36,6 +52,7 @@ export async function syncProductOffer(input: SyncProductOfferInput) {
   const data = {
     courseId,
     bundleId,
+    accessProductId,
     name: buildDefaultOfferName(input.title),
     type: "ONE_TIME" as const,
     price: Number(input.price),

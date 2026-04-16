@@ -33,6 +33,7 @@ export async function createOrder(input: { offerId: string; userId?: string | nu
         include: {
           course: true,
           bundle: true,
+          accessProduct: true,
         },
       },
     },

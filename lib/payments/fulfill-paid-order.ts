@@ -21,6 +21,13 @@ export async function fulfillPaidOrder(orderId: string) {
               },
             },
           },
+          accessProduct: {
+            include: {
+              grants: {
+                orderBy: { position: "asc" },
+              },
+            },
+          },
         },
       },
     },
@@ -43,11 +50,16 @@ export async function fulfillPaidOrder(orderId: string) {
     return;
   }
 
-  const courseIds = order.offer.courseId ? [order.offer.courseId] : order.offer.bundle?.courses.map((item) => item.courseId) ?? [];
+  const courseIds =
+    order.offer.accessProduct?.grants.length
+      ? order.offer.accessProduct.grants.map((grant) => grant.courseId)
+      : order.offer.courseId
+        ? [order.offer.courseId]
+        : order.offer.bundle?.courses.map((item) => item.courseId) ?? [];
 
   await Promise.all(courseIds.map((courseId) => ensureEnrollment(order.userId!, courseId)));
 
-  const purchaseTitle = order.offer.course?.title ?? order.offer.bundle?.title ?? order.offer.name;
+  const purchaseTitle = order.offer.accessProduct?.title ?? order.offer.course?.title ?? order.offer.bundle?.title ?? order.offer.name;
   await sendPurchaseConfirmation({
     to: order.user?.email ?? "",
     courseTitle: purchaseTitle,

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import { offerInputSchema } from "@/lib/zod/schemas";
+import { findAccessProductIdForOwner } from "@/lib/access-products/sync-access-product";
 
 function buildCheckoutPath(ownerId: string, offerName: string) {
   return `/checkout/${ownerId}-${offerName.toLowerCase().replace(/\s+/g, "-")}`;
@@ -13,6 +14,7 @@ export async function upsertOffer(input: unknown, id?: string) {
   }
 
   const ownerId = data.courseId ?? data.bundleId;
+  const accessProductId = await findAccessProductIdForOwner({ courseId: data.courseId, bundleId: data.bundleId });
 
   if (!ownerId) {
     throw new Error("Offer must belong to a course or bundle");
@@ -21,6 +23,7 @@ export async function upsertOffer(input: unknown, id?: string) {
   const payload = {
     courseId: data.courseId || null,
     bundleId: data.bundleId || null,
+    accessProductId,
     name: data.name,
     type: data.type,
     price: data.price,

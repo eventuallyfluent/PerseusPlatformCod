@@ -64,7 +64,59 @@ export type BundleWithRelations = Prisma.BundleGetPayload<{
         prices: true;
       };
     };
+    accessProduct: {
+      include: {
+        grants: {
+          include: {
+            course: true;
+          };
+          orderBy: {
+            position: "asc";
+          };
+        };
+        offers: {
+          include: {
+            prices: true;
+          };
+        };
+      };
+    };
     pages: true;
+  };
+}>;
+
+export type AccessProductWithRelations = Prisma.AccessProductGetPayload<{
+  include: {
+    course: true;
+    bundle: {
+      include: {
+        courses: {
+          include: {
+            course: true;
+          };
+          orderBy: {
+            position: "asc";
+          };
+        };
+      };
+    };
+    grants: {
+      include: {
+        course: {
+          include: {
+            instructor: true;
+          };
+        };
+      };
+      orderBy: {
+        position: "asc";
+      };
+    };
+    offers: {
+      include: {
+        prices: true;
+      };
+    };
   };
 }>;
 

@@ -67,5 +67,22 @@ export const bundleInclude = {
       prices: true,
     },
   },
+  accessProduct: {
+    include: {
+      grants: {
+        include: {
+          course: true,
+        },
+        orderBy: {
+          position: "asc" as const,
+        },
+      },
+      offers: {
+        include: {
+          prices: true,
+        },
+      },
+    },
+  },
   pages: true,
 };

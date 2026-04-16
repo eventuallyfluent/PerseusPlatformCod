@@ -36,6 +36,13 @@ export default async function CourseDetailPage({
         upsellBundle: true,
         modules: { include: { lessons: { orderBy: { position: "asc" } } }, orderBy: { position: "asc" } },
         offers: true,
+        accessProduct: {
+          include: {
+            grants: {
+              orderBy: { position: "asc" },
+            },
+          },
+        },
         faqs: { orderBy: { position: "asc" } },
         testimonials: { orderBy: { position: "asc" } },
         pages: true,
@@ -253,6 +260,15 @@ export default async function CourseDetailPage({
                 Save course changes
               </button>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{course.status}</span></div>
+              {course.accessProduct ? (
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Access product</span>
+                  <span className="mt-1 block text-base font-semibold text-stone-950">{course.accessProduct.title}</span>
+                  <HardLink href={`/admin/products/${course.accessProduct.id}`} className="mt-2 inline-flex text-sm font-medium underline underline-offset-4">
+                    Manage access product
+                  </HardLink>
+                </div>
+              ) : null}
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Sales page</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Thank-you page</span><span className="mt-1 block break-all text-base text-stone-950">{thankYouPagePath}</span></div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Curriculum</span><span className="mt-1 block text-base text-stone-950">{course.modules.length} module{course.modules.length === 1 ? "" : "s"}</span></div>

@@ -18,6 +18,7 @@ import { encryptGatewayCredentialValue, isEncryptedGatewayCredentialValue } from
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
 import { confirmManualPayment, failManualPayment } from "@/lib/payments/manual-payment";
 import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSectionPayloadMap } from "@/lib/homepage/sections";
+import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 import { CouponScope, CourseStatus, type HomepageSectionType } from "@prisma/client";
 import type { GatewayCapabilities, GatewayCheckoutModel, GatewayKind, GatewaySettlementBehavior, GatewayTaxModel } from "@/types";
 
@@ -1004,10 +1005,33 @@ export async function saveBundleCoursesAction(formData: FormData) {
         })),
       });
     }
+
+    const bundle = await prisma.bundle.findUnique({
+      where: { id: bundleId },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        shortDescription: true,
+        status: true,
+      },
+    });
+
+    if (bundle) {
+      await syncAccessProduct({
+        bundleId: bundle.id,
+        slug: bundle.slug,
+        title: `${bundle.title} access`,
+        status: bundle.status,
+        description: bundle.shortDescription,
+        grantedCourseIds: courseIds,
+      });
+    }
   } catch {
     redirect(`/admin/bundles/${bundleId}?error=courses`);
   }
 
+  revalidatePath("/admin/products");
   revalidatePath(`/admin/bundles/${bundleId}`);
   redirect(`/admin/bundles/${bundleId}?saved=courses`);
 }

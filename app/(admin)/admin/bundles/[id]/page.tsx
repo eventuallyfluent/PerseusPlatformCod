@@ -30,6 +30,13 @@ export default async function BundleDetailPage({
         upsellBundle: true,
         courses: { include: { course: true }, orderBy: { position: "asc" } },
         offers: true,
+        accessProduct: {
+          include: {
+            grants: {
+              orderBy: { position: "asc" },
+            },
+          },
+        },
         faqs: { orderBy: { position: "asc" } },
         testimonials: { orderBy: { position: "asc" } },
       },
@@ -204,6 +211,15 @@ export default async function BundleDetailPage({
                 Save bundle changes
               </button>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{bundle.status}</span></div>
+              {bundle.accessProduct ? (
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Access product</span>
+                  <span className="mt-1 block text-base font-semibold text-stone-950">{bundle.accessProduct.title}</span>
+                  <HardLink href={`/admin/products/${bundle.accessProduct.id}`} className="mt-2 inline-flex text-sm font-medium underline underline-offset-4">
+                    Manage access product
+                  </HardLink>
+                </div>
+              ) : null}
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Sales page</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Thank-you page</span><span className="mt-1 block break-all text-base text-stone-950">{thankYouPagePath}</span></div>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Included courses</span><span className="mt-1 block text-base text-stone-950">{bundle.courses.length} course{bundle.courses.length === 1 ? "" : "s"}</span></div>

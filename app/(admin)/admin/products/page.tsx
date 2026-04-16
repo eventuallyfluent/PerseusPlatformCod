@@ -1,105 +1,67 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { HardLink } from "@/components/ui/hard-link";
+import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
-import { HardLink } from "@/components/ui/hard-link";
 
 export const dynamic = "force-dynamic";
 
-type ProductRow = {
-  id: string;
-  type: "Course" | "Bundle";
-  title: string;
-  owner: string;
-  status: string;
-  price: string;
-  updatedAt: Date;
-  editHref: string;
-  viewHref: string;
-  previewHref?: string;
-};
+function formatTypeLabel(type: string) {
+  return type
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (value) => value.toUpperCase());
+}
 
 export default async function AdminProductsPage() {
-  const [courses, bundles] = await Promise.all([
-    prisma.course.findMany({
-      include: {
-        instructor: true,
-        modules: {
-          include: {
-            lessons: {
-              orderBy: { position: "asc" },
-              take: 1,
-            },
-          },
-          orderBy: { position: "asc" },
-          take: 1,
+  const products = await prisma.accessProduct.findMany({
+    include: {
+      course: true,
+      bundle: {
+        include: {
+          courses: true,
         },
       },
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.bundle.findMany({
-      include: {
-        courses: {
-          include: {
-            course: {
-              include: {
-                instructor: true,
-              },
+      grants: {
+        include: {
+          course: {
+            include: {
+              instructor: true,
             },
           },
         },
+        orderBy: { position: "asc" },
       },
-      orderBy: { updatedAt: "desc" },
-    }),
-  ]);
-
-  const products: ProductRow[] = [
-    ...courses.map((course) => ({
-      id: course.id,
-      type: "Course" as const,
-      title: course.title,
-      owner: course.instructor.name,
-      status: course.status,
-      price: `${course.price.toString()} ${course.currency}`,
-      updatedAt: course.updatedAt,
-      editHref: `/admin/courses/${course.id}`,
-      viewHref: resolveCoursePublicPath(course),
-      previewHref: course.modules[0]?.lessons[0] ? `/learn/${course.slug}/${course.modules[0].lessons[0].slug}` : undefined,
-    })),
-    ...bundles.map((bundle) => ({
-      id: bundle.id,
-      type: "Bundle" as const,
-      title: bundle.title,
-      owner:
-        bundle.courses.length > 0
-          ? `${bundle.courses.length} course${bundle.courses.length === 1 ? "" : "s"}`
-          : "No courses yet",
-      status: bundle.status,
-      price: `${bundle.price.toString()} ${bundle.currency}`,
-      updatedAt: bundle.updatedAt,
-      editHref: `/admin/bundles/${bundle.id}`,
-      viewHref: resolveBundlePublicPath(bundle),
-    })),
-  ].sort((left, right) => right.updatedAt.getTime() - left.updatedAt.getTime());
+      offers: {
+        include: {
+          prices: true,
+        },
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
 
   return (
-    <AdminShell
-      title="Products"
-      description="See every course and bundle, then jump straight into managing it."
-    >
+    <AdminShell title="Products" description="Products are the access layer. They decide what a buyer unlocks and which checkout path sells it.">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-3 text-sm text-stone-600">
-          <span className="rounded-full border border-[var(--border)] bg-[rgba(255,252,247,0.78)] px-4 py-2">
-            {courses.length} course{courses.length === 1 ? "" : "s"}
+          <span className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2">
+            {products.length} access product{products.length === 1 ? "" : "s"}
           </span>
-          <span className="rounded-full border border-[var(--border)] bg-[rgba(255,252,247,0.78)] px-4 py-2">
-            {bundles.length} bundle{bundles.length === 1 ? "" : "s"}
+          <span className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2">
+            {products.reduce((count, product) => count + product.grants.length, 0)} granted course links
           </span>
         </div>
-        <HardLink href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
-          Add product
-        </HardLink>
+        <div className="flex flex-wrap gap-3">
+          <HardLink href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+            Add course-backed product
+          </HardLink>
+          <HardLink href="/admin/bundles/new" className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-medium text-stone-800">
+            Add bundle-backed product
+          </HardLink>
+        </div>
       </div>
 
       <Card className="overflow-hidden p-0">
@@ -108,41 +70,55 @@ export default async function AdminProductsPage() {
             <tr>
               <th>Type</th>
               <th>Title</th>
-              <th>Owner / Contents</th>
+              <th>Unlocks</th>
+              <th>Checkout</th>
               <th>Status</th>
-              <th>Price</th>
-              <th>Updated</th>
+              <th>Source</th>
               <th />
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
-              <tr key={`${product.type}-${product.id}`}>
-                <td>
-                  <span className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-600">
-                    {product.type}
-                  </span>
-                </td>
-                <td>{product.title}</td>
-                <td>{product.owner}</td>
-                <td>{product.status}</td>
-                <td>{product.price}</td>
-                <td>{product.updatedAt.toLocaleDateString()}</td>
-                <td className="space-x-3">
-                  <HardLink href={product.viewHref} className="underline">
-                    View
-                  </HardLink>
-                  {product.previewHref ? (
-                    <HardLink href={product.previewHref} className="underline">
-                      Preview
+            {products.map((product) => {
+              const primaryOffer = getPrimaryOffer(product.offers);
+              const sourceHref = product.course
+                ? `/admin/courses/${product.course.id}`
+                : product.bundle
+                  ? `/admin/bundles/${product.bundle.id}`
+                  : `/admin/products/${product.id}`;
+              const publicHref = product.course
+                ? resolveCoursePublicPath(product.course)
+                : product.bundle
+                  ? resolveBundlePublicPath(product.bundle)
+                  : null;
+
+              return (
+                <tr key={product.id}>
+                  <td>
+                    <span className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-600">
+                      {formatTypeLabel(product.type)}
+                    </span>
+                  </td>
+                  <td>{product.title}</td>
+                  <td>{product.grants.length} course{product.grants.length === 1 ? "" : "s"}</td>
+                  <td>{primaryOffer ? `/checkout/${primaryOffer.id}` : "No published offer"}</td>
+                  <td>{product.status}</td>
+                  <td>{product.course ? "Course" : product.bundle ? "Bundle" : "Manual"}</td>
+                  <td className="space-x-3">
+                    <HardLink href={`/admin/products/${product.id}`} className="underline">
+                      Manage
                     </HardLink>
-                  ) : null}
-                  <HardLink href={product.editHref} className="underline">
-                    Edit
-                  </HardLink>
-                </td>
-              </tr>
-            ))}
+                    <HardLink href={sourceHref} className="underline">
+                      Source
+                    </HardLink>
+                    {publicHref ? (
+                      <HardLink href={publicHref} className="underline">
+                        View
+                      </HardLink>
+                    ) : null}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </Card>

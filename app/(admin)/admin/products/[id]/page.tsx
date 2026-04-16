@@ -66,14 +66,14 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const sourceHref = product.course ? `/admin/courses/${product.course.id}` : product.bundle ? `/admin/bundles/${product.bundle.id}` : null;
 
   return (
-    <AdminShell title={product.title} description="This product is the access object. It decides what checkout sells and what content unlocks after payment.">
+    <AdminShell title={product.title} description="This product is the commerce layer. It owns checkout, pricing, and what content unlocks after purchase.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <Card className="space-y-6 bg-white p-8">
           <div className="space-y-4 border-b border-[var(--border)] pb-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Access product</p>
-            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Product-driven access and post-purchase entry.</h2>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product</p>
+            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Commerce settings and unlocked content.</h2>
             <p className="max-w-3xl text-sm leading-7 text-stone-700">
-              This record powers the access layer. Courses and bundles remain the content objects, but this product decides what a buyer unlocks and which public surfaces belong to the sale.
+              Courses and bundles remain the content objects. This product decides what checkout sells, which thank-you flow follows, and what the buyer unlocks.
             </p>
           </div>
 
@@ -106,13 +106,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
           <div className="space-y-3">
             <div className="space-y-1">
-              <h3 className="text-xl font-semibold text-stone-950">Granted content</h3>
-              <p className="text-sm text-stone-600">These course links are what fulfillment uses after successful payment or manual confirmation.</p>
+              <h3 className="text-xl font-semibold text-stone-950">Unlocked content</h3>
+              <p className="text-sm text-stone-600">These linked courses are what fulfillment grants after successful payment or manual confirmation.</p>
             </div>
             <div className="grid gap-3">
               {product.grants.map((grant, index) => (
                 <div key={grant.id} className="rounded-[20px] border border-stone-200 bg-white px-4 py-4 text-sm text-stone-700">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Granted course {index + 1}</span>
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Unlocked course {index + 1}</span>
                   <span className="mt-2 block text-base font-semibold text-stone-950">{grant.course.title}</span>
                   <span className="mt-1 block text-sm text-stone-600">{grant.course.instructor.name}</span>
                 </div>
@@ -142,7 +142,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               ) : null}
               {sourceHref ? (
                 <HardLink href={sourceHref} className="rounded-full bg-stone-950 px-5 py-3 text-center text-sm font-medium text-stone-50">
-                  Manage source content
+                  Manage content
                 </HardLink>
               ) : null}
             </div>

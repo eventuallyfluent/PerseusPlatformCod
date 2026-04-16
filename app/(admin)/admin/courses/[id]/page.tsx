@@ -104,15 +104,15 @@ export default async function CourseDetailPage({
         : "";
 
   return (
-    <AdminShell title={course.title} description="One product record controls the page, curriculum, pricing, and delivery.">
+    <AdminShell title={course.title} description="Edit the course content here. Pricing, checkout, and unlock rules live on the linked product.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <div className="space-y-6">
           <Card className="space-y-8 bg-white p-8">
             {feedbackMessage ? <p className="rounded-[18px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedbackMessage}</p> : null}
             {errorMessage ? <p className="rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">{errorMessage}</p> : null}
             <div className="space-y-4 border-b border-[var(--border)] pb-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
-              <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the product once and let the page generate from it.</h2>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course content</p>
+              <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Manage the course itself here, then use the product for commerce settings.</h2>
             </div>
             <form id="course-details-form" action={saveCourseAction} className="space-y-8">
               <input type="hidden" name="id" value={course.id} />
@@ -144,7 +144,7 @@ export default async function CourseDetailPage({
                 <label>SEO title<input name="seoTitle" defaultValue={course.seoTitle ?? ""} /></label>
                 <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} /></label>
               </ProductFormSection>
-              <ProductFormSection id="pricing-checkout" title="Pricing" description="Set the live course price here. Coupons apply discounts at checkout.">
+              <ProductFormSection id="pricing-checkout" title="Commerce handoff" description="This course links to a sellable product. Use this section for price defaults and upsell targets, then manage the product for checkout flow.">
                 <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={course.price.toString()} /></label>
                 <label>Currency<input name="currency" defaultValue={course.currency} /></label>
                 <label>Compare-at price<input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={course.compareAtPrice?.toString() ?? ""} /></label>
@@ -178,7 +178,7 @@ export default async function CourseDetailPage({
                 </label>
                 <label className="lg:col-span-2">Upsell headline<input name="upsellHeadline" defaultValue={course.upsellHeadline ?? ""} placeholder="Optional override for the upsell title" /></label>
                 <label className="lg:col-span-2">Upsell body<textarea name="upsellBody" rows={3} defaultValue={course.upsellBody ?? ""} placeholder="Explain the discounted follow-up offer clearly." /></label>
-                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">Checkout reads the course price directly. Use coupons for discounts and configure one optional upsell with its own discounted follow-up offer.</div>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">This sets the default commercial values the linked product uses. Keep course editing here, then use the product screen to manage checkout and what buyers unlock.</div>
               </ProductFormSection>
               <ProductFormSection id="pages" title="Pages" description="Manage the public sales, checkout, and thank-you surfaces from one place.">
                 <div className="lg:col-span-2 grid gap-3 md:grid-cols-3">
@@ -250,7 +250,7 @@ export default async function CourseDetailPage({
         </div>
         <div className="space-y-4">
           <Card className="space-y-4 bg-white p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product status</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course summary</p>
             <div className="grid gap-3 text-sm text-stone-700">
               <button
                 className="w-full rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50"
@@ -262,10 +262,10 @@ export default async function CourseDetailPage({
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{course.status}</span></div>
               {course.accessProduct ? (
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Access product</span>
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Linked product</span>
                   <span className="mt-1 block text-base font-semibold text-stone-950">{course.accessProduct.title}</span>
                   <HardLink href={`/admin/products/${course.accessProduct.id}`} className="mt-2 inline-flex text-sm font-medium underline underline-offset-4">
-                    Manage access product
+                    Manage product
                   </HardLink>
                 </div>
               ) : null}
@@ -280,7 +280,7 @@ export default async function CourseDetailPage({
               <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#core-identity">Core identity</a>
               <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#sales-copy">Sales copy</a>
               <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#media-seo">Media and SEO</a>
-              <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#pricing-checkout">Pricing and checkout</a>
+              <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#pricing-checkout">Commerce handoff</a>
               <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#pages">Pages</a>
               <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#curriculum">Curriculum</a>
               <a className="rounded-full border border-stone-200 px-4 py-2 text-stone-700" href="#social-proof">Reviews and FAQ</a>

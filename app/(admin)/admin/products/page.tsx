@@ -44,22 +44,22 @@ export default async function AdminProductsPage() {
   });
 
   return (
-    <AdminShell title="Products" description="Products are the access layer. They decide what a buyer unlocks and which checkout path sells it.">
+    <AdminShell title="Products" description="Products are the sellable layer. They control checkout, pricing, thank-you flow, and what content a buyer unlocks.">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-3 text-sm text-stone-600">
           <span className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2">
-            {products.length} access product{products.length === 1 ? "" : "s"}
+            {products.length} product{products.length === 1 ? "" : "s"}
           </span>
           <span className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2">
-            {products.reduce((count, product) => count + product.grants.length, 0)} granted course links
+            {products.reduce((count, product) => count + product.grants.length, 0)} attached course grant{products.reduce((count, product) => count + product.grants.length, 0) === 1 ? "" : "s"}
           </span>
         </div>
         <div className="flex flex-wrap gap-3">
           <HardLink href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
-            Add course-backed product
+            Add course content
           </HardLink>
           <HardLink href="/admin/bundles/new" className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-medium text-stone-800">
-            Add bundle-backed product
+            Add bundle content
           </HardLink>
         </div>
       </div>
@@ -73,7 +73,7 @@ export default async function AdminProductsPage() {
               <th>Unlocks</th>
               <th>Checkout</th>
               <th>Status</th>
-              <th>Source</th>
+              <th>Content Source</th>
               <th />
             </tr>
           </thead>
@@ -102,13 +102,13 @@ export default async function AdminProductsPage() {
                   <td>{product.grants.length} course{product.grants.length === 1 ? "" : "s"}</td>
                   <td>{primaryOffer ? `/checkout/${primaryOffer.id}` : "No published offer"}</td>
                   <td>{product.status}</td>
-                  <td>{product.course ? "Course" : product.bundle ? "Bundle" : "Manual"}</td>
+                  <td>{product.course ? "Course" : product.bundle ? "Bundle" : "Standalone"}</td>
                   <td className="space-x-3">
                     <HardLink href={`/admin/products/${product.id}`} className="underline">
-                      Manage
+                      Manage product
                     </HardLink>
                     <HardLink href={sourceHref} className="underline">
-                      Source
+                      Content
                     </HardLink>
                     {publicHref ? (
                       <HardLink href={publicHref} className="underline">

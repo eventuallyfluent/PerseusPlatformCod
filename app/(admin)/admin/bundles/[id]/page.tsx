@@ -89,14 +89,14 @@ export default async function BundleDetailPage({
             : "");
 
   return (
-    <AdminShell title={bundle.title} description="One product record controls the bundle page, included courses, pricing, and access.">
+    <AdminShell title={bundle.title} description="Edit the bundle content here. Pricing, checkout, and unlock rules live on the linked product.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <Card className="space-y-8 bg-white p-8">
           {feedbackMessage ? <p className="rounded-[18px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedbackMessage}</p> : null}
           {detailedErrorMessage ? <p className="rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">{detailedErrorMessage}</p> : null}
           <div className="space-y-4 border-b border-[var(--border)] pb-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product editor</p>
-            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Edit the product once and let the page generate from it.</h2>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Bundle content</p>
+            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Manage the bundle itself here, then use the product for commerce settings.</h2>
           </div>
           <form id="bundle-details-form" action={saveBundleAction} className="space-y-8">
             <input type="hidden" name="id" value={bundle.id} />
@@ -126,7 +126,7 @@ export default async function BundleDetailPage({
               <label>SEO title<input name="seoTitle" defaultValue={bundle.seoTitle ?? ""} /></label>
               <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={bundle.seoDescription ?? ""} /></label>
             </ProductFormSection>
-            <ProductFormSection title="Pricing" description="Set the live bundle price here. Coupons apply discounts at checkout.">
+            <ProductFormSection title="Commerce handoff" description="This bundle links to a sellable product. Use this section for price defaults and upsell targets, then manage the product for checkout flow.">
               <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={bundle.price.toString()} /></label>
               <label>Currency<input name="currency" defaultValue={bundle.currency} /></label>
               <label>Compare-at price<input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={bundle.compareAtPrice?.toString() ?? ""} /></label>
@@ -160,7 +160,7 @@ export default async function BundleDetailPage({
               </label>
               <label className="lg:col-span-2">Upsell headline<input name="upsellHeadline" defaultValue={bundle.upsellHeadline ?? ""} placeholder="Optional override for the upsell title" /></label>
               <label className="lg:col-span-2">Upsell body<textarea name="upsellBody" rows={3} defaultValue={bundle.upsellBody ?? ""} placeholder="Explain the discounted follow-up offer clearly." /></label>
-              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">Checkout reads the bundle price directly. Use coupons for discounts and configure one optional upsell with its own discounted follow-up offer.</div>
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">This sets the default commercial values the linked product uses. Keep bundle editing here, then use the product screen to manage checkout and what buyers unlock.</div>
             </ProductFormSection>
             <ProductFormSection title="Pages" description="Manage the public sales, checkout, and thank-you surfaces from one place.">
               <div className="lg:col-span-2 grid gap-3 md:grid-cols-3">
@@ -201,7 +201,7 @@ export default async function BundleDetailPage({
         </Card>
         <div className="space-y-4">
           <Card className="space-y-4 bg-white p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product status</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Bundle summary</p>
             <div className="grid gap-3 text-sm text-stone-700">
               <button
                 className="w-full rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50"
@@ -213,10 +213,10 @@ export default async function BundleDetailPage({
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{bundle.status}</span></div>
               {bundle.accessProduct ? (
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Access product</span>
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Linked product</span>
                   <span className="mt-1 block text-base font-semibold text-stone-950">{bundle.accessProduct.title}</span>
                   <HardLink href={`/admin/products/${bundle.accessProduct.id}`} className="mt-2 inline-flex text-sm font-medium underline underline-offset-4">
-                    Manage access product
+                    Manage product
                   </HardLink>
                 </div>
               ) : null}

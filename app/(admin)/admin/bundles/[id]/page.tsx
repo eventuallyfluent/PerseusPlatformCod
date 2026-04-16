@@ -200,8 +200,11 @@ export default async function BundleDetailPage({
           </form>
         </Card>
         <div className="space-y-4">
-          <Card className="space-y-4 bg-white p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Bundle summary</p>
+          <Card className="space-y-5 bg-white p-5">
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Content workspace</p>
+              <h3 className="text-lg font-semibold text-stone-950">Keep bundle editing here. Use the linked product for commerce.</h3>
+            </div>
             <div className="grid gap-3 text-sm text-stone-700">
               <button
                 className="w-full rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50"
@@ -210,24 +213,30 @@ export default async function BundleDetailPage({
               >
                 Save bundle changes
               </button>
-              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{bundle.status}</span></div>
               {bundle.accessProduct ? (
-                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                <div className="rounded-[22px] border border-stone-200 bg-stone-50 px-4 py-4">
                   <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Linked product</span>
                   <span className="mt-1 block text-base font-semibold text-stone-950">{bundle.accessProduct.title}</span>
-                  <HardLink href={`/admin/products/${bundle.accessProduct.id}`} className="mt-2 inline-flex text-sm font-medium underline underline-offset-4">
+                  <p className="mt-2 text-sm leading-6 text-stone-600">Pricing, checkout flow, and unlock rules live on the product side.</p>
+                  <HardLink href={`/admin/products/${bundle.accessProduct.id}`} className="mt-3 inline-flex rounded-full bg-stone-950 px-4 py-2 text-sm font-medium text-stone-50">
                     Manage product
                   </HardLink>
                 </div>
               ) : null}
-              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Sales page</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
-              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Thank-you page</span><span className="mt-1 block break-all text-base text-stone-950">{thankYouPagePath}</span></div>
-              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Included courses</span><span className="mt-1 block text-base text-stone-950">{bundle.courses.length} course{bundle.courses.length === 1 ? "" : "s"}</span></div>
-              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Live price</span><span className="mt-1 block text-base text-stone-950">{bundle.price.toString()} {bundle.currency}</span></div>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{bundle.status}</span></div>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Included courses</span><span className="mt-1 block text-base text-stone-950">{bundle.courses.length} course{bundle.courses.length === 1 ? "" : "s"}</span></div>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Sales page</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Thank-you page</span><span className="mt-1 block break-all text-base text-stone-950">{thankYouPagePath}</span></div>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 sm:col-span-2 xl:col-span-1"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Live price</span><span className="mt-1 block text-base text-stone-950">{bundle.price.toString()} {bundle.currency}</span></div>
+              </div>
             </div>
           </Card>
-          <Card className="space-y-3 bg-white p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Actions</p>
+          <Card className="space-y-4 bg-white p-5">
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Preview and publish</p>
+              <p className="text-sm leading-6 text-stone-600">Use the public surfaces here, then return to the linked product when you need to change checkout or access behavior.</p>
+            </div>
             <div className="grid gap-3">
               <HardLink href={publicPagePath} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">View sales page</HardLink>
               {previewOffer ? <HardLink href={`/checkout/${previewOffer.id}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">Preview checkout</HardLink> : null}

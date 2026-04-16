@@ -64,87 +64,156 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       ? resolveBundleThankYouPath(product.bundle)
       : null;
   const sourceHref = product.course ? `/admin/courses/${product.course.id}` : product.bundle ? `/admin/bundles/${product.bundle.id}` : null;
+  const sourceLabel = product.course ? "Course source" : product.bundle ? "Bundle source" : "Linked source";
+  const actionLinkClass =
+    "inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-5 py-3 text-sm font-medium text-stone-700 transition hover:border-stone-300 hover:text-stone-950";
+  const infoCardClass = "rounded-[22px] border border-stone-200 bg-stone-50 px-5 py-4 text-sm text-stone-700";
 
   return (
     <AdminShell title={product.title} description="This product is the commerce layer. It owns checkout, pricing, and what content unlocks after purchase.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
-        <Card className="space-y-6 bg-white p-8">
-          <div className="space-y-4 border-b border-[var(--border)] pb-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product</p>
-            <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Commerce settings and unlocked content.</h2>
-            <p className="max-w-3xl text-sm leading-7 text-stone-700">
-              Courses and bundles remain the content objects. This product decides what checkout sells, which thank-you flow follows, and what the buyer unlocks.
-            </p>
-          </div>
+        <div className="space-y-6">
+          <Card className="space-y-6 bg-white p-8">
+            <div className="space-y-4 border-b border-[var(--border)] pb-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product</p>
+              <div className="space-y-3">
+                <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Commerce settings, checkout ownership, and unlock rules.</h2>
+                <p className="max-w-3xl text-sm leading-7 text-stone-700">
+                  Courses and bundles remain the content objects. This product is the commercial layer that decides what buyers purchase, where they go next, and what access they receive.
+                </p>
+              </div>
+            </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Product type</span>
-              <span className="mt-2 block text-base font-semibold text-stone-950">{formatTypeLabel(product.type)}</span>
+            <div className="flex flex-wrap gap-3">
+              {salesPagePath ? (
+                <HardLink href={salesPagePath} className={`${actionLinkClass} shadow-sm`}>
+                  View sales page
+                </HardLink>
+              ) : null}
+              {primaryOffer ? (
+                <HardLink href={`/checkout/${primaryOffer.id}`} className={`${actionLinkClass} shadow-sm`}>
+                  Preview checkout
+                </HardLink>
+              ) : null}
+              {thankYouPagePath ? (
+                <HardLink href={thankYouPagePath} className={`${actionLinkClass} shadow-sm`}>
+                  View thank-you page
+                </HardLink>
+              ) : null}
+              {sourceHref ? (
+                <HardLink href={sourceHref} className="inline-flex items-center justify-center rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50 shadow-sm transition hover:bg-stone-800">
+                  Manage content
+                </HardLink>
+              ) : null}
             </div>
-            <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Status</span>
-              <span className="mt-2 block text-base font-semibold text-stone-950">{product.status}</span>
-            </div>
-            <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Checkout page</span>
-              <span className="mt-2 block break-all text-stone-950">{primaryOffer ? `/checkout/${primaryOffer.id}` : "No published checkout offer"}</span>
-            </div>
-            <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Checkout mode</span>
-              <span className="mt-2 block text-base font-semibold text-stone-950">{product.checkoutMode.replace(/_/g, " ")}</span>
-            </div>
-            <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Sales page</span>
-              <span className="mt-2 block break-all text-stone-950">{salesPagePath ?? "No product sales page linked yet"}</span>
-            </div>
-            <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
-              <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Thank-you page</span>
-              <span className="mt-2 block break-all text-stone-950">{thankYouPagePath ?? "No thank-you page linked yet"}</span>
-            </div>
-          </div>
 
-          <div className="space-y-3">
+            <div className="grid gap-4 lg:grid-cols-4">
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Product type</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{formatTypeLabel(product.type)}</span>
+              </div>
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Status</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{product.status}</span>
+              </div>
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Checkout mode</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{product.checkoutMode.replace(/_/g, " ")}</span>
+              </div>
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Unlocks</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">
+                  {product.grants.length} course{product.grants.length === 1 ? "" : "s"}
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="space-y-5 bg-white p-8">
+            <div className="space-y-1">
+              <h3 className="text-xl font-semibold text-stone-950">Checkout and page surfaces</h3>
+              <p className="text-sm leading-7 text-stone-600">This is where the product sends buyers during the sales, checkout, and post-purchase flow.</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Checkout page</span>
+                <span className="mt-2 block break-all text-stone-950">{primaryOffer ? `/checkout/${primaryOffer.id}` : "No published checkout offer"}</span>
+              </div>
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Sales page</span>
+                <span className="mt-2 block break-all text-stone-950">{salesPagePath ?? "No product sales page linked yet"}</span>
+              </div>
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Thank-you page</span>
+                <span className="mt-2 block break-all text-stone-950">{thankYouPagePath ?? "No thank-you page linked yet"}</span>
+              </div>
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Offer count</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{product.offers.length} active offer path{product.offers.length === 1 ? "" : "s"}</span>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="space-y-5 bg-white p-8">
             <div className="space-y-1">
               <h3 className="text-xl font-semibold text-stone-950">Unlocked content</h3>
               <p className="text-sm text-stone-600">These linked courses are what fulfillment grants after successful payment or manual confirmation.</p>
             </div>
             <div className="grid gap-3">
-              {product.grants.map((grant, index) => (
-                <div key={grant.id} className="rounded-[20px] border border-stone-200 bg-white px-4 py-4 text-sm text-stone-700">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Unlocked course {index + 1}</span>
-                  <span className="mt-2 block text-base font-semibold text-stone-950">{grant.course.title}</span>
-                  <span className="mt-1 block text-sm text-stone-600">{grant.course.instructor.name}</span>
+              {product.grants.length > 0 ? (
+                product.grants.map((grant, index) => (
+                  <div key={grant.id} className="rounded-[22px] border border-stone-200 bg-white px-5 py-4 text-sm text-stone-700 shadow-sm">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Unlocked course {index + 1}</span>
+                        <span className="mt-2 block text-base font-semibold text-stone-950">{grant.course.title}</span>
+                        <span className="mt-1 block text-sm text-stone-600">{grant.course.instructor.name}</span>
+                      </div>
+                      <HardLink href={`/admin/courses/${grant.course.id}`} className="text-sm font-medium text-stone-700 underline underline-offset-4">
+                        Open course
+                      </HardLink>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-[22px] border border-dashed border-stone-200 bg-stone-50 px-5 py-4 text-sm text-stone-600">
+                  No unlocked content is configured yet.
                 </div>
-              ))}
+              )}
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
 
         <div className="space-y-4">
-          <Card className="space-y-3 bg-white p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Actions</p>
-            <div className="grid gap-3">
-              {salesPagePath ? (
-                <HardLink href={salesPagePath} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
-                  View sales page
-                </HardLink>
-              ) : null}
-              {primaryOffer ? (
-                <HardLink href={`/checkout/${primaryOffer.id}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
-                  Preview checkout
-                </HardLink>
-              ) : null}
-              {thankYouPagePath ? (
-                <HardLink href={thankYouPagePath} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">
-                  View thank-you page
-                </HardLink>
-              ) : null}
+          <Card className="space-y-4 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Linked content source</p>
+            <div className="space-y-3 text-sm text-stone-700">
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">{sourceLabel}</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{product.course?.title ?? product.bundle?.title ?? "No linked content source"}</span>
+                <p className="mt-2 leading-6 text-stone-600">
+                  Edit curriculum, included courses, and sales copy on the content side. Keep checkout and access decisions here on the product.
+                </p>
+              </div>
               {sourceHref ? (
-                <HardLink href={sourceHref} className="rounded-full bg-stone-950 px-5 py-3 text-center text-sm font-medium text-stone-50">
+                <HardLink href={sourceHref} className="inline-flex items-center justify-center rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50 transition hover:bg-stone-800">
                   Manage content
                 </HardLink>
               ) : null}
+            </div>
+          </Card>
+
+          <Card className="space-y-4 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">At a glance</p>
+            <div className="grid gap-3 text-sm text-stone-700">
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Source status</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{product.course?.status ?? product.bundle?.status ?? "No source"}</span>
+              </div>
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Offer coverage</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{primaryOffer ? "Checkout ready" : "Missing checkout offer"}</span>
+              </div>
             </div>
           </Card>
         </div>

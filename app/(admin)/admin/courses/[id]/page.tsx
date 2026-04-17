@@ -64,6 +64,8 @@ export default async function CourseDetailPage({
   const previewOffer = getPrimaryOffer(course.offers);
   const publicPagePath = resolveCoursePublicPath(course);
   const thankYouPagePath = resolveCourseThankYouPath(course);
+  const canonicalPathLocked =
+    Boolean(course.legacyUrl?.startsWith("/")) || Boolean(course.publicPath?.startsWith("/") && course.publicPath !== `/course/${course.slug}`);
   const salesPageConfig = parseSalesPageConfig(course.salesPageConfig);
   const upsellTarget = course.upsellCourseId ? `course:${course.upsellCourseId}` : course.upsellBundleId ? `bundle:${course.upsellBundleId}` : "";
   const feedbackMessage =
@@ -114,9 +116,14 @@ export default async function CourseDetailPage({
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Course content</p>
               <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Manage the course itself here, then use the product for commerce settings.</h2>
             </div>
+            <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-7 text-amber-900">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-700">Canonical public URL</span>
+              <span className="mt-2 block break-all font-semibold text-stone-950">{publicPagePath}</span>
+              <p className="mt-2">This is the live SEO path for this migrated course. Routine edits do not change it.</p>
+            </div>
             <form id="course-details-form" action={saveCourseAction} className="space-y-8">
               <input type="hidden" name="id" value={course.id} />
-              <ProductFormSection id="core-identity" title="Core identity" description="Title, route, owner, and status.">
+              <ProductFormSection id="core-identity" title="Core identity" description="Title, route, owner, and status." collapsible defaultOpen>
                 <label>Title<input name="title" defaultValue={course.title} required /></label>
                 <label>Slug<input name="slug" defaultValue={course.slug} required /></label>
                 <label>Subtitle<input name="subtitle" defaultValue={course.subtitle ?? ""} /></label>
@@ -124,14 +131,14 @@ export default async function CourseDetailPage({
                 <label>Status<select name="status" defaultValue={course.status}><option value="DRAFT">DRAFT</option><option value="PUBLISHED">PUBLISHED</option><option value="ARCHIVED">ARCHIVED</option></select></label>
                 <div className="hidden md:block" />
               </ProductFormSection>
-              <ProductFormSection id="sales-copy" title="Sales copy" description="Core page copy.">
+              <ProductFormSection id="sales-copy" title="Sales copy" description="Core page copy." collapsible defaultOpen>
                 <label className="lg:col-span-2">Short description<textarea name="shortDescription" rows={4} defaultValue={course.shortDescription ?? ""} /></label>
                 <label className="lg:col-span-2">Long description<textarea name="longDescription" rows={6} defaultValue={course.longDescription ?? ""} /></label>
                 <label className="lg:col-span-2">Outcomes<textarea name="learningOutcomes" rows={4} defaultValue={(course.learningOutcomes as string[] | null)?.join("\n") ?? ""} /></label>
                 <label>Who it&apos;s for<textarea name="whoItsFor" rows={4} defaultValue={(course.whoItsFor as string[] | null)?.join("\n") ?? ""} /></label>
                 <label>Includes<textarea name="includes" rows={4} defaultValue={(course.includes as string[] | null)?.join("\n") ?? ""} /></label>
               </ProductFormSection>
-              <ProductFormSection id="media-seo" title="Media and SEO" description="Hero media and search.">
+              <ProductFormSection id="media-seo" title="Media and SEO" description="Hero media and search." collapsible>
                 <ImageField
                   name="heroImageUrl"
                   label="Course cover image URL"
@@ -144,7 +151,7 @@ export default async function CourseDetailPage({
                 <label>SEO title<input name="seoTitle" defaultValue={course.seoTitle ?? ""} /></label>
                 <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} /></label>
               </ProductFormSection>
-              <ProductFormSection id="pricing-checkout" title="Commerce handoff" description="This course links to a sellable product. Use this section for price defaults and upsell targets, then manage the product for checkout flow.">
+              <ProductFormSection id="pricing-checkout" title="Commerce handoff" description="This course links to a sellable product. Use this section for price defaults and upsell targets, then manage the product for checkout flow." collapsible>
                 <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={course.price.toString()} /></label>
                 <label>Currency<input name="currency" defaultValue={course.currency} /></label>
                 <label>Compare-at price<input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={course.compareAtPrice?.toString() ?? ""} /></label>
@@ -180,7 +187,7 @@ export default async function CourseDetailPage({
                 <label className="lg:col-span-2">Upsell body<textarea name="upsellBody" rows={3} defaultValue={course.upsellBody ?? ""} placeholder="Explain the discounted follow-up offer clearly." /></label>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">This sets the default commercial values the linked product uses. Keep course editing here, then use the product screen to manage checkout and what buyers unlock.</div>
               </ProductFormSection>
-              <ProductFormSection id="pages" title="Pages" description="Manage the public sales, checkout, and thank-you surfaces from one place.">
+              <ProductFormSection id="pages" title="Pages" description="Manage the public sales, checkout, and thank-you surfaces from one place." collapsible>
                 <div className="lg:col-span-2 grid gap-3 md:grid-cols-3">
                   <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
                     <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Sales page</span>
@@ -211,10 +218,25 @@ export default async function CourseDetailPage({
                 <label className="lg:col-span-2">Section order<textarea name="salesPage.sectionOrder" rows={7} defaultValue={(salesPageConfig.sectionOrder ?? ["description", "highlights", "curriculum", "instructor", "testimonials", "faqs", "pricing"]).join("\n")} /></label>
                 <label className="lg:col-span-2">Hidden sections<textarea name="salesPage.hiddenSections" rows={7} defaultValue={(salesPageConfig.hiddenSections ?? []).join("\n")} /></label>
               </ProductFormSection>
-              <ProductFormSection id="migration-urls" title="Migration and preserved URLs" description="Only use these when preserving an old live route.">
+              <ProductFormSection id="migration-urls" title="Publish and URL preservation" description="Preserved migrated routes stay canonical after migration and should be treated as SEO-critical." collapsible>
                 <label>Legacy course ID<input name="legacyCourseId" defaultValue={course.legacyCourseId ?? ""} /></label>
                 <label>Legacy slug<input name="legacySlug" defaultValue={course.legacySlug ?? ""} /></label>
-                <label className="md:col-span-2">Legacy URL<input name="legacyUrl" defaultValue={course.legacyUrl ?? ""} /></label>
+                {canonicalPathLocked ? (
+                  <>
+                    <input type="hidden" name="legacyUrl" value={course.legacyUrl ?? ""} />
+                    <label className="md:col-span-2">Canonical public URL<input name="legacyUrlDisplay" value={publicPagePath} readOnly /></label>
+                    <div className="md:col-span-2 rounded-[20px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-7 text-amber-900">
+                      This route is locked because it is live and SEO-critical. Perseus keeps serving this exact path and does not replace it with the course slug route.
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <label className="md:col-span-2">Canonical public URL<input name="legacyUrl" defaultValue={course.legacyUrl ?? ""} /></label>
+                    <div className="md:col-span-2 rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
+                      Use a custom public URL only when preserving an existing live route. This affects the canonical path buyers and search engines use.
+                    </div>
+                  </>
+                )}
               </ProductFormSection>
               <div className="border-t border-[var(--border)] pt-6"><button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">Save course</button></div>
             </form>
@@ -275,6 +297,7 @@ export default async function CourseDetailPage({
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{course.status}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Curriculum</span><span className="mt-1 block text-base text-stone-950">{course.modules.length} module{course.modules.length === 1 ? "" : "s"}</span></div>
+                <div className="rounded-[20px] border border-amber-200 bg-amber-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-700">Canonical URL</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Sales page</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Thank-you page</span><span className="mt-1 block break-all text-base text-stone-950">{thankYouPagePath}</span></div>
               </div>
@@ -324,11 +347,15 @@ export default async function CourseDetailPage({
 
       <div className="grid gap-6">
         <div id="curriculum">
-          <Card className="space-y-4 bg-white">
-            <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-stone-950">Curriculum</h2>
-              <p className="text-sm text-stone-600">Work top to bottom: add a module, add lessons inside it, then save each lesson once after changing content, preview, or embed fields.</p>
-            </div>
+          <details className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]" open>
+            <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold text-stone-950">Curriculum</h2>
+                <p className="text-sm text-stone-600">Work top to bottom: add a module, add lessons inside it, then save each lesson once after changing content, preview, or embed fields.</p>
+              </div>
+              <span className="rounded-full border border-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Toggle</span>
+            </summary>
+            <div className="mt-4 space-y-4">
             {course.modules.map((module) => (
               <details key={module.id} className="rounded-[24px] border border-stone-200 bg-stone-50 p-4" open>
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
@@ -432,15 +459,19 @@ export default async function CourseDetailPage({
                 <button className="w-fit rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Create module</button>
               </form>
             </details>
-          </Card>
+            </div>
+          </details>
         </div>
         <div id="social-proof">
-          <Card className="space-y-6 bg-white">
-            <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-stone-950">FAQ and reviews</h2>
-              <p className="text-sm text-stone-600">Keep public proof and objections inside the same product editor.</p>
-            </div>
-            <div className="space-y-3 text-sm text-stone-700">
+          <details className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]">
+            <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold text-stone-950">FAQ and reviews</h2>
+                <p className="text-sm text-stone-600">Keep public proof and objections inside the same product editor.</p>
+              </div>
+              <span className="rounded-full border border-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Toggle</span>
+            </summary>
+            <div className="mt-4 space-y-3 text-sm text-stone-700">
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
                 Live price: {course.price.toString()} {course.currency}
                 {course.compareAtPrice ? ` · compare-at ${course.compareAtPrice.toString()} ${course.currency}` : ""}
@@ -492,7 +523,7 @@ export default async function CourseDetailPage({
               </form>
             ))}
           </div>
-        </Card>
+        </details>
         </div>
       </div>
     </AdminShell>

@@ -58,6 +58,8 @@ export default async function BundleDetailPage({
   const previewOffer = getPrimaryOffer(bundle.offers);
   const publicPagePath = resolveBundlePublicPath(bundle);
   const thankYouPagePath = resolveBundleThankYouPath(bundle);
+  const canonicalPathLocked =
+    Boolean(bundle.legacyUrl?.startsWith("/")) || Boolean(bundle.publicPath?.startsWith("/") && bundle.publicPath !== `/bundle/${bundle.slug}`);
   const salesPageConfig = parseSalesPageConfig(bundle.salesPageConfig);
   const upsellTarget = bundle.upsellCourseId ? `course:${bundle.upsellCourseId}` : bundle.upsellBundleId ? `bundle:${bundle.upsellBundleId}` : "";
   const saved = resolvedSearchParams?.saved ?? "";
@@ -193,8 +195,23 @@ export default async function BundleDetailPage({
               <label className="lg:col-span-2">Section order<textarea name="salesPage.sectionOrder" rows={6} defaultValue={(salesPageConfig.sectionOrder ?? ["description", "highlights", "included-courses", "testimonials", "faqs", "pricing"]).join("\n")} /></label>
               <label className="lg:col-span-2">Hidden sections<textarea name="salesPage.hiddenSections" rows={6} defaultValue={(salesPageConfig.hiddenSections ?? []).join("\n")} /></label>
             </ProductFormSection>
-            <ProductFormSection title="Preserved URLs" description="Only use this when preserving an old live route.">
-              <label className="lg:col-span-2">Legacy URL<input name="legacyUrl" defaultValue={bundle.legacyUrl ?? ""} /></label>
+            <ProductFormSection title="Preserved URLs" description="This public route is SEO-critical for migrated content and should be treated as the canonical path.">
+              {canonicalPathLocked ? (
+                <>
+                  <input type="hidden" name="legacyUrl" value={bundle.legacyUrl ?? ""} />
+                  <label className="lg:col-span-2">Canonical public URL<input name="legacyUrlDisplay" value={publicPagePath} readOnly /></label>
+                  <div className="lg:col-span-2 rounded-[20px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-7 text-amber-900">
+                    This migrated bundle route is locked because it is live and SEO-critical. Perseus keeps serving this exact URL after migration.
+                  </div>
+                </>
+              ) : (
+                <>
+                  <label className="lg:col-span-2">Canonical public URL<input name="legacyUrl" defaultValue={bundle.legacyUrl ?? ""} /></label>
+                  <div className="lg:col-span-2 rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
+                    Use a custom public URL only when preserving an existing live route. This affects the canonical path search engines and backlinks use.
+                  </div>
+                </>
+              )}
             </ProductFormSection>
             <div className="border-t border-[var(--border)] pt-6"><button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">Save bundle</button></div>
           </form>
@@ -226,6 +243,7 @@ export default async function BundleDetailPage({
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{bundle.status}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Included courses</span><span className="mt-1 block text-base text-stone-950">{bundle.courses.length} course{bundle.courses.length === 1 ? "" : "s"}</span></div>
+                <div className="rounded-[20px] border border-amber-200 bg-amber-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-700">Canonical URL</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Sales page</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Thank-you page</span><span className="mt-1 block break-all text-base text-stone-950">{thankYouPagePath}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 sm:col-span-2 xl:col-span-1"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Live price</span><span className="mt-1 block text-base text-stone-950">{bundle.price.toString()} {bundle.currency}</span></div>

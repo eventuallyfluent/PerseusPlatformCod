@@ -18,8 +18,20 @@ export async function updateCourse(courseId: string, input: unknown) {
   }
 
   const slug = data.slug ?? existing.slug;
+  const defaultPath = `/course/${existing.slug}`;
+  const hasLockedCanonicalPath =
+    Boolean(existing.legacyUrl?.startsWith("/")) ||
+    Boolean(existing.publicPath?.startsWith("/") && existing.publicPath !== defaultPath);
+  const lockedCanonicalPath =
+    existing.publicPath?.startsWith("/") && hasLockedCanonicalPath
+      ? existing.publicPath
+      : existing.legacyUrl?.startsWith("/")
+        ? existing.legacyUrl
+        : null;
   const desiredPath =
-    data.legacyUrl === undefined
+    lockedCanonicalPath
+      ? lockedCanonicalPath
+      : data.legacyUrl === undefined
       ? (existing.publicPath?.startsWith("/") ? existing.publicPath : `/course/${slug}`)
       : data.legacyUrl?.startsWith("/")
         ? data.legacyUrl
@@ -47,7 +59,7 @@ export async function updateCourse(courseId: string, input: unknown) {
       upsellBody: data.upsellBody === "" ? null : data.upsellBody,
       legacyCourseId: data.legacyCourseId === "" ? null : data.legacyCourseId,
       legacySlug: data.legacySlug === "" ? null : data.legacySlug,
-      legacyUrl: data.legacyUrl === "" ? null : data.legacyUrl,
+      legacyUrl: lockedCanonicalPath ? existing.legacyUrl : data.legacyUrl === "" ? null : data.legacyUrl,
     },
     include: courseInclude,
   });

@@ -18,8 +18,20 @@ export async function updateBundle(bundleId: string, input: unknown) {
   }
 
   const slug = data.slug ?? existing.slug;
+  const defaultPath = `/bundle/${existing.slug}`;
+  const hasLockedCanonicalPath =
+    Boolean(existing.legacyUrl?.startsWith("/")) ||
+    Boolean(existing.publicPath?.startsWith("/") && existing.publicPath !== defaultPath);
+  const lockedCanonicalPath =
+    existing.publicPath?.startsWith("/") && hasLockedCanonicalPath
+      ? existing.publicPath
+      : existing.legacyUrl?.startsWith("/")
+        ? existing.legacyUrl
+        : null;
   const desiredPath =
-    data.legacyUrl === undefined
+    lockedCanonicalPath
+      ? lockedCanonicalPath
+      : data.legacyUrl === undefined
       ? (existing.publicPath?.startsWith("/") ? existing.publicPath : `/bundle/${slug}`)
       : data.legacyUrl?.startsWith("/")
         ? data.legacyUrl
@@ -46,7 +58,7 @@ export async function updateBundle(bundleId: string, input: unknown) {
             : data.upsellDiscountValue,
       upsellHeadline: data.upsellHeadline === "" ? null : data.upsellHeadline,
       upsellBody: data.upsellBody === "" ? null : data.upsellBody,
-      legacyUrl: data.legacyUrl === "" ? null : data.legacyUrl,
+      legacyUrl: lockedCanonicalPath ? existing.legacyUrl : data.legacyUrl === "" ? null : data.legacyUrl,
     },
     include: bundleInclude,
   });

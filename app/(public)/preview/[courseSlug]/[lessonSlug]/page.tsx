@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CoursePlayerLayout } from "@/components/course-player/course-player-layout";
 import { getCourseBySlug } from "@/lib/courses/get-course-by-slug";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = buildNoIndexMetadata({
+  title: "Preview Lesson",
+  description: "Non-indexable public lesson preview page.",
+});
 
 export default async function PublicPreviewLessonPage({
   params,

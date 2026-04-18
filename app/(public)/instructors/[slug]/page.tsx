@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getInstructorBySlug } from "@/lib/instructors/get-instructor-by-slug";
 import { CourseCard } from "@/components/public/course-card";
 import { buildMetadata } from "@/lib/seo/metadata";
-import { buildPersonStructuredData } from "@/lib/seo/structured-data";
+import { buildBreadcrumbStructuredData, buildPersonStructuredData, buildProfilePageStructuredData } from "@/lib/seo/structured-data";
 
 export const dynamic = "force-dynamic";
 
@@ -46,10 +46,24 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
     url: `/instructors/${instructor.slug}`,
     sameAs: socialLinks.map(([, url]) => url as string),
   });
+  const profilePageJsonLd = buildProfilePageStructuredData({
+    name: instructor.name,
+    description: instructor.shortBio ?? instructor.longBio,
+    image: instructor.imageUrl,
+    path: `/instructors/${instructor.slug}`,
+    sameAs: socialLinks.map(([, url]) => url as string),
+  });
+  const breadcrumbJsonLd = buildBreadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Instructors", path: "/instructors" },
+    { name: instructor.name, path: `/instructors/${instructor.slug}` },
+  ]);
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(143,44,255,0.08),transparent_18%),linear-gradient(180deg,#0d0f1d,#13152a_28%,#0c0e1d_100%)] text-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(profilePageJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
       <section className="relative overflow-hidden border-b border-[rgba(255,255,255,0.08)]">
         <div

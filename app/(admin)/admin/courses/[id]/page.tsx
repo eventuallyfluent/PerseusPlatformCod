@@ -123,7 +123,7 @@ export default async function CourseDetailPage({
             </div>
             <form id="course-details-form" action={saveCourseAction} className="space-y-8">
               <input type="hidden" name="id" value={course.id} />
-              <ProductFormSection id="core-identity" title="Core identity" description="Title, route, owner, and status." collapsible defaultOpen>
+              <ProductFormSection id="core-identity" title="Core identity" description="Title, route, owner, and status." collapsible>
                 <label>Title<input name="title" defaultValue={course.title} required /></label>
                 <label>Slug<input name="slug" defaultValue={course.slug} required /></label>
                 <label>Subtitle<input name="subtitle" defaultValue={course.subtitle ?? ""} /></label>
@@ -131,7 +131,7 @@ export default async function CourseDetailPage({
                 <label>Status<select name="status" defaultValue={course.status}><option value="DRAFT">DRAFT</option><option value="PUBLISHED">PUBLISHED</option><option value="ARCHIVED">ARCHIVED</option></select></label>
                 <div className="hidden md:block" />
               </ProductFormSection>
-              <ProductFormSection id="sales-copy" title="Sales copy" description="Core page copy." collapsible defaultOpen>
+              <ProductFormSection id="sales-copy" title="Sales copy" description="Core page copy." collapsible>
                 <label className="lg:col-span-2">Short description<textarea name="shortDescription" rows={4} defaultValue={course.shortDescription ?? ""} /></label>
                 <label className="lg:col-span-2">Long description<textarea name="longDescription" rows={6} defaultValue={course.longDescription ?? ""} /></label>
                 <label className="lg:col-span-2">Outcomes<textarea name="learningOutcomes" rows={4} defaultValue={(course.learningOutcomes as string[] | null)?.join("\n") ?? ""} /></label>

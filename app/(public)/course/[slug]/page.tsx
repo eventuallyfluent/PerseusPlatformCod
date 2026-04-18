@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { CourseSalesPage } from "@/components/public/course-sales-page";
 import { getCourseBySlug } from "@/lib/courses/get-course-by-slug";
@@ -40,16 +40,22 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const { slug } = await params;
   const session = await auth();
   const course = await getCourseBySlug(slug);
+  const routePath = `/course/${slug}`;
   const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`/course/${slug}#leave-review`)}`;
 
   if (!course) {
-    const resolved = await resolvePublicRequest(`/course/${slug}`);
+    const resolved = await resolvePublicRequest(routePath);
 
     if (resolved?.type === "redirect") {
       redirect(resolved.redirect.toPath);
     }
 
     if (resolved?.type === "course") {
+      const canonicalPath = resolveCoursePublicPath(resolved.course);
+      if (canonicalPath !== routePath) {
+        permanentRedirect(canonicalPath);
+      }
+
       const canLeaveReview = Boolean(
         session?.user?.email &&
           (await prisma.enrollment.findFirst({
@@ -83,6 +89,11 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
     }
 
     notFound();
+  }
+
+  const canonicalPath = resolveCoursePublicPath(course);
+  if (canonicalPath !== routePath) {
+    permanentRedirect(canonicalPath);
   }
 
   const payload = getCourseSalesPage(course);

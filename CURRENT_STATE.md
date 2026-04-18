@@ -70,9 +70,39 @@ Customer-facing copy should focus on:
 - gateway maturity needs to stay described honestly in admin and docs
 - admin auth is currently practical rather than final-form
 
+## Public SEO And Discovery
+
+Current truth:
+
+- preserved migrated public URLs are the canonical public URLs for migrated courses and bundles
+- public-only SEO is the target; private lesson and learner routes are not search surfaces
+- the platform now has sitemap, robots, canonical metadata, structured data, and `llms.txt` support in the local rollout pass
+
+Still provisional until pushed and deployed:
+
+- the local SEO/canonical pass that adds:
+  - duplicate slug-route redirects to preserved canonical URLs
+  - private-route `noindex`
+  - sitemap and robots cleanup
+  - `llms.txt`
+  - richer public structured data
+
+## Migration Rollout
+
+Current truth:
+
+- the import center already supports course-package and course-student dry runs and execution
+- import execution is intended to be course-by-course with verification, not bulk blind loading
+- preserved Payhip-backed public URLs must remain exact during migration
+
+Local verification support now includes:
+
+- `npm run prisma:check:imports`
+- [MIGRATION_ROLLOUT.md](C:\Users\stude\OneDrive\Desktop\Perseus Platform\MIGRATION_ROLLOUT.md)
+
 ## Next Priority Areas
 
-1. keep auth stable and production-usable
-2. continue customer-facing copy cleanup
+1. push and deploy the current local SEO/canonical pass
+2. migrate courses in controlled batches through the import center
 3. verify real hosted-checkout providers with live credentials
-4. keep gateway/operator guidance and planning state current
+4. continue customer-facing copy cleanup only where migration exposes weak spots

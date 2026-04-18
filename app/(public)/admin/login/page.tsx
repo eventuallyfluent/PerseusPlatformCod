@@ -1,12 +1,18 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { LoginForm } from "@/components/public/login-form";
 import { normalizeAdminReturnPath } from "@/lib/auth/return-path";
 import { isPreviewLoginEnabled } from "@/lib/auth/preview-login";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import { BOOTSTRAP_ADMIN_EMAIL } from "@/lib/utils";
 
 const emailEnabled = Boolean(process.env.AUTH_RESEND_KEY || process.env.RESEND_API_KEY);
 const adminPasswordConfigured = true;
+export const metadata: Metadata = buildNoIndexMetadata({
+  title: "Admin Login",
+  description: "Private admin authentication page.",
+});
 
 export default async function AdminLoginPage({
   searchParams,

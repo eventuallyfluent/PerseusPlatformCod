@@ -1,10 +1,17 @@
+import type { Metadata } from "next";
 import { requireSession } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { getDashboardCourseState } from "@/lib/courses/dashboard-progress";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import { Badge } from "@/components/ui/badge";
 import { HardLink } from "@/components/ui/hard-link";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = buildNoIndexMetadata({
+  title: "Dashboard",
+  description: "Private learner dashboard.",
+  path: "/dashboard",
+});
 
 export default async function DashboardPage() {
   const session = await requireSession();

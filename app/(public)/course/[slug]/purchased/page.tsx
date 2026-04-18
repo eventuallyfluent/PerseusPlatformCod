@@ -1,12 +1,19 @@
-import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { ProductThankYouPage } from "@/components/public/product-thank-you-page";
 import { prisma } from "@/lib/db/prisma";
 import { getCourseBySlug } from "@/lib/courses/get-course-by-slug";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import { getCourseThankYouPage } from "@/lib/sales-pages/get-course-thank-you-page";
+import { resolveCoursePublicPath, resolveCourseThankYouPath } from "@/lib/urls/resolve-course-path";
 import { resolvePublicRequest } from "@/lib/urls/resolve-public-request";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = buildNoIndexMetadata({
+  title: "Course Purchase Complete",
+  description: "Private post-purchase course confirmation page.",
+});
 
 export default async function CoursePurchasedPage({
   params,
@@ -19,6 +26,7 @@ export default async function CoursePurchasedPage({
   const query = await searchParams;
   const session = await auth();
   const course = await getCourseBySlug(slug);
+  const routePath = `/course/${slug}/purchased`;
 
   if (!course) {
     const resolved = await resolvePublicRequest(`/course/${slug}`);
@@ -31,7 +39,17 @@ export default async function CoursePurchasedPage({
       notFound();
     }
 
+    const canonicalPath = resolveCourseThankYouPath(resolved.course);
+    if (canonicalPath !== routePath) {
+      permanentRedirect(`${canonicalPath}${query.order ? `?order=${query.order}` : ""}`);
+    }
+
     return renderCourseThankYou(resolved.course, session?.user?.email ?? null, query.order);
+  }
+
+  const canonicalPath = resolveCourseThankYouPath(course);
+  if (canonicalPath !== routePath) {
+    permanentRedirect(`${canonicalPath}${query.order ? `?order=${query.order}` : ""}`);
   }
 
   return renderCourseThankYou(course, session?.user?.email ?? null, query.order);
@@ -75,7 +93,7 @@ async function renderCourseThankYou(
       payload={payload}
       primaryActionHref={primaryActionHref}
       primaryActionLabel={primaryActionLabel}
-      secondaryActionHref={signedIn ? "/dashboard" : `/course/${course.slug}`}
+      secondaryActionHref={signedIn ? "/dashboard" : resolveCoursePublicPath(course)}
       secondaryActionLabel={signedIn ? "Go to dashboard" : "Back to course page"}
     />
   );

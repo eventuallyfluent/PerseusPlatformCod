@@ -34,6 +34,7 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
         <div className="grid gap-3 text-sm text-stone-600">
           <div>Type: {batch.type}</div>
           <div>Status: {batch.status}</div>
+          {isProcessing ? <div className="font-medium text-amber-700">If this batch stopped mid-run, use resume processing.</div> : null}
           {totalCount > 0 ? <div>Progress: {processedCount} / {totalCount}</div> : null}
           {targetCourse ? <div>Target course: {targetCourse}</div> : null}
         </div>
@@ -42,6 +43,13 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
             <form action={`/api/imports/batches/${batch.id}/execute`} method="post">
               <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
                 Execute batch
+              </button>
+            </form>
+          ) : null}
+          {batch.status === "PROCESSING" ? (
+            <form action={`/api/imports/batches/${batch.id}/execute`} method="post">
+              <button className="rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800" type="submit">
+                Resume processing
               </button>
             </form>
           ) : null}

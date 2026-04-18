@@ -93,6 +93,7 @@ export default async function BundleDetailPage({
   return (
     <AdminShell title={bundle.title} description="Edit the bundle content here. Pricing, checkout, and unlock rules live on the linked product.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
+        <div className="space-y-6">
         <Card className="space-y-8 bg-white p-8">
           {feedbackMessage ? <p className="rounded-[18px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedbackMessage}</p> : null}
           {detailedErrorMessage ? <p className="rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">{detailedErrorMessage}</p> : null}
@@ -100,22 +101,27 @@ export default async function BundleDetailPage({
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Bundle content</p>
             <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Manage the bundle itself here, then use the product for commerce settings.</h2>
           </div>
+          <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-7 text-amber-900">
+            <span className="block text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-700">Canonical public URL</span>
+            <span className="mt-2 block break-all font-semibold text-stone-950">{publicPagePath}</span>
+            <p className="mt-2">This is the live SEO path for this migrated bundle. Routine edits do not change it.</p>
+          </div>
           <form id="bundle-details-form" action={saveBundleAction} className="space-y-8">
             <input type="hidden" name="id" value={bundle.id} />
-            <ProductFormSection title="Core identity" description="Title, route, and status.">
+            <ProductFormSection title="Core identity" description="Title, route, and status." collapsible>
               <label>Title<input name="title" defaultValue={bundle.title} required /></label>
               <label>Slug<input name="slug" defaultValue={bundle.slug} required /></label>
               <label>Subtitle<input name="subtitle" defaultValue={bundle.subtitle ?? ""} /></label>
               <label>Status<select name="status" defaultValue={bundle.status}><option value="DRAFT">DRAFT</option><option value="PUBLISHED">PUBLISHED</option><option value="ARCHIVED">ARCHIVED</option></select></label>
             </ProductFormSection>
-            <ProductFormSection title="Sales copy" description="Core page copy.">
+            <ProductFormSection title="Sales copy" description="Core page copy." collapsible>
               <label className="lg:col-span-2">Short description<textarea name="shortDescription" rows={4} defaultValue={bundle.shortDescription ?? ""} /></label>
               <label className="lg:col-span-2">Long description<textarea name="longDescription" rows={6} defaultValue={bundle.longDescription ?? ""} /></label>
               <label className="lg:col-span-2">Outcomes<textarea name="learningOutcomes" rows={4} defaultValue={(bundle.learningOutcomes as string[] | null)?.join("\n") ?? ""} /></label>
               <label>Who it&apos;s for<textarea name="whoItsFor" rows={4} defaultValue={(bundle.whoItsFor as string[] | null)?.join("\n") ?? ""} /></label>
               <label>Includes<textarea name="includes" rows={4} defaultValue={(bundle.includes as string[] | null)?.join("\n") ?? ""} /></label>
             </ProductFormSection>
-            <ProductFormSection title="Media and SEO" description="Hero media and search.">
+            <ProductFormSection title="Media and SEO" description="Hero media and search." collapsible>
               <ImageField
                 name="heroImageUrl"
                 label="Bundle cover image URL"
@@ -128,7 +134,7 @@ export default async function BundleDetailPage({
               <label>SEO title<input name="seoTitle" defaultValue={bundle.seoTitle ?? ""} /></label>
               <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={bundle.seoDescription ?? ""} /></label>
             </ProductFormSection>
-            <ProductFormSection title="Commerce handoff" description="This bundle links to a sellable product. Use this section for price defaults and upsell targets, then manage the product for checkout flow.">
+            <ProductFormSection title="Commerce handoff" description="This bundle links to a sellable product. Use this section for price defaults and upsell targets, then manage the product for checkout flow." collapsible>
               <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={bundle.price.toString()} /></label>
               <label>Currency<input name="currency" defaultValue={bundle.currency} /></label>
               <label>Compare-at price<input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={bundle.compareAtPrice?.toString() ?? ""} /></label>
@@ -164,7 +170,7 @@ export default async function BundleDetailPage({
               <label className="lg:col-span-2">Upsell body<textarea name="upsellBody" rows={3} defaultValue={bundle.upsellBody ?? ""} placeholder="Explain the discounted follow-up offer clearly." /></label>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">This sets the default commercial values the linked product uses. Keep bundle editing here, then use the product screen to manage checkout and what buyers unlock.</div>
             </ProductFormSection>
-            <ProductFormSection title="Pages" description="Manage the public sales, checkout, and thank-you surfaces from one place.">
+            <ProductFormSection title="Pages" description="Manage the public sales, checkout, and thank-you surfaces from one place." collapsible>
               <div className="lg:col-span-2 grid gap-3 md:grid-cols-3">
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
                   <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Sales page</span>
@@ -195,7 +201,7 @@ export default async function BundleDetailPage({
               <label className="lg:col-span-2">Section order<textarea name="salesPage.sectionOrder" rows={6} defaultValue={(salesPageConfig.sectionOrder ?? ["description", "highlights", "included-courses", "testimonials", "faqs", "pricing"]).join("\n")} /></label>
               <label className="lg:col-span-2">Hidden sections<textarea name="salesPage.hiddenSections" rows={6} defaultValue={(salesPageConfig.hiddenSections ?? []).join("\n")} /></label>
             </ProductFormSection>
-            <ProductFormSection title="Preserved URLs" description="This public route is SEO-critical for migrated content and should be treated as the canonical path.">
+            <ProductFormSection title="Preserved URLs" description="This public route is SEO-critical for migrated content and should be treated as the canonical path." collapsible>
               {canonicalPathLocked ? (
                 <>
                   <input type="hidden" name="legacyUrl" value={bundle.legacyUrl ?? ""} />
@@ -264,15 +270,19 @@ export default async function BundleDetailPage({
           </Card>
           <form id="bundle-editor-actions"><input type="hidden" name="bundleId" value={bundle.id} /></form>
         </div>
+        </div>
       </div>
 
       <div className="grid gap-6">
-        <Card className="space-y-4 bg-white">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-stone-950">Included courses</h2>
-            <p className="text-sm text-stone-600">Select the courses this bundle unlocks.</p>
-          </div>
-          <form action={saveBundleCoursesAction} className="space-y-3">
+        <details className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]">
+          <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold text-stone-950">Included courses</h2>
+              <p className="text-sm text-stone-600">Select the courses this bundle unlocks.</p>
+            </div>
+            <span className="rounded-full border border-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Toggle</span>
+          </summary>
+          <form action={saveBundleCoursesAction} className="mt-4 space-y-3">
             <input type="hidden" name="bundleId" value={bundle.id} />
             {allCourses.map((course) => (
               <label key={course.id} className="flex items-start gap-3 rounded-[20px] border border-stone-200 bg-white px-4 py-4 text-stone-700">
@@ -282,13 +292,16 @@ export default async function BundleDetailPage({
             ))}
             <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save included courses</button>
           </form>
-        </Card>
-        <Card className="space-y-6 bg-white">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-stone-950">FAQ and reviews</h2>
-            <p className="text-sm text-stone-600">Keep public proof and objections inside the same product editor.</p>
-          </div>
-          <div className="space-y-3 text-sm text-stone-700">
+        </details>
+        <details className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]">
+          <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold text-stone-950">FAQ and reviews</h2>
+              <p className="text-sm text-stone-600">Keep public proof and objections inside the same product editor.</p>
+            </div>
+            <span className="rounded-full border border-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Toggle</span>
+          </summary>
+          <div className="mt-4 space-y-3 text-sm text-stone-700">
             <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">Live price: {bundle.price.toString()} {bundle.currency}{bundle.compareAtPrice ? ` · compare-at ${bundle.compareAtPrice.toString()} ${bundle.currency}` : ""}</div>
             <div className="space-y-3 pt-2"><h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-stone-500">FAQ</h3>{bundle.faqs.map((faq) => <div key={`summary-${faq.id}`} className="rounded-[20px] bg-stone-50 px-4 py-3">{faq.question}</div>)}</div>
             <form action={saveFaqAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
@@ -337,7 +350,7 @@ export default async function BundleDetailPage({
               </form>
             ))}
           </div>
-        </Card>
+        </details>
       </div>
     </AdminShell>
   );

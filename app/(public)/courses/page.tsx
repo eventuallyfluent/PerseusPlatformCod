@@ -1,8 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import { CourseCard } from "@/components/public/course-card";
 import { HardLink } from "@/components/ui/hard-link";
 import { resolveCollectionPublicPath } from "@/lib/urls/resolve-collection-path";
+import { buildMetadata } from "@/lib/seo/metadata";
+import { buildBreadcrumbStructuredData, buildItemListStructuredData } from "@/lib/seo/structured-data";
+import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +22,26 @@ function formatPriceLabel(amount: string | number, currency: string) {
 
 function normalizeSearchParam(value: string | string[] | undefined) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const query = normalizeSearchParam(params.q);
+  const collection = normalizeSearchParam(params.collection);
+  const instructor = normalizeSearchParam(params.instructor);
+  const sort = normalizeSearchParam(params.sort);
+  const hasFilters = Boolean(query || collection || instructor || (sort && sort !== "newest"));
+
+  return buildMetadata({
+    title: "Courses",
+    description: "Browse the public course catalog by course, instructor, or collection.",
+    path: "/courses",
+    noIndex: hasFilters,
+  });
 }
 
 export default async function CoursesIndexPage({
@@ -116,8 +140,23 @@ export default async function CoursesIndexPage({
             : { updatedAt: "desc" },
   });
 
+  const breadcrumbJsonLd = buildBreadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Courses", path: "/courses" },
+  ]);
+  const itemListJsonLd = buildItemListStructuredData({
+    name: "Courses",
+    path: "/courses",
+    items: courses.map((course) => ({
+      name: course.title,
+      path: resolveCoursePublicPath(course),
+    })),
+  });
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <div className="mx-auto max-w-4xl space-y-4 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--accent-lavender)]">Courses</p>
         <h1 className="font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">Browse by course, collection, or instructor.</h1>

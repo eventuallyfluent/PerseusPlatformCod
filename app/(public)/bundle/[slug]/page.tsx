@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import { BundleSalesPage } from "@/components/public/bundle-sales-page";
 import { getBundleBySlug } from "@/lib/bundles/get-bundle-by-slug";
 import { getBundleSalesPage } from "@/lib/bundles/get-bundle-sales-page";
@@ -38,19 +38,30 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function BundlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const bundle = await getBundleBySlug(slug);
+  const routePath = `/bundle/${slug}`;
 
   if (!bundle) {
-    const resolved = await resolvePublicRequest(`/bundle/${slug}`);
+    const resolved = await resolvePublicRequest(routePath);
 
     if (resolved?.type === "redirect") {
       redirect(resolved.redirect.toPath);
     }
 
     if (resolved?.type === "bundle") {
+      const canonicalPath = resolveBundlePublicPath(resolved.bundle);
+      if (canonicalPath !== routePath) {
+        permanentRedirect(canonicalPath);
+      }
+
       return <BundleSalesPage bundle={resolved.bundle} payload={getBundleSalesPage(resolved.bundle)} />;
     }
 
     notFound();
+  }
+
+  const canonicalPath = resolveBundlePublicPath(bundle);
+  if (canonicalPath !== routePath) {
+    permanentRedirect(canonicalPath);
   }
 
   return <BundleSalesPage bundle={bundle} payload={getBundleSalesPage(bundle)} />;

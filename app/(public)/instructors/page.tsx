@@ -1,7 +1,15 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
+import { buildMetadata } from "@/lib/seo/metadata";
+import { buildBreadcrumbStructuredData, buildItemListStructuredData } from "@/lib/seo/structured-data";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = buildMetadata({
+  title: "Instructors",
+  description: "Browse Perseus Arcane Academy instructors and the public courses they teach.",
+  path: "/instructors",
+});
 
 export default async function InstructorsIndexPage() {
   const instructors = await prisma.instructor.findMany({
@@ -14,8 +22,23 @@ export default async function InstructorsIndexPage() {
     },
   });
 
+  const breadcrumbJsonLd = buildBreadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Instructors", path: "/instructors" },
+  ]);
+  const itemListJsonLd = buildItemListStructuredData({
+    name: "Instructors",
+    path: "/instructors",
+    items: instructors.map((instructor) => ({
+      name: instructor.name,
+      path: `/instructors/${instructor.slug}`,
+    })),
+  });
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <div className="mx-auto max-w-4xl space-y-4 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--accent-lavender)]">Instructors</p>
         <h1 className="font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">Meet the guides behind the work.</h1>

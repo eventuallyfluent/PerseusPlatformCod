@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { absoluteUrl } from "@/lib/utils";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE_TEMPLATE } from "@/lib/seo/site";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -14,8 +16,24 @@ const bodyFont = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Perseus Platform",
-  description: "Perseus-owned course commerce platform",
+  metadataBase: new URL(absoluteUrl("/")),
+  title: {
+    default: SITE_NAME,
+    template: SITE_TITLE_TEMPLATE,
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    url: absoluteUrl("/"),
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

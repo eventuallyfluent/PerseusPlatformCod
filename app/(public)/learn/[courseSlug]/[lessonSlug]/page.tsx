@@ -1,11 +1,17 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { requireSession } from "@/lib/auth/guards";
 import { getCourseBySlug } from "@/lib/courses/get-course-by-slug";
 import { isLessonUnlocked } from "@/lib/courses/lesson-availability";
 import { prisma } from "@/lib/db/prisma";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import { CoursePlayerLayout } from "@/components/course-player/course-player-layout";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = buildNoIndexMetadata({
+  title: "Lesson",
+  description: "Private learner lesson page.",
+});
 
 export default async function LessonPage({ params }: { params: Promise<{ courseSlug: string; lessonSlug: string }> }) {
   const session = await requireSession();

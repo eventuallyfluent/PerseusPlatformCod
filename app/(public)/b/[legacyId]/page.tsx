@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { BundleSalesPage } from "@/components/public/bundle-sales-page";
 import { CourseSalesPage } from "@/components/public/course-sales-page";
@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getBundleSalesPage } from "@/lib/bundles/get-bundle-sales-page";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { getCourseSalesPage } from "@/lib/sales-pages/get-course-sales-page";
+import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { resolvePublicRequest } from "@/lib/urls/resolve-public-request";
 
@@ -30,8 +31,9 @@ export async function generateMetadata({ params }: { params: Promise<{ legacyId:
 export default async function LegacyCoursePage({ params }: { params: Promise<{ legacyId: string }> }) {
   const { legacyId } = await params;
   const session = await auth();
-  const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`/b/${legacyId}#leave-review`)}`;
-  const resolved = await resolvePublicRequest(`/b/${legacyId}`);
+  const routePath = `/b/${legacyId}`;
+  const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`${routePath}#leave-review`)}`;
+  const resolved = await resolvePublicRequest(routePath);
 
   if (!resolved) {
     notFound();
@@ -42,7 +44,17 @@ export default async function LegacyCoursePage({ params }: { params: Promise<{ l
   }
 
   if (resolved.type === "bundle") {
+    const canonicalPath = resolveBundlePublicPath(resolved.bundle);
+    if (canonicalPath !== routePath) {
+      permanentRedirect(canonicalPath);
+    }
+
     return <BundleSalesPage bundle={resolved.bundle} payload={getBundleSalesPage(resolved.bundle)} />;
+  }
+
+  const canonicalPath = resolveCoursePublicPath(resolved.course);
+  if (canonicalPath !== routePath) {
+    permanentRedirect(canonicalPath);
   }
 
   const canLeaveReview = Boolean(

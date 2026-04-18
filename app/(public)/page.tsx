@@ -1,8 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { resolveCollectionPublicPath } from "@/lib/urls/resolve-collection-path";
+import { buildMetadata } from "@/lib/seo/metadata";
+import { buildOrganizationStructuredData, buildWebsiteStructuredData } from "@/lib/seo/structured-data";
 import { Button } from "@/components/ui/button";
 import { HardLink } from "@/components/ui/hard-link";
 import type {
@@ -13,6 +16,11 @@ import type {
 } from "@/lib/homepage/sections";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = buildMetadata({
+  title: "Structured Magical Training",
+  description: "Browse Perseus Arcane Academy courses, bundles, instructors, and public training paths on their canonical public URLs.",
+  path: "/",
+});
 
 function formatPrice(amount: string | number, currency: string) {
   const numericAmount = typeof amount === "number" ? amount : Number(amount);
@@ -395,5 +403,14 @@ export default async function HomePage() {
     return null;
   });
 
-  return <div className="pb-24">{sectionRenderers}</div>;
+  const organizationJsonLd = buildOrganizationStructuredData();
+  const websiteJsonLd = buildWebsiteStructuredData();
+
+  return (
+    <div className="pb-24">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+      {sectionRenderers}
+    </div>
+  );
 }

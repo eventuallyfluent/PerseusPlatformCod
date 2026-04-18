@@ -17,6 +17,7 @@ Perseus Platform is a single-tenant course and commerce system built to replace 
 - Generated course sales pages from structured course data
 - Course and bundle product flows
 - URL preservation and redirect handling for migrated paths
+- Public-only SEO surface with canonical preserved URLs, sitemap, robots, and `llms.txt`
 - Gateway-agnostic payment architecture with native connectors, generic API profiles, and bank transfer
 - CSV migration center with dry run, execution logs, and idempotent imports
 - Separate student and admin auth entry points
@@ -52,6 +53,7 @@ npm run prisma:check
 npm run prisma:check:bundle-payment
 npm run prisma:check:bank-transfer
 npm run prisma:check:webhook
+npm run prisma:check:imports
 ```
 
 ## Environment variables
@@ -100,3 +102,11 @@ High-level flow:
 8. Configure gateway credentials in admin
 
 Detailed deployment notes are in [DEPLOYMENT.md](C:\Users\stude\OneDrive\Desktop\Perseus Platform\DEPLOYMENT.md).
+
+## Migration rollout
+
+Use the import center for controlled course migration. Do not treat slug routes as the new canonical URL if a preserved migrated public path already exists.
+
+Operational runbook:
+
+- [MIGRATION_ROLLOUT.md](C:\Users\stude\OneDrive\Desktop\Perseus Platform\MIGRATION_ROLLOUT.md)

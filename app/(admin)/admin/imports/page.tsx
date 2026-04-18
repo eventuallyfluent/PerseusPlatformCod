@@ -28,6 +28,39 @@ export default async function ImportsPage() {
 
   return (
     <AdminShell title="Imports" description="Download the migration template, fill it with Payhip details, then upload it here.">
+      <Card className="space-y-5 bg-white">
+        <div className="space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Migration workflow</p>
+          <h2 className="text-3xl leading-none tracking-[-0.04em] text-stone-950">Run migration as controlled QA, not blind bulk upload.</h2>
+          <p className="text-sm leading-7 text-stone-700">
+            Preserve the existing Payhip-backed public path, dry run every course first, then verify the public page before importing students.
+          </p>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-[22px] bg-stone-50 px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-700">Per course</p>
+            <ol className="mt-3 space-y-2 text-sm leading-7 text-stone-700">
+              <li>1. Dry run the course package import.</li>
+              <li>2. Resolve conflicts or warnings before execution.</li>
+              <li>3. Execute the course import.</li>
+              <li>4. Verify canonical public URL, page copy, curriculum, media, FAQ, reviews, product, and checkout.</li>
+              <li>5. Dry run and import students only after the course itself is correct.</li>
+            </ol>
+          </div>
+          <div className="rounded-[22px] bg-stone-50 px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-700">Required QA</p>
+            <ul className="mt-3 space-y-2 text-sm leading-7 text-stone-700">
+              <li>Preserved canonical URL still matches the live migrated path.</li>
+              <li>Sales page renders on the preserved route.</li>
+              <li>SEO title and description imported correctly.</li>
+              <li>Curriculum order, preview flags, and media URLs imported correctly.</li>
+              <li>Product and offer link to checkout correctly.</li>
+            </ul>
+          </div>
+        </div>
+        <p className="text-sm text-stone-700">Full rollout notes are in <span className="font-medium text-stone-950">MIGRATION_ROLLOUT.md</span> in the repo.</p>
+      </Card>
+
       <div className="grid gap-6 xl:grid-cols-2">
         <Card className="space-y-5 bg-white">
           <div className="space-y-2">
@@ -131,12 +164,27 @@ export default async function ImportsPage() {
                 <td>{batch.status}</td>
                 <td>{batch.filename}</td>
                 <td>{batch.dryRunSummary ? "Ready" : "-"}</td>
-                <td>{batch.status === "PROCESSING" ? "Processing" : batch.status === "COMPLETED" || batch.status === "FAILED" ? "Recorded" : "Pending"}</td>
+                <td>
+                  {batch.status === "PROCESSING"
+                    ? "Processing"
+                    : batch.status === "COMPLETED" || batch.status === "FAILED"
+                      ? "Recorded"
+                      : "Pending"}
+                </td>
                 <td>{batch.createdAt.toLocaleString()}</td>
                 <td>
-                  <Link href={`/admin/imports/${batch.id}`} className="underline">
-                    View
-                  </Link>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link href={`/admin/imports/${batch.id}`} className="underline">
+                      View
+                    </Link>
+                    {batch.status === "PROCESSING" ? (
+                      <form action={`/api/imports/batches/${batch.id}/execute`} method="post">
+                        <button type="submit" className="text-sm font-medium text-stone-950 underline">
+                          Resume
+                        </button>
+                      </form>
+                    ) : null}
+                  </div>
                 </td>
               </tr>
             ))}

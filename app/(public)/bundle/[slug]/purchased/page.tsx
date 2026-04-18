@@ -1,12 +1,19 @@
-import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { ProductThankYouPage } from "@/components/public/product-thank-you-page";
 import { prisma } from "@/lib/db/prisma";
 import { getBundleBySlug } from "@/lib/bundles/get-bundle-by-slug";
 import { getBundleThankYouPage } from "@/lib/bundles/get-bundle-thank-you-page";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
+import { resolveBundlePublicPath, resolveBundleThankYouPath } from "@/lib/urls/resolve-bundle-path";
 import { resolvePublicRequest } from "@/lib/urls/resolve-public-request";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = buildNoIndexMetadata({
+  title: "Bundle Purchase Complete",
+  description: "Private post-purchase bundle confirmation page.",
+});
 
 export default async function BundlePurchasedPage({
   params,
@@ -19,6 +26,7 @@ export default async function BundlePurchasedPage({
   const query = await searchParams;
   const session = await auth();
   const bundle = await getBundleBySlug(slug);
+  const routePath = `/bundle/${slug}/purchased`;
 
   if (!bundle) {
     const resolved = await resolvePublicRequest(`/bundle/${slug}`);
@@ -31,7 +39,17 @@ export default async function BundlePurchasedPage({
       notFound();
     }
 
+    const canonicalPath = resolveBundleThankYouPath(resolved.bundle);
+    if (canonicalPath !== routePath) {
+      permanentRedirect(`${canonicalPath}${query.order ? `?order=${query.order}` : ""}`);
+    }
+
     return renderBundleThankYou(resolved.bundle, session?.user?.email ?? null, query.order);
+  }
+
+  const canonicalPath = resolveBundleThankYouPath(bundle);
+  if (canonicalPath !== routePath) {
+    permanentRedirect(`${canonicalPath}${query.order ? `?order=${query.order}` : ""}`);
   }
 
   return renderBundleThankYou(bundle, session?.user?.email ?? null, query.order);
@@ -72,7 +90,7 @@ async function renderBundleThankYou(
       payload={payload}
       primaryActionHref={signedIn ? "/dashboard" : `/login?returnTo=${encodeURIComponent("/dashboard")}`}
       primaryActionLabel={signedIn ? payload.signedInActionLabel : payload.signedOutActionLabel}
-      secondaryActionHref={signedIn ? `/bundle/${bundle.slug}` : `/bundle/${bundle.slug}`}
+      secondaryActionHref={resolveBundlePublicPath(bundle)}
       secondaryActionLabel={signedIn ? "Review bundle page" : "Back to bundle page"}
     />
   );

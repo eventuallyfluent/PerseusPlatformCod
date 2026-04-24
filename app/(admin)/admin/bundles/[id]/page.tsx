@@ -178,7 +178,12 @@ export default async function BundleDetailPage({
                 Keep this to one clear next offer. Pricing defaults live here, while the linked product remains the source of truth for checkout flow and unlock rules.
               </div>
             </ProductFormSection>
-            <ProductFormSection id="pages" title="Pages" description="Manage the public sales, checkout, and thank-you surfaces from one place." collapsible>
+            <ProductFormSection
+              id="pages"
+              title="Pages"
+              description="Use this as a small surface-management block. Core sales copy stays in the bundle fields above; only put true page-specific overrides here."
+              collapsible
+            >
               <div className="lg:col-span-2 grid gap-3 md:grid-cols-3">
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
                   <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Sales page</span>
@@ -193,14 +198,12 @@ export default async function BundleDetailPage({
                   <span className="mt-2 block break-all text-stone-950">{thankYouPagePath}</span>
                 </div>
               </div>
+              <div className="lg:col-span-2 rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
+                Sales page headlines, descriptions, pricing language, and proof sections now fall back to the bundle content automatically. Only use the fields below when the page itself needs different CTA labels or thank-you copy.
+              </div>
               <label>Hero metadata line<input name="salesPage.heroMetadataLine" defaultValue={salesPageConfig.heroMetadataLine ?? ""} /></label>
               <label>Primary CTA label<input name="salesPage.primaryCtaLabel" defaultValue={salesPageConfig.primaryCtaLabel ?? ""} /></label>
               <label>Secondary CTA label<input name="salesPage.secondaryCtaLabel" defaultValue={salesPageConfig.secondaryCtaLabel ?? ""} /></label>
-              <label>Pricing badge<input name="salesPage.pricingBadge" defaultValue={salesPageConfig.pricingBadge ?? ""} /></label>
-              <label className="lg:col-span-2">Pricing headline<input name="salesPage.pricingHeadline" defaultValue={salesPageConfig.pricingHeadline ?? ""} /></label>
-              <label className="lg:col-span-2">Pricing body<textarea name="salesPage.pricingBody" rows={3} defaultValue={salesPageConfig.pricingBody ?? ""} /></label>
-              <label>Final CTA label<input name="salesPage.finalCtaLabel" defaultValue={salesPageConfig.finalCtaLabel ?? ""} /></label>
-              <label className="lg:col-span-2">Final CTA body<textarea name="salesPage.finalCtaBody" rows={3} defaultValue={salesPageConfig.finalCtaBody ?? ""} /></label>
               <label>Thank-you eyebrow<input name="salesPage.thankYouEyebrow" defaultValue={salesPageConfig.thankYouEyebrow ?? ""} /></label>
               <label>Signed-in CTA label<input name="salesPage.thankYouSignedInLabel" defaultValue={salesPageConfig.thankYouSignedInLabel ?? ""} /></label>
               <label>Signed-out CTA label<input name="salesPage.thankYouSignedOutLabel" defaultValue={salesPageConfig.thankYouSignedOutLabel ?? ""} /></label>

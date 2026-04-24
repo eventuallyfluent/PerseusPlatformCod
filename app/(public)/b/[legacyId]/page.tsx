@@ -32,7 +32,7 @@ export default async function LegacyCoursePage({ params }: { params: Promise<{ l
   const { legacyId } = await params;
   const session = await auth();
   const routePath = `/b/${legacyId}`;
-  const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`${routePath}#leave-review`)}`;
+  const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`${routePath}#leave-review-form`)}`;
   const resolved = await resolvePublicRequest(routePath);
 
   if (!resolved) {

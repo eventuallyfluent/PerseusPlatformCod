@@ -12,14 +12,14 @@ export async function submitCourseReviewAction(formData: FormData) {
   const session = await auth();
 
   if (!session?.user?.email) {
-    redirect(`/login?returnTo=${encodeURIComponent(`/course/${courseSlug}#leave-review`)}`);
+    redirect(`/login?returnTo=${encodeURIComponent(`/course/${courseSlug}#leave-review-form`)}`);
   }
 
   const name = String(formData.get("name") ?? "").trim() || session.user.name || "Student";
   const rating = Number(formData.get("rating") ?? 0);
 
   if (!courseId || !courseSlug || !quote || !Number.isInteger(rating) || rating < 1 || rating > 5) {
-    redirect(`/course/${courseSlug}#leave-review`);
+    redirect(`/course/${courseSlug}#leave-review-form`);
   }
 
   const enrollment = await prisma.enrollment.findFirst({
@@ -75,7 +75,7 @@ export async function submitCourseReviewAction(formData: FormData) {
   revalidatePath(`/course/${courseSlug}`);
   revalidatePath("/dashboard");
   revalidatePath("/admin");
-  redirect(`/course/${courseSlug}#leave-review`);
+  redirect(`/course/${courseSlug}#leave-review-form`);
 }
 
 export async function markLessonCompleteAction(formData: FormData) {

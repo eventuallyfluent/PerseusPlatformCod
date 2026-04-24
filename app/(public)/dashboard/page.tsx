@@ -159,7 +159,7 @@ export default async function DashboardPage() {
                       ) : null}
                       {!enrollment.course.testimonials.some((testimonial) => testimonial.email === session.user.email) ? (
                         <HardLink
-                          href={`/course/${enrollment.course.slug}#leave-review`}
+                          href={`/course/${enrollment.course.slug}#leave-review-form`}
                           className="inline-flex rounded-full border border-[var(--portal-border)] px-5 py-3 text-sm font-semibold text-[var(--portal-text)] transition hover:bg-[rgba(255,255,255,0.06)]"
                         >
                           Leave review

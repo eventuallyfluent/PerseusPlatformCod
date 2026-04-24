@@ -58,6 +58,10 @@ const csvBoolean = z.preprocess((value) => {
     return value;
   }
 
+  if (value === null || value === undefined) {
+    return false;
+  }
+
   if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
     if (["true", "1", "yes", "y"].includes(normalized)) return true;

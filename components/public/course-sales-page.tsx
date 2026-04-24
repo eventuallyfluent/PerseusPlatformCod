@@ -56,13 +56,13 @@ export function CourseSalesPage({
           </a>
         ) : (
           <a href={reviewLoginHref}>
-            <Button>Leave a Review</Button>
+            <Button>Sign in to Leave a Review</Button>
           </a>
         )}
       </div>
       {!isLoggedIn ? (
         <p className="mt-6 rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm leading-7 text-[var(--text-secondary)]">
-          Sign in with your learner email to leave a review.
+          Sign in with your learner email and you will land directly in the review form.
         </p>
       ) : canLeaveReview ? (
         <form id="leave-review-form" action={submitCourseReviewAction} className="mt-6 grid gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] p-5">

@@ -66,9 +66,7 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
           <div className={`mx-auto max-w-4xl space-y-5 p-6 ${sectionPanelClass}`}>
             {payload.media.salesVideoUrl ? (
               <StreamableEmbed url={payload.media.salesVideoUrl} title={`${payload.hero.title} sales video`} />
-            ) : (
-              <p className={`text-sm ${panelMutedTextClass}`}>No sales video configured.</p>
-            )}
+            ) : null}
             {payload.descriptionSection.longDescription ? (
               <p className={`text-sm leading-8 ${panelMutedTextClass}`}>{payload.descriptionSection.longDescription}</p>
             ) : null}

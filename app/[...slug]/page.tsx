@@ -79,7 +79,7 @@ export default async function PublicPathPage({
   const session = await auth();
   const requestPath = buildRequestPath(slug);
   const { isPurchased, lookupPath } = stripPurchasedSuffix(slug);
-  const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`${lookupPath}#leave-review`)}`;
+  const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`${lookupPath}#leave-review-form`)}`;
   const resolved = await resolvePublicRequest(lookupPath);
 
   if (!resolved) {

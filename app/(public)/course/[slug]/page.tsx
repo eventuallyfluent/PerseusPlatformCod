@@ -41,7 +41,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const session = await auth();
   const course = await getCourseBySlug(slug);
   const routePath = `/course/${slug}`;
-  const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`/course/${slug}#leave-review`)}`;
+  const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`/course/${slug}#leave-review-form`)}`;
 
   if (!course) {
     const resolved = await resolvePublicRequest(routePath);

@@ -181,22 +181,8 @@ export default async function BundleDetailPage({
               description="This is the public page summary for this bundle. Sales and checkout copy comes from the bundle content above."
               collapsible
             >
-              <div className="lg:col-span-2 grid gap-3 md:grid-cols-3">
-                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Sales page</span>
-                  <span className="mt-2 block break-all text-stone-950">{publicPagePath}</span>
-                </div>
-                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Checkout page</span>
-                  <span className="mt-2 block break-all text-stone-950">{previewOffer ? `/checkout/${previewOffer.id}` : "Create an offer to preview checkout."}</span>
-                </div>
-                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Thank-you page</span>
-                  <span className="mt-2 block break-all text-stone-950">{thankYouPagePath}</span>
-                </div>
-              </div>
               <div className="lg:col-span-2 rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
-                Edit the bundle once above, then use these links to view the three public surfaces. The only editable copy here is the thank-you page.
+                Edit the bundle once above, then use the right-side page actions to view the public surfaces. The only editable copy here is the thank-you page.
               </div>
               <label>Thank-you eyebrow<input name="salesPage.thankYouEyebrow" defaultValue={salesPageConfig.thankYouEyebrow ?? ""} /></label>
               <label>Signed-in CTA label<input name="salesPage.thankYouSignedInLabel" defaultValue={salesPageConfig.thankYouSignedInLabel ?? ""} /></label>

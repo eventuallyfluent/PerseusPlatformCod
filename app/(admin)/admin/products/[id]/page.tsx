@@ -11,6 +11,14 @@ import { saveOfferAction } from "@/app/(admin)/admin/actions";
 export const dynamic = "force-dynamic";
 
 function formatTypeLabel(type: string) {
+  if (type === "COURSE_ACCESS") {
+    return "Course";
+  }
+
+  if (type === "BUNDLE_ACCESS") {
+    return "Bundle";
+  }
+
   return type
     .toLowerCase()
     .replace(/_/g, " ")
@@ -72,19 +80,22 @@ export default async function ProductDetailPage({
       ? resolveBundleThankYouPath(product.bundle)
       : null;
   const sourceHref = product.course ? `/admin/courses/${product.course.id}` : product.bundle ? `/admin/bundles/${product.bundle.id}` : null;
-  const sourceLabel = product.course ? "Course source" : product.bundle ? "Bundle source" : "Linked source";
+  const sourceLabel = product.course ? "Linked course" : product.bundle ? "Linked bundle" : "Linked source";
   const sourceOwnerId = product.course?.id ?? product.bundle?.id ?? "";
   const primaryOfferPrice = primaryOffer?.prices[0]?.amount ?? primaryOffer?.price ?? product.course?.price ?? product.bundle?.price ?? 0;
   const primaryOfferCurrency = primaryOffer?.prices[0]?.currency ?? primaryOffer?.currency ?? product.course?.currency ?? product.bundle?.currency ?? "USD";
   const primaryOfferCompareAt = primaryOffer?.compareAtPrice ?? product.course?.compareAtPrice ?? product.bundle?.compareAtPrice ?? null;
   const feedbackMessage = resolvedSearchParams?.saved === "offer" ? "Checkout settings saved." : "";
   const errorMessage = resolvedSearchParams?.error === "offer" ? "Checkout settings could not be saved. Check the offer fields and try again." : "";
+  const contentKindLabel = product.course ? "Course" : product.bundle ? "Bundle" : formatTypeLabel(product.type);
+  const checkoutLabel = product.checkoutMode === "managed_checkout" ? "Managed" : product.checkoutMode.replace(/_/g, " ");
+  const accessSummary = product.bundle ? `${product.grants.length} included courses` : "Single course access";
   const actionLinkClass =
     "inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-5 py-3 text-sm font-medium text-stone-700 transition hover:border-stone-300 hover:text-stone-950";
   const infoCardClass = "rounded-[22px] border border-stone-200 bg-stone-50 px-5 py-4 text-sm text-stone-700";
 
   return (
-    <AdminShell title={product.title} description="This product is the commerce layer. It owns checkout, pricing, and what content unlocks after purchase.">
+    <AdminShell title={product.course?.title ?? product.bundle?.title ?? product.title} description="Use this page to control checkout, price, and post-purchase flow for the linked content.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <div className="space-y-6">
           <Card className="space-y-6 bg-white p-8">
@@ -93,9 +104,9 @@ export default async function ProductDetailPage({
             <div className="space-y-4 border-b border-[var(--border)] pb-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product</p>
               <div className="space-y-3">
-                <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Commerce settings, checkout ownership, and unlock rules.</h2>
+                <h2 className="text-4xl leading-none tracking-[-0.04em] text-stone-950">Checkout, price, and buyer flow.</h2>
                 <p className="max-w-3xl text-sm leading-7 text-stone-700">
-                  Courses and bundles remain the content objects. This product is the commercial layer that decides what buyers purchase, where they go next, and what access they receive.
+                  Keep curriculum, included courses, and sales copy on the content page. Use this page for the actual buying path and what happens after purchase.
                 </p>
               </div>
             </div>
@@ -118,29 +129,27 @@ export default async function ProductDetailPage({
               ) : null}
               {sourceHref ? (
                 <HardLink href={sourceHref} className="inline-flex items-center justify-center rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50 shadow-sm transition hover:bg-stone-800">
-                  Manage content
+                  Open {product.course ? "course" : product.bundle ? "bundle" : "content"}
                 </HardLink>
               ) : null}
             </div>
 
             <div className="grid gap-4 lg:grid-cols-4">
               <div className={infoCardClass}>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Product type</span>
-                <span className="mt-2 block text-base font-semibold text-stone-950">{formatTypeLabel(product.type)}</span>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Sells</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{contentKindLabel}</span>
               </div>
               <div className={infoCardClass}>
                 <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Status</span>
                 <span className="mt-2 block text-base font-semibold text-stone-950">{product.status}</span>
               </div>
               <div className={infoCardClass}>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Checkout mode</span>
-                <span className="mt-2 block text-base font-semibold text-stone-950">{product.checkoutMode.replace(/_/g, " ")}</span>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Checkout</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{checkoutLabel}</span>
               </div>
               <div className={infoCardClass}>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Unlocks</span>
-                <span className="mt-2 block text-base font-semibold text-stone-950">
-                  {product.grants.length} course{product.grants.length === 1 ? "" : "s"}
-                </span>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">{product.bundle ? "Includes" : "Access"}</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{accessSummary}</span>
               </div>
             </div>
           </Card>
@@ -165,7 +174,7 @@ export default async function ProductDetailPage({
               </div>
               <div className={infoCardClass}>
                 <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Offer count</span>
-                <span className="mt-2 block text-base font-semibold text-stone-950">{product.offers.length} active offer path{product.offers.length === 1 ? "" : "s"}</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{product.offers.length} checkout offer{product.offers.length === 1 ? "" : "s"}</span>
               </div>
             </div>
           </Card>
@@ -211,7 +220,7 @@ export default async function ProductDetailPage({
                 </span>
               </label>
               <div className="md:col-span-2 rounded-[22px] border border-stone-200 bg-stone-50 px-5 py-4 text-sm leading-7 text-stone-700">
-                Product count and learner library count do not need to match. One product can unlock multiple courses when this product carries multiple course grants.
+                This page is the checkout layer. For a normal course, it just controls the buying path for that one course. If you want one purchase to include multiple courses, that should be a bundle.
               </div>
               <div className="md:col-span-2">
                 <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
@@ -221,34 +230,36 @@ export default async function ProductDetailPage({
             </form>
           </Card>
 
-          <Card className="space-y-5 bg-white p-8">
-            <div className="space-y-1">
-              <h3 className="text-xl font-semibold text-stone-950">Unlocked content</h3>
-              <p className="text-sm text-stone-600">These linked courses are what fulfillment grants after successful payment or manual confirmation.</p>
-            </div>
-            <div className="grid gap-3">
-              {product.grants.length > 0 ? (
-                product.grants.map((grant, index) => (
-                  <div key={grant.id} className="rounded-[22px] border border-stone-200 bg-white px-5 py-4 text-sm text-stone-700 shadow-sm">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Unlocked course {index + 1}</span>
-                        <span className="mt-2 block text-base font-semibold text-stone-950">{grant.course.title}</span>
-                        <span className="mt-1 block text-sm text-stone-600">{grant.course.instructor.name}</span>
+          {product.bundle ? (
+            <Card className="space-y-5 bg-white p-8">
+              <div className="space-y-1">
+                <h3 className="text-xl font-semibold text-stone-950">Included courses</h3>
+                <p className="text-sm text-stone-600">These are the courses the bundle purchase unlocks.</p>
+              </div>
+              <div className="grid gap-3">
+                {product.grants.length > 0 ? (
+                  product.grants.map((grant, index) => (
+                    <div key={grant.id} className="rounded-[22px] border border-stone-200 bg-white px-5 py-4 text-sm text-stone-700 shadow-sm">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Included course {index + 1}</span>
+                          <span className="mt-2 block text-base font-semibold text-stone-950">{grant.course.title}</span>
+                          <span className="mt-1 block text-sm text-stone-600">{grant.course.instructor.name}</span>
+                        </div>
+                        <HardLink href={`/admin/courses/${grant.course.id}`} className="text-sm font-medium text-stone-700 underline underline-offset-4">
+                          Open course
+                        </HardLink>
                       </div>
-                      <HardLink href={`/admin/courses/${grant.course.id}`} className="text-sm font-medium text-stone-700 underline underline-offset-4">
-                        Open course
-                      </HardLink>
                     </div>
+                  ))
+                ) : (
+                  <div className="rounded-[22px] border border-dashed border-stone-200 bg-stone-50 px-5 py-4 text-sm text-stone-600">
+                    No included courses are configured yet.
                   </div>
-                ))
-              ) : (
-                <div className="rounded-[22px] border border-dashed border-stone-200 bg-stone-50 px-5 py-4 text-sm text-stone-600">
-                  No unlocked content is configured yet.
-                </div>
-              )}
-            </div>
-          </Card>
+                )}
+              </div>
+            </Card>
+          ) : null}
         </div>
 
         <div className="space-y-4">
@@ -259,14 +270,9 @@ export default async function ProductDetailPage({
                 <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">{sourceLabel}</span>
                 <span className="mt-2 block text-base font-semibold text-stone-950">{product.course?.title ?? product.bundle?.title ?? "No linked content source"}</span>
                 <p className="mt-2 leading-6 text-stone-600">
-                  Edit curriculum, included courses, and sales copy on the content side. Keep checkout and access decisions here on the product.
+                  Edit curriculum, included courses, and sales copy on that page. Keep checkout and price decisions here.
                 </p>
               </div>
-              {sourceHref ? (
-                <HardLink href={sourceHref} className="inline-flex items-center justify-center rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50 transition hover:bg-stone-800">
-                  Manage content
-                </HardLink>
-              ) : null}
             </div>
           </Card>
 

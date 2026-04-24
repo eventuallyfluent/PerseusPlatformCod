@@ -21,6 +21,7 @@ import { evaluateGatewayOperationalReadiness } from "@/lib/payments/readiness";
 import { confirmManualPayment, failManualPayment } from "@/lib/payments/manual-payment";
 import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSectionPayloadMap } from "@/lib/homepage/sections";
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
+import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 import { CouponScope, CourseStatus, type HomepageSectionType } from "@prisma/client";
 import type { GatewayCapabilities, GatewayCheckoutModel, GatewayKind, GatewaySettlementBehavior, GatewayTaxModel } from "@/types";
 
@@ -1448,9 +1449,37 @@ export async function setCourseStatusAction(formData: FormData) {
   const status = String(formData.get("status") ?? CourseStatus.DRAFT) as CourseStatus;
 
   try {
-    await prisma.course.update({
+    const course = await prisma.course.update({
       where: { id: courseId },
       data: { status },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        shortDescription: true,
+        status: true,
+        price: true,
+        currency: true,
+        compareAtPrice: true,
+      },
+    });
+
+    await syncProductOffer({
+      courseId: course.id,
+      title: course.title,
+      price: course.price.toString(),
+      currency: course.currency,
+      compareAtPrice: course.compareAtPrice?.toString() ?? null,
+      status: course.status,
+    });
+
+    await syncAccessProduct({
+      courseId: course.id,
+      slug: course.slug,
+      title: `${course.title} access`,
+      status: course.status,
+      description: course.shortDescription,
+      grantedCourseIds: [course.id],
     });
   } catch {
     redirect(`/admin/courses/${courseId}?error=status`);
@@ -1458,5 +1487,6 @@ export async function setCourseStatusAction(formData: FormData) {
 
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
+  revalidatePath("/admin/products");
   redirect(`/admin/courses/${courseId}?saved=status`);
 }

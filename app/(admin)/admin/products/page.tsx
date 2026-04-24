@@ -9,10 +9,58 @@ import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 export const dynamic = "force-dynamic";
 
 function formatTypeLabel(type: string) {
+  if (type === "COURSE_ACCESS") {
+    return "Course";
+  }
+
+  if (type === "BUNDLE_ACCESS") {
+    return "Bundle";
+  }
+
   return type
     .toLowerCase()
     .replace(/_/g, " ")
     .replace(/\b\w/g, (value) => value.toUpperCase());
+}
+
+function getCheckoutReadiness(product: {
+  status: string;
+  offers: Array<{
+    isDefault: boolean;
+    isPublished: boolean;
+    price: number | { toString(): string };
+    prices: Array<{ amount: number | { toString(): string } }>;
+  }>;
+}) {
+  const primaryOffer = getPrimaryOffer(product.offers);
+  const amountValue = primaryOffer?.prices[0]?.amount ?? primaryOffer?.price ?? 0;
+  const amount = Number(amountValue);
+
+  if (product.status !== "PUBLISHED") {
+    return { label: "Draft", tone: "muted" as const };
+  }
+
+  if (amount <= 0) {
+    return { label: "Missing price", tone: "warning" as const };
+  }
+
+  if (primaryOffer?.isPublished) {
+    return { label: "Ready", tone: "success" as const };
+  }
+
+  return { label: "Needs setup", tone: "warning" as const };
+}
+
+function getCheckoutStatusClass(tone: "muted" | "warning" | "success") {
+  if (tone === "success") {
+    return "border-emerald-200 bg-emerald-50 text-emerald-700";
+  }
+
+  if (tone === "warning") {
+    return "border-amber-200 bg-amber-50 text-amber-800";
+  }
+
+  return "border-stone-200 bg-stone-50 text-stone-600";
 }
 
 export default async function AdminProductsPage() {
@@ -79,7 +127,7 @@ export default async function AdminProductsPage() {
           </thead>
           <tbody>
             {products.map((product) => {
-              const primaryOffer = getPrimaryOffer(product.offers);
+              const checkoutReadiness = getCheckoutReadiness(product);
               const sourceHref = product.course
                 ? `/admin/courses/${product.course.id}`
                 : product.bundle
@@ -98,9 +146,13 @@ export default async function AdminProductsPage() {
                       {formatTypeLabel(product.type)}
                     </span>
                   </td>
-                  <td>{product.title}</td>
-                  <td>{product.grants.length} course{product.grants.length === 1 ? "" : "s"}</td>
-                  <td>{primaryOffer ? `/checkout/${primaryOffer.id}` : "No published offer"}</td>
+                  <td>{product.course?.title ?? product.bundle?.title ?? product.title}</td>
+                  <td>{product.bundle ? `${product.grants.length} courses` : "Course"}</td>
+                  <td>
+                    <span className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${getCheckoutStatusClass(checkoutReadiness.tone)}`}>
+                      {checkoutReadiness.label}
+                    </span>
+                  </td>
                   <td>{product.status}</td>
                   <td>{product.course ? "Course" : product.bundle ? "Bundle" : "Standalone"}</td>
                   <td className="space-x-3">

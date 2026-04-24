@@ -33,13 +33,26 @@ function normalizeIframeSrc(value: unknown) {
 
 const optionalUrl = z.preprocess(normalizeIframeSrc, z.string().url().optional().or(z.literal("")));
 const optionalDateString = z.string().optional().or(z.literal(""));
-const optionalCsvNumber = z.preprocess((value) => {
+const blankToUndefined = (value: unknown) => {
   if (value === "" || value === null || value === undefined) {
     return undefined;
   }
 
   return value;
+};
+const optionalCsvNumber = z.preprocess((value) => {
+  return blankToUndefined(value);
 }, z.coerce.number().optional());
+const csvMoney = z.preprocess(blankToUndefined, z.coerce.number().min(0).default(0));
+const optionalCsvMoney = z.preprocess(blankToUndefined, z.coerce.number().min(0).optional());
+const csvCurrency = z.preprocess((value) => {
+  const normalized = blankToUndefined(value);
+  if (typeof normalized === "string") {
+    return normalized.trim().toUpperCase();
+  }
+
+  return normalized;
+}, z.string().length(3).default("USD"));
 const csvBoolean = z.preprocess((value) => {
   if (typeof value === "boolean") {
     return value;
@@ -214,9 +227,9 @@ export const courseCsvRowSchema = z.object({
   seo_title: z.string().optional(),
   seo_description: z.string().optional(),
   status: csvCourseStatus.default(CourseStatus.DRAFT),
-  price: z.coerce.number().min(0).default(0),
-  currency: z.string().min(3).max(3).default("USD"),
-  compare_at_price: z.coerce.number().min(0).optional(),
+  price: csvMoney,
+  currency: csvCurrency,
+  compare_at_price: optionalCsvMoney,
 });
 
 export const instructorCsvRowSchema = z.object({
@@ -278,9 +291,9 @@ export const coursePackageCsvRowSchema = z.object({
   seo_title: z.string().optional(),
   seo_description: z.string().optional(),
   status: csvCourseStatus.default(CourseStatus.DRAFT),
-  price: z.coerce.number().min(0).default(0),
-  currency: z.string().min(3).max(3).default("USD"),
-  compare_at_price: z.coerce.number().min(0).optional(),
+  price: csvMoney,
+  currency: csvCurrency,
+  compare_at_price: optionalCsvMoney,
   testimonial_name: z.string().optional(),
   testimonial_email: z.string().email().optional().or(z.literal("")),
   testimonial_quote: z.string().optional(),

@@ -382,9 +382,6 @@ export async function saveCourseAction(formData: FormData) {
     seoTitle: String(formData.get("seoTitle") ?? ""),
     seoDescription: String(formData.get("seoDescription") ?? ""),
     status: String(formData.get("status") ?? "DRAFT"),
-    price: Number(formData.get("price") ?? 0),
-    currency: String(formData.get("currency") ?? "USD"),
-    compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
     ...upsell,
     upsellDiscountType: String(formData.get("upsellDiscountType") ?? "NONE"),
     upsellDiscountValue: parseOptionalNumber(formData.get("upsellDiscountValue")),
@@ -394,6 +391,14 @@ export async function saveCourseAction(formData: FormData) {
     legacySlug: String(formData.get("legacySlug") ?? ""),
     legacyUrl: String(formData.get("legacyUrl") ?? ""),
   };
+
+  if (formData.has("price")) {
+    Object.assign(payload, {
+      price: Number(formData.get("price") ?? 0),
+      currency: String(formData.get("currency") ?? "USD"),
+      compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
+    });
+  }
 
   let course;
 
@@ -438,15 +443,19 @@ export async function saveBundleAction(formData: FormData) {
     seoTitle: String(formData.get("seoTitle") ?? ""),
     seoDescription: String(formData.get("seoDescription") ?? ""),
     status: String(formData.get("status") ?? "DRAFT"),
-    price: Number(formData.get("price") ?? 0),
-    currency: String(formData.get("currency") ?? "USD"),
-    compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
     ...upsell,
     upsellDiscountType: String(formData.get("upsellDiscountType") ?? "NONE"),
     upsellDiscountValue: parseOptionalNumber(formData.get("upsellDiscountValue")),
     upsellHeadline: String(formData.get("upsellHeadline") ?? ""),
     upsellBody: String(formData.get("upsellBody") ?? ""),
     legacyUrl: String(formData.get("legacyUrl") ?? ""),
+    ...(formData.has("price")
+      ? {
+          price: Number(formData.get("price") ?? 0),
+          currency: String(formData.get("currency") ?? "USD"),
+          compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
+        }
+      : {}),
   });
 
   if (!parsed.success) {
@@ -635,6 +644,7 @@ export async function saveOfferAction(formData: FormData) {
   const offerId = String(formData.get("id") ?? "");
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
+  const productId = String(formData.get("productId") ?? "");
   try {
     await upsertOffer(
       {
@@ -651,6 +661,9 @@ export async function saveOfferAction(formData: FormData) {
       offerId || undefined,
     );
   } catch {
+    if (productId) {
+      redirect(`/admin/products/${productId}?error=offer`);
+    }
     if (courseId) {
       redirect(`/admin/courses/${courseId}?error=offer`);
     }
@@ -661,6 +674,10 @@ export async function saveOfferAction(formData: FormData) {
   }
 
   revalidatePath("/admin/offers");
+  if (productId) {
+    revalidatePath(`/admin/products/${productId}`);
+    redirect(`/admin/products/${productId}?saved=offer`);
+  }
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
     redirect(`/admin/courses/${courseId}?saved=offer`);

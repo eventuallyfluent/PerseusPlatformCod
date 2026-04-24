@@ -51,7 +51,7 @@ export default async function AdminProductsPage() {
             {products.length} product{products.length === 1 ? "" : "s"}
           </span>
           <span className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2">
-            {products.reduce((count, product) => count + product.grants.length, 0)} attached course grant{products.reduce((count, product) => count + product.grants.length, 0) === 1 ? "" : "s"}
+            {products.reduce((count, product) => count + product.grants.length, 0)} unlocked course{products.reduce((count, product) => count + product.grants.length, 0) === 1 ? "" : "s"}
           </span>
         </div>
         <div className="flex flex-wrap gap-3">

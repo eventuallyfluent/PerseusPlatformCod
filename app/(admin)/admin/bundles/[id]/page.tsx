@@ -136,14 +136,11 @@ export default async function BundleDetailPage({
               <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={bundle.seoDescription ?? ""} /></label>
             </ProductFormSection>
             <ProductFormSection
-              id="pricing-checkout"
-              title="Related offer and pricing"
-              description="Set the bundle price defaults and choose one follow-up offer to present after checkout. Use the linked product when you need to change checkout execution or access rules."
+              id="related-offer"
+              title="Related offer"
+              description="Choose one follow-up recommendation for buyers. Price, checkout, and access rules live on the linked product."
               collapsible
             >
-              <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={bundle.price.toString()} /></label>
-              <label>Currency<input name="currency" defaultValue={bundle.currency} /></label>
-              <label>Compare-at price<input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={bundle.compareAtPrice?.toString() ?? ""} /></label>
               <label className="lg:col-span-2">
                 Related follow-up offer
                 <select name="upsellTarget" defaultValue={upsellTarget}>
@@ -175,7 +172,7 @@ export default async function BundleDetailPage({
               <label className="lg:col-span-2">Related-offer headline<input name="upsellHeadline" defaultValue={bundle.upsellHeadline ?? ""} placeholder="Optional override for the follow-up offer title" /></label>
               <label className="lg:col-span-2">Related-offer body<textarea name="upsellBody" rows={3} defaultValue={bundle.upsellBody ?? ""} placeholder="Explain why this is the next recommended offer." /></label>
               <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
-                Keep this to one clear next offer. Pricing defaults live here, while the linked product remains the source of truth for checkout flow and unlock rules.
+                Keep this to one clear next offer. Use the linked product when you need to change pricing, checkout execution, or what access a purchase grants.
               </div>
             </ProductFormSection>
             <ProductFormSection
@@ -259,7 +256,6 @@ export default async function BundleDetailPage({
                 <div className="rounded-[20px] border border-amber-200 bg-amber-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-700">Canonical URL</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Sales page</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Thank-you page</span><span className="mt-1 block break-all text-base text-stone-950">{thankYouPagePath}</span></div>
-                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 sm:col-span-2 xl:col-span-1"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Live price</span><span className="mt-1 block text-base text-stone-950">{bundle.price.toString()} {bundle.currency}</span></div>
               </div>
             </div>
           </Card>
@@ -272,7 +268,7 @@ export default async function BundleDetailPage({
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#core-identity">Core identity</a>
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#sales-copy">Sales copy</a>
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#media-seo">Media and SEO</a>
-              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#pricing-checkout">Related offer and pricing</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#related-offer">Related offer</a>
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#pages">Pages</a>
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#included-courses">Included courses</a>
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#social-proof">Reviews and FAQ</a>
@@ -328,7 +324,6 @@ export default async function BundleDetailPage({
             <span className="rounded-full border border-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Toggle</span>
           </summary>
           <div className="mt-4 space-y-3 text-sm text-stone-700">
-            <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">Live price: {bundle.price.toString()} {bundle.currency}{bundle.compareAtPrice ? ` · compare-at ${bundle.compareAtPrice.toString()} ${bundle.currency}` : ""}</div>
             <div className="space-y-3 pt-2"><h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-stone-500">FAQ</h3>{bundle.faqs.map((faq) => <div key={`summary-${faq.id}`} className="rounded-[20px] bg-stone-50 px-4 py-3">{faq.question}</div>)}</div>
             <form action={saveFaqAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
               <input type="hidden" name="bundleId" value={bundle.id} />
@@ -381,3 +376,4 @@ export default async function BundleDetailPage({
     </AdminShell>
   );
 }
+

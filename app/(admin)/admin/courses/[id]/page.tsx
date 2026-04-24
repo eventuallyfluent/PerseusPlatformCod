@@ -167,14 +167,11 @@ export default async function CourseDetailPage({
                 <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} /></label>
               </ProductFormSection>
               <ProductFormSection
-                id="pricing-checkout"
-                title="Related offer and pricing"
-                description="Set the course price defaults and choose one follow-up offer to present after checkout. Use the linked product when you need to change checkout execution or access rules."
+                id="related-offer"
+                title="Related offer"
+                description="Choose one follow-up recommendation for buyers. Price, checkout, and access rules live on the linked product."
                 collapsible
               >
-                <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={course.price.toString()} /></label>
-                <label>Currency<input name="currency" defaultValue={course.currency} /></label>
-                <label>Compare-at price<input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={course.compareAtPrice?.toString() ?? ""} /></label>
                 <label className="lg:col-span-2">
                   Related follow-up offer
                   <select name="upsellTarget" defaultValue={upsellTarget}>
@@ -206,7 +203,7 @@ export default async function CourseDetailPage({
                 <label className="lg:col-span-2">Related-offer headline<input name="upsellHeadline" defaultValue={course.upsellHeadline ?? ""} placeholder="Optional override for the follow-up offer title" /></label>
                 <label className="lg:col-span-2">Related-offer body<textarea name="upsellBody" rows={3} defaultValue={course.upsellBody ?? ""} placeholder="Explain why this is the next recommended offer." /></label>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
-                  Keep this to one clear next offer. Pricing defaults live here, while the linked product remains the source of truth for checkout flow and unlock rules.
+                  Keep this to one clear next offer. Use the linked product when you need to change pricing, checkout execution, or what access a purchase grants.
                 </div>
               </ProductFormSection>
               <ProductFormSection
@@ -348,7 +345,7 @@ export default async function CourseDetailPage({
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#core-identity">Core identity</a>
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#sales-copy">Sales copy</a>
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#media-seo">Media and SEO</a>
-              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#pricing-checkout">Related offer and pricing</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#related-offer">Related offer</a>
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#pages">Pages</a>
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#curriculum">Curriculum</a>
               <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#social-proof">Reviews and FAQ</a>
@@ -533,10 +530,6 @@ export default async function CourseDetailPage({
               <span className="rounded-full border border-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Toggle</span>
             </summary>
             <div className="mt-4 space-y-3 text-sm text-stone-700">
-              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
-                Live price: {course.price.toString()} {course.currency}
-                {course.compareAtPrice ? ` · compare-at ${course.compareAtPrice.toString()} ${course.currency}` : ""}
-              </div>
               <p className="pt-2 text-sm font-semibold uppercase tracking-[0.24em] text-stone-500">FAQ</p>
             <form action={saveFaqAction} className="grid gap-3 rounded-[20px] border border-dashed border-stone-200 p-4">
               <input type="hidden" name="courseId" value={course.id} />
@@ -590,3 +583,4 @@ export default async function CourseDetailPage({
     </AdminShell>
   );
 }
+

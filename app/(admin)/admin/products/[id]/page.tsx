@@ -6,6 +6,7 @@ import { HardLink } from "@/components/ui/hard-link";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 import { resolveBundlePublicPath, resolveBundleThankYouPath } from "@/lib/urls/resolve-bundle-path";
 import { resolveCoursePublicPath, resolveCourseThankYouPath } from "@/lib/urls/resolve-course-path";
+import { saveOfferAction } from "@/app/(admin)/admin/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +17,15 @@ function formatTypeLabel(type: string) {
     .replace(/\b\w/g, (value) => value.toUpperCase());
 }
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProductDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ saved?: string; error?: string }>;
+}) {
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const product = await prisma.accessProduct.findUnique({
     where: { id },
     include: {
@@ -65,6 +73,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       : null;
   const sourceHref = product.course ? `/admin/courses/${product.course.id}` : product.bundle ? `/admin/bundles/${product.bundle.id}` : null;
   const sourceLabel = product.course ? "Course source" : product.bundle ? "Bundle source" : "Linked source";
+  const sourceOwnerId = product.course?.id ?? product.bundle?.id ?? "";
+  const primaryOfferPrice = primaryOffer?.prices[0]?.amount ?? primaryOffer?.price ?? product.course?.price ?? product.bundle?.price ?? 0;
+  const primaryOfferCurrency = primaryOffer?.prices[0]?.currency ?? primaryOffer?.currency ?? product.course?.currency ?? product.bundle?.currency ?? "USD";
+  const primaryOfferCompareAt = primaryOffer?.compareAtPrice ?? product.course?.compareAtPrice ?? product.bundle?.compareAtPrice ?? null;
+  const feedbackMessage = resolvedSearchParams?.saved === "offer" ? "Checkout settings saved." : "";
+  const errorMessage = resolvedSearchParams?.error === "offer" ? "Checkout settings could not be saved. Check the offer fields and try again." : "";
   const actionLinkClass =
     "inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-5 py-3 text-sm font-medium text-stone-700 transition hover:border-stone-300 hover:text-stone-950";
   const infoCardClass = "rounded-[22px] border border-stone-200 bg-stone-50 px-5 py-4 text-sm text-stone-700";
@@ -74,6 +88,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
         <div className="space-y-6">
           <Card className="space-y-6 bg-white p-8">
+            {feedbackMessage ? <p className="rounded-[18px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedbackMessage}</p> : null}
+            {errorMessage ? <p className="rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">{errorMessage}</p> : null}
             <div className="space-y-4 border-b border-[var(--border)] pb-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Product</p>
               <div className="space-y-3">
@@ -152,6 +168,57 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 <span className="mt-2 block text-base font-semibold text-stone-950">{product.offers.length} active offer path{product.offers.length === 1 ? "" : "s"}</span>
               </div>
             </div>
+          </Card>
+
+          <Card className="space-y-5 bg-white p-8">
+            <div className="space-y-1">
+              <h3 className="text-xl font-semibold text-stone-950">Checkout settings</h3>
+              <p className="text-sm leading-7 text-stone-600">Edit the primary checkout offer here. This product is the commerce object, so one product can unlock one or many courses without changing the product count.</p>
+            </div>
+            <form action={saveOfferAction} className="grid gap-4 md:grid-cols-2">
+              <input type="hidden" name="id" value={primaryOffer?.id ?? ""} />
+              <input type="hidden" name="productId" value={product.id} />
+              {product.course ? <input type="hidden" name="courseId" value={sourceOwnerId} /> : null}
+              {product.bundle ? <input type="hidden" name="bundleId" value={sourceOwnerId} /> : null}
+              <label>
+                Offer name
+                <input name="name" defaultValue={primaryOffer?.name ?? "Main checkout"} required />
+              </label>
+              <label>
+                Offer type
+                <select name="type" defaultValue={primaryOffer?.type ?? "ONE_TIME"}>
+                  <option value="ONE_TIME">ONE_TIME</option>
+                  <option value="SUBSCRIPTION">SUBSCRIPTION</option>
+                </select>
+              </label>
+              <label>
+                Price
+                <input name="price" type="number" min="0" step="0.01" defaultValue={primaryOfferPrice.toString()} required />
+              </label>
+              <label>
+                Currency
+                <input name="currency" defaultValue={primaryOfferCurrency} required />
+              </label>
+              <label>
+                Compare-at price
+                <input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={primaryOfferCompareAt?.toString() ?? ""} />
+              </label>
+              <label>
+                Checkout status
+                <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
+                  <input className="w-auto" type="checkbox" name="isPublished" value="true" defaultChecked={primaryOffer?.isPublished ?? true} />
+                  Published and available for checkout
+                </span>
+              </label>
+              <div className="md:col-span-2 rounded-[22px] border border-stone-200 bg-stone-50 px-5 py-4 text-sm leading-7 text-stone-700">
+                Product count and learner library count do not need to match. One product can unlock multiple courses when this product carries multiple course grants.
+              </div>
+              <div className="md:col-span-2">
+                <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
+                  Save checkout settings
+                </button>
+              </div>
+            </form>
           </Card>
 
           <Card className="space-y-5 bg-white p-8">

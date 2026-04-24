@@ -162,7 +162,7 @@ export default async function CheckoutPage({
           </div>
 
           <div className="mt-5">
-            {gatewayPolicy?.allowed ? (
+            {gatewayPolicy?.allowed && gatewayReadiness?.canRunCheckout ? (
             <CheckoutForm
               offerId={offer.id}
               initialUpsellFromOfferId={query.upsellFrom ?? ""}
@@ -196,7 +196,7 @@ export default async function CheckoutPage({
             </CheckoutForm>
             ) : (
               <div className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-5 py-5 text-sm leading-7 text-[rgba(236,229,255,0.78)]">
-                Checkout is unavailable until the active gateway is configured for a real payment path and passes the current payment policy.
+                Checkout is unavailable until the active gateway is configured for a real payment path, has the required credentials, and passes the current payment policy.
               </div>
             )}
           </div>

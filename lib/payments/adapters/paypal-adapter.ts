@@ -20,6 +20,7 @@ function mapPayPalEvent(eventType: string): CanonicalPaymentEvent | undefined {
 export const paypalConnector: PaymentGatewayConnector = {
   provider: "paypal",
   displayName: "PayPal",
+  isCheckoutImplemented: false,
   credentialFields: [
     { key: "client_id", label: "Client ID", inputType: "text", required: true, secret: false },
     { key: "client_secret", label: "Client Secret", inputType: "password", required: true, secret: true },

@@ -16,6 +16,8 @@ import { bundleInputSchema, moduleInputSchema, lessonInputSchema } from "@/lib/z
 import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { encryptGatewayCredentialValue, isEncryptedGatewayCredentialValue } from "@/lib/payments/gateway-credentials";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
+import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
+import { evaluateGatewayOperationalReadiness } from "@/lib/payments/readiness";
 import { confirmManualPayment, failManualPayment } from "@/lib/payments/manual-payment";
 import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSectionPayloadMap } from "@/lib/homepage/sections";
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
@@ -1387,10 +1389,31 @@ export async function setGatewayActiveStateAction(formData: FormData) {
 
   const gateway = await prisma.gateway.findUnique({
     where: { id: gatewayId },
+    include: { credentials: true, webhookEvents: true },
   });
 
   if (!gateway) {
     redirect("/admin/gateways?connection=failed&message=Gateway%20not%20found.");
+  }
+
+  if (makeActive) {
+    const connector = findPaymentConnector(gateway.provider);
+    const definition = resolveGatewayDefinition(gateway, connector);
+    const readiness = evaluateGatewayOperationalReadiness({
+      gateway: { ...gateway, schemaCompatMode: "current" },
+      definition,
+      connector,
+      credentials: getGatewayCredentialMap(gateway.credentials),
+    });
+    const blockingIssues = readiness.issues.filter((issue) => issue.tone === "danger");
+
+    if (blockingIssues.length > 0) {
+      redirect(
+        `/admin/gateways/${gateway.id}?connection=failed&message=${encodeURIComponent(
+          `Gateway cannot be activated yet. ${blockingIssues.map((issue) => `${issue.label}: ${issue.detail}`).join(" ")}`,
+        )}`,
+      );
+    }
   }
 
   await prisma.$transaction(async (tx) => {

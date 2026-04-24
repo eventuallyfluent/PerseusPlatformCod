@@ -1,12 +1,15 @@
 import type { Bundle } from "@prisma/client";
+import { normalizePublicPathInput } from "@/lib/urls/normalize-public-path";
 
 export function resolveBundlePublicPath(bundle: Pick<Bundle, "slug" | "publicPath" | "legacyUrl">) {
-  if (bundle.publicPath && bundle.publicPath.startsWith("/")) {
-    return bundle.publicPath;
+  const publicPath = normalizePublicPathInput(bundle.publicPath);
+  if (publicPath) {
+    return publicPath;
   }
 
-  if (bundle.legacyUrl && bundle.legacyUrl.startsWith("/")) {
-    return bundle.legacyUrl;
+  const legacyUrl = normalizePublicPathInput(bundle.legacyUrl);
+  if (legacyUrl) {
+    return legacyUrl;
   }
 
   return `/bundle/${bundle.slug}`;

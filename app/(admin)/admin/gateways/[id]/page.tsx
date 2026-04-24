@@ -260,7 +260,7 @@ export default async function GatewayDetailPage({
                   name="gatewayId"
                   value={gateway.id}
                 >
-                  Test connection
+                  Test saved connection
                 </button>
               ) : null}
             </div>

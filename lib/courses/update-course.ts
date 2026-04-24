@@ -3,6 +3,7 @@ import { persistGeneratedPage } from "@/lib/sales-pages/persist-generated-page";
 import { courseInputSchema } from "@/lib/zod/schemas";
 import { courseInclude } from "@/lib/courses/course-query";
 import { validatePublicPathAvailability } from "@/lib/urls/validate-public-path";
+import { normalizePublicPathInput } from "@/lib/urls/normalize-public-path";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 
@@ -18,23 +19,26 @@ export async function updateCourse(courseId: string, input: unknown) {
   }
 
   const slug = data.slug ?? existing.slug;
+  const normalizedExistingLegacyUrl = normalizePublicPathInput(existing.legacyUrl);
+  const normalizedExistingPublicPath = normalizePublicPathInput(existing.publicPath);
+  const normalizedInputLegacyUrl = data.legacyUrl === undefined ? undefined : normalizePublicPathInput(data.legacyUrl);
   const defaultPath = `/course/${existing.slug}`;
   const hasLockedCanonicalPath =
-    Boolean(existing.legacyUrl?.startsWith("/")) ||
-    Boolean(existing.publicPath?.startsWith("/") && existing.publicPath !== defaultPath);
+    Boolean(normalizedExistingLegacyUrl) ||
+    Boolean(normalizedExistingPublicPath && normalizedExistingPublicPath !== defaultPath);
   const lockedCanonicalPath =
-    existing.publicPath?.startsWith("/") && hasLockedCanonicalPath
-      ? existing.publicPath
-      : existing.legacyUrl?.startsWith("/")
-        ? existing.legacyUrl
+    normalizedExistingPublicPath && hasLockedCanonicalPath
+      ? normalizedExistingPublicPath
+      : normalizedExistingLegacyUrl
+        ? normalizedExistingLegacyUrl
         : null;
   const desiredPath =
     lockedCanonicalPath
       ? lockedCanonicalPath
       : data.legacyUrl === undefined
-      ? (existing.publicPath?.startsWith("/") ? existing.publicPath : `/course/${slug}`)
-      : data.legacyUrl?.startsWith("/")
-        ? data.legacyUrl
+      ? (normalizedExistingPublicPath ?? `/course/${slug}`)
+      : normalizedInputLegacyUrl
+        ? normalizedInputLegacyUrl
         : `/course/${slug}`;
 
   const isAvailable = await validatePublicPathAvailability(desiredPath, courseId);
@@ -59,7 +63,7 @@ export async function updateCourse(courseId: string, input: unknown) {
       upsellBody: data.upsellBody === "" ? null : data.upsellBody,
       legacyCourseId: data.legacyCourseId === "" ? null : data.legacyCourseId,
       legacySlug: data.legacySlug === "" ? null : data.legacySlug,
-      legacyUrl: lockedCanonicalPath ? existing.legacyUrl : data.legacyUrl === "" ? null : data.legacyUrl,
+      legacyUrl: lockedCanonicalPath ? normalizedExistingLegacyUrl : data.legacyUrl === "" ? null : normalizedInputLegacyUrl,
     },
     include: courseInclude,
   });

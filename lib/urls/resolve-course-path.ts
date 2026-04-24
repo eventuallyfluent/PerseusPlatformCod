@@ -1,12 +1,15 @@
 import type { Course } from "@prisma/client";
+import { normalizePublicPathInput } from "@/lib/urls/normalize-public-path";
 
 export function resolveCoursePublicPath(course: Pick<Course, "slug" | "publicPath" | "legacyUrl">) {
-  if (course.publicPath && course.publicPath.startsWith("/")) {
-    return course.publicPath;
+  const publicPath = normalizePublicPathInput(course.publicPath);
+  if (publicPath) {
+    return publicPath;
   }
 
-  if (course.legacyUrl && course.legacyUrl.startsWith("/")) {
-    return course.legacyUrl;
+  const legacyUrl = normalizePublicPathInput(course.legacyUrl);
+  if (legacyUrl) {
+    return legacyUrl;
   }
 
   return `/course/${course.slug}`;

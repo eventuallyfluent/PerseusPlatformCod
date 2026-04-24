@@ -37,6 +37,14 @@ export function evaluateGatewayOperationalReadiness(input: {
   }
 
   if (connector) {
+    if (!connector.isCheckoutImplemented) {
+      issues.push({
+        tone: "danger",
+        label: "Native checkout not implemented",
+        detail: `${connector.displayName} is registered for capability modeling and webhook parsing, but live checkout creation is not implemented yet. Use bank transfer, a configured generic redirect profile, or another implemented fallback for real purchases.`,
+      });
+    }
+
     const missingRequiredCredentials = connector.credentialFields
       .filter((field) => field.required && !String(credentials[field.key] ?? "").trim())
       .map((field) => field.label);

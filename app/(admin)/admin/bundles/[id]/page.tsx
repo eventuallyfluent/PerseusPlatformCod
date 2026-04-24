@@ -62,6 +62,7 @@ export default async function BundleDetailPage({
     Boolean(bundle.legacyUrl?.startsWith("/")) || Boolean(bundle.publicPath?.startsWith("/") && bundle.publicPath !== `/bundle/${bundle.slug}`);
   const salesPageConfig = parseSalesPageConfig(bundle.salesPageConfig);
   const upsellTarget = bundle.upsellCourseId ? `course:${bundle.upsellCourseId}` : bundle.upsellBundleId ? `bundle:${bundle.upsellBundleId}` : "";
+  const relatedOfferLabel = bundle.upsellCourse?.title ?? bundle.upsellBundle?.title ?? null;
   const saved = resolvedSearchParams?.saved ?? "";
   const feedbackMessage =
     saved === "details"
@@ -108,20 +109,20 @@ export default async function BundleDetailPage({
           </div>
           <form id="bundle-details-form" action={saveBundleAction} className="space-y-8">
             <input type="hidden" name="id" value={bundle.id} />
-            <ProductFormSection title="Core identity" description="Title, route, and status." collapsible>
+            <ProductFormSection id="core-identity" title="Core identity" description="Title, route, and status." collapsible>
               <label>Title<input name="title" defaultValue={bundle.title} required /></label>
               <label>Slug<input name="slug" defaultValue={bundle.slug} required /></label>
               <label>Subtitle<input name="subtitle" defaultValue={bundle.subtitle ?? ""} /></label>
               <label>Status<select name="status" defaultValue={bundle.status}><option value="DRAFT">DRAFT</option><option value="PUBLISHED">PUBLISHED</option><option value="ARCHIVED">ARCHIVED</option></select></label>
             </ProductFormSection>
-            <ProductFormSection title="Sales copy" description="Core page copy." collapsible>
+            <ProductFormSection id="sales-copy" title="Sales copy" description="Core page copy." collapsible>
               <label className="lg:col-span-2">Short description<textarea name="shortDescription" rows={4} defaultValue={bundle.shortDescription ?? ""} /></label>
               <label className="lg:col-span-2">Long description<textarea name="longDescription" rows={6} defaultValue={bundle.longDescription ?? ""} /></label>
               <label className="lg:col-span-2">Outcomes<textarea name="learningOutcomes" rows={4} defaultValue={(bundle.learningOutcomes as string[] | null)?.join("\n") ?? ""} /></label>
               <label>Who it&apos;s for<textarea name="whoItsFor" rows={4} defaultValue={(bundle.whoItsFor as string[] | null)?.join("\n") ?? ""} /></label>
               <label>Includes<textarea name="includes" rows={4} defaultValue={(bundle.includes as string[] | null)?.join("\n") ?? ""} /></label>
             </ProductFormSection>
-            <ProductFormSection title="Media and SEO" description="Hero media and search." collapsible>
+            <ProductFormSection id="media-seo" title="Media and SEO" description="Hero media and search." collapsible>
               <ImageField
                 name="heroImageUrl"
                 label="Bundle cover image URL"
@@ -134,14 +135,19 @@ export default async function BundleDetailPage({
               <label>SEO title<input name="seoTitle" defaultValue={bundle.seoTitle ?? ""} /></label>
               <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={bundle.seoDescription ?? ""} /></label>
             </ProductFormSection>
-            <ProductFormSection title="Commerce handoff" description="This bundle links to a sellable product. Use this section for price defaults and upsell targets, then manage the product for checkout flow." collapsible>
+            <ProductFormSection
+              id="pricing-checkout"
+              title="Related offer and pricing"
+              description="Set the bundle price defaults and choose one follow-up offer to present after checkout. Use the linked product when you need to change checkout execution or access rules."
+              collapsible
+            >
               <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={bundle.price.toString()} /></label>
               <label>Currency<input name="currency" defaultValue={bundle.currency} /></label>
               <label>Compare-at price<input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={bundle.compareAtPrice?.toString() ?? ""} /></label>
               <label className="lg:col-span-2">
-                Checkout upsell
+                Related follow-up offer
                 <select name="upsellTarget" defaultValue={upsellTarget}>
-                  <option value="">No upsell</option>
+                  <option value="">No related offer</option>
                   {upsellCourses.map((upsellCourse) => (
                     <option key={`course-${upsellCourse.id}`} value={`course:${upsellCourse.id}`}>
                       Course: {upsellCourse.title}
@@ -155,22 +161,24 @@ export default async function BundleDetailPage({
                 </select>
               </label>
               <label>
-                Upsell discount type
+                Related-offer discount type
                 <select name="upsellDiscountType" defaultValue={bundle.upsellDiscountType}>
-                  <option value="NONE">No upsell discount</option>
+                  <option value="NONE">No discount</option>
                   <option value="AMOUNT">Amount off</option>
                   <option value="PERCENT">Percent off</option>
                 </select>
               </label>
               <label>
-                Upsell discount value
+                Related-offer discount value
                 <input name="upsellDiscountValue" type="number" min="0.01" step="0.01" defaultValue={bundle.upsellDiscountValue?.toString() ?? ""} />
               </label>
-              <label className="lg:col-span-2">Upsell headline<input name="upsellHeadline" defaultValue={bundle.upsellHeadline ?? ""} placeholder="Optional override for the upsell title" /></label>
-              <label className="lg:col-span-2">Upsell body<textarea name="upsellBody" rows={3} defaultValue={bundle.upsellBody ?? ""} placeholder="Explain the discounted follow-up offer clearly." /></label>
-              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">This sets the default commercial values the linked product uses. Keep bundle editing here, then use the product screen to manage checkout and what buyers unlock.</div>
+              <label className="lg:col-span-2">Related-offer headline<input name="upsellHeadline" defaultValue={bundle.upsellHeadline ?? ""} placeholder="Optional override for the follow-up offer title" /></label>
+              <label className="lg:col-span-2">Related-offer body<textarea name="upsellBody" rows={3} defaultValue={bundle.upsellBody ?? ""} placeholder="Explain why this is the next recommended offer." /></label>
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
+                Keep this to one clear next offer. Pricing defaults live here, while the linked product remains the source of truth for checkout flow and unlock rules.
+              </div>
             </ProductFormSection>
-            <ProductFormSection title="Pages" description="Manage the public sales, checkout, and thank-you surfaces from one place." collapsible>
+            <ProductFormSection id="pages" title="Pages" description="Manage the public sales, checkout, and thank-you surfaces from one place." collapsible>
               <div className="lg:col-span-2 grid gap-3 md:grid-cols-3">
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
                   <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Sales page</span>
@@ -201,7 +209,7 @@ export default async function BundleDetailPage({
               <label className="lg:col-span-2">Section order<textarea name="salesPage.sectionOrder" rows={6} defaultValue={(salesPageConfig.sectionOrder ?? ["description", "highlights", "included-courses", "testimonials", "faqs", "pricing"]).join("\n")} /></label>
               <label className="lg:col-span-2">Hidden sections<textarea name="salesPage.hiddenSections" rows={6} defaultValue={(salesPageConfig.hiddenSections ?? []).join("\n")} /></label>
             </ProductFormSection>
-            <ProductFormSection title="Preserved URLs" description="This public route is SEO-critical for migrated content and should be treated as the canonical path." collapsible>
+            <ProductFormSection id="migration-urls" title="Preserved URLs" description="This public route is SEO-critical for migrated content and should be treated as the canonical path." collapsible>
               {canonicalPathLocked ? (
                 <>
                   <input type="hidden" name="legacyUrl" value={bundle.legacyUrl ?? ""} />
@@ -222,7 +230,7 @@ export default async function BundleDetailPage({
             <div className="border-t border-[var(--border)] pt-6"><button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">Save bundle</button></div>
           </form>
         </Card>
-        <div className="space-y-4">
+        <div className="space-y-4 xl:sticky xl:top-24 xl:self-start">
           <Card className="space-y-5 bg-white p-5">
             <div className="space-y-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Content workspace</p>
@@ -249,6 +257,7 @@ export default async function BundleDetailPage({
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{bundle.status}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Included courses</span><span className="mt-1 block text-base text-stone-950">{bundle.courses.length} course{bundle.courses.length === 1 ? "" : "s"}</span></div>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Related offer</span><span className="mt-1 block text-base text-stone-950">{relatedOfferLabel ?? "No follow-up offer set"}</span></div>
                 <div className="rounded-[20px] border border-amber-200 bg-amber-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-700">Canonical URL</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Sales page</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Thank-you page</span><span className="mt-1 block break-all text-base text-stone-950">{thankYouPagePath}</span></div>
@@ -256,6 +265,24 @@ export default async function BundleDetailPage({
               </div>
             </div>
           </Card>
+          <Card className="space-y-4 bg-white p-5">
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Page structure</p>
+              <p className="text-sm leading-6 text-stone-600">Jump straight to the section you need instead of working through the bundle as one long form.</p>
+            </div>
+            <div className="grid gap-2 text-sm sm:grid-cols-2 xl:grid-cols-1">
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#core-identity">Core identity</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#sales-copy">Sales copy</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#media-seo">Media and SEO</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#pricing-checkout">Related offer and pricing</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#pages">Pages</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#included-courses">Included courses</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#social-proof">Reviews and FAQ</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#migration-urls">Preserved URLs</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#publish">Publish and preview</a>
+            </div>
+          </Card>
+          <div id="publish">
           <Card className="space-y-4 bg-white p-5">
             <div className="space-y-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Preview and publish</p>
@@ -268,13 +295,14 @@ export default async function BundleDetailPage({
               <button className="rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteBundleAction} form="bundle-editor-actions" name="bundleId" value={bundle.id}>Delete bundle</button>
             </div>
           </Card>
+          </div>
           <form id="bundle-editor-actions"><input type="hidden" name="bundleId" value={bundle.id} /></form>
         </div>
         </div>
       </div>
 
       <div className="grid gap-6">
-        <details className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]">
+        <details id="included-courses" className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]">
           <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
             <div className="space-y-1">
               <h2 className="text-lg font-semibold text-stone-950">Included courses</h2>
@@ -293,7 +321,7 @@ export default async function BundleDetailPage({
             <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save included courses</button>
           </form>
         </details>
-        <details className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]">
+        <details id="social-proof" className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]">
           <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
             <div className="space-y-1">
               <h2 className="text-lg font-semibold text-stone-950">FAQ and reviews</h2>

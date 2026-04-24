@@ -17,6 +17,14 @@ function formatLessonType(type: string) {
   return type.charAt(0) + type.slice(1).toLowerCase();
 }
 
+function formatDripSummary(dripDays: number | null) {
+  if (!dripDays || dripDays <= 0) {
+    return "Available immediately";
+  }
+
+  return `Unlocks on day ${dripDays}`;
+}
+
 export default async function CourseDetailPage({
   params,
   searchParams,
@@ -68,6 +76,13 @@ export default async function CourseDetailPage({
     Boolean(course.legacyUrl?.startsWith("/")) || Boolean(course.publicPath?.startsWith("/") && course.publicPath !== `/course/${course.slug}`);
   const salesPageConfig = parseSalesPageConfig(course.salesPageConfig);
   const upsellTarget = course.upsellCourseId ? `course:${course.upsellCourseId}` : course.upsellBundleId ? `bundle:${course.upsellBundleId}` : "";
+  const totalLessons = course.modules.reduce((count, module) => count + module.lessons.length, 0);
+  const dripLessons = course.modules.reduce(
+    (count, module) => count + module.lessons.filter((lesson) => (lesson.dripDays ?? 0) > 0).length,
+    0,
+  );
+  const latestDripDay = Math.max(0, ...course.modules.flatMap((module) => module.lessons.map((lesson) => lesson.dripDays ?? 0)));
+  const relatedOfferLabel = course.upsellCourse?.title ?? course.upsellBundle?.title ?? null;
   const feedbackMessage =
     resolvedSearchParams?.saved === "details"
       ? "Course details saved."
@@ -108,7 +123,7 @@ export default async function CourseDetailPage({
   return (
     <AdminShell title={course.title} description="Edit the course content here. Pricing, checkout, and unlock rules live on the linked product.">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_320px]">
-        <div className="space-y-6">
+        <div className="space-y-6 xl:sticky xl:top-24 xl:self-start">
           <Card className="space-y-8 bg-white p-8">
             {feedbackMessage ? <p className="rounded-[18px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{feedbackMessage}</p> : null}
             {errorMessage ? <p className="rounded-[18px] bg-rose-50 px-4 py-3 text-sm text-rose-700">{errorMessage}</p> : null}
@@ -151,14 +166,19 @@ export default async function CourseDetailPage({
                 <label>SEO title<input name="seoTitle" defaultValue={course.seoTitle ?? ""} /></label>
                 <label className="lg:col-span-2">SEO description<textarea name="seoDescription" rows={3} defaultValue={course.seoDescription ?? ""} /></label>
               </ProductFormSection>
-              <ProductFormSection id="pricing-checkout" title="Commerce handoff" description="This course links to a sellable product. Use this section for price defaults and upsell targets, then manage the product for checkout flow." collapsible>
+              <ProductFormSection
+                id="pricing-checkout"
+                title="Related offer and pricing"
+                description="Set the course price defaults and choose one follow-up offer to present after checkout. Use the linked product when you need to change checkout execution or access rules."
+                collapsible
+              >
                 <label>Price<input name="price" type="number" min="0" step="0.01" defaultValue={course.price.toString()} /></label>
                 <label>Currency<input name="currency" defaultValue={course.currency} /></label>
                 <label>Compare-at price<input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={course.compareAtPrice?.toString() ?? ""} /></label>
                 <label className="lg:col-span-2">
-                  Checkout upsell
+                  Related follow-up offer
                   <select name="upsellTarget" defaultValue={upsellTarget}>
-                    <option value="">No upsell</option>
+                    <option value="">No related offer</option>
                     {upsellCourses.map((upsellCourse) => (
                       <option key={`course-${upsellCourse.id}`} value={`course:${upsellCourse.id}`}>
                         Course: {upsellCourse.title}
@@ -172,20 +192,22 @@ export default async function CourseDetailPage({
                   </select>
                 </label>
                 <label>
-                  Upsell discount type
+                  Related-offer discount type
                   <select name="upsellDiscountType" defaultValue={course.upsellDiscountType}>
-                    <option value="NONE">No upsell discount</option>
+                    <option value="NONE">No discount</option>
                     <option value="AMOUNT">Amount off</option>
                     <option value="PERCENT">Percent off</option>
                   </select>
                 </label>
                 <label>
-                  Upsell discount value
+                  Related-offer discount value
                   <input name="upsellDiscountValue" type="number" min="0.01" step="0.01" defaultValue={course.upsellDiscountValue?.toString() ?? ""} />
                 </label>
-                <label className="lg:col-span-2">Upsell headline<input name="upsellHeadline" defaultValue={course.upsellHeadline ?? ""} placeholder="Optional override for the upsell title" /></label>
-                <label className="lg:col-span-2">Upsell body<textarea name="upsellBody" rows={3} defaultValue={course.upsellBody ?? ""} placeholder="Explain the discounted follow-up offer clearly." /></label>
-                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">This sets the default commercial values the linked product uses. Keep course editing here, then use the product screen to manage checkout and what buyers unlock.</div>
+                <label className="lg:col-span-2">Related-offer headline<input name="upsellHeadline" defaultValue={course.upsellHeadline ?? ""} placeholder="Optional override for the follow-up offer title" /></label>
+                <label className="lg:col-span-2">Related-offer body<textarea name="upsellBody" rows={3} defaultValue={course.upsellBody ?? ""} placeholder="Explain why this is the next recommended offer." /></label>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
+                  Keep this to one clear next offer. Pricing defaults live here, while the linked product remains the source of truth for checkout flow and unlock rules.
+                </div>
               </ProductFormSection>
               <ProductFormSection id="pages" title="Pages" description="Manage the public sales, checkout, and thank-you surfaces from one place." collapsible>
                 <div className="lg:col-span-2 grid gap-3 md:grid-cols-3">
@@ -296,7 +318,23 @@ export default async function CourseDetailPage({
               ) : null}
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Current status</span><span className="mt-1 block text-base font-semibold text-stone-950">{course.status}</span></div>
-                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Curriculum</span><span className="mt-1 block text-base text-stone-950">{course.modules.length} module{course.modules.length === 1 ? "" : "s"}</span></div>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Curriculum</span>
+                  <span className="mt-1 block text-base text-stone-950">
+                    {course.modules.length} module{course.modules.length === 1 ? "" : "s"} · {totalLessons} lesson{totalLessons === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Drip schedule</span>
+                  <span className="mt-1 block text-base text-stone-950">
+                    {dripLessons > 0 ? `${dripLessons} delayed lesson${dripLessons === 1 ? "" : "s"}` : "All lessons unlock immediately"}
+                  </span>
+                  {dripLessons > 0 ? <p className="mt-1 text-sm text-stone-600">Latest unlock: day {latestDripDay}</p> : null}
+                </div>
+                <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Related offer</span>
+                  <span className="mt-1 block text-base text-stone-950">{relatedOfferLabel ?? "No follow-up offer set"}</span>
+                </div>
                 <div className="rounded-[20px] border border-amber-200 bg-amber-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-700">Canonical URL</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Sales page</span><span className="mt-1 block break-all text-base text-stone-950">{publicPagePath}</span></div>
                 <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3"><span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Thank-you page</span><span className="mt-1 block break-all text-base text-stone-950">{thankYouPagePath}</span></div>
@@ -306,18 +344,18 @@ export default async function CourseDetailPage({
           <Card className="space-y-4 bg-white p-5">
             <div className="space-y-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Page structure</p>
-              <p className="text-sm leading-6 text-stone-600">Work top to bottom: identity, copy, media, commerce handoff, pages, curriculum, proof, then publish.</p>
+              <p className="text-sm leading-6 text-stone-600">Jump directly to the section you need. Keep commerce, pages, and drip checks separate from curriculum editing.</p>
             </div>
-            <div className="grid gap-2 text-sm">
-              <a className="border-l-2 border-stone-200 px-3 py-1 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#core-identity">Core identity</a>
-              <a className="border-l-2 border-stone-200 px-3 py-1 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#sales-copy">Sales copy</a>
-              <a className="border-l-2 border-stone-200 px-3 py-1 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#media-seo">Media and SEO</a>
-              <a className="border-l-2 border-stone-200 px-3 py-1 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#pricing-checkout">Commerce handoff</a>
-              <a className="border-l-2 border-stone-200 px-3 py-1 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#pages">Pages</a>
-              <a className="border-l-2 border-stone-200 px-3 py-1 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#curriculum">Curriculum</a>
-              <a className="border-l-2 border-stone-200 px-3 py-1 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#social-proof">Reviews and FAQ</a>
-              <a className="border-l-2 border-stone-200 px-3 py-1 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#publish">Publish and preview</a>
-              <a className="border-l-2 border-stone-200 px-3 py-1 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#migration-urls">Migration and URLs</a>
+            <div className="grid gap-2 text-sm sm:grid-cols-2 xl:grid-cols-1">
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#core-identity">Core identity</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#sales-copy">Sales copy</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#media-seo">Media and SEO</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#pricing-checkout">Related offer and pricing</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#pages">Pages</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#curriculum">Curriculum</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#social-proof">Reviews and FAQ</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#publish">Publish and preview</a>
+              <a className="rounded-[16px] border border-stone-200 bg-stone-50 px-3 py-2 text-stone-700 transition hover:border-stone-400 hover:text-stone-950" href="#migration-urls">Migration and URLs</a>
             </div>
           </Card>
           <div id="publish">
@@ -347,23 +385,42 @@ export default async function CourseDetailPage({
 
       <div className="grid gap-6">
         <div id="curriculum">
-          <details className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]" open>
+          <details className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]">
             <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
               <div className="space-y-1">
                 <h2 className="text-lg font-semibold text-stone-950">Curriculum</h2>
-                <p className="text-sm text-stone-600">Work top to bottom: add a module, add lessons inside it, then save each lesson once after changing content, preview, or embed fields.</p>
+                <p className="text-sm text-stone-600">Expand only the module you need. Drip timing stays visible here without forcing the whole curriculum open.</p>
               </div>
               <span className="rounded-full border border-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Toggle</span>
             </summary>
             <div className="mt-4 space-y-4">
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Immediate lessons</span>
+                <span className="mt-1 block text-base text-stone-950">{totalLessons - dripLessons}</span>
+              </div>
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Delayed lessons</span>
+                <span className="mt-1 block text-base text-stone-950">{dripLessons}</span>
+              </div>
+              <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Latest unlock day</span>
+                <span className="mt-1 block text-base text-stone-950">{latestDripDay}</span>
+              </div>
+            </div>
             {course.modules.map((module) => (
-              <details key={module.id} className="rounded-[24px] border border-stone-200 bg-stone-50 p-4" open>
+              <details key={module.id} className="rounded-[24px] border border-stone-200 bg-stone-50 p-4">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">Module {module.position}</p>
                   <p className="mt-1 text-lg font-semibold text-stone-950">{module.title}</p>
                 </div>
-                <p className="text-sm text-stone-600">{module.lessons.length} lesson{module.lessons.length === 1 ? "" : "s"}</p>
+                <p className="text-sm text-stone-600">
+                  {module.lessons.length} lesson{module.lessons.length === 1 ? "" : "s"} /{" "}
+                  {module.lessons.filter((lesson) => (lesson.dripDays ?? 0) > 0).length > 0
+                    ? `${module.lessons.filter((lesson) => (lesson.dripDays ?? 0) > 0).length} on drip`
+                    : "all immediate"}
+                </p>
               </summary>
               <div className="mt-4 space-y-4">
                 <form action={addModuleAction} className="grid gap-3 rounded-[20px] border border-stone-200 bg-white p-4 md:grid-cols-[minmax(0,1fr)_120px_auto]">
@@ -382,7 +439,9 @@ export default async function CourseDetailPage({
                       <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
                         <div>
                           <p className="text-sm font-semibold text-stone-950">{lesson.title}</p>
-                          <p className="mt-1 text-xs uppercase tracking-[0.22em] text-stone-500">{formatLessonType(lesson.type)} · {lesson.status}</p>
+                          <p className="mt-1 text-xs uppercase tracking-[0.22em] text-stone-500">
+                            {formatLessonType(lesson.type)} / {lesson.status} / {formatDripSummary(lesson.dripDays)}
+                          </p>
                         </div>
                         <p className="text-sm text-stone-600">Open</p>
                       </summary>
@@ -409,10 +468,14 @@ export default async function CourseDetailPage({
                           <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                             <label>Download URL<input name="downloadUrl" defaultValue={lesson.downloadUrl ?? ""} /></label>
                             <label>Duration<input name="durationLabel" defaultValue={lesson.durationLabel ?? ""} /></label>
-                            <label>Drip days<input name="dripDays" type="number" min="0" defaultValue={lesson.dripDays ?? ""} /></label>
+                            <label>
+                              Unlock after enrollment (days)
+                              <input name="dripDays" type="number" min="0" defaultValue={lesson.dripDays ?? ""} />
+                            </label>
                             <label>Status<select name="status" defaultValue={lesson.status}><option value="DRAFT">DRAFT</option><option value="PUBLISHED">PUBLISHED</option></select></label>
                           </div>
                           <div className="mt-3 space-y-2">
+                            <p className="text-sm leading-6 text-stone-600">Leave blank or set 0 to make the lesson available immediately. Any positive number delays access from the learner&apos;s enrollment date.</p>
                             <label className="flex items-center gap-3 text-stone-700"><input className="w-auto" type="checkbox" name="isPreview" value="true" defaultChecked={lesson.isPreview} />Preview lesson</label>
                             <p className="text-sm leading-6 text-stone-600">Preview lessons get a public Watch preview link on the sales page. Leave this off for buyer-only lessons.</p>
                           </div>

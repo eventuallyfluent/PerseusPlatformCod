@@ -21,7 +21,7 @@ export default async function AuthCompletePage({
 
   if (audience === "admin") {
     if (!session.user.isAdmin) {
-      redirect("/login?error=admin-only");
+      redirect("/admin/login?error=not-admin");
     }
 
     redirect(normalizeAdminReturnPath(query.returnTo, "/admin"));

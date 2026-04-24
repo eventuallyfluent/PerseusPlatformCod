@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { courseInputSchema } from "@/lib/zod/schemas";
 import { persistGeneratedPage } from "@/lib/sales-pages/persist-generated-page";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
+import { normalizePublicPathInput } from "@/lib/urls/normalize-public-path";
 import { validatePublicPathAvailability } from "@/lib/urls/validate-public-path";
 import { courseInclude } from "@/lib/courses/course-query";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
@@ -9,7 +10,8 @@ import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 
 export async function createCourse(input: unknown) {
   const data = courseInputSchema.parse(input);
-  const desiredPath = data.legacyUrl?.startsWith("/") ? data.legacyUrl : `/course/${data.slug}`;
+  const normalizedLegacyUrl = normalizePublicPathInput(data.legacyUrl);
+  const desiredPath = normalizedLegacyUrl ?? `/course/${data.slug}`;
   const isAvailable = await validatePublicPathAvailability(desiredPath);
 
   if (!isAvailable) {
@@ -26,7 +28,7 @@ export async function createCourse(input: unknown) {
       upsellBody: data.upsellBody || null,
       legacyCourseId: data.legacyCourseId || null,
       legacySlug: data.legacySlug || null,
-      legacyUrl: data.legacyUrl || null,
+      legacyUrl: normalizedLegacyUrl,
       publicPath: desiredPath,
     },
     include: courseInclude,

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { bundleInputSchema } from "@/lib/zod/schemas";
 import { validatePublicPathAvailability } from "@/lib/urls/validate-public-path";
+import { normalizePublicPathInput } from "@/lib/urls/normalize-public-path";
 import { bundleInclude } from "@/lib/bundles/bundle-query";
 import { persistGeneratedBundlePage } from "@/lib/bundles/persist-generated-bundle-page";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
@@ -18,23 +19,26 @@ export async function updateBundle(bundleId: string, input: unknown) {
   }
 
   const slug = data.slug ?? existing.slug;
+  const normalizedExistingLegacyUrl = normalizePublicPathInput(existing.legacyUrl);
+  const normalizedExistingPublicPath = normalizePublicPathInput(existing.publicPath);
+  const normalizedInputLegacyUrl = data.legacyUrl === undefined ? undefined : normalizePublicPathInput(data.legacyUrl);
   const defaultPath = `/bundle/${existing.slug}`;
   const hasLockedCanonicalPath =
-    Boolean(existing.legacyUrl?.startsWith("/")) ||
-    Boolean(existing.publicPath?.startsWith("/") && existing.publicPath !== defaultPath);
+    Boolean(normalizedExistingLegacyUrl) ||
+    Boolean(normalizedExistingPublicPath && normalizedExistingPublicPath !== defaultPath);
   const lockedCanonicalPath =
-    existing.publicPath?.startsWith("/") && hasLockedCanonicalPath
-      ? existing.publicPath
-      : existing.legacyUrl?.startsWith("/")
-        ? existing.legacyUrl
+    normalizedExistingPublicPath && hasLockedCanonicalPath
+      ? normalizedExistingPublicPath
+      : normalizedExistingLegacyUrl
+        ? normalizedExistingLegacyUrl
         : null;
   const desiredPath =
     lockedCanonicalPath
       ? lockedCanonicalPath
       : data.legacyUrl === undefined
-      ? (existing.publicPath?.startsWith("/") ? existing.publicPath : `/bundle/${slug}`)
-      : data.legacyUrl?.startsWith("/")
-        ? data.legacyUrl
+      ? (normalizedExistingPublicPath ?? `/bundle/${slug}`)
+      : normalizedInputLegacyUrl
+        ? normalizedInputLegacyUrl
         : `/bundle/${slug}`;
 
   const isAvailable = await validatePublicPathAvailability(desiredPath, undefined, bundleId);
@@ -58,7 +62,7 @@ export async function updateBundle(bundleId: string, input: unknown) {
             : data.upsellDiscountValue,
       upsellHeadline: data.upsellHeadline === "" ? null : data.upsellHeadline,
       upsellBody: data.upsellBody === "" ? null : data.upsellBody,
-      legacyUrl: lockedCanonicalPath ? existing.legacyUrl : data.legacyUrl === "" ? null : data.legacyUrl,
+      legacyUrl: lockedCanonicalPath ? normalizedExistingLegacyUrl : data.legacyUrl === "" ? null : normalizedInputLegacyUrl,
     },
     include: bundleInclude,
   });

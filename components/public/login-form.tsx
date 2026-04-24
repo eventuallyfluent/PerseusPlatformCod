@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { AuthEntryShell } from "@/components/public/auth-entry-shell";
+import { HardLink } from "@/components/ui/hard-link";
 
 export function LoginForm({
   previewEnabled,
@@ -41,6 +42,16 @@ export function LoginForm({
     >
       {errorMessage || adminError ? (
         <p className="rounded-[20px] bg-[rgba(183,28,28,0.08)] px-4 py-3 text-sm font-medium text-[#b42318]">{errorMessage ?? adminError}</p>
+      ) : !isAdmin ? (
+        <div className="space-y-3 rounded-[20px] border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-4">
+          <p className="text-sm font-medium text-[var(--foreground)]">Student login is not available right now.</p>
+          <p className="text-sm leading-7 text-[var(--foreground-soft)]">
+            Email sign-in is not configured for this environment. Contact support so access can be restored.
+          </p>
+          <HardLink href="/contact" className="inline-flex text-sm font-medium text-[var(--accent)] underline underline-offset-4">
+            Contact support
+          </HardLink>
+        </div>
       ) : null}
       {isAdmin ? (
         <>

@@ -20,6 +20,7 @@ function mapCreemEvent(eventType: string): CanonicalPaymentEvent | undefined {
 export const creemConnector: PaymentGatewayConnector = {
   provider: "creem",
   displayName: "Creem",
+  isCheckoutImplemented: false,
   credentialFields: [
     { key: "api_key", label: "API Key", inputType: "password", required: true, secret: true },
     { key: "webhook_secret", label: "Webhook Secret", inputType: "password", required: true, secret: true },

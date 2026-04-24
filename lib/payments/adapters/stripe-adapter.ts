@@ -42,6 +42,7 @@ function mapStripeEvent(eventType: string): CanonicalPaymentEvent | undefined {
 export const stripeConnector: PaymentGatewayConnector = {
   provider: "stripe",
   displayName: "Stripe",
+  isCheckoutImplemented: true,
   credentialFields: [
     { key: "api_key", label: "API Key", inputType: "password", required: true, secret: true },
     { key: "webhook_secret", label: "Webhook Secret", inputType: "password", required: true, secret: true },

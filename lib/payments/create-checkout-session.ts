@@ -8,6 +8,8 @@ import { getOfferById } from "@/lib/offers/get-offer-by-id";
 import { getActiveGateway } from "@/lib/payments/active-gateway";
 import { evaluateGatewayPolicy } from "@/lib/payments/policy";
 import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
+import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
+import { evaluateGatewayOperationalReadiness } from "@/lib/payments/readiness";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
 
 function interpolateCheckoutTemplate(template: string, values: Record<string, string>) {
@@ -33,9 +35,24 @@ export async function createCheckoutSession(input: {
   const connector = findPaymentConnector(gateway.provider);
   const gatewayDefinition = resolveGatewayDefinition(gateway, connector);
   const gatewayPolicy = evaluateGatewayPolicy(gatewayDefinition.capabilities);
+  const gatewayReadiness = evaluateGatewayOperationalReadiness({
+    gateway,
+    definition: gatewayDefinition,
+    connector,
+    credentials: getGatewayCredentialMap(gateway.credentials),
+  });
 
   if (!gatewayPolicy.allowed) {
     throw new Error(gatewayPolicy.detail);
+  }
+
+  if (!gatewayReadiness.canRunCheckout) {
+    const blockingIssues = gatewayReadiness.issues.filter((issue) => issue.tone === "danger");
+    throw new Error(
+      blockingIssues.length > 0
+        ? blockingIssues.map((issue) => `${issue.label}: ${issue.detail}`).join(" ")
+        : gatewayReadiness.detail,
+    );
   }
 
   const offer = await getOfferById(input.offerId);

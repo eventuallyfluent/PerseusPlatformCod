@@ -363,6 +363,7 @@ export type GatewayOperationalReadiness = {
 export interface PaymentGatewayConnector {
   provider: string;
   displayName: string;
+  isCheckoutImplemented: boolean;
   credentialFields: GatewayCredentialField[];
   capabilities: GatewayCapabilities;
   createCheckoutSession(input: {

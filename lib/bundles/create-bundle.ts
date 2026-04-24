@@ -4,12 +4,14 @@ import { validatePublicPathAvailability } from "@/lib/urls/validate-public-path"
 import { bundleInclude } from "@/lib/bundles/bundle-query";
 import { persistGeneratedBundlePage } from "@/lib/bundles/persist-generated-bundle-page";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
+import { normalizePublicPathInput } from "@/lib/urls/normalize-public-path";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 
 export async function createBundle(input: unknown) {
   const data = bundleInputSchema.parse(input);
-  const desiredPath = data.legacyUrl?.startsWith("/") ? data.legacyUrl : `/bundle/${data.slug}`;
+  const normalizedLegacyUrl = normalizePublicPathInput(data.legacyUrl);
+  const desiredPath = normalizedLegacyUrl ?? `/bundle/${data.slug}`;
   const isAvailable = await validatePublicPathAvailability(desiredPath);
 
   if (!isAvailable) {
@@ -24,7 +26,7 @@ export async function createBundle(input: unknown) {
       upsellDiscountValue: data.upsellDiscountType === "NONE" ? null : data.upsellDiscountValue ?? null,
       upsellHeadline: data.upsellHeadline || null,
       upsellBody: data.upsellBody || null,
-      legacyUrl: data.legacyUrl || null,
+      legacyUrl: normalizedLegacyUrl,
       publicPath: desiredPath,
     },
     include: bundleInclude,

@@ -8,6 +8,7 @@ import { validateLessonRows } from "@/lib/imports/validate-lessons";
 import { validateOfferRows } from "@/lib/imports/validate-offers";
 import type { ImportDryRunSummary, ImportValidationResult } from "@/lib/imports/types";
 import { validatePublicPathAvailability } from "@/lib/urls/validate-public-path";
+import { normalizePublicPathInput } from "@/lib/urls/normalize-public-path";
 import { coursePackageCsvRowSchema, courseStudentCsvRowSchema } from "@/lib/zod/schemas";
 import { validateRows } from "@/lib/imports/shared";
 
@@ -124,7 +125,7 @@ async function enrichCourseValidation(
       continue;
     }
 
-    const desiredPath = row.legacy_url || `/course/${row.slug}`;
+    const desiredPath = normalizePublicPathInput(row.legacy_url) ?? `/course/${row.slug}`;
     const existingCourse =
       (row.legacy_course_id
         ? await prisma.course.findFirst({
@@ -272,7 +273,7 @@ async function enrichCoursePackageValidation(
     };
   }
 
-  const desiredPath = String(firstRow.legacy_url || "") || `/course/${String(firstRow.slug)}`;
+  const desiredPath = normalizePublicPathInput(String(firstRow.legacy_url || "")) ?? `/course/${String(firstRow.slug)}`;
   const existingCourse =
     (firstRow.legacy_course_id
       ? await prisma.course.findFirst({

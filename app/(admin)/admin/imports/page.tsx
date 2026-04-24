@@ -178,11 +178,9 @@ export default async function ImportsPage() {
                       View
                     </Link>
                     {batch.status === "PROCESSING" ? (
-                      <form action={`/api/imports/batches/${batch.id}/execute`} method="post">
-                        <button type="submit" className="text-sm font-medium text-stone-950 underline">
-                          Resume
-                        </button>
-                      </form>
+                      <Link href={`/admin/imports/${batch.id}`} className="text-sm font-medium text-stone-950 underline">
+                        Resume
+                      </Link>
                     ) : null}
                   </div>
                 </td>

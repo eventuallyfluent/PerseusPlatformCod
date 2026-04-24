@@ -212,7 +212,7 @@ export default async function CourseDetailPage({
               <ProductFormSection
                 id="pages"
                 title="Pages"
-                description="Use this as a small surface-management block. Core sales copy stays in the course fields above; only put true page-specific overrides here."
+                description="This is the public page summary for this course. Sales and checkout copy comes from the course content above."
                 collapsible
               >
                 <div className="lg:col-span-2 grid gap-3 md:grid-cols-3">
@@ -230,18 +230,13 @@ export default async function CourseDetailPage({
                   </div>
                 </div>
                 <div className="lg:col-span-2 rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
-                  Sales page headlines, descriptions, pricing language, and proof sections now fall back to the course content automatically. Only use the fields below when the page itself needs different CTA labels or thank-you copy.
+                  Edit the course once above, then use these links to view the three public surfaces. The only editable copy here is the thank-you page.
                 </div>
-                <label>Hero metadata line<input name="salesPage.heroMetadataLine" defaultValue={salesPageConfig.heroMetadataLine ?? ""} /></label>
-                <label>Primary CTA label<input name="salesPage.primaryCtaLabel" defaultValue={salesPageConfig.primaryCtaLabel ?? ""} /></label>
-                <label>Secondary CTA label<input name="salesPage.secondaryCtaLabel" defaultValue={salesPageConfig.secondaryCtaLabel ?? ""} /></label>
                 <label>Thank-you eyebrow<input name="salesPage.thankYouEyebrow" defaultValue={salesPageConfig.thankYouEyebrow ?? ""} /></label>
                 <label>Signed-in CTA label<input name="salesPage.thankYouSignedInLabel" defaultValue={salesPageConfig.thankYouSignedInLabel ?? ""} /></label>
                 <label>Signed-out CTA label<input name="salesPage.thankYouSignedOutLabel" defaultValue={salesPageConfig.thankYouSignedOutLabel ?? ""} /></label>
                 <label className="lg:col-span-2">Thank-you headline<input name="salesPage.thankYouHeadline" defaultValue={salesPageConfig.thankYouHeadline ?? ""} /></label>
                 <label className="lg:col-span-2">Thank-you body<textarea name="salesPage.thankYouBody" rows={3} defaultValue={salesPageConfig.thankYouBody ?? ""} /></label>
-                <label className="lg:col-span-2">Section order<textarea name="salesPage.sectionOrder" rows={7} defaultValue={(salesPageConfig.sectionOrder ?? ["description", "highlights", "curriculum", "instructor", "testimonials", "faqs", "pricing"]).join("\n")} /></label>
-                <label className="lg:col-span-2">Hidden sections<textarea name="salesPage.hiddenSections" rows={7} defaultValue={(salesPageConfig.hiddenSections ?? []).join("\n")} /></label>
               </ProductFormSection>
               <ProductFormSection id="migration-urls" title="Publish and URL preservation" description="Preserved migrated routes stay canonical after migration and should be treated as SEO-critical." collapsible>
                 <label>Legacy course ID<input name="legacyCourseId" defaultValue={course.legacyCourseId ?? ""} /></label>

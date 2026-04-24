@@ -31,20 +31,8 @@ function toArray(value: FormDataEntryValue | null) {
     .filter(Boolean);
 }
 
-function toStructuredArray(value: FormDataEntryValue | null) {
-  return String(value ?? "")
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function parseSalesPageConfig(formData: FormData) {
   return {
-    heroMetadataLine: String(formData.get("salesPage.heroMetadataLine") ?? ""),
-    primaryCtaLabel: String(formData.get("salesPage.primaryCtaLabel") ?? ""),
-    secondaryCtaLabel: String(formData.get("salesPage.secondaryCtaLabel") ?? ""),
-    sectionOrder: toStructuredArray(formData.get("salesPage.sectionOrder")),
-    hiddenSections: toStructuredArray(formData.get("salesPage.hiddenSections")),
     thankYouEyebrow: String(formData.get("salesPage.thankYouEyebrow") ?? ""),
     thankYouHeadline: String(formData.get("salesPage.thankYouHeadline") ?? ""),
     thankYouBody: String(formData.get("salesPage.thankYouBody") ?? ""),

@@ -1,4 +1,5 @@
 import { AdminShell } from "@/components/admin/admin-shell";
+import { BundleCoursePicker } from "@/components/admin/bundle-course-picker";
 import { ImageField } from "@/components/admin/image-field";
 import { Card } from "@/components/ui/card";
 import { ProductFormSection, ProductFormShell } from "@/components/admin/product-form-shell";
@@ -130,16 +131,8 @@ export default async function NewBundlePage({
           title="Included courses"
           description="Choose the courses this bundle unlocks. These are written on first save so the public bundle page can list every included course immediately."
         >
-          <div className="md:col-span-2 grid gap-3">
-            {allCourses.map((course) => (
-              <label key={course.id} className="flex items-start gap-3 rounded-[20px] border border-stone-200 bg-white px-4 py-4 text-stone-700">
-                <input className="mt-1 w-auto" type="checkbox" name="courseIds" value={course.id} />
-                <span>
-                  <span className="block font-semibold text-stone-950">{course.title}</span>
-                  {course.subtitle ? <span className="block text-sm text-stone-700">{course.subtitle}</span> : null}
-                </span>
-              </label>
-            ))}
+          <div className="md:col-span-2">
+            <BundleCoursePicker courses={allCourses} emptyLabel="No courses match this search." />
           </div>
         </ProductFormSection>
 

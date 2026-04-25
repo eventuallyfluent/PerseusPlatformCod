@@ -5,6 +5,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { ImageField } from "@/components/admin/image-field";
 import { ProductFormSection } from "@/components/admin/product-form-shell";
+import { RelatedOfferPicker } from "@/components/admin/related-offer-picker";
 import { HardLink } from "@/components/ui/hard-link";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import { resolveCoursePublicPath, resolveCourseThankYouPath } from "@/lib/urls/resolve-course-path";
@@ -172,22 +173,24 @@ export default async function CourseDetailPage({
                 description="Choose one follow-up recommendation for buyers. Price, checkout, and access rules live on the linked product."
                 collapsible
               >
-                <label className="lg:col-span-2">
-                  Related follow-up offer
-                  <select name="upsellTarget" defaultValue={upsellTarget}>
-                    <option value="">No related offer</option>
-                    {upsellCourses.map((upsellCourse) => (
-                      <option key={`course-${upsellCourse.id}`} value={`course:${upsellCourse.id}`}>
-                        Course: {upsellCourse.title}
-                      </option>
-                    ))}
-                    {upsellBundles.map((upsellBundle) => (
-                      <option key={`bundle-${upsellBundle.id}`} value={`bundle:${upsellBundle.id}`}>
-                        Bundle: {upsellBundle.title}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <div className="lg:col-span-2">
+                  <span className="mb-2 block text-sm font-medium text-stone-700">Related follow-up offer</span>
+                  <RelatedOfferPicker
+                    selectedValue={upsellTarget}
+                    options={[
+                      ...upsellCourses.map((upsellCourse) => ({
+                        value: `course:${upsellCourse.id}`,
+                        label: upsellCourse.title,
+                        kind: "course" as const,
+                      })),
+                      ...upsellBundles.map((upsellBundle) => ({
+                        value: `bundle:${upsellBundle.id}`,
+                        label: upsellBundle.title,
+                        kind: "bundle" as const,
+                      })),
+                    ]}
+                  />
+                </div>
                 <label>
                   Related-offer discount type
                   <select name="upsellDiscountType" defaultValue={course.upsellDiscountType}>

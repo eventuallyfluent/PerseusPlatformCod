@@ -6,6 +6,7 @@ import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { resolveCollectionPublicPath } from "@/lib/urls/resolve-collection-path";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { buildOrganizationStructuredData, buildWebsiteStructuredData } from "@/lib/seo/structured-data";
+import { getPublicReviewName } from "@/lib/testimonials/public-review-name";
 import { Button } from "@/components/ui/button";
 import { HardLink } from "@/components/ui/hard-link";
 import type {
@@ -329,7 +330,7 @@ export default async function HomePage() {
       testimonial.id,
       {
         id: testimonial.id,
-        name: testimonial.name ?? "Student",
+        name: getPublicReviewName(testimonial.name),
         source: testimonial.course?.title ?? testimonial.bundle?.title ?? "Student",
         quote: testimonial.quote,
       },
@@ -343,7 +344,7 @@ export default async function HomePage() {
           .filter((item): item is { id: string; name: string; source: string; quote: string } => Boolean(item))
       : approvedTestimonials.map((testimonial) => ({
           id: testimonial.id,
-          name: testimonial.name ?? "Student",
+          name: getPublicReviewName(testimonial.name),
           source: testimonial.course?.title ?? testimonial.bundle?.title ?? "Student",
           quote: testimonial.quote,
         }));

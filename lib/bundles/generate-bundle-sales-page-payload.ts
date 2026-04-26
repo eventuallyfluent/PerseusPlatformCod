@@ -3,6 +3,7 @@ import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { normalizeSectionOrder, parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import type { BundleSalesPagePayload, BundleWithRelations, SalesPageOfferSummary } from "@/types";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
+import { getPublicReviewName } from "@/lib/testimonials/public-review-name";
 
 function readStringArray(value: unknown) {
   if (Array.isArray(value)) {
@@ -102,7 +103,7 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
       eyebrow: "Testimonies",
       title: "What students say after entering the bundle",
       items: approvedTestimonials.map((testimonial) => ({
-        name: testimonial.name,
+        name: getPublicReviewName(testimonial.name),
         quote: testimonial.quote,
         rating: testimonial.rating,
         source: bundle.title,

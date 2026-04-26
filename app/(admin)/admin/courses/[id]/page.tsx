@@ -554,6 +554,12 @@ export default async function CourseDetailPage({
               <form key={`${testimonial.id}-edit`} action={saveTestimonialAction} className="grid gap-3 rounded-[20px] border border-stone-200 p-4">
                 <input type="hidden" name="testimonialId" value={testimonial.id} />
                 <input type="hidden" name="courseId" value={course.id} />
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-600">
+                    {testimonial.email ? "Learner review" : "Imported review"}
+                  </span>
+                  {testimonial.email ? <span className="text-xs text-stone-500">{testimonial.email}</span> : null}
+                </div>
                 <label>Name<input name="name" defaultValue={testimonial.name ?? ""} /></label>
                 <label>Quote<textarea name="quote" rows={3} defaultValue={testimonial.quote} /></label>
                 <label>Rating<input name="rating" type="number" min="1" max="5" defaultValue={testimonial.rating} /></label>

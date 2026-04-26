@@ -50,6 +50,29 @@ function humanizeSlug(slug: string) {
     .join(" ");
 }
 
+function pickFirstNonEmptyPackageValue<T extends string | number | null | undefined>(
+  rows: CoursePackageCsvRow[],
+  selector: (row: CoursePackageCsvRow) => T,
+) {
+  for (const row of rows) {
+    const value = selector(row);
+
+    if (typeof value === "string") {
+      if (value.trim()) {
+        return value;
+      }
+
+      continue;
+    }
+
+    if (value !== null && value !== undefined) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
+
 function buildExecutionSummary(type: ImportType, totalCount = 0): ImportExecutionSummary {
   return {
     type,
@@ -402,8 +425,8 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
     learningOutcomes: splitPipeList(firstRow.learning_outcomes),
     whoItsFor: splitPipeList(firstRow.who_its_for),
     includes: splitPipeList(firstRow.includes),
-    heroImageUrl: firstRow.hero_image_url,
-    salesVideoUrl: firstRow.sales_video_url,
+    heroImageUrl: pickFirstNonEmptyPackageValue(rows, (row) => row.hero_image_url) ?? firstRow.hero_image_url,
+    salesVideoUrl: pickFirstNonEmptyPackageValue(rows, (row) => row.sales_video_url) ?? firstRow.sales_video_url,
     instructorId: instructor.id,
     seoTitle: firstRow.seo_title,
     seoDescription: firstRow.seo_description,

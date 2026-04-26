@@ -158,83 +158,6 @@ export function CoursePlayerLayout({
 
   const activeLessonNumber = activeIndex + 1;
 
-  if (publicPreview) {
-    return (
-      <div className="space-y-6">
-        <section className="overflow-hidden rounded-[32px] border border-[var(--border)] bg-[var(--surface-panel)] shadow-[var(--shadow-panel)]">
-          <LessonMedia lesson={activeLesson} />
-        </section>
-
-        <section className="rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] p-8 text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
-          <div className="space-y-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--portal-muted)]">{course.title}</p>
-            <Badge variant="portal">{activeLesson.moduleTitle}</Badge>
-            <h1 className="text-3xl leading-[0.96] tracking-[-0.04em] lg:text-[2.7rem]">{activeLesson.title}</h1>
-            <div className="flex flex-wrap items-center gap-3 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--portal-muted)]">
-              <span>{getLessonTypeLabel(activeLesson)}</span>
-              {activeLesson.durationLabel ? <span>{activeLesson.durationLabel}</span> : null}
-            </div>
-          </div>
-          {activeLesson.content ? <div className="mt-6 max-w-3xl text-base leading-8 text-[var(--text-secondary)]">{activeLesson.content}</div> : null}
-        </section>
-
-        <section className="rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--portal-muted)]">Preview curriculum</p>
-            <h2 className="text-2xl leading-none tracking-[-0.03em]">Watch the public lessons in this course.</h2>
-          </div>
-          <div className="mt-5 grid gap-3">
-            {course.modules.map((module, moduleIndex) => (
-              <div key={module.id} className="space-y-3 rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel-strong)] p-4">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.3em] text-[var(--portal-muted)]">Module {moduleIndex + 1}</p>
-                  <h3 className="mt-2 text-xl leading-none tracking-[-0.03em]">{module.title}</h3>
-                </div>
-                <div className="grid gap-2">
-                  {module.lessons.map((lesson, lessonIndex) => {
-                    if (!lesson.isPreview) {
-                      return (
-                        <div key={lesson.id} className="rounded-[20px] border border-dashed border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm text-[var(--text-muted)]">
-                          <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em]">
-                            <span>Members only</span>
-                            <span>{lesson.durationLabel ?? "Included"}</span>
-                          </span>
-                          <span className="mt-1 block font-semibold">{lesson.title}</span>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <HardLink
-                        key={lesson.id}
-                        href={`/preview/${course.slug}/${lesson.slug}`}
-                        className={`block rounded-[20px] border px-4 py-3 text-sm transition ${
-                          lesson.slug === activeLessonSlug
-                            ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--text-primary)] shadow-[var(--shadow-brand)]"
-                            : "border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]"
-                        }`}
-                      >
-                        <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] opacity-70">
-                          <span>Lesson {lessonIndex + 1}</span>
-                          <span>{lesson.slug === activeLessonSlug ? "Current" : "Preview"}</span>
-                        </span>
-                        <span className="mt-1 block font-semibold">{lesson.title}</span>
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] opacity-60">
-                          <span>{getLessonTypeLabel({ ...lesson, moduleTitle: module.title, isUnlocked: true, isCompleted: false })}</span>
-                          {lesson.durationLabel ? <span>{lesson.durationLabel}</span> : null}
-                        </div>
-                      </HardLink>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="grid gap-6 pb-4 lg:grid-cols-[340px_minmax(0,1fr)]">
@@ -316,6 +239,9 @@ export function CoursePlayerLayout({
         <div className="space-y-6 lg:h-[calc(100svh-6.25rem)]">
           <div className="space-y-5 rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] p-8 text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
             <div className="space-y-4">
+              <div className="space-y-4">
+                <LessonMedia lesson={activeLesson} />
+              </div>
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--portal-muted)]">{course.title}</p>
@@ -329,9 +255,6 @@ export function CoursePlayerLayout({
                   </div>
                 </div>
                 <FocusModeButton active={focusModeActive} onToggle={() => setFocusModeActive((value) => !value)} />
-              </div>
-              <div className="space-y-4">
-                <LessonMedia lesson={activeLesson} />
               </div>
             </div>
             <div className="space-y-6">

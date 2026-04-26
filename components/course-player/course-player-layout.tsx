@@ -40,27 +40,19 @@ function getLessonTypeLabel(lesson: LessonRecord) {
   return "Study lesson";
 }
 
-function LessonMedia({ lesson, focus = false }: { lesson: LessonRecord; focus?: boolean }) {
-  const supportsVideoSurface = lesson.type === "VIDEO" || lesson.type === "MIXED";
+function getLessonDisplayNumber(lesson: LessonRecord, fallback: number) {
+  const explicitNumber = lesson.title.match(/^Lesson\s+(\d+)/i)?.[1];
+  return explicitNumber ? Number(explicitNumber) : fallback;
+}
 
-  if (!supportsVideoSurface && !lesson.videoUrl) {
+function LessonMedia({ lesson, focus = false }: { lesson: LessonRecord; focus?: boolean }) {
+  if (!lesson.videoUrl) {
     return null;
   }
 
-  return lesson.videoUrl ? (
+  return (
     <div className={focus ? "h-full min-h-0" : undefined}>
       <StreamableEmbed url={lesson.videoUrl} title={lesson.title} focus={focus} />
-    </div>
-  ) : (
-    <div
-      className={`flex w-full items-center justify-center rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-center text-[var(--text-secondary)] ${
-        focus ? "min-h-[72svh]" : "aspect-video max-h-[52svh]"
-      }`}
-    >
-      <div className="space-y-2 px-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.28em]">Video placeholder</p>
-        <p className="text-base leading-7">Video not added yet.</p>
-      </div>
     </div>
   );
 }
@@ -179,6 +171,7 @@ export function CoursePlayerLayout({
                       isUnlocked: unlocked,
                       isCompleted: completed,
                     };
+                    const displayLessonNumber = getLessonDisplayNumber(lessonRecord, lessonIndex + 1);
                     const lessonHref = publicPreview ? `/preview/${course.slug}/${lesson.slug}` : `/learn/${course.slug}/${lesson.slug}`;
 
                     if (publicPreview && !lesson.isPreview) {
@@ -218,7 +211,7 @@ export function CoursePlayerLayout({
                         }`}
                       >
                         <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] opacity-70">
-                          <span>Lesson {lessonIndex + 1}</span>
+                          <span>{publicPreview ? lesson.type.toLowerCase() : `Lesson ${displayLessonNumber}`}</span>
                           <span>{statusLabel}</span>
                         </span>
                         <span className="mt-1 block font-semibold">{lesson.title}</span>
@@ -254,7 +247,7 @@ export function CoursePlayerLayout({
                     {!publicPreview && activeLesson.isCompleted ? <span className="text-[var(--premium)]">Completed</span> : null}
                   </div>
                 </div>
-                <FocusModeButton active={focusModeActive} onToggle={() => setFocusModeActive((value) => !value)} />
+                {!publicPreview ? <FocusModeButton active={focusModeActive} onToggle={() => setFocusModeActive((value) => !value)} /> : null}
               </div>
             </div>
             <div className="space-y-6">

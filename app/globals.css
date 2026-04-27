@@ -681,12 +681,20 @@ body::before {
 .theme-perseus-modern-dark .perseus-site-header,
 .theme-perseus-modern-light .perseus-site-header {
   box-shadow: 0 18px 42px rgba(8, 10, 18, 0.08);
+  border-bottom-color: transparent;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--header-surface) 88%, transparent), color-mix(in srgb, var(--header-surface) 74%, transparent));
 }
 
 .theme-perseus-modern-dark .perseus-site-header-inner,
 .theme-perseus-modern-light .perseus-site-header-inner {
   padding-top: 1.05rem;
   padding-bottom: 1.05rem;
+}
+
+.theme-perseus-original-dark .perseus-home-hero-sidecar,
+.theme-perseus-original-light .perseus-home-hero-sidecar {
+  display: none;
 }
 
 .theme-perseus-modern-dark .perseus-footer-shell,
@@ -717,18 +725,67 @@ body::before {
 .theme-perseus-modern-dark .perseus-home-hero-inner,
 .theme-perseus-modern-light .perseus-home-hero-inner {
   min-height: calc(100svh - 74px);
-  padding-top: 5.5rem;
-  padding-bottom: 6.5rem;
+  padding-top: 4.25rem;
+  padding-bottom: 5rem;
 }
 
-.theme-perseus-modern-dark .perseus-home-hero h1,
-.theme-perseus-modern-light .perseus-home-hero h1 {
-  max-width: 12ch;
+.theme-perseus-modern-dark .perseus-home-hero-grid,
+.theme-perseus-modern-light .perseus-home-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+  align-items: center;
+  gap: 3rem;
+}
+
+.theme-perseus-modern-dark .perseus-home-hero-copy,
+.theme-perseus-modern-light .perseus-home-hero-copy {
+  align-items: flex-start;
+  text-align: left;
+  max-width: none;
+}
+
+.theme-perseus-modern-dark .perseus-home-hero-copy h1,
+.theme-perseus-modern-light .perseus-home-hero-copy h1 {
+  max-width: 9.5ch;
+}
+
+.theme-perseus-modern-dark .perseus-home-hero-copy p,
+.theme-perseus-modern-light .perseus-home-hero-copy p {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.theme-perseus-modern-dark .perseus-home-hero-actions,
+.theme-perseus-modern-light .perseus-home-hero-actions {
+  justify-content: flex-start;
+}
+
+.theme-perseus-modern-dark .perseus-home-hero-sidecar,
+.theme-perseus-modern-light .perseus-home-hero-sidecar {
+  display: block;
+  align-self: end;
 }
 
 .theme-perseus-modern-dark .perseus-sales-hero-shell,
 .theme-perseus-modern-light .perseus-sales-hero-shell {
-  border-radius: 46px;
+  border-radius: 24px;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.theme-perseus-modern-dark .perseus-sales-hero-content,
+.theme-perseus-modern-light .perseus-sales-hero-content {
+  max-width: 72rem;
+  text-align: left;
+}
+
+.theme-perseus-modern-dark .perseus-sales-hero-badges,
+.theme-perseus-modern-light .perseus-sales-hero-badges,
+.theme-perseus-modern-dark .perseus-sales-hero-actions,
+.theme-perseus-modern-light .perseus-sales-hero-actions,
+.theme-perseus-modern-dark .perseus-sales-hero-price,
+.theme-perseus-modern-light .perseus-sales-hero-price {
+  justify-content: flex-start;
 }
 
 .theme-perseus-modern-dark .perseus-home-collections .perseus-collection-panel,
@@ -742,9 +799,74 @@ body::before {
   transform: translateY(-3px);
 }
 
+.theme-perseus-modern-dark .perseus-home-collections .perseus-collection-panel,
+.theme-perseus-modern-light .perseus-home-collections .perseus-collection-panel,
+.theme-perseus-modern-dark .perseus-course-card,
+.theme-perseus-modern-light .perseus-course-card {
+  border-radius: 22px;
+}
+
+.theme-perseus-modern-dark .perseus-home-collections .perseus-collection-panel > div:first-child,
+.theme-perseus-modern-light .perseus-home-collections .perseus-collection-panel > div:first-child {
+  min-height: 260px;
+  padding: 2rem;
+}
+
 .theme-perseus-modern-dark .perseus-collection-row,
 .theme-perseus-modern-light .perseus-collection-row {
-  border-radius: 20px;
+  border-radius: 16px;
+}
+
+.theme-perseus-modern-dark .perseus-testimonial-card,
+.theme-perseus-modern-light .perseus-testimonial-card {
+  position: relative;
+  border-radius: 22px;
+}
+
+.theme-perseus-modern-dark .perseus-testimonial-card::before,
+.theme-perseus-modern-light .perseus-testimonial-card::before {
+  content: "“";
+  position: absolute;
+  top: 0.9rem;
+  right: 1.25rem;
+  font-family: var(--font-display), serif;
+  font-size: 5rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--accent-lavender) 32%, transparent);
+}
+
+.theme-perseus-modern-dark .perseus-email-signup,
+.theme-perseus-modern-light .perseus-email-signup {
+  border-radius: 24px;
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+}
+
+.theme-perseus-modern-dark .perseus-course-card-media,
+.theme-perseus-modern-light .perseus-course-card-media {
+  height: 17rem;
+}
+
+.theme-perseus-modern-dark .perseus-course-card-body,
+.theme-perseus-modern-light .perseus-course-card-body {
+  padding: 1.5rem;
+}
+
+.theme-perseus-modern-dark .perseus-course-card-copy h3,
+.theme-perseus-modern-light .perseus-course-card-copy h3 {
+  min-height: 6.4rem;
+  font-size: 2.35rem;
+}
+
+.theme-perseus-modern-dark .perseus-course-card-footer,
+.theme-perseus-modern-light .perseus-course-card-footer {
+  align-items: end;
+}
+
+.theme-perseus-modern-dark .perseus-footer-shell,
+.theme-perseus-modern-light .perseus-footer-shell {
+  border-radius: 22px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-panel) 92%, transparent), color-mix(in srgb, var(--surface-panel-strong) 92%, transparent));
 }
 
 .theme-perseus-modern-dark .perseus-dashboard-course-card,
@@ -764,7 +886,39 @@ body::before {
 
 .theme-perseus-modern-dark .perseus-card,
 .theme-perseus-modern-light .perseus-card {
-  border-radius: var(--radius-panel);
+  border-radius: 22px;
+}
+
+@media (max-width: 1024px) {
+  .theme-perseus-modern-dark .perseus-home-hero-grid,
+  .theme-perseus-modern-light .perseus-home-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .theme-perseus-modern-dark .perseus-home-hero-copy,
+  .theme-perseus-modern-light .perseus-home-hero-copy {
+    align-items: center;
+    text-align: center;
+  }
+
+  .theme-perseus-modern-dark .perseus-home-hero-actions,
+  .theme-perseus-modern-light .perseus-home-hero-actions,
+  .theme-perseus-modern-dark .perseus-sales-hero-badges,
+  .theme-perseus-modern-light .perseus-sales-hero-badges,
+  .theme-perseus-modern-dark .perseus-sales-hero-price,
+  .theme-perseus-modern-light .perseus-sales-hero-price,
+  .theme-perseus-modern-dark .perseus-sales-hero-actions,
+  .theme-perseus-modern-light .perseus-sales-hero-actions {
+    justify-content: center;
+  }
+
+  .theme-perseus-modern-dark .perseus-home-hero-copy p,
+  .theme-perseus-modern-light .perseus-home-hero-copy p,
+  .theme-perseus-modern-dark .perseus-sales-hero-content,
+  .theme-perseus-modern-light .perseus-sales-hero-content {
+    text-align: center;
+  }
 }
 
 a {

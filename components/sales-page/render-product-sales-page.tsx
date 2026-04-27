@@ -316,13 +316,13 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
           />
           <div className="absolute inset-0 bg-[var(--hero-shell-overlay)]" />
 
-          <div className="relative mx-auto max-w-4xl text-center">
-            <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="perseus-sales-hero-content relative mx-auto max-w-4xl text-center">
+            <div className="perseus-sales-hero-badges flex flex-wrap items-center justify-center gap-3">
               <Badge variant="accent">{payload.hero.eyebrow}</Badge>
               {payload.hero.primaryOffer?.savingsLabel ? <Badge variant="premium">{payload.hero.primaryOffer.savingsLabel}</Badge> : null}
             </div>
 
-            <div className="mt-10 space-y-6">
+            <div className="perseus-sales-hero-copy mt-10 space-y-6">
               {payload.hero.metadataLine ? (
                 <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--hero-text-muted)]">{payload.hero.metadataLine}</p>
               ) : null}
@@ -331,14 +331,14 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
             </div>
 
             {payload.hero.primaryOffer ? (
-              <div className="mt-10 flex flex-wrap items-end justify-center gap-x-4 gap-y-2">
+              <div className="perseus-sales-hero-price mt-10 flex flex-wrap items-end justify-center gap-x-4 gap-y-2">
                 <p className="text-5xl font-semibold text-[var(--hero-text-primary)]">{payload.hero.primaryOffer.price}</p>
                 {payload.hero.primaryOffer.compareAtPrice ? <p className="text-xl text-[var(--hero-price-muted)] line-through">{payload.hero.primaryOffer.compareAtPrice}</p> : null}
                 {payload.hero.primaryOffer.savingsLabel ? <Badge variant="premium">{payload.hero.primaryOffer.savingsLabel}</Badge> : null}
               </div>
             ) : null}
 
-            <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <div className="perseus-sales-hero-actions mt-10 flex flex-wrap justify-center gap-3">
               <Link href={payload.hero.primaryCtaHref}>
                 <Button className="min-w-[280px]">{payload.hero.primaryCtaLabel}</Button>
               </Link>

@@ -41,9 +41,12 @@ function PerseusHeroMark() {
         <path d="M42 20 L74 78 H10 Z" fill="var(--perseus-logo-accent)" opacity="0.9" />
         <path d="M42 10 L56 34 H28 Z" fill="var(--perseus-logo-gold)" opacity="0.85" />
       </svg>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.42em] text-[var(--accent-lavender)]">Perseus Arcane Academy</p>
     </div>
   );
+}
+
+function normalizeHeroText(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
 type HomepageCourse = {
@@ -143,25 +146,51 @@ function CollectionPanel({
 }
 
 function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
+  const normalizedBrand = normalizeHeroText("Perseus Arcane Academy");
+  const showEyebrow = normalizeHeroText(payload.eyebrow) !== normalizedBrand && normalizeHeroText(payload.eyebrow) !== normalizeHeroText(payload.title);
+
   return (
     <section className="perseus-home-hero relative overflow-hidden border-b border-[var(--border)]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_22%,var(--perseus-hero-glow),transparent_24%),radial-gradient(circle_at_72%_18%,rgba(212,168,85,0.12),transparent_22%)]" />
-      <div className="perseus-home-hero-inner relative mx-auto flex min-h-[calc(100svh-74px)] max-w-7xl flex-col items-center justify-center px-6 py-16 text-center lg:py-24">
-        <PerseusHeroMark />
-        <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.42em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
-        <h1 className="mt-5 max-w-6xl font-serif text-6xl leading-[0.88] tracking-[-0.06em] text-[var(--portal-text)] sm:text-7xl lg:text-[6.8rem]">
-          {payload.title}
-        </h1>
-        <p className="mt-8 max-w-3xl text-xl leading-9 text-[var(--foreground-soft)]">{payload.description}</p>
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <Link href={payload.primaryCtaHref}>
-            <Button className="min-w-[220px]">{payload.primaryCtaLabel}</Button>
-          </Link>
-          <Link href={payload.secondaryCtaHref}>
-            <Button variant="secondary" className="min-w-[220px]">
-              {payload.secondaryCtaLabel}
-            </Button>
-          </Link>
+      <div className="perseus-home-hero-inner relative mx-auto max-w-7xl px-6 py-16 lg:py-24">
+        <div className="perseus-home-hero-grid flex min-h-[calc(100svh-74px)] flex-col items-center justify-center gap-12">
+          <div className="perseus-home-hero-copy flex max-w-5xl flex-col items-center text-center">
+            <PerseusHeroMark />
+            {showEyebrow ? (
+              <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.42em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
+            ) : null}
+            <h1 className="mt-5 max-w-6xl font-serif text-6xl leading-[0.88] tracking-[-0.06em] text-[var(--portal-text)] sm:text-7xl lg:text-[6.8rem]">
+              {payload.title}
+            </h1>
+            <p className="mt-8 max-w-3xl text-xl leading-9 text-[var(--foreground-soft)]">{payload.description}</p>
+            <div className="perseus-home-hero-actions mt-10 flex flex-wrap justify-center gap-4">
+              <Link href={payload.primaryCtaHref}>
+                <Button className="min-w-[220px]">{payload.primaryCtaLabel}</Button>
+              </Link>
+              <Link href={payload.secondaryCtaHref}>
+                <Button variant="secondary" className="min-w-[220px]">
+                  {payload.secondaryCtaLabel}
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="perseus-home-hero-sidecar hidden w-full max-w-md rounded-[28px] border border-[var(--border)] bg-[var(--surface-panel)] p-6 text-left shadow-[var(--shadow-panel)]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Study entry</p>
+            <div className="mt-5 space-y-4">
+              <Link href={payload.primaryCtaHref} className="block rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel-strong)] p-4 transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--text-muted)]">Primary path</p>
+                <p className="mt-2 text-xl leading-none tracking-[-0.03em] text-[var(--text-primary)]">{payload.primaryCtaLabel}</p>
+              </Link>
+              <Link href={payload.secondaryCtaHref} className="block rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel-strong)] p-4 transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--text-muted)]">Support path</p>
+                <p className="mt-2 text-xl leading-none tracking-[-0.03em] text-[var(--text-primary)]">{payload.secondaryCtaLabel}</p>
+              </Link>
+            </div>
+            <p className="mt-6 text-sm leading-7 text-[var(--text-secondary)]">
+              Public previews, structured pathways, and private learner access remain under one coherent academy shell.
+            </p>
+          </div>
         </div>
       </div>
     </section>

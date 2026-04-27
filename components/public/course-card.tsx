@@ -21,21 +21,21 @@ export function CourseCard({ course }: CourseCardProps) {
 
   return (
     <HardLink href={resolveCoursePublicPath(course)} className="group block">
-      <article className="flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-panel)]">
+      <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-panel)]">
         <div
-          className="h-72 bg-cover bg-center transition duration-500 group-hover:scale-[1.02]"
+          className="perseus-course-card-media h-72 bg-cover bg-center transition duration-500 group-hover:scale-[1.02]"
           style={{
             backgroundImage: course.heroImageUrl
               ? `linear-gradient(180deg, rgba(15, 16, 32, 0.2), rgba(15, 16, 32, 0.58)), url(${course.heroImageUrl})`
               : cardTone,
           }}
         />
-        <div className="flex flex-1 flex-col p-7">
-          <div className="flex items-center justify-between gap-4">
+        <div className="perseus-course-card-body flex flex-1 flex-col p-7">
+          <div className="perseus-course-card-badges flex items-center justify-between gap-4">
             <Badge variant="portal">{course.statusLabel ?? "Featured"}</Badge>
             <Badge variant="premium">{course.priceLabel?.toLowerCase() === "free" ? "Free" : "Premium"}</Badge>
           </div>
-          <div className="mt-5 space-y-3">
+          <div className="perseus-course-card-copy mt-5 space-y-3">
             <p className="text-sm text-[var(--text-secondary)]">Perseus course</p>
             <h3
               className="max-w-sm min-h-[7.5rem] text-4xl leading-none tracking-[-0.04em] text-[var(--text-primary)]"
@@ -64,7 +64,7 @@ export function CourseCard({ course }: CourseCardProps) {
               <div className="min-h-[4rem]" />
             )}
           </div>
-          <div className="mt-auto flex items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
+          <div className="perseus-course-card-footer mt-auto flex items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
             <div>
               <p className="text-xs uppercase tracking-[0.24em] text-[var(--text-secondary)]">Access path</p>
               <p className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">{course.priceLabel ?? "View offer"}</p>

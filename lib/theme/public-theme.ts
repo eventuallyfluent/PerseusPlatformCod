@@ -29,10 +29,19 @@ export function getPublicThemeClass(family: PublicThemeFamily, mode: PublicTheme
 }
 
 export async function getPublicThemeFamily(): Promise<PublicThemeFamily> {
-  const setting = await prisma.siteSetting.findUnique({
-    where: { key: PUBLIC_THEME_FAMILY_SETTING_KEY },
-    select: { value: true },
-  });
+  let setting: { value: unknown } | null = null;
+
+  try {
+    setting = await prisma.siteSetting.findUnique({
+      where: { key: PUBLIC_THEME_FAMILY_SETTING_KEY },
+      select: { value: true },
+    });
+  } catch {
+    // Deployment can briefly run against a database that has not applied the
+    // new SiteSetting migration yet. Fall back to the preserved original family
+    // instead of failing the entire app render.
+    return "original";
+  }
 
   if (!setting || typeof setting.value !== "object" || setting.value === null) {
     return "original";

@@ -196,7 +196,7 @@ export default async function SettingsPage({
                   </p>
                 </div>
                 <div className="mt-5">
-                  <Button type="submit" name="family" value="original" variant={publicThemeFamily === "original" ? "secondary" : "default"}>
+                  <Button type="submit" name="family" value="original" variant={publicThemeFamily === "original" ? "secondary" : "primary"}>
                     {publicThemeFamily === "original" ? "Original is active" : "Use Perseus Original"}
                   </Button>
                 </div>
@@ -217,7 +217,7 @@ export default async function SettingsPage({
                   </p>
                 </div>
                 <div className="mt-5">
-                  <Button type="submit" name="family" value="modern" variant={publicThemeFamily === "modern" ? "secondary" : "default"}>
+                  <Button type="submit" name="family" value="modern" variant={publicThemeFamily === "modern" ? "secondary" : "primary"}>
                     {publicThemeFamily === "modern" ? "Modern is active" : "Use Perseus Modern"}
                   </Button>
                 </div>

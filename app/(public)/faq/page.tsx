@@ -44,9 +44,9 @@ export default async function FaqPage() {
       <div className="space-y-4">
         {faqs.map((faq) => (
           <Card key={faq.id} className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.3em] text-stone-400">{faq.course?.title ?? faq.bundle?.title ?? "Perseus"}</p>
-            <h2 className="text-lg font-semibold text-stone-950">{faq.question}</h2>
-            <p className="text-sm leading-7 text-stone-600">{faq.answer}</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-[var(--text-muted)]">{faq.course?.title ?? faq.bundle?.title ?? "Perseus"}</p>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">{faq.question}</h2>
+            <p className="text-sm leading-7 text-[var(--text-secondary)]">{faq.answer}</p>
           </Card>
         ))}
       </div>

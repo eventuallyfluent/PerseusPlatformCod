@@ -1,31 +1,39 @@
 # Perseus Theme System
 
-## Active themes
-- `Perseus Dark Theme1`
-  Current public and student baseline.
-- `Perseus Light Theme1`
-  Active public and student light mode paired to the same semantic token contract.
+## Active theme tracks
+- `Perseus Original`
+  Preserved baseline of the current public/student UI.
+- `Perseus Modern`
+  Sharper forward-facing public/student family using the same Perseus brand DNA.
 - `Admin Clean`
   Separate admin treatment focused on legibility and operational clarity.
 
-## Surface ownership
-- Public and learner surfaces use the Perseus dark/light theme track.
+## Runtime ownership
+- Public and learner surfaces use one public theme family selected in admin:
+  - `original`
+  - `modern`
+- Public and learner users still choose `dark` or `light` mode in the footer.
 - Admin surfaces use `Admin Clean` only.
-- Admin does not expose the public theme toggle.
+- Admin does not inherit or expose the public theme family visually.
+
+## Public families
+### Perseus Original
+- `Perseus Original Dark`
+  Exact preservation of the prior dark public/student UI.
+- `Perseus Original Light`
+  Exact preservation of the prior light public/student UI.
+
+### Perseus Modern
+- `Perseus Modern Dark`
+  More cinematic contrast, cleaner hierarchy, tighter surfaces, stronger hero presence.
+- `Perseus Modern Light`
+  More editorial and premium than the Original light mode, without losing the Perseus palette.
 
 ## Typography
 - Display: `Cormorant Garamond`
 - Body/UI: `Manrope`
 
-## Perseus Dark Theme1
-- Deep night-violet canvas
-- Lavender brand accent
-- Gold premium accent
-- Soft violet glows, not harsh neon
-- Large rounded panels and cards
-- Elevated surfaces should stay atmospheric and layered
-
-## Token contract
+## Shared token contract
 - Surfaces:
   - `--surface-canvas`
   - `--surface-canvas-soft`
@@ -56,6 +64,19 @@
   - `--radius-field`
   - `--radius-pill`
 
+## Surface ownership
+- Public + learner:
+  - homepage
+  - sales pages
+  - checkout
+  - thank-you pages
+  - preview
+  - dashboard
+  - learner player shell
+  - shared public header/footer/buttons/cards/forms
+- Admin:
+  - `Admin Clean` only
+
 ## Required component rules
 - Shared public and learner components must use semantic theme tokens, not hardcoded dark or light colors.
 - Acceptable patterns:
@@ -65,12 +86,13 @@
   - `var(--text-secondary)`
   - `var(--border)`
   - `var(--border-strong)`
-- No new shared component should ship with:
-  - `text-white` as its normal tone
-  - raw dark RGBA panel backgrounds
+- Family-specific styling should prefer semantic class hooks plus token overrides, not one-off inline colors.
+- No new shared public/learner component should ship with:
+  - default `text-white`
+  - raw fixed dark RGBA panels
   - direct `stone-*` utility colors
-  - fixed `bg-white/...` panel styling
-- Theme-locked exceptions are allowed only for intentionally atmospheric hero sections or overlays.
+  - fixed `bg-white/...` surfaces
+- Theme-locked exceptions are allowed only for intentionally isolated overlays such as focus mode.
 
 ## Admin Clean principles
 - Light, restrained, and readable
@@ -78,9 +100,3 @@
 - Predictable form and table treatment
 - No decorative storefront glow language beyond subtle accent support
 - Admin should feel intentional, not branded for spectacle
-
-## Light Theme1 direction
-- Keep the same typography, spacing, radius, and hierarchy
-- Translate Perseus into a pale arcane palette rather than plain white SaaS UI
-- Maintain lavender and gold identity with lower glow intensity
-- Use the same semantic token map so components do not need renaming when light mode is added

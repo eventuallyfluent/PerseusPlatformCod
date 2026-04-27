@@ -26,7 +26,7 @@ export function ProductThankYouPage({
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={primaryActionHref}
-                  className="inline-flex rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
+                  className="inline-flex rounded-full bg-[var(--button-primary-background)] px-5 py-3 text-sm font-semibold text-white shadow-[var(--button-primary-shadow)] transition hover:bg-[var(--button-primary-hover)]"
                 >
                   {primaryActionLabel}
                 </Link>

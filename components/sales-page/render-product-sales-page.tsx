@@ -8,9 +8,9 @@ import type { BundleSalesPagePayload, GeneratedSalesPagePayload, SalesPageOfferS
 type ProductPayload = GeneratedSalesPagePayload | BundleSalesPagePayload;
 
 const sectionPanelClass =
-  "rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
+  "perseus-sales-panel rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
 const sectionPanelStrongClass =
-  "rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
+  "perseus-sales-panel-strong rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
 const panelMutedTextClass = "text-[var(--text-secondary)]";
 const panelSubtleTextClass = "text-[var(--text-muted)]";
 
@@ -110,13 +110,13 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                   </p>
                 </div>
                 <ol className="grid">
-                  {module.lessons.map((lesson, lessonIndex) => (
+                  {module.lessons.map((lesson) => (
                     <li
                       key={`${module.moduleTitle}-${lesson.title}`}
                       className="grid gap-3 border-t border-[var(--border)] px-6 py-4 first:border-t-0 lg:grid-cols-[88px_1fr_auto]"
                     >
                       <div className={`pt-1 text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>
-                        Lesson {lessonIndex + 1}
+                        {lesson.type.replace(/_/g, " ")}
                       </div>
                       <div className="space-y-2">
                         <p className="text-base font-medium text-[var(--text-primary)]">{lesson.title}</p>
@@ -301,9 +301,9 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
   };
 
   return (
-    <div className="space-y-16">
+    <div className="perseus-sales-page space-y-16">
       <section className="px-6">
-        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[42px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] px-8 py-12 text-[var(--hero-text-primary)] shadow-[0_34px_80px_rgba(10,11,24,0.18)] lg:px-12 lg:py-16">
+        <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[42px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] px-8 py-12 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] lg:px-12 lg:py-16">
           <div
             className="absolute inset-0 opacity-90"
             style={{

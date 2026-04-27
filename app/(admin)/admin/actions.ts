@@ -22,6 +22,7 @@ import { confirmManualPayment, failManualPayment } from "@/lib/payments/manual-p
 import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSectionPayloadMap } from "@/lib/homepage/sections";
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
+import { normalizePublicThemeFamily, PUBLIC_THEME_FAMILY_SETTING_KEY } from "@/lib/theme/public-theme";
 import { CouponScope, CourseStatus, type HomepageSectionType } from "@prisma/client";
 import type { GatewayCapabilities, GatewayCheckoutModel, GatewayKind, GatewaySettlementBehavior, GatewayTaxModel } from "@/types";
 
@@ -173,6 +174,31 @@ function getGatewayDefaults(kind: GatewayKind): {
 
 function getDefaultHomepagePayload(type: HomepageSectionType) {
   return defaultHomepageSections().find((section) => section.type === type)!.payload;
+}
+
+export async function savePublicThemeFamilyAction(formData: FormData) {
+  const family = normalizePublicThemeFamily(String(formData.get("family") ?? ""));
+
+  try {
+    await prisma.siteSetting.upsert({
+      where: { key: PUBLIC_THEME_FAMILY_SETTING_KEY },
+      update: {
+        value: { family },
+      },
+      create: {
+        key: PUBLIC_THEME_FAMILY_SETTING_KEY,
+        value: { family },
+      },
+    });
+  } catch {
+    redirect("/admin/settings?error=theme");
+  }
+
+  revalidatePath("/");
+  revalidatePath("/courses");
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/settings");
+  redirect("/admin/settings?saved=theme");
 }
 
 export async function saveHomepageSectionAction(formData: FormData) {

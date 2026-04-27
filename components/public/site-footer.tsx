@@ -30,8 +30,8 @@ export async function SiteFooter() {
     .filter((link, index, items) => items.findIndex((candidate) => candidate.label === link.label && candidate.href === link.href) === index);
 
   return (
-    <footer className="mt-auto mx-auto w-full max-w-7xl px-6 py-16">
-      <div className="rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-8 shadow-[var(--shadow-soft)] sm:px-10 sm:py-10">
+    <footer className="perseus-site-footer mt-auto mx-auto w-full max-w-7xl px-6 py-16">
+      <div className="perseus-footer-shell rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-8 shadow-[var(--shadow-soft)] sm:px-10 sm:py-10">
         <div className="grid gap-10 border-b border-[var(--border)] pb-10 lg:grid-cols-[1.4fr_0.9fr_0.9fr]">
           <div className="space-y-6">
             <div className="space-y-3">

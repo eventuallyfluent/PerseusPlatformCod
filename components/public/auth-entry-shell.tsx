@@ -28,7 +28,7 @@ export function AuthEntryShell({ eyebrow, title, description, successMessage, as
         {aside ? <div className="grid gap-4 sm:grid-cols-2">{aside}</div> : null}
       </div>
 
-      <Card className="space-y-6 rounded-[34px] bg-[rgba(255,255,255,0.86)] p-8">
+      <Card className="space-y-6 rounded-[34px] bg-[var(--surface-panel)] p-8">
         {successMessage ? (
           <p className="rounded-[20px] bg-[var(--success-soft)] px-4 py-3 text-sm font-medium text-[var(--success)]">{successMessage}</p>
         ) : null}

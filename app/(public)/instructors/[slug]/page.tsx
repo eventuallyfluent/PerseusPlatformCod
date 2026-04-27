@@ -60,23 +60,23 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
   ]);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(143,44,255,0.08),transparent_18%),linear-gradient(180deg,#0d0f1d,#13152a_28%,#0c0e1d_100%)] text-white">
+    <div className="min-h-screen bg-[var(--shell-background-public)] text-[var(--text-primary)]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(profilePageJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <section className="relative overflow-hidden border-b border-[rgba(255,255,255,0.08)]">
+      <section className="relative overflow-hidden border-b border-[var(--hero-shell-border)]">
         <div
           className="absolute inset-0 opacity-95"
           style={{
             backgroundImage: instructor.imageUrl
               ? `linear-gradient(180deg, rgba(9,10,20,0.18), rgba(9,10,20,0.78)), url(${instructor.imageUrl})`
-              : "linear-gradient(135deg,#1b0c34,#2e175f)",
+              : "var(--hero-fallback-background)",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,7,20,0.06),rgba(10,7,20,0.82)_68%,#111223)]" />
+        <div className="absolute inset-0 bg-[var(--hero-shell-overlay)]" />
 
         <div className="relative mx-auto max-w-7xl px-6 pb-10 pt-16 lg:pb-12 lg:pt-20">
           <div className="min-h-[380px] lg:min-h-[440px]" />
@@ -85,17 +85,17 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
               <div
                 className="h-32 w-32 rounded-full border-[3px] border-[var(--accent)] bg-cover bg-center shadow-[0_16px_40px_rgba(10,11,24,0.35)] lg:h-36 lg:w-36"
                 style={{
-                  backgroundImage: instructor.imageUrl ? `url(${instructor.imageUrl})` : "linear-gradient(135deg,#1b0c34,#2e175f)",
+                  backgroundImage: instructor.imageUrl ? `url(${instructor.imageUrl})` : "var(--hero-fallback-background)",
                 }}
               />
             </div>
             <div className="space-y-4">
               <div className="space-y-3">
-                <h1 className="text-5xl leading-none tracking-[-0.06em] text-[#f2eaff] sm:text-6xl lg:text-[4.8rem]">{instructor.name}</h1>
+                <h1 className="text-5xl leading-none tracking-[-0.06em] text-[var(--hero-text-primary)] sm:text-6xl lg:text-[4.8rem]">{instructor.name}</h1>
                 {instructor.shortBio ? <p className="max-w-3xl text-xl leading-8 text-[var(--accent-lavender)]">{instructor.shortBio}</p> : null}
               </div>
 
-              <div className="flex flex-wrap items-center gap-8 text-white">
+              <div className="flex flex-wrap items-center gap-8 text-[var(--hero-text-primary)]">
                 <div>
                   <p className="text-4xl font-semibold">{instructor.courses.length}</p>
                   <p className="mt-2 text-[11px] uppercase tracking-[0.28em] text-[var(--portal-muted)]">Courses</p>
@@ -108,7 +108,7 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
                         href={url!}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.04)] px-4 py-2 text-sm text-[#ddd5f5] transition hover:bg-[rgba(255,255,255,0.08)] hover:text-white"
+                        className="rounded-full border border-[var(--hero-shell-border)] bg-[var(--button-ghost-background)] px-4 py-2 text-sm text-[var(--hero-text-secondary)] transition hover:bg-[var(--button-ghost-hover-background)] hover:text-[var(--hero-text-primary)]"
                       >
                         {label}
                       </a>
@@ -124,7 +124,7 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
       <div className="mx-auto max-w-7xl space-y-14 px-6 py-10 lg:py-14">
         {instructor.longBio ? (
           <section className="max-w-4xl">
-            <div className="space-y-4 text-lg leading-10 text-[#bcaedc]">
+            <div className="space-y-4 text-lg leading-10 text-[var(--text-secondary)]">
               {instructor.longBio
                 .split(/\n+/)
                 .filter(Boolean)
@@ -138,7 +138,7 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
         <section className="space-y-8">
           <div className="space-y-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Courses</p>
-            <h2 className="text-5xl leading-none tracking-[-0.05em] text-white">Study with {instructor.name.split(" ")[0]}</h2>
+            <h2 className="text-5xl leading-none tracking-[-0.05em] text-[var(--hero-text-primary)]">Study with {instructor.name.split(" ")[0]}</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {instructor.courses.map((course) => (

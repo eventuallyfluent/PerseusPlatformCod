@@ -3,8 +3,9 @@ import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { saveHomepageSectionAction } from "@/app/(admin)/admin/actions";
+import { saveHomepageSectionAction, savePublicThemeFamilyAction } from "@/app/(admin)/admin/actions";
 import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
+import { getPublicThemeFamily } from "@/lib/theme/public-theme";
 import {
   stringifyLinkLines,
   type HomepageCollectionsPayload,
@@ -121,8 +122,9 @@ export default async function SettingsPage({
   searchParams?: Promise<{ saved?: string; error?: string }>;
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const [sections, approvedTestimonials, collectionRecords] = await Promise.all([
+  const [homepageSections, publicThemeFamily, approvedTestimonials, collectionRecords] = await Promise.all([
     getHomepageSections(),
+    getPublicThemeFamily(),
     prisma.testimonial.findMany({
       where: { isApproved: true },
       include: {
@@ -141,24 +143,59 @@ export default async function SettingsPage({
       },
     }),
   ]);
-  const hero = sections.find((section) => section.type === "HERO")!;
+  const hero = homepageSections.find((section) => section.type === "HERO")!;
   const heroPayload = hero.payload as HomepageHeroPayload;
-  const collections = sections.find((section) => section.type === "COLLECTIONS")!;
+  const collections = homepageSections.find((section) => section.type === "COLLECTIONS")!;
   const collectionsPayload = collections.payload as HomepageCollectionsPayload;
-  const testimonies = sections.find((section) => section.type === "TESTIMONIES")!;
+  const testimonies = homepageSections.find((section) => section.type === "TESTIMONIES")!;
   const testimoniesPayload = testimonies.payload as HomepageTestimoniesPayload;
   const selectedHomepageTestimonials = testimoniesPayload.selectedTestimonialIds ?? [];
-  const emailSignup = sections.find((section) => section.type === "EMAIL_SIGNUP")!;
+  const emailSignup = homepageSections.find((section) => section.type === "EMAIL_SIGNUP")!;
   const emailSignupPayload = emailSignup.payload as HomepageEmailSignupPayload;
-  const footer = sections.find((section) => section.type === "FOOTER")!;
+  const footer = homepageSections.find((section) => section.type === "FOOTER")!;
   const footerPayload = footer.payload as HomepageFooterPayload;
-  const feedbackMessage = resolvedSearchParams?.saved ? "Homepage section saved." : resolvedSearchParams?.error ? "Homepage section could not be saved. Try again." : "";
+  const feedbackMessage =
+    resolvedSearchParams?.saved === "theme"
+      ? "Public theme family saved."
+      : resolvedSearchParams?.saved
+        ? "Homepage section saved."
+        : resolvedSearchParams?.error === "theme"
+          ? "Public theme family could not be saved. Try again."
+          : resolvedSearchParams?.error
+            ? "Homepage section could not be saved. Try again."
+            : "";
   const feedbackTone = resolvedSearchParams?.error ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700";
 
   return (
     <AdminShell title="Homepage Settings" description="Edit, reorder, and toggle the five public homepage sections.">
       <div className="space-y-6">
         {feedbackMessage ? <p className={`rounded-[18px] px-4 py-3 text-sm ${feedbackTone}`}>{feedbackMessage}</p> : null}
+        <Card className="space-y-6 p-6">
+          <form action={savePublicThemeFamilyAction} className="space-y-6">
+            <div className="flex flex-col gap-4 border-b border-stone-200 pb-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold text-stone-950">Public theme family</h2>
+                <p className="max-w-2xl text-sm leading-6 text-stone-600">
+                  Preserve the current public/student UI as Perseus Original or switch the live public/student family to Perseus Modern. Learners still choose dark or light mode from the public footer.
+                </p>
+              </div>
+              <label className="space-y-2">
+                <span className="text-sm font-medium text-stone-900">Active family</span>
+                <select
+                  name="family"
+                  defaultValue={publicThemeFamily}
+                  className="rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-400"
+                >
+                  <option value="original">Perseus Original</option>
+                  <option value="modern">Perseus Modern</option>
+                </select>
+              </label>
+            </div>
+            <div className="flex justify-end">
+              <Button type="submit">Save theme family</Button>
+            </div>
+          </form>
+        </Card>
         <SectionFrame
           type="HERO"
           title="Hero"

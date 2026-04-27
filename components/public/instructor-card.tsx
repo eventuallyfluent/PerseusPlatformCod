@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 export function InstructorCard({ instructor }: { instructor: Pick<Instructor, "slug" | "name" | "shortBio" | "imageUrl"> }) {
   return (
     <Link href={`/instructors/${instructor.slug}`} className="group block">
-      <article className="h-full overflow-hidden rounded-[32px] border border-[var(--border)] bg-[rgba(255,255,255,0.76)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_55px_rgba(21,26,45,0.11)]">
+      <article className="perseus-card h-full overflow-hidden rounded-[32px] border border-[var(--border)] bg-[var(--surface-panel)] shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-panel)]">
         <div
           className="h-60 bg-cover bg-center transition duration-500 group-hover:scale-[1.02]"
           style={{

@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root,
+.theme-perseus-original-dark,
 .theme-perseus-dark-1 {
-  --theme-name: "Perseus Dark Theme1";
+  --theme-name: "Perseus Original Dark";
   --background: #0d0d1a;
   --background-soft: #141426;
   --background-elevated: rgba(26, 26, 46, 0.92);
@@ -70,10 +71,67 @@
   --radius-card: 24px;
   --radius-field: 20px;
   --radius-pill: 999px;
+  --body-background:
+    radial-gradient(circle at top, var(--perseus-hero-glow), transparent 22%),
+    radial-gradient(circle at 70% 30%, rgba(212, 168, 85, 0.12), transparent 24%),
+    linear-gradient(180deg, var(--background-deep) 0%, var(--background-deep-soft) 48%, var(--background) 100%);
+  --body-grid-color: rgba(173, 181, 226, 0.025);
+  --shell-background-public: radial-gradient(circle_at_top,rgba(143,44,255,0.08),transparent_18%),linear-gradient(180deg,#0d0f1d,#13152a_32%,#0c0e1d_100%);
+  --shell-background-checkout: radial-gradient(circle_at_top,rgba(143,44,255,0.1),transparent_20%),linear-gradient(180deg,#0d0f1d,#13152a_34%,#0c0e1d_100%);
+  --shell-background-learner: radial-gradient(circle_at_top,rgba(143,44,255,0.08),transparent_18%),linear-gradient(180deg,#0d0f1d,#13152a_32%,#0c0e1d_100%);
+  --hero-shell-shadow: 0 34px 80px rgba(10, 11, 24, 0.18);
+  --collection-panel-shadow: var(--shadow-soft);
+  --collection-row-hover: rgba(51, 51, 84, 0.98);
+  --button-primary-background: var(--accent);
+  --button-primary-hover: var(--accent-strong);
+  --button-primary-shadow: var(--shadow-glow);
+  --button-secondary-border: var(--accent);
+  --button-secondary-background: var(--accent-soft);
+  --button-secondary-hover: var(--surface-panel-strong);
+  --button-secondary-text: var(--accent);
+  --button-ghost-background: var(--surface-panel);
+  --button-ghost-hover-background: var(--surface-panel-strong);
+  --button-ghost-text: var(--text-secondary);
+  --checkout-hero-panel-background: linear-gradient(145deg, #160b30, #110a24);
+  --checkout-hero-panel-border: rgba(255, 255, 255, 0.1);
+  --checkout-hero-text: #ffffff;
+  --checkout-hero-muted: rgba(236, 229, 255, 0.78);
+  --checkout-hero-chip: rgba(228, 216, 255, 0.74);
+  --checkout-hero-shadow: 0 24px 60px rgba(14, 12, 30, 0.24);
+  --checkout-form-panel-background: rgba(19, 21, 42, 0.92);
+  --checkout-form-panel-border: rgba(255, 255, 255, 0.08);
+  --checkout-form-text: #ffffff;
+  --checkout-form-muted: rgba(236, 229, 255, 0.76);
+  --checkout-form-shadow: 0 24px 60px rgba(14, 12, 30, 0.16);
+  --checkout-summary-background: #ffffff;
+  --checkout-summary-text: #1c1917;
+  --checkout-summary-muted: #78716c;
+  --checkout-upsell-border: rgba(212, 168, 70, 0.22);
+  --checkout-upsell-background: linear-gradient(135deg, rgba(212, 168, 70, 0.1), rgba(143, 44, 255, 0.1));
+  --checkout-upsell-label: #f2c45e;
+  --checkout-upsell-text: #ffffff;
+  --checkout-upsell-muted: rgba(236, 229, 255, 0.78);
+  --checkout-upsell-chip-background: rgba(255, 255, 255, 0.1);
+  --checkout-upsell-chip-text: #ffffff;
+  --checkout-upsell-button-background: #ffffff;
+  --checkout-upsell-button-hover: rgba(255, 255, 255, 0.92);
+  --checkout-upsell-button-text: var(--accent);
+  --checkout-unavailable-border: rgba(255, 255, 255, 0.08);
+  --checkout-unavailable-background: rgba(255, 255, 255, 0.03);
+  --checkout-unavailable-text: rgba(236, 229, 255, 0.78);
+  --focus-overlay-backdrop: rgba(7, 8, 16, 0.9);
+  --focus-overlay-panel-background: rgba(255, 255, 255, 0.06);
+  --focus-overlay-panel-border: rgba(255, 255, 255, 0.1);
+  --focus-overlay-text: #ffffff;
+  --focus-overlay-muted: rgba(240, 234, 248, 0.9);
+  --focus-overlay-button-background: rgba(255, 255, 255, 0.08);
+  --focus-overlay-button-hover: rgba(255, 255, 255, 0.14);
+  --focus-overlay-button-border: rgba(255, 255, 255, 0.15);
 }
 
+.theme-perseus-original-light,
 .theme-perseus-light-1 {
-  --theme-name: "Perseus Light Theme1";
+  --theme-name: "Perseus Original Light";
   --background: #f4f0fb;
   --background-soft: #ede6f8;
   --background-elevated: rgba(255, 255, 255, 0.92);
@@ -141,6 +199,316 @@
   --radius-card: 24px;
   --radius-field: 20px;
   --radius-pill: 999px;
+  --body-background:
+    radial-gradient(circle at top, var(--perseus-hero-glow), transparent 22%),
+    radial-gradient(circle at 70% 30%, rgba(212, 168, 85, 0.08), transparent 24%),
+    linear-gradient(180deg, var(--background-deep) 0%, var(--background-deep-soft) 48%, var(--background) 100%);
+  --body-grid-color: rgba(173, 181, 226, 0.025);
+  --shell-background-public: radial-gradient(circle_at_top,rgba(123,47,190,0.08),transparent_18%),linear-gradient(180deg,#f8f4fc,#efe7f8_32%,#f4f0fb_100%);
+  --shell-background-checkout: radial-gradient(circle_at_top,rgba(123,47,190,0.08),transparent_20%),linear-gradient(180deg,#f8f4fc,#efe7f8_34%,#f4f0fb_100%);
+  --shell-background-learner: radial-gradient(circle_at_top,rgba(123,47,190,0.08),transparent_18%),linear-gradient(180deg,#f8f4fc,#efe7f8_32%,#f4f0fb_100%);
+  --hero-shell-shadow: 0 24px 60px rgba(69, 43, 98, 0.1);
+  --collection-panel-shadow: var(--shadow-soft);
+  --collection-row-hover: rgba(255, 255, 255, 1);
+  --button-primary-background: var(--accent);
+  --button-primary-hover: var(--accent-strong);
+  --button-primary-shadow: var(--shadow-glow);
+  --button-secondary-border: var(--accent);
+  --button-secondary-background: var(--accent-soft);
+  --button-secondary-hover: var(--surface-panel-strong);
+  --button-secondary-text: var(--accent);
+  --button-ghost-background: var(--surface-panel);
+  --button-ghost-hover-background: var(--surface-panel-strong);
+  --button-ghost-text: var(--text-secondary);
+  --checkout-hero-panel-background: linear-gradient(145deg, #f4ebff, #ebe1f8);
+  --checkout-hero-panel-border: rgba(123, 47, 190, 0.12);
+  --checkout-hero-text: #231733;
+  --checkout-hero-muted: #5d476f;
+  --checkout-hero-chip: #7d6294;
+  --checkout-hero-shadow: 0 18px 38px rgba(69, 43, 98, 0.12);
+  --checkout-form-panel-background: rgba(255, 255, 255, 0.94);
+  --checkout-form-panel-border: rgba(123, 47, 190, 0.12);
+  --checkout-form-text: #231733;
+  --checkout-form-muted: #6d5886;
+  --checkout-form-shadow: 0 18px 38px rgba(69, 43, 98, 0.12);
+  --checkout-summary-background: rgba(247, 241, 252, 0.98);
+  --checkout-summary-text: #231733;
+  --checkout-summary-muted: #6d5886;
+  --checkout-upsell-border: rgba(198, 146, 50, 0.18);
+  --checkout-upsell-background: linear-gradient(135deg, rgba(198, 146, 50, 0.1), rgba(123, 47, 190, 0.08));
+  --checkout-upsell-label: #a06f1f;
+  --checkout-upsell-text: #231733;
+  --checkout-upsell-muted: #5d476f;
+  --checkout-upsell-chip-background: rgba(123, 47, 190, 0.08);
+  --checkout-upsell-chip-text: #231733;
+  --checkout-upsell-button-background: rgba(255, 255, 255, 0.96);
+  --checkout-upsell-button-hover: rgba(255, 255, 255, 1);
+  --checkout-upsell-button-text: var(--accent);
+  --checkout-unavailable-border: rgba(123, 47, 190, 0.12);
+  --checkout-unavailable-background: rgba(255, 255, 255, 0.62);
+  --checkout-unavailable-text: #5d476f;
+  --focus-overlay-backdrop: rgba(32, 24, 43, 0.72);
+  --focus-overlay-panel-background: rgba(255, 255, 255, 0.92);
+  --focus-overlay-panel-border: rgba(123, 47, 190, 0.12);
+  --focus-overlay-text: #231733;
+  --focus-overlay-muted: #5d476f;
+  --focus-overlay-button-background: rgba(123, 47, 190, 0.08);
+  --focus-overlay-button-hover: rgba(123, 47, 190, 0.14);
+  --focus-overlay-button-border: rgba(123, 47, 190, 0.16);
+}
+
+.theme-perseus-modern-dark {
+  --theme-name: "Perseus Modern Dark";
+  --background: #080a12;
+  --background-soft: #0d1220;
+  --background-elevated: rgba(17, 21, 37, 0.84);
+  --background-deep: #06070d;
+  --background-deep-soft: #0a1121;
+  --foreground: #f8f4ff;
+  --foreground-soft: #c6bddb;
+  --muted: #9488ad;
+  --card: rgba(16, 21, 36, 0.82);
+  --card-strong: rgba(22, 28, 48, 0.9);
+  --border: rgba(194, 177, 237, 0.14);
+  --border-strong: rgba(194, 177, 237, 0.28);
+  --accent: #a04cff;
+  --accent-strong: #c26eff;
+  --accent-soft: rgba(160, 76, 255, 0.12);
+  --accent-glow: rgba(160, 76, 255, 0.28);
+  --accent-lavender: #d1a4ff;
+  --premium: #efc36a;
+  --premium-soft: rgba(239, 195, 106, 0.14);
+  --success: #4dd7a6;
+  --success-soft: rgba(77, 215, 166, 0.14);
+  --warning: #f0bd4b;
+  --warning-soft: rgba(240, 189, 75, 0.14);
+  --danger: #ff7a7a;
+  --danger-soft: rgba(255, 122, 122, 0.14);
+  --shadow-soft: 0 28px 80px rgba(2, 4, 10, 0.45);
+  --shadow-glow: 0 24px 60px rgba(160, 76, 255, 0.24);
+  --portal-border: rgba(194, 177, 237, 0.16);
+  --portal-panel: rgba(13, 18, 31, 0.84);
+  --portal-panel-strong: rgba(18, 25, 43, 0.92);
+  --portal-text: #f8f4ff;
+  --portal-muted: #b5a8d2;
+  --perseus-logo-primary: #f8f4ff;
+  --perseus-logo-accent: #d1a4ff;
+  --perseus-logo-gold: #efc36a;
+  --perseus-collection-panel: rgba(12, 17, 30, 0.82);
+  --perseus-collection-elevated: rgba(19, 25, 43, 0.92);
+  --perseus-hero-glow: rgba(160, 76, 255, 0.26);
+  --header-surface: rgba(7, 10, 18, 0.72);
+  --hero-shell-border: rgba(255, 255, 255, 0.08);
+  --hero-shell-background: linear-gradient(180deg, rgba(11, 15, 29, 0.86), rgba(14, 12, 27, 0.94));
+  --hero-fallback-background: linear-gradient(135deg, #111124, #182240 56%, #290d4f);
+  --hero-media-overlay: linear-gradient(180deg, rgba(6, 7, 13, 0.12), rgba(6, 7, 13, 0.76));
+  --hero-shell-overlay: linear-gradient(180deg, rgba(8, 8, 16, 0.08), rgba(8, 8, 16, 0.68));
+  --hero-text-primary: #faf7ff;
+  --hero-text-secondary: #dad2ee;
+  --hero-text-muted: #b7abcf;
+  --hero-price-muted: #9e95b8;
+  --collection-arcane: linear-gradient(135deg, rgba(55, 20, 102, 0.96), rgba(20, 31, 70, 0.94));
+  --collection-discipline: linear-gradient(135deg, rgba(17, 48, 88, 0.94), rgba(26, 88, 140, 0.9));
+  --collection-gateway: linear-gradient(135deg, rgba(10, 70, 54, 0.94), rgba(17, 115, 94, 0.92));
+  --surface-canvas: var(--background);
+  --surface-canvas-soft: var(--background-soft);
+  --surface-panel: var(--card);
+  --surface-panel-strong: var(--card-strong);
+  --text-primary: var(--foreground);
+  --text-secondary: var(--foreground-soft);
+  --text-muted: var(--muted);
+  --status-success: var(--success);
+  --status-warning: var(--warning);
+  --status-danger: var(--danger);
+  --shadow-panel: var(--shadow-soft);
+  --shadow-brand: var(--shadow-glow);
+  --radius-panel: 26px;
+  --radius-card: 20px;
+  --radius-field: 16px;
+  --radius-pill: 999px;
+  --body-background:
+    radial-gradient(circle at 14% 0%, rgba(160, 76, 255, 0.22), transparent 24%),
+    radial-gradient(circle at 84% 12%, rgba(239, 195, 106, 0.08), transparent 18%),
+    linear-gradient(180deg, #06070d 0%, #08101d 46%, #090d18 100%);
+  --body-grid-color: rgba(189, 178, 221, 0.028);
+  --shell-background-public: radial-gradient(circle_at_top,rgba(160,76,255,0.13),transparent_18%),linear-gradient(180deg,#06070d,#0a1120_34%,#090d18_100%);
+  --shell-background-checkout: radial-gradient(circle_at_top,rgba(160,76,255,0.16),transparent_20%),linear-gradient(180deg,#06070d,#0a1120_36%,#090d18_100%);
+  --shell-background-learner: radial-gradient(circle_at_top,rgba(160,76,255,0.13),transparent_18%),linear-gradient(180deg,#06070d,#0a1120_34%,#090d18_100%);
+  --hero-shell-shadow: 0 46px 110px rgba(2, 4, 10, 0.55);
+  --collection-panel-shadow: 0 26px 70px rgba(2, 4, 10, 0.42);
+  --collection-row-hover: rgba(27, 34, 58, 0.96);
+  --button-primary-background: linear-gradient(135deg, #a04cff, #d070ff);
+  --button-primary-hover: linear-gradient(135deg, #b15dff, #d983ff);
+  --button-primary-shadow: 0 22px 48px rgba(160, 76, 255, 0.28);
+  --button-secondary-border: rgba(194, 177, 237, 0.22);
+  --button-secondary-background: rgba(255, 255, 255, 0.04);
+  --button-secondary-hover: rgba(255, 255, 255, 0.08);
+  --button-secondary-text: #f4efff;
+  --button-ghost-background: rgba(255, 255, 255, 0.02);
+  --button-ghost-hover-background: rgba(255, 255, 255, 0.06);
+  --button-ghost-text: var(--text-secondary);
+  --checkout-hero-panel-background: linear-gradient(145deg, rgba(20, 13, 43, 0.96), rgba(11, 18, 36, 0.96));
+  --checkout-hero-panel-border: rgba(255, 255, 255, 0.08);
+  --checkout-hero-text: #f8f4ff;
+  --checkout-hero-muted: rgba(236, 229, 255, 0.8);
+  --checkout-hero-chip: rgba(228, 216, 255, 0.76);
+  --checkout-hero-shadow: 0 32px 72px rgba(2, 4, 10, 0.44);
+  --checkout-form-panel-background: rgba(14, 19, 33, 0.88);
+  --checkout-form-panel-border: rgba(255, 255, 255, 0.08);
+  --checkout-form-text: #f8f4ff;
+  --checkout-form-muted: rgba(236, 229, 255, 0.8);
+  --checkout-form-shadow: 0 24px 60px rgba(2, 4, 10, 0.36);
+  --checkout-summary-background: rgba(245, 241, 255, 0.98);
+  --checkout-summary-text: #1f1730;
+  --checkout-summary-muted: #6d6382;
+  --checkout-upsell-border: rgba(239, 195, 106, 0.2);
+  --checkout-upsell-background: linear-gradient(135deg, rgba(239, 195, 106, 0.12), rgba(160, 76, 255, 0.12));
+  --checkout-upsell-label: #efc36a;
+  --checkout-upsell-text: #f8f4ff;
+  --checkout-upsell-muted: rgba(236, 229, 255, 0.82);
+  --checkout-upsell-chip-background: rgba(255, 255, 255, 0.12);
+  --checkout-upsell-chip-text: #f8f4ff;
+  --checkout-upsell-button-background: rgba(255, 255, 255, 0.98);
+  --checkout-upsell-button-hover: rgba(255, 255, 255, 1);
+  --checkout-upsell-button-text: #8a3cff;
+  --checkout-unavailable-border: rgba(194, 177, 237, 0.12);
+  --checkout-unavailable-background: rgba(255, 255, 255, 0.04);
+  --checkout-unavailable-text: rgba(236, 229, 255, 0.8);
+  --focus-overlay-backdrop: rgba(4, 6, 12, 0.92);
+  --focus-overlay-panel-background: rgba(255, 255, 255, 0.06);
+  --focus-overlay-panel-border: rgba(194, 177, 237, 0.14);
+  --focus-overlay-text: #f8f4ff;
+  --focus-overlay-muted: rgba(236, 229, 255, 0.86);
+  --focus-overlay-button-background: rgba(255, 255, 255, 0.08);
+  --focus-overlay-button-hover: rgba(255, 255, 255, 0.14);
+  --focus-overlay-button-border: rgba(194, 177, 237, 0.18);
+}
+
+.theme-perseus-modern-light {
+  --theme-name: "Perseus Modern Light";
+  --background: #f6f2ec;
+  --background-soft: #efe8df;
+  --background-elevated: rgba(255, 255, 255, 0.9);
+  --background-deep: #fbf7f2;
+  --background-deep-soft: #f3ede5;
+  --foreground: #191524;
+  --foreground-soft: #645973;
+  --muted: #8a7f96;
+  --card: rgba(255, 255, 255, 0.88);
+  --card-strong: rgba(250, 244, 239, 0.94);
+  --border: rgba(69, 47, 98, 0.14);
+  --border-strong: rgba(69, 47, 98, 0.24);
+  --accent: #8f45e8;
+  --accent-strong: #aa5fff;
+  --accent-soft: rgba(143, 69, 232, 0.09);
+  --accent-glow: rgba(143, 69, 232, 0.16);
+  --accent-lavender: #9254da;
+  --premium: #bc8a2f;
+  --premium-soft: rgba(188, 138, 47, 0.12);
+  --success: #1e8d6c;
+  --success-soft: rgba(30, 141, 108, 0.12);
+  --warning: #c98d19;
+  --warning-soft: rgba(201, 141, 25, 0.12);
+  --danger: #cf5656;
+  --danger-soft: rgba(207, 86, 86, 0.12);
+  --shadow-soft: 0 24px 70px rgba(62, 40, 86, 0.1);
+  --shadow-glow: 0 16px 36px rgba(143, 69, 232, 0.12);
+  --portal-border: rgba(69, 47, 98, 0.12);
+  --portal-panel: rgba(255, 255, 255, 0.9);
+  --portal-panel-strong: rgba(250, 244, 239, 0.94);
+  --portal-text: #191524;
+  --portal-muted: #645973;
+  --perseus-logo-primary: #191524;
+  --perseus-logo-accent: #9254da;
+  --perseus-logo-gold: #bc8a2f;
+  --perseus-collection-panel: rgba(255, 255, 255, 0.9);
+  --perseus-collection-elevated: rgba(250, 244, 239, 0.94);
+  --perseus-hero-glow: rgba(143, 69, 232, 0.12);
+  --header-surface: rgba(246, 242, 236, 0.76);
+  --hero-shell-border: rgba(69, 47, 98, 0.1);
+  --hero-shell-background: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(248, 241, 236, 0.88));
+  --hero-fallback-background: linear-gradient(135deg, #f4ebff, #f7f1eb 56%, #efe7dd);
+  --hero-media-overlay: linear-gradient(180deg, rgba(251, 247, 242, 0.26), rgba(243, 237, 229, 0.66));
+  --hero-shell-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.38));
+  --hero-text-primary: #171321;
+  --hero-text-secondary: #534862;
+  --hero-text-muted: #7a6c8a;
+  --hero-price-muted: #8a7f96;
+  --collection-arcane: linear-gradient(135deg, #f0e2ff, #f8f1eb);
+  --collection-discipline: linear-gradient(135deg, #dbe8ff, #f6fbff);
+  --collection-gateway: linear-gradient(135deg, #d8f3e8, #f2fbf7);
+  --surface-canvas: var(--background);
+  --surface-canvas-soft: var(--background-soft);
+  --surface-panel: var(--card);
+  --surface-panel-strong: var(--card-strong);
+  --text-primary: var(--foreground);
+  --text-secondary: var(--foreground-soft);
+  --text-muted: var(--muted);
+  --status-success: var(--success);
+  --status-warning: var(--warning);
+  --status-danger: var(--danger);
+  --shadow-panel: var(--shadow-soft);
+  --shadow-brand: var(--shadow-glow);
+  --radius-panel: 26px;
+  --radius-card: 20px;
+  --radius-field: 16px;
+  --radius-pill: 999px;
+  --body-background:
+    radial-gradient(circle at 18% 0%, rgba(143, 69, 232, 0.12), transparent 26%),
+    radial-gradient(circle at 82% 10%, rgba(188, 138, 47, 0.07), transparent 18%),
+    linear-gradient(180deg, #fbf7f2 0%, #f3ede5 46%, #f6f2ec 100%);
+  --body-grid-color: rgba(120, 96, 148, 0.024);
+  --shell-background-public: radial-gradient(circle_at_top,rgba(143,69,232,0.08),transparent_18%),linear-gradient(180deg,#fbf7f2,#f3ede5_34%,#f6f2ec_100%);
+  --shell-background-checkout: radial-gradient(circle_at_top,rgba(143,69,232,0.08),transparent_20%),linear-gradient(180deg,#fbf7f2,#f3ede5_36%,#f6f2ec_100%);
+  --shell-background-learner: radial-gradient(circle_at_top,rgba(143,69,232,0.08),transparent_18%),linear-gradient(180deg,#fbf7f2,#f3ede5_34%,#f6f2ec_100%);
+  --hero-shell-shadow: 0 28px 72px rgba(62, 40, 86, 0.12);
+  --collection-panel-shadow: 0 22px 48px rgba(62, 40, 86, 0.08);
+  --collection-row-hover: rgba(255, 255, 255, 0.96);
+  --button-primary-background: linear-gradient(135deg, #8f45e8, #bc74ff);
+  --button-primary-hover: linear-gradient(135deg, #9a53ef, #c583ff);
+  --button-primary-shadow: 0 16px 34px rgba(143, 69, 232, 0.16);
+  --button-secondary-border: rgba(69, 47, 98, 0.18);
+  --button-secondary-background: rgba(255, 255, 255, 0.5);
+  --button-secondary-hover: rgba(255, 255, 255, 0.84);
+  --button-secondary-text: #241b32;
+  --button-ghost-background: rgba(255, 255, 255, 0.52);
+  --button-ghost-hover-background: rgba(255, 255, 255, 0.88);
+  --button-ghost-text: var(--text-secondary);
+  --checkout-hero-panel-background: linear-gradient(145deg, #f1e8ff, #f7f0e7);
+  --checkout-hero-panel-border: rgba(69, 47, 98, 0.12);
+  --checkout-hero-text: #1b1626;
+  --checkout-hero-muted: #5c506c;
+  --checkout-hero-chip: #7a6c8a;
+  --checkout-hero-shadow: 0 20px 42px rgba(62, 40, 86, 0.12);
+  --checkout-form-panel-background: rgba(255, 255, 255, 0.88);
+  --checkout-form-panel-border: rgba(69, 47, 98, 0.12);
+  --checkout-form-text: #1b1626;
+  --checkout-form-muted: #645973;
+  --checkout-form-shadow: 0 20px 42px rgba(62, 40, 86, 0.1);
+  --checkout-summary-background: rgba(248, 242, 235, 0.96);
+  --checkout-summary-text: #1b1626;
+  --checkout-summary-muted: #645973;
+  --checkout-upsell-border: rgba(188, 138, 47, 0.18);
+  --checkout-upsell-background: linear-gradient(135deg, rgba(188, 138, 47, 0.1), rgba(143, 69, 232, 0.08));
+  --checkout-upsell-label: #9f6f20;
+  --checkout-upsell-text: #1b1626;
+  --checkout-upsell-muted: #5c506c;
+  --checkout-upsell-chip-background: rgba(255, 255, 255, 0.72);
+  --checkout-upsell-chip-text: #1b1626;
+  --checkout-upsell-button-background: rgba(255, 255, 255, 0.96);
+  --checkout-upsell-button-hover: rgba(255, 255, 255, 1);
+  --checkout-upsell-button-text: #8f45e8;
+  --checkout-unavailable-border: rgba(69, 47, 98, 0.12);
+  --checkout-unavailable-background: rgba(255, 255, 255, 0.62);
+  --checkout-unavailable-text: #5c506c;
+  --focus-overlay-backdrop: rgba(29, 22, 38, 0.76);
+  --focus-overlay-panel-background: rgba(255, 255, 255, 0.9);
+  --focus-overlay-panel-border: rgba(69, 47, 98, 0.14);
+  --focus-overlay-text: #1b1626;
+  --focus-overlay-muted: #5c506c;
+  --focus-overlay-button-background: rgba(143, 69, 232, 0.08);
+  --focus-overlay-button-hover: rgba(143, 69, 232, 0.14);
+  --focus-overlay-button-border: rgba(69, 47, 98, 0.18);
 }
 
 .admin-theme,
@@ -208,10 +576,7 @@ html {
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at top, var(--perseus-hero-glow), transparent 22%),
-    radial-gradient(circle at 70% 30%, rgba(212, 168, 85, 0.12), transparent 24%),
-    linear-gradient(180deg, var(--background-deep) 0%, var(--background-deep-soft) 48%, var(--background) 100%);
+  background: var(--body-background);
   color: var(--text-primary);
   font-family: var(--font-body), sans-serif;
   text-rendering: optimizeLegibility;
@@ -297,10 +662,99 @@ body::before {
   pointer-events: none;
   background:
     linear-gradient(rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02)),
-    linear-gradient(90deg, rgba(173, 181, 226, 0.025) 1px, transparent 1px),
-    linear-gradient(rgba(173, 181, 226, 0.025) 1px, transparent 1px);
+    linear-gradient(90deg, var(--body-grid-color) 1px, transparent 1px),
+    linear-gradient(var(--body-grid-color) 1px, transparent 1px);
   background-size: auto, 60px 60px, 60px 60px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.24), transparent 72%);
+}
+
+.theme-perseus-modern-dark .perseus-site-header,
+.theme-perseus-modern-light .perseus-site-header {
+  box-shadow: 0 18px 42px rgba(8, 10, 18, 0.08);
+}
+
+.theme-perseus-modern-dark .perseus-site-header-inner,
+.theme-perseus-modern-light .perseus-site-header-inner {
+  padding-top: 1.05rem;
+  padding-bottom: 1.05rem;
+}
+
+.theme-perseus-modern-dark .perseus-footer-shell,
+.theme-perseus-modern-light .perseus-footer-shell,
+.theme-perseus-modern-dark .perseus-collection-panel,
+.theme-perseus-modern-light .perseus-collection-panel,
+.theme-perseus-modern-dark .perseus-testimonial-card,
+.theme-perseus-modern-light .perseus-testimonial-card,
+.theme-perseus-modern-dark .perseus-email-signup,
+.theme-perseus-modern-light .perseus-email-signup,
+.theme-perseus-modern-dark .perseus-dashboard-stat,
+.theme-perseus-modern-light .perseus-dashboard-stat,
+.theme-perseus-modern-dark .perseus-dashboard-course-card,
+.theme-perseus-modern-light .perseus-dashboard-course-card,
+.theme-perseus-modern-dark .perseus-player-panel,
+.theme-perseus-modern-light .perseus-player-panel,
+.theme-perseus-modern-dark .perseus-sales-panel,
+.theme-perseus-modern-light .perseus-sales-panel,
+.theme-perseus-modern-dark .perseus-sales-panel-strong,
+.theme-perseus-modern-light .perseus-sales-panel-strong,
+.theme-perseus-modern-dark .perseus-checkout-hero,
+.theme-perseus-modern-light .perseus-checkout-hero,
+.theme-perseus-modern-dark .perseus-checkout-form,
+.theme-perseus-modern-light .perseus-checkout-form {
+  backdrop-filter: blur(18px);
+}
+
+.theme-perseus-modern-dark .perseus-home-hero-inner,
+.theme-perseus-modern-light .perseus-home-hero-inner {
+  min-height: calc(100svh - 74px);
+  padding-top: 5.5rem;
+  padding-bottom: 6.5rem;
+}
+
+.theme-perseus-modern-dark .perseus-home-hero h1,
+.theme-perseus-modern-light .perseus-home-hero h1 {
+  max-width: 12ch;
+}
+
+.theme-perseus-modern-dark .perseus-sales-hero-shell,
+.theme-perseus-modern-light .perseus-sales-hero-shell {
+  border-radius: 46px;
+}
+
+.theme-perseus-modern-dark .perseus-home-collections .perseus-collection-panel,
+.theme-perseus-modern-light .perseus-home-collections .perseus-collection-panel {
+  transform: translateZ(0);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.theme-perseus-modern-dark .perseus-home-collections .perseus-collection-panel:hover,
+.theme-perseus-modern-light .perseus-home-collections .perseus-collection-panel:hover {
+  transform: translateY(-3px);
+}
+
+.theme-perseus-modern-dark .perseus-collection-row,
+.theme-perseus-modern-light .perseus-collection-row {
+  border-radius: 20px;
+}
+
+.theme-perseus-modern-dark .perseus-dashboard-course-card,
+.theme-perseus-modern-light .perseus-dashboard-course-card {
+  border-radius: 32px;
+}
+
+.theme-perseus-modern-dark .perseus-player-shell,
+.theme-perseus-modern-light .perseus-player-shell {
+  align-items: start;
+}
+
+.theme-perseus-modern-dark .perseus-checkout-summary,
+.theme-perseus-modern-light .perseus-checkout-summary {
+  border: 1px solid var(--border);
+}
+
+.theme-perseus-modern-dark .perseus-card,
+.theme-perseus-modern-light .perseus-card {
+  border-radius: var(--radius-panel);
 }
 
 a {

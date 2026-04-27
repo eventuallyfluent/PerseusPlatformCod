@@ -16,16 +16,16 @@ export async function SiteHeader() {
   const session = await auth();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--header-surface)] backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <HardLink href="/" className="flex items-center gap-3 text-[var(--text-primary)]">
+    <header className="perseus-site-header sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--header-surface)] backdrop-blur-xl">
+      <div className="perseus-site-header-inner mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <HardLink href="/" className="perseus-site-brand flex items-center gap-3 text-[var(--text-primary)]">
           <PerseusMark />
           <div className="space-y-1">
             <span className="block text-sm font-semibold uppercase tracking-[0.28em] text-[var(--text-primary)]">Perseus Arcane Academy</span>
             <span className="block text-[11px] uppercase tracking-[0.34em] text-[var(--text-secondary)]">Structured magical training</span>
           </div>
         </HardLink>
-        <nav className="flex items-center gap-2 text-sm text-[var(--text-primary)] sm:gap-4">
+        <nav className="perseus-site-nav flex items-center gap-2 text-sm text-[var(--text-primary)] sm:gap-4">
           <HardLink href="/faq" className="rounded-full px-3 py-2 text-[var(--text-primary)] transition hover:bg-[var(--accent-soft)] hover:text-[var(--text-primary)]">
             FAQ
           </HardLink>

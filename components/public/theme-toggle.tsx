@@ -1,28 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  getPublicThemeClass,
+  normalizePublicThemeFamily,
+  normalizePublicThemeMode,
+  PUBLIC_THEME_CLASSES,
+  PUBLIC_THEME_MODE_STORAGE_KEY,
+  type PublicThemeMode,
+} from "@/lib/theme/public-theme";
 
-const STORAGE_KEY = "perseus-theme";
-
-type ThemeName = "dark" | "light";
-
-function applyTheme(theme: ThemeName) {
-  document.body.classList.remove("theme-perseus-dark-1", "theme-perseus-light-1");
-  document.body.classList.add(theme === "light" ? "theme-perseus-light-1" : "theme-perseus-dark-1");
+function applyTheme(mode: PublicThemeMode) {
+  const family = normalizePublicThemeFamily(document.body.dataset.publicThemeFamily);
+  document.body.classList.remove(...PUBLIC_THEME_CLASSES);
+  document.body.classList.add(getPublicThemeClass(family, mode));
+  document.body.dataset.publicThemeMode = mode;
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<ThemeName>(() => {
+  const [theme, setTheme] = useState<PublicThemeMode>(() => {
     if (typeof window === "undefined") {
       return "dark";
     }
 
-    return window.localStorage.getItem(STORAGE_KEY) === "light" ? "light" : "dark";
+    return normalizePublicThemeMode(window.localStorage.getItem(PUBLIC_THEME_MODE_STORAGE_KEY));
   });
 
   useEffect(() => {
     applyTheme(theme);
-    window.localStorage.setItem(STORAGE_KEY, theme);
+    window.localStorage.setItem(PUBLIC_THEME_MODE_STORAGE_KEY, theme);
   }, [theme]);
 
   return (

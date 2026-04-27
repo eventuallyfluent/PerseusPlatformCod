@@ -295,7 +295,7 @@ export default async function CoursesIndexPage({
           </label>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(143,44,255,0.18)]" type="submit">
+          <button className="rounded-full bg-[var(--button-primary-background)] px-5 py-3 text-sm font-semibold text-white shadow-[var(--button-primary-shadow)] transition hover:bg-[var(--button-primary-hover)]" type="submit">
             Update results
           </button>
           <Link href="/courses" className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold text-[var(--portal-text)]">

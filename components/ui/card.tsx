@@ -5,7 +5,7 @@ export function Card({ children, className }: PropsWithChildren<{ className?: st
   return (
     <div
       className={cn(
-        "rounded-[var(--radius-panel)] border border-[var(--border)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-panel)] backdrop-blur-sm",
+        "perseus-card rounded-[var(--radius-panel)] border border-[var(--border)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-panel)] backdrop-blur-sm",
         className,
       )}
     >

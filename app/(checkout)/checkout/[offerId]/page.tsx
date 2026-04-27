@@ -89,25 +89,25 @@ export default async function CheckoutPage({
   return (
     <div className="mx-auto flex min-h-[calc(100svh-5.5rem)] w-full max-w-6xl items-center px-6 py-4">
       <div className="grid w-full gap-5 lg:grid-cols-[0.7fr_1.3fr]">
-        <section className="rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,#160b30,#110a24)] px-8 py-7 text-white shadow-[0_24px_60px_rgba(14,12,30,0.24)]">
-          <p className="text-[11px] uppercase tracking-[0.34em] text-[rgba(228,216,255,0.74)]">{productKind}</p>
+        <section className="perseus-checkout-hero rounded-[34px] border border-[var(--checkout-hero-panel-border)] bg-[var(--checkout-hero-panel-background)] px-8 py-7 text-[var(--checkout-hero-text)] shadow-[var(--checkout-hero-shadow)]">
+          <p className="text-[11px] uppercase tracking-[0.34em] text-[var(--checkout-hero-chip)]">{productKind}</p>
           <h1 className="mt-4 max-w-lg text-3xl leading-[0.98] tracking-[-0.045em] lg:text-[2.55rem]">{productTitle}</h1>
-          <p className="mt-4 max-w-lg text-sm leading-7 text-[rgba(236,229,255,0.78)]">
+          <p className="mt-4 max-w-lg text-sm leading-7 text-[var(--checkout-hero-muted)]">
             {activeGatewayDefinition?.kind === "bank_transfer"
               ? "Review the offer now, then follow the transfer instructions to complete your purchase."
               : "Review the offer now, then complete your purchase through one clear payment step."}
           </p>
-          <div className="mt-5 flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[rgba(228,216,255,0.74)]">
-            <span className="rounded-full border border-white/10 px-4 py-2">Secure</span>
-            <span className="rounded-full border border-white/10 px-4 py-2">{checkoutChipLabel}</span>
-            <span className="rounded-full border border-white/10 px-4 py-2">{accessChipLabel}</span>
+          <div className="mt-5 flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--checkout-hero-chip)]">
+            <span className="rounded-full border border-[var(--checkout-hero-panel-border)] px-4 py-2">Secure</span>
+            <span className="rounded-full border border-[var(--checkout-hero-panel-border)] px-4 py-2">{checkoutChipLabel}</span>
+            <span className="rounded-full border border-[var(--checkout-hero-panel-border)] px-4 py-2">{accessChipLabel}</span>
           </div>
         </section>
 
-        <section className="rounded-[34px] border border-[rgba(255,255,255,0.08)] bg-[rgba(19,21,42,0.92)] px-8 py-7 shadow-[0_24px_60px_rgba(14,12,30,0.16)]">
+        <section className="perseus-checkout-form rounded-[34px] border border-[var(--checkout-form-panel-border)] bg-[var(--checkout-form-panel-background)] px-8 py-7 text-[var(--checkout-form-text)] shadow-[var(--checkout-form-shadow)]">
           <div className="space-y-2">
-            <p className="text-[11px] uppercase tracking-[0.3em] text-[rgba(228,216,255,0.58)]">Checkout</p>
-            <p className="text-sm leading-7 text-[rgba(236,229,255,0.76)]">{paymentHeadline}</p>
+            <p className="text-[11px] uppercase tracking-[0.3em] text-[var(--checkout-form-muted)]">Checkout</p>
+            <p className="text-sm leading-7 text-[var(--checkout-form-muted)]">{paymentHeadline}</p>
           </div>
           {gatewayPolicy ? (
             <p className={`mt-5 rounded-2xl px-4 py-3 text-sm ${gatewayPolicy.tone === "success" ? "bg-emerald-50 text-emerald-700" : gatewayPolicy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
@@ -132,31 +132,31 @@ export default async function CheckoutPage({
           {query.status === "cancelled" ? (
             <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Checkout was cancelled. You can try again at any time.</p>
           ) : null}
-          <div className="mt-5 grid gap-3 rounded-[24px] bg-white px-5 py-4 text-sm text-stone-700 shadow-[0_16px_28px_rgba(15,23,42,0.07)]">
+          <div className="perseus-checkout-summary mt-5 grid gap-3 rounded-[24px] bg-[var(--checkout-summary-background)] px-5 py-4 text-sm shadow-[0_16px_28px_rgba(15,23,42,0.07)]">
             <div className="flex items-center justify-between gap-4">
-              <span className="text-stone-500">Product</span>
-              <span className="max-w-[20rem] text-right font-medium text-stone-950 [overflow-wrap:anywhere]">{productTitle}</span>
+              <span className="text-[var(--checkout-summary-muted)]">Product</span>
+              <span className="max-w-[20rem] text-right font-medium text-[var(--checkout-summary-text)] [overflow-wrap:anywhere]">{productTitle}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <span className="text-stone-500">Price</span>
-              <span className="font-medium text-stone-950">{discountedPriceLabel}</span>
+              <span className="text-[var(--checkout-summary-muted)]">Price</span>
+              <span className="font-medium text-[var(--checkout-summary-text)]">{discountedPriceLabel}</span>
             </div>
             {appliedUpsellDiscount && appliedUpsellDiscount.discountAmount > 0 ? (
               <>
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-stone-500">Original price</span>
-                  <span className="font-medium text-stone-500 line-through">{appliedUpsellDiscount.originalPrice}</span>
+                  <span className="text-[var(--checkout-summary-muted)]">Original price</span>
+                  <span className="font-medium text-[var(--checkout-summary-muted)] line-through">{appliedUpsellDiscount.originalPrice}</span>
                 </div>
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-stone-500">Upsell discount</span>
+                  <span className="text-[var(--checkout-summary-muted)]">Upsell discount</span>
                   <span className="font-medium text-emerald-700">{appliedUpsellDiscount.savingsLabel ?? "Discount applied"}</span>
                 </div>
               </>
             ) : null}
             {productMeta ? (
               <div className="flex items-center justify-between gap-4">
-                <span className="text-stone-500">{productMeta.label}</span>
-                <span className="font-medium text-stone-950">{productMeta.value}</span>
+                <span className="text-[var(--checkout-summary-muted)]">{productMeta.label}</span>
+                <span className="font-medium text-[var(--checkout-summary-text)]">{productMeta.value}</span>
               </div>
             ) : null}
           </div>
@@ -172,22 +172,22 @@ export default async function CheckoutPage({
               paymentNote={paymentNote}
             >
               {upsell ? (
-                <div className="rounded-[24px] border border-[rgba(212,168,70,0.22)] bg-[linear-gradient(135deg,rgba(212,168,70,0.10),rgba(143,44,255,0.10))] px-5 py-4">
+                <div className="rounded-[24px] border border-[var(--checkout-upsell-border)] bg-[var(--checkout-upsell-background)] px-5 py-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#f2c45e]">Optional upsell</p>
-                      <h2 className="mt-2 text-xl leading-none tracking-[-0.03em] text-white">{upsell.title}</h2>
-                      <p className="mt-2 text-sm leading-7 text-[rgba(236,229,255,0.78)]">{upsell.subtitle}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--checkout-upsell-label)]">Optional upsell</p>
+                      <h2 className="mt-2 text-xl leading-none tracking-[-0.03em] text-[var(--checkout-upsell-text)]">{upsell.title}</h2>
+                      <p className="mt-2 text-sm leading-7 text-[var(--checkout-upsell-muted)]">{upsell.subtitle}</p>
                     </div>
                     <div className="space-y-2 text-right">
-                      {upsell.savingsLabel ? <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#f2c45e]">{upsell.savingsLabel}</p> : null}
-                      <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white">{upsell.price}</span>
-                      {upsell.originalPrice !== upsell.price ? <p className="text-sm text-[rgba(236,229,255,0.62)] line-through">{upsell.originalPrice}</p> : null}
+                      {upsell.savingsLabel ? <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--checkout-upsell-label)]">{upsell.savingsLabel}</p> : null}
+                      <span className="rounded-full bg-[var(--checkout-upsell-chip-background)] px-4 py-2 text-sm font-semibold text-[var(--checkout-upsell-chip-text)]">{upsell.price}</span>
+                      {upsell.originalPrice !== upsell.price ? <p className="text-sm text-[var(--checkout-upsell-muted)] line-through">{upsell.originalPrice}</p> : null}
                     </div>
                   </div>
                   <div className="mt-4 flex items-center justify-between gap-4">
-                    <p className="text-sm text-[rgba(236,229,255,0.72)]">Add this only if you want the discounted follow-up offer before completing this purchase.</p>
-                    <Link href={upsell.href} className="inline-flex rounded-full border border-white/14 bg-white px-5 py-3 text-sm font-semibold text-[var(--accent)] transition hover:bg-[rgba(255,255,255,0.92)]">
+                    <p className="text-sm text-[var(--checkout-upsell-muted)]">Add this only if you want the discounted follow-up offer before completing this purchase.</p>
+                    <Link href={upsell.href} className="inline-flex rounded-full border border-[var(--checkout-upsell-border)] bg-[var(--checkout-upsell-button-background)] px-5 py-3 text-sm font-semibold text-[var(--checkout-upsell-button-text)] transition hover:bg-[var(--checkout-upsell-button-hover)]">
                       {upsell.label}
                     </Link>
                   </div>
@@ -195,7 +195,7 @@ export default async function CheckoutPage({
               ) : null}
             </CheckoutForm>
             ) : (
-              <div className="rounded-[24px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-5 py-5 text-sm leading-7 text-[rgba(236,229,255,0.78)]">
+              <div className="rounded-[24px] border border-[var(--checkout-unavailable-border)] bg-[var(--checkout-unavailable-background)] px-5 py-5 text-sm leading-7 text-[var(--checkout-unavailable-text)]">
                 Checkout is unavailable until the active gateway is configured for a real payment path, has the required credentials, and passes the current payment policy.
               </div>
             )}

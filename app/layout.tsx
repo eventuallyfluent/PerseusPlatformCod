@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { absoluteUrl } from "@/lib/utils";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE_TEMPLATE } from "@/lib/seo/site";
+import { getPublicThemeClass, getPublicThemeFamily, PUBLIC_THEME_CLASSES, PUBLIC_THEME_MODE_STORAGE_KEY } from "@/lib/theme/public-theme";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -36,10 +37,31 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const publicThemeFamily = await getPublicThemeFamily();
+  const defaultThemeClass = getPublicThemeClass(publicThemeFamily, "dark");
+  const themeBootScript = `
+    (function() {
+      var family = document.body.dataset.publicThemeFamily || "original";
+      var mode = window.localStorage.getItem("${PUBLIC_THEME_MODE_STORAGE_KEY}") === "light" ? "light" : "dark";
+      var classes = ${JSON.stringify([...PUBLIC_THEME_CLASSES])};
+      document.body.classList.remove.apply(document.body.classList, classes);
+      document.body.classList.add("theme-perseus-" + family + "-" + mode);
+      document.body.dataset.publicThemeMode = mode;
+    })();
+  `;
+
   return (
     <html lang="en">
-      <body className={`theme-perseus-dark-1 ${displayFont.variable} ${bodyFont.variable}`}>{children}</body>
+      <body
+        suppressHydrationWarning
+        data-public-theme-family={publicThemeFamily}
+        data-public-theme-mode="dark"
+        className={`${defaultThemeClass} ${displayFont.variable} ${bodyFont.variable}`}
+      >
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+        {children}
+      </body>
     </html>
   );
 }

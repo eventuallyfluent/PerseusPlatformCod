@@ -69,7 +69,7 @@ export default async function LessonPage({ params }: { params: Promise<{ courseS
     : new Set<string>();
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(143,44,255,0.08),transparent_18%),linear-gradient(180deg,#0d0f1d,#13152a_32%,#0c0e1d_100%)]">
+    <div className="min-h-screen bg-[var(--shell-background-learner)]">
       <div className="mx-auto max-w-7xl px-6 py-10">
         <CoursePlayerLayout
           course={course}

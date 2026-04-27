@@ -12,11 +12,11 @@ export function Button({ children, className, variant = "primary", ...props }: B
         "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold tracking-[0.01em] transition duration-200 will-change-transform",
         "focus-visible:outline-none focus-visible:ring-4",
         variant === "primary" &&
-          "bg-[var(--accent)] text-white shadow-[var(--shadow-glow)] hover:-translate-y-px hover:bg-[var(--accent-strong)] focus-visible:ring-[rgba(143,44,255,0.22)]",
+          "bg-[var(--button-primary-background)] text-white shadow-[var(--button-primary-shadow)] hover:-translate-y-px hover:bg-[var(--button-primary-hover)] focus-visible:ring-[rgba(143,44,255,0.22)]",
         variant === "secondary" &&
-          "border border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)] hover:-translate-y-px hover:bg-[var(--surface-panel-strong)] focus-visible:ring-[rgba(143,44,255,0.16)]",
+          "border border-[var(--button-secondary-border)] bg-[var(--button-secondary-background)] text-[var(--button-secondary-text)] hover:-translate-y-px hover:bg-[var(--button-secondary-hover)] focus-visible:ring-[rgba(143,44,255,0.16)]",
         variant === "ghost" &&
-          "border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel-strong)] hover:text-[var(--text-primary)] focus-visible:ring-[rgba(88,97,130,0.16)]",
+          "border border-[var(--border)] bg-[var(--button-ghost-background)] text-[var(--button-ghost-text)] hover:border-[var(--border-strong)] hover:bg-[var(--button-ghost-hover-background)] hover:text-[var(--text-primary)] focus-visible:ring-[rgba(88,97,130,0.16)]",
         variant === "premium" &&
           "bg-[var(--premium)] text-[#211607] shadow-[0_16px_36px_rgba(212,168,70,0.2)] hover:-translate-y-px hover:brightness-105 focus-visible:ring-[rgba(212,168,70,0.18)]",
         variant === "portal" &&

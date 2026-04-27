@@ -64,7 +64,7 @@ function CollectionCourseRow({ course }: { course: HomepageCourse }) {
   return (
     <HardLink
       href={resolveCoursePublicPath(course)}
-      className="flex items-start justify-between gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] p-4 transition hover:border-[var(--border-strong)] hover:bg-[rgba(51,51,84,0.98)]"
+      className="perseus-collection-row flex items-start justify-between gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] p-4 transition hover:border-[var(--border-strong)] hover:bg-[var(--collection-row-hover)]"
     >
       <div className="space-y-2">
         <div className="flex flex-wrap gap-2">
@@ -111,7 +111,7 @@ function CollectionPanel({
         : "var(--collection-gateway)";
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] shadow-[var(--shadow-soft)]">
+    <article className="perseus-collection-panel flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] shadow-[var(--collection-panel-shadow)]">
       <div
         className="min-h-[220px] border-b border-[var(--border)] px-7 py-7"
         style={{
@@ -144,9 +144,9 @@ function CollectionPanel({
 
 function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
   return (
-    <section className="relative overflow-hidden border-b border-[var(--border)]">
+    <section className="perseus-home-hero relative overflow-hidden border-b border-[var(--border)]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_22%,var(--perseus-hero-glow),transparent_24%),radial-gradient(circle_at_72%_18%,rgba(212,168,85,0.12),transparent_22%)]" />
-      <div className="relative mx-auto flex min-h-[calc(100svh-74px)] max-w-7xl flex-col items-center justify-center px-6 py-16 text-center lg:py-24">
+      <div className="perseus-home-hero-inner relative mx-auto flex min-h-[calc(100svh-74px)] max-w-7xl flex-col items-center justify-center px-6 py-16 text-center lg:py-24">
         <PerseusHeroMark />
         <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.42em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
         <h1 className="mt-5 max-w-6xl font-serif text-6xl leading-[0.88] tracking-[-0.06em] text-[var(--portal-text)] sm:text-7xl lg:text-[6.8rem]">
@@ -185,7 +185,7 @@ function CollectionsSection({
   }>;
 }) {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-16">
+    <section className="perseus-home-collections mx-auto max-w-7xl px-6 py-16">
       <div className="mx-auto mb-10 max-w-4xl space-y-4 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
         <h2 className="font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">{payload.title}</h2>
@@ -222,7 +222,7 @@ function TestimoniesSection({
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-16">
+    <section className="perseus-home-testimonies mx-auto max-w-7xl px-6 py-16">
       <div className="mx-auto mb-10 max-w-4xl space-y-4 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--premium)]">{payload.eyebrow}</p>
         <h2 className="font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">{payload.title}</h2>
@@ -230,7 +230,7 @@ function TestimoniesSection({
       </div>
       <div className="grid gap-6 xl:grid-cols-3">
         {items.map((testimonial) => (
-          <figure key={testimonial.id} className="rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-7 shadow-[var(--shadow-soft)]">
+          <figure key={testimonial.id} className="perseus-testimonial-card rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-7 shadow-[var(--collection-panel-shadow)]">
             <blockquote className="text-lg leading-9 text-[var(--portal-text)]">&ldquo;{testimonial.quote}&rdquo;</blockquote>
             <figcaption className="mt-6 space-y-1">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--accent-lavender)]">{testimonial.name}</p>
@@ -245,8 +245,8 @@ function TestimoniesSection({
 
 function EmailSignupSection({ payload }: { payload: HomepageEmailSignupPayload }) {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-16">
-      <div className="rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-10 shadow-[var(--shadow-soft)] sm:px-10 lg:px-14">
+    <section className="perseus-home-email mx-auto max-w-7xl px-6 py-16">
+      <div className="perseus-email-signup rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-10 shadow-[var(--collection-panel-shadow)] sm:px-10 lg:px-14">
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
           <h2 className="mt-4 font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">{payload.title}</h2>

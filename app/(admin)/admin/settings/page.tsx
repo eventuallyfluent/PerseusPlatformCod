@@ -172,27 +172,56 @@ export default async function SettingsPage({
         {feedbackMessage ? <p className={`rounded-[18px] px-4 py-3 text-sm ${feedbackTone}`}>{feedbackMessage}</p> : null}
         <Card className="space-y-6 p-6">
           <form action={savePublicThemeFamilyAction} className="space-y-6">
-            <div className="flex flex-col gap-4 border-b border-stone-200 pb-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-4 border-b border-stone-200 pb-4">
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold text-stone-950">Public theme family</h2>
                 <p className="max-w-2xl text-sm leading-6 text-stone-600">
                   Preserve the current public/student UI as Perseus Original or switch the live public/student family to Perseus Modern. Learners still choose dark or light mode from the public footer.
                 </p>
               </div>
-              <label className="space-y-2">
-                <span className="text-sm font-medium text-stone-900">Active family</span>
-                <select
-                  name="family"
-                  defaultValue={publicThemeFamily}
-                  className="rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-400"
-                >
-                  <option value="original">Perseus Original</option>
-                  <option value="modern">Perseus Modern</option>
-                </select>
-              </label>
             </div>
-            <div className="flex justify-end">
-              <Button type="submit">Save theme family</Button>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className={`rounded-[24px] border p-5 ${publicThemeFamily === "original" ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-stone-200 bg-white"}`}>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-lg font-semibold text-stone-950">Perseus Original</h3>
+                    {publicThemeFamily === "original" ? (
+                      <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white">
+                        Active
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="text-sm leading-6 text-stone-600">
+                    Keeps the current public and learner UI exactly as it is now, with the existing light and dark modes.
+                  </p>
+                </div>
+                <div className="mt-5">
+                  <Button type="submit" name="family" value="original" variant={publicThemeFamily === "original" ? "secondary" : "default"}>
+                    {publicThemeFamily === "original" ? "Original is active" : "Use Perseus Original"}
+                  </Button>
+                </div>
+              </div>
+
+              <div className={`rounded-[24px] border p-5 ${publicThemeFamily === "modern" ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-stone-200 bg-white"}`}>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-lg font-semibold text-stone-950">Perseus Modern</h3>
+                    {publicThemeFamily === "modern" ? (
+                      <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white">
+                        Active
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="text-sm leading-6 text-stone-600">
+                    Uses the sharper premium family across public and learner surfaces while still letting visitors choose light or dark.
+                  </p>
+                </div>
+                <div className="mt-5">
+                  <Button type="submit" name="family" value="modern" variant={publicThemeFamily === "modern" ? "secondary" : "default"}>
+                    {publicThemeFamily === "modern" ? "Modern is active" : "Use Perseus Modern"}
+                  </Button>
+                </div>
+              </div>
             </div>
           </form>
         </Card>

@@ -557,6 +557,16 @@
   --radius-card: 22px;
   --radius-field: 18px;
   --radius-pill: 999px;
+  --button-primary-background: var(--accent);
+  --button-primary-hover: var(--accent-strong);
+  --button-primary-shadow: var(--shadow-glow);
+  --button-secondary-border: var(--accent);
+  --button-secondary-background: var(--accent-soft);
+  --button-secondary-hover: rgba(123, 47, 190, 0.14);
+  --button-secondary-text: var(--accent);
+  --button-ghost-background: var(--surface-panel);
+  --button-ghost-hover-background: var(--surface-panel-strong);
+  --button-ghost-text: var(--text-secondary);
   background: linear-gradient(180deg, var(--background-deep) 0%, var(--background) 100%);
   color: var(--text-primary);
 }

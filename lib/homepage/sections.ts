@@ -52,6 +52,7 @@ export type HomepageFooterPayload = {
   socialLabels: string[];
   bottomLeftText: string;
   bottomRightText: string;
+  themeFamily?: "original" | "modern";
 };
 
 export type HomepageSectionPayloadMap = {

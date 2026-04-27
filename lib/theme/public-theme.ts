@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import type { HomepageFooterPayload } from "@/lib/homepage/sections";
 
 export const PUBLIC_THEME_FAMILY_SETTING_KEY = "public-theme-family";
 export const PUBLIC_THEME_MODE_STORAGE_KEY = "perseus-theme-mode";
@@ -37,17 +38,27 @@ export async function getPublicThemeFamily(): Promise<PublicThemeFamily> {
       select: { value: true },
     });
   } catch {
-    // Deployment can briefly run against a database that has not applied the
-    // new SiteSetting migration yet. Fall back to the preserved original family
-    // instead of failing the entire app render.
-    return "original";
+    setting = null;
   }
 
-  if (!setting || typeof setting.value !== "object" || setting.value === null) {
-    return "original";
+  if (setting && typeof setting.value === "object" && setting.value !== null) {
+    const family = "family" in setting.value ? setting.value.family : null;
+    return normalizePublicThemeFamily(typeof family === "string" ? family : null);
   }
 
-  const family = "family" in setting.value ? setting.value.family : null;
+  try {
+    const footerSection = await prisma.homepageSection.findUnique({
+      where: { type: "FOOTER" },
+      select: { payload: true },
+    });
 
-  return normalizePublicThemeFamily(typeof family === "string" ? family : null);
+    if (!footerSection || typeof footerSection.payload !== "object" || footerSection.payload === null) {
+      return "original";
+    }
+
+    const footerPayload = footerSection.payload as HomepageFooterPayload;
+    return normalizePublicThemeFamily(footerPayload.themeFamily);
+  } catch {
+    return "original";
+  }
 }

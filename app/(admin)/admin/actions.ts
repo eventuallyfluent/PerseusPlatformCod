@@ -191,7 +191,44 @@ export async function savePublicThemeFamilyAction(formData: FormData) {
       },
     });
   } catch {
-    redirect("/admin/settings?error=theme");
+    try {
+      const footerDefault = defaultHomepageSections().find((section) => section.type === "FOOTER")!;
+      const existingFooter = await prisma.homepageSection.findUnique({
+        where: { type: "FOOTER" },
+      });
+
+      const currentPayload =
+        existingFooter && typeof existingFooter.payload === "object" && existingFooter.payload !== null
+          ? (existingFooter.payload as HomepageSectionPayloadMap["FOOTER"])
+          : footerDefault.payload;
+
+      await prisma.homepageSection.upsert({
+        where: { type: "FOOTER" },
+        update: {
+          enabled: existingFooter?.enabled ?? footerDefault.enabled,
+          position: existingFooter?.position ?? footerDefault.position,
+          payload: JSON.parse(
+            JSON.stringify({
+              ...currentPayload,
+              themeFamily: family,
+            }),
+          ),
+        },
+        create: {
+          type: "FOOTER",
+          enabled: footerDefault.enabled,
+          position: footerDefault.position,
+          payload: JSON.parse(
+            JSON.stringify({
+              ...(footerDefault.payload as HomepageSectionPayloadMap["FOOTER"]),
+              themeFamily: family,
+            }),
+          ),
+        },
+      });
+    } catch {
+      redirect("/admin/settings?error=theme");
+    }
   }
 
   revalidatePath("/");
@@ -250,6 +287,15 @@ export async function saveHomepageSectionAction(formData: FormData) {
       legalText: String(formData.get("legalText") ?? ""),
     };
   } else if (type === "FOOTER") {
+    const existingFooter = await prisma.homepageSection.findUnique({
+      where: { type: "FOOTER" },
+      select: { payload: true },
+    });
+    const currentThemeFamily =
+      existingFooter && typeof existingFooter.payload === "object" && existingFooter.payload !== null
+        ? (existingFooter.payload as HomepageSectionPayloadMap["FOOTER"]).themeFamily
+        : undefined;
+
     payload = {
       brandTitle: String(formData.get("brandTitle") ?? ""),
       brandSubtitle: String(formData.get("brandSubtitle") ?? ""),
@@ -261,6 +307,7 @@ export async function saveHomepageSectionAction(formData: FormData) {
       socialLabels: parseLines(String(formData.get("socialLabels") ?? "")),
       bottomLeftText: String(formData.get("bottomLeftText") ?? ""),
       bottomRightText: String(formData.get("bottomRightText") ?? ""),
+      themeFamily: currentThemeFamily,
     };
   } else {
     payload = getDefaultHomepagePayload(type);

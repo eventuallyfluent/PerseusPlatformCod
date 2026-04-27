@@ -175,22 +175,6 @@ function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
             </div>
           </div>
 
-          <div className="perseus-home-hero-sidecar hidden w-full max-w-md rounded-[28px] border border-[var(--border)] bg-[var(--surface-panel)] p-6 text-left shadow-[var(--shadow-panel)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Study entry</p>
-            <div className="mt-5 space-y-4">
-              <Link href={payload.primaryCtaHref} className="block rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel-strong)] p-4 transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--text-muted)]">Primary path</p>
-                <p className="mt-2 text-xl leading-none tracking-[-0.03em] text-[var(--text-primary)]">{payload.primaryCtaLabel}</p>
-              </Link>
-              <Link href={payload.secondaryCtaHref} className="block rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel-strong)] p-4 transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--text-muted)]">Support path</p>
-                <p className="mt-2 text-xl leading-none tracking-[-0.03em] text-[var(--text-primary)]">{payload.secondaryCtaLabel}</p>
-              </Link>
-            </div>
-            <p className="mt-6 text-sm leading-7 text-[var(--text-secondary)]">
-              Public previews, structured pathways, and private learner access remain under one coherent academy shell.
-            </p>
-          </div>
         </div>
       </div>
     </section>

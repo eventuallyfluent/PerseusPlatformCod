@@ -1,33 +1,21 @@
 # Perseus Theme System
 
 ## Active theme tracks
-- `Perseus Original`
-  Preserved baseline of the current public/student UI.
-- `Perseus Modern`
-  Sharper forward-facing public/student family using the same Perseus brand DNA.
+- `Perseus Public`
+  The single public and learner theme track.
 - `Admin Clean`
   Separate admin treatment focused on legibility and operational clarity.
 
 ## Runtime ownership
-- Public and learner surfaces use one public theme family selected in admin:
-  - `original`
-  - `modern`
+- Public and learner surfaces use one shared theme track only.
 - Public and learner users still choose `dark` or `light` mode in the footer.
 - Admin surfaces use `Admin Clean` only.
-- Admin does not inherit or expose the public theme family visually.
 
-## Public families
-### Perseus Original
-- `Perseus Original Dark`
-  Exact preservation of the prior dark public/student UI.
-- `Perseus Original Light`
-  Exact preservation of the prior light public/student UI.
-
-### Perseus Modern
-- `Perseus Modern Dark`
-  More cinematic contrast, cleaner hierarchy, tighter surfaces, stronger hero presence.
-- `Perseus Modern Light`
-  More editorial and premium than the Original light mode, without losing the Perseus palette.
+## Public modes
+- `Perseus Dark`
+  Preserved baseline of the current dark public/student UI.
+- `Perseus Light`
+  Preserved baseline of the current light public/student UI.
 
 ## Typography
 - Display: `Cormorant Garamond`
@@ -86,7 +74,6 @@
   - `var(--text-secondary)`
   - `var(--border)`
   - `var(--border-strong)`
-- Family-specific styling should prefer semantic class hooks plus token overrides, not one-off inline colors.
 - No new shared public/learner component should ship with:
   - default `text-white`
   - raw fixed dark RGBA panels

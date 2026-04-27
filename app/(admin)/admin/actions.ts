@@ -22,7 +22,6 @@ import { confirmManualPayment, failManualPayment } from "@/lib/payments/manual-p
 import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSectionPayloadMap } from "@/lib/homepage/sections";
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
-import { normalizePublicThemeFamily, PUBLIC_THEME_FAMILY_SETTING_KEY } from "@/lib/theme/public-theme";
 import { CouponScope, CourseStatus, type HomepageSectionType } from "@prisma/client";
 import type { GatewayCapabilities, GatewayCheckoutModel, GatewayKind, GatewaySettlementBehavior, GatewayTaxModel } from "@/types";
 
@@ -176,68 +175,6 @@ function getDefaultHomepagePayload(type: HomepageSectionType) {
   return defaultHomepageSections().find((section) => section.type === type)!.payload;
 }
 
-export async function savePublicThemeFamilyAction(formData: FormData) {
-  const family = normalizePublicThemeFamily(String(formData.get("family") ?? ""));
-
-  try {
-    await prisma.siteSetting.upsert({
-      where: { key: PUBLIC_THEME_FAMILY_SETTING_KEY },
-      update: {
-        value: { family },
-      },
-      create: {
-        key: PUBLIC_THEME_FAMILY_SETTING_KEY,
-        value: { family },
-      },
-    });
-  } catch {
-    try {
-      const footerDefault = defaultHomepageSections().find((section) => section.type === "FOOTER")!;
-      const existingFooter = await prisma.homepageSection.findUnique({
-        where: { type: "FOOTER" },
-      });
-
-      const currentPayload =
-        existingFooter && typeof existingFooter.payload === "object" && existingFooter.payload !== null
-          ? (existingFooter.payload as HomepageSectionPayloadMap["FOOTER"])
-          : footerDefault.payload;
-
-      await prisma.homepageSection.upsert({
-        where: { type: "FOOTER" },
-        update: {
-          enabled: existingFooter?.enabled ?? footerDefault.enabled,
-          position: existingFooter?.position ?? footerDefault.position,
-          payload: JSON.parse(
-            JSON.stringify({
-              ...currentPayload,
-              themeFamily: family,
-            }),
-          ),
-        },
-        create: {
-          type: "FOOTER",
-          enabled: footerDefault.enabled,
-          position: footerDefault.position,
-          payload: JSON.parse(
-            JSON.stringify({
-              ...(footerDefault.payload as HomepageSectionPayloadMap["FOOTER"]),
-              themeFamily: family,
-            }),
-          ),
-        },
-      });
-    } catch {
-      redirect("/admin/settings?error=theme");
-    }
-  }
-
-  revalidatePath("/");
-  revalidatePath("/courses");
-  revalidatePath("/dashboard");
-  revalidatePath("/admin/settings");
-  redirect("/admin/settings?saved=theme");
-}
-
 export async function saveHomepageSectionAction(formData: FormData) {
   const type = String(formData.get("type") ?? "") as HomepageSectionType;
   const enabled = String(formData.get("enabled") ?? "") === "true";
@@ -287,15 +224,6 @@ export async function saveHomepageSectionAction(formData: FormData) {
       legalText: String(formData.get("legalText") ?? ""),
     };
   } else if (type === "FOOTER") {
-    const existingFooter = await prisma.homepageSection.findUnique({
-      where: { type: "FOOTER" },
-      select: { payload: true },
-    });
-    const currentThemeFamily =
-      existingFooter && typeof existingFooter.payload === "object" && existingFooter.payload !== null
-        ? (existingFooter.payload as HomepageSectionPayloadMap["FOOTER"]).themeFamily
-        : undefined;
-
     payload = {
       brandTitle: String(formData.get("brandTitle") ?? ""),
       brandSubtitle: String(formData.get("brandSubtitle") ?? ""),
@@ -307,7 +235,6 @@ export async function saveHomepageSectionAction(formData: FormData) {
       socialLabels: parseLines(String(formData.get("socialLabels") ?? "")),
       bottomLeftText: String(formData.get("bottomLeftText") ?? ""),
       bottomRightText: String(formData.get("bottomRightText") ?? ""),
-      themeFamily: currentThemeFamily,
     };
   } else {
     payload = getDefaultHomepagePayload(type);

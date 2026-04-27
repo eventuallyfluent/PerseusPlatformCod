@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  getPublicThemeClass,
-  normalizePublicThemeFamily,
   normalizePublicThemeMode,
   PUBLIC_THEME_CLASSES,
   PUBLIC_THEME_MODE_STORAGE_KEY,
@@ -11,9 +9,8 @@ import {
 } from "@/lib/theme/public-theme";
 
 function applyTheme(mode: PublicThemeMode) {
-  const family = normalizePublicThemeFamily(document.body.dataset.publicThemeFamily);
   document.body.classList.remove(...PUBLIC_THEME_CLASSES);
-  document.body.classList.add(getPublicThemeClass(family, mode));
+  document.body.classList.add(mode === "light" ? "theme-perseus-light-1" : "theme-perseus-dark-1");
   document.body.dataset.publicThemeMode = mode;
 }
 

@@ -152,9 +152,9 @@ function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
   return (
     <section className="perseus-home-hero relative overflow-hidden border-b border-[var(--border)]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_22%,var(--perseus-hero-glow),transparent_24%),radial-gradient(circle_at_72%_18%,rgba(212,168,85,0.12),transparent_22%)]" />
-      <div className="perseus-home-hero-inner relative mx-auto max-w-7xl px-6 py-16 lg:py-24">
+      <div className="perseus-home-hero-inner relative mx-auto max-w-7xl px-6 py-12 lg:py-18">
         <div className="perseus-home-hero-grid flex min-h-[calc(100svh-74px)] flex-col items-center justify-center gap-12">
-          <div className="perseus-home-hero-copy flex max-w-5xl flex-col items-center text-center">
+          <div className="perseus-home-hero-copy flex max-w-5xl -translate-y-6 flex-col items-center text-center lg:-translate-y-10">
             <PerseusHeroMark />
             {showEyebrow ? (
               <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.42em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>

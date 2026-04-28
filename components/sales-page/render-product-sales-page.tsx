@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { StreamableEmbed } from "@/components/ui/streamable-embed";
 import type { BundleSalesPagePayload, GeneratedSalesPagePayload, SalesPageOfferSummary, SalesPageSectionKey } from "@/types";
 
@@ -28,11 +28,13 @@ function OfferButtons({ offers, primaryLabel }: { offers: SalesPageOfferSummary[
   return (
     <div className="flex flex-wrap gap-3">
       {offers.map((offer) => (
-        <Link key={offer.offerId} href={offer.checkoutUrl}>
-          <Button className="min-w-[240px] bg-[linear-gradient(135deg,var(--accent),#c16bff)] px-6 shadow-[0_18px_34px_rgba(143,44,255,0.24)]">
-            {primaryLabel} {offer.price}
-          </Button>
-        </Link>
+        <ButtonLink
+          key={offer.offerId}
+          href={offer.checkoutUrl}
+          className="min-w-[240px] bg-[linear-gradient(135deg,var(--accent),#c16bff)] px-6 shadow-[0_18px_34px_rgba(143,44,255,0.24)]"
+        >
+          {primaryLabel} {offer.price}
+        </ButtonLink>
       ))}
     </div>
   );
@@ -339,14 +341,12 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
             ) : null}
 
             <div className="perseus-sales-hero-actions mt-10 flex flex-wrap justify-center gap-3">
-              <Link href={payload.hero.primaryCtaHref}>
-                <Button className="min-w-[280px]">{payload.hero.primaryCtaLabel}</Button>
-              </Link>
-              <a href={payload.hero.secondaryCtaHref}>
-                <Button variant="secondary" className="min-w-[220px]">
-                  {payload.hero.secondaryCtaLabel}
-                </Button>
-              </a>
+              <ButtonLink href={payload.hero.primaryCtaHref} className="min-w-[280px]">
+                {payload.hero.primaryCtaLabel}
+              </ButtonLink>
+              <ButtonLink href={payload.hero.secondaryCtaHref} variant="secondary" className="min-w-[220px]">
+                {payload.hero.secondaryCtaLabel}
+              </ButtonLink>
             </div>
           </div>
         </div>

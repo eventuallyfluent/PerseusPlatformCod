@@ -1,5 +1,6 @@
 import { auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { HardLink } from "@/components/ui/hard-link";
 
 function PerseusMark() {
@@ -49,9 +50,9 @@ export async function SiteHeader() {
               </form>
             </>
           ) : (
-            <HardLink href="/login">
-              <Button className="px-5 py-2.5">Student login</Button>
-            </HardLink>
+            <ButtonLink href="/login" className="px-5 py-2.5">
+              Student login
+            </ButtonLink>
           )}
         </nav>
       </div>

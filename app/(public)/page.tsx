@@ -8,6 +8,7 @@ import { buildMetadata } from "@/lib/seo/metadata";
 import { buildOrganizationStructuredData, buildWebsiteStructuredData } from "@/lib/seo/structured-data";
 import { getPublicReviewName } from "@/lib/testimonials/public-review-name";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { HardLink } from "@/components/ui/hard-link";
 import type {
   HomepageCollectionsPayload,
@@ -164,14 +165,12 @@ function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
             </h1>
             <p className="mt-8 max-w-3xl text-xl leading-9 text-[var(--foreground-soft)]">{payload.description}</p>
             <div className="perseus-home-hero-actions mt-10 flex flex-wrap justify-center gap-4">
-              <Link href={payload.primaryCtaHref}>
-                <Button className="min-w-[220px]">{payload.primaryCtaLabel}</Button>
-              </Link>
-              <Link href={payload.secondaryCtaHref}>
-                <Button variant="secondary" className="min-w-[220px]">
-                  {payload.secondaryCtaLabel}
-                </Button>
-              </Link>
+              <ButtonLink href={payload.primaryCtaHref} className="min-w-[220px]">
+                {payload.primaryCtaLabel}
+              </ButtonLink>
+              <ButtonLink href={payload.secondaryCtaHref} variant="secondary" className="min-w-[220px]">
+                {payload.secondaryCtaLabel}
+              </ButtonLink>
             </div>
           </div>
 

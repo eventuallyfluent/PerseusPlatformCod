@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 
 type LearnerContextBarProps = {
   label?: string;
@@ -40,25 +39,19 @@ export function LearnerContextBar({
         <div className="inline-flex rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm text-[var(--text-secondary)]">{identity}</div>
         <div className="flex flex-wrap gap-3 lg:justify-end">
           {secondaryHref && secondaryLabel ? (
-            <Link href={secondaryHref}>
-              <Button variant="ghost" className="px-4 py-2">
-                {secondaryLabel}
-              </Button>
-            </Link>
+            <ButtonLink href={secondaryHref} variant="ghost" className="px-4 py-2">
+              {secondaryLabel}
+            </ButtonLink>
           ) : null}
           {auxiliaryHref && auxiliaryLabel ? (
-            <Link href={auxiliaryHref}>
-              <Button variant="ghost" className="px-4 py-2">
-                {auxiliaryLabel}
-              </Button>
-            </Link>
+            <ButtonLink href={auxiliaryHref} variant="ghost" className="px-4 py-2">
+              {auxiliaryLabel}
+            </ButtonLink>
           ) : null}
           {primaryHref && primaryLabel ? (
-            <Link href={primaryHref}>
-              <Button variant="portal" className="px-4 py-2">
-                {primaryLabel}
-              </Button>
-            </Link>
+            <ButtonLink href={primaryHref} variant="portal" className="px-4 py-2">
+              {primaryLabel}
+            </ButtonLink>
           ) : null}
         </div>
       </div>

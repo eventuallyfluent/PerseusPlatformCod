@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { MultiSelectPicker } from "@/components/admin/multi-select-picker";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { saveHomepageSectionAction } from "@/app/(admin)/admin/actions";
@@ -187,7 +188,7 @@ export default async function SettingsPage({
         <SectionFrame
           type="COLLECTIONS"
           title="Collections"
-          description="Control the homepage collections section here. Real collections are created and edited in Admin → Collections."
+          description="Control the homepage collections section here. Real collections are created and edited in Admin -> Collections."
           position={collections.position}
           enabled={collections.enabled}
         >
@@ -201,22 +202,22 @@ export default async function SettingsPage({
             <p className="mt-1 text-sm leading-6 text-stone-600">
               Create collections from the collections admin area, then choose which ones should appear on the homepage.
             </p>
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {collectionRecords.map((collection) => (
-                <label key={collection.id} className="flex items-start gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3">
-                  <input
-                    className="mt-1 w-auto"
-                    type="checkbox"
-                    name="featuredCollectionIds"
-                    value={collection.id}
-                    defaultChecked={(collectionsPayload.featuredCollectionIds ?? []).includes(collection.id)}
-                  />
-                  <span className="space-y-1">
-                    <span className="block text-sm font-semibold text-stone-950">{collection.title}</span>
-                    <span className="block text-xs uppercase tracking-[0.22em] text-stone-500">{collection.slug}</span>
-                  </span>
-                </label>
-              ))}
+            <div className="mt-4">
+              <MultiSelectPicker
+                name="featuredCollectionIds"
+                options={collectionRecords.map((collection) => ({
+                  value: collection.id,
+                  title: collection.title,
+                  subtitle: collection.slug,
+                  badge: "Collection",
+                }))}
+                selectedValues={collectionsPayload.featuredCollectionIds ?? []}
+                headerLabel="Homepage collections"
+                selectedLabel="collections selected"
+                searchPlaceholder="Search collections"
+                emptyLabel="No collections match this search."
+                actionLabels={{ selected: "Featured", unselected: "Add" }}
+              />
             </div>
           </div>
         </SectionFrame>
@@ -248,27 +249,22 @@ export default async function SettingsPage({
             <div className="rounded-2xl border border-stone-200 p-4">
               <p className="text-sm font-medium text-stone-900">Approved testimonial bank</p>
               <p className="mt-1 text-sm leading-6 text-stone-600">Select specific testimonials or leave the section on latest approved.</p>
-              <div className="mt-4 grid gap-3">
-                {approvedTestimonials.map((testimonial) => {
-                  const source = testimonial.course?.title ?? testimonial.bundle?.title ?? "General";
-                  return (
-                    <label key={testimonial.id} className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3">
-                      <input
-                        className="mt-1 w-auto"
-                        type="checkbox"
-                        name="selectedTestimonialIds"
-                        value={testimonial.id}
-                        defaultChecked={selectedHomepageTestimonials.includes(testimonial.id)}
-                      />
-                      <span className="space-y-1">
-                        <span className="block text-sm font-semibold text-stone-950">
-                          {testimonial.name ?? "Anonymous"} · {source}
-                        </span>
-                        <span className="block text-sm leading-6 text-stone-700">{testimonial.quote}</span>
-                      </span>
-                    </label>
-                  );
-                })}
+              <div className="mt-4">
+                <MultiSelectPicker
+                  name="selectedTestimonialIds"
+                  options={approvedTestimonials.map((testimonial) => ({
+                    value: testimonial.id,
+                    title: testimonial.name ?? "Anonymous",
+                    subtitle: `${testimonial.course?.title ?? testimonial.bundle?.title ?? "General"} • ${testimonial.quote}`,
+                    badge: "Review",
+                  }))}
+                  selectedValues={selectedHomepageTestimonials}
+                  headerLabel="Homepage reviews"
+                  selectedLabel="reviews selected"
+                  searchPlaceholder="Search approved reviews"
+                  emptyLabel="No approved reviews match this search."
+                  actionLabels={{ selected: "Featured", unselected: "Add" }}
+                />
               </div>
             </div>
           </div>

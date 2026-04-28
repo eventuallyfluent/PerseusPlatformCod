@@ -40,14 +40,34 @@ function getLessonTypeLabel(lesson: LessonRecord) {
   return "Study lesson";
 }
 
-function LessonMedia({ lesson, focus = false }: { lesson: LessonRecord; focus?: boolean }) {
-  if (!lesson.videoUrl) {
-    return null;
+function LessonMedia({
+  lesson,
+  focus = false,
+  fallbackUrl,
+  emptyMessage,
+}: {
+  lesson: LessonRecord;
+  focus?: boolean;
+  fallbackUrl?: string | null;
+  emptyMessage?: string | null;
+}) {
+  const mediaUrl = lesson.videoUrl || fallbackUrl;
+
+  if (!mediaUrl) {
+    if (!emptyMessage) {
+      return null;
+    }
+
+    return (
+      <div className="rounded-[24px] border border-dashed border-[var(--border)] bg-[var(--surface-panel-strong)] px-5 py-4 text-sm leading-7 text-[var(--text-secondary)]">
+        {emptyMessage}
+      </div>
+    );
   }
 
   return (
     <div className={focus ? "h-full min-h-0" : undefined}>
-      <StreamableEmbed url={lesson.videoUrl} title={lesson.title} focus={focus} />
+      <StreamableEmbed url={mediaUrl} title={lesson.title} focus={focus} />
     </div>
   );
 }
@@ -134,6 +154,13 @@ export function CoursePlayerLayout({
 
   const activeIndex = lessons.findIndex((lesson) => lesson.slug === activeLessonSlug);
   const activeLesson = lessons[activeIndex];
+  const previewFallbackVideoUrl = publicPreview && activeLesson?.isPreview ? course.salesVideoUrl : null;
+  const lessonVideoMissingMessage =
+    publicPreview && activeLesson?.type === "VIDEO" && !activeLesson.videoUrl
+      ? previewFallbackVideoUrl
+        ? "This preview is using the course sales video because the lesson video has not been added yet."
+        : "This preview lesson is marked as video, but no lesson video has been added yet."
+      : null;
 
   if (!activeLesson) {
     return <div className="rounded-[28px] border border-[var(--portal-border)] bg-[var(--portal-panel)] p-6 text-[var(--portal-text)]">Lesson not found.</div>;
@@ -223,7 +250,11 @@ export function CoursePlayerLayout({
           <div className="perseus-player-panel space-y-5 rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] p-8 text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
             <div className="space-y-4">
               <div className="space-y-4">
-                <LessonMedia lesson={activeLesson} />
+                <LessonMedia
+                  lesson={activeLesson}
+                  fallbackUrl={previewFallbackVideoUrl}
+                  emptyMessage={lessonVideoMissingMessage}
+                />
               </div>
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">

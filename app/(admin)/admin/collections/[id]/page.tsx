@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { MultiSelectPicker } from "@/components/admin/multi-select-picker";
 import { ImageField } from "@/components/admin/image-field";
 import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
@@ -139,17 +140,21 @@ export default async function CollectionDetailPage({
         </div>
         <form action={saveCollectionCoursesAction} className="space-y-3">
           <input type="hidden" name="collectionId" value={collection.id} />
-          <div className="grid gap-3 md:grid-cols-2">
-            {courses.map((course) => (
-              <label key={course.id} className="flex items-start gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3">
-                <input className="mt-1 w-auto" type="checkbox" name="courseIds" value={course.id} defaultChecked={selectedCourseIds.has(course.id)} />
-                <span className="space-y-1">
-                  <span className="block text-sm font-semibold text-stone-950">{course.title}</span>
-                  <span className="block text-xs uppercase tracking-[0.22em] text-stone-500">{course.slug} · {course.status}</span>
-                </span>
-              </label>
-            ))}
-          </div>
+          <MultiSelectPicker
+            name="courseIds"
+            options={courses.map((course) => ({
+              value: course.id,
+              title: course.title,
+              subtitle: `${course.slug} • ${course.status}`,
+              badge: "Course",
+            }))}
+            selectedValues={[...selectedCourseIds]}
+            headerLabel="Collection contents"
+            selectedLabel="courses selected"
+            searchPlaceholder="Search courses"
+            emptyLabel="No courses match this search."
+            actionLabels={{ selected: "Included", unselected: "Add" }}
+          />
           <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
             Save collection courses
           </button>

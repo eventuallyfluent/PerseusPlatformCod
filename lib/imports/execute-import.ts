@@ -671,6 +671,10 @@ async function processCoursePackageChunk(
     return summary;
   }
 
+  if (!summary.testimonialsApplied) {
+    await applyCoursePackageTestimonials(course.id, rows, summary);
+  }
+
   const cursor = summary.cursor ?? 0;
   const chunk = lessonEntries.slice(cursor, cursor + IMPORT_CHUNK_SIZE);
 
@@ -693,10 +697,9 @@ async function processCoursePackageChunk(
   const nextCursor = cursor + chunk.length;
   summary.cursor = nextCursor;
   summary.lessonsApplied = nextCursor >= lessonEntries.length;
-  summary.hasMore = nextCursor < lessonEntries.length || !summary.testimonialsApplied;
+  summary.hasMore = nextCursor < lessonEntries.length;
 
-  if (summary.lessonsApplied && !summary.testimonialsApplied) {
-    await applyCoursePackageTestimonials(course.id, rows, summary);
+  if (summary.lessonsApplied) {
     const refreshedCourse = await prisma.course.findUnique({
       where: { id: course.id },
       include: courseInclude,

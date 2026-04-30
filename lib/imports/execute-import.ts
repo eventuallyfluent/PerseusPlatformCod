@@ -17,6 +17,8 @@ import {
   courseStudentCsvRowSchema,
 } from "@/lib/zod/schemas";
 import { ensureEnrollment } from "@/lib/enrollments/ensure-enrollment";
+import { courseInclude } from "@/lib/courses/course-query";
+import { persistGeneratedPage } from "@/lib/sales-pages/persist-generated-page";
 
 type InstructorCsvRow = z.infer<typeof instructorCsvRowSchema>;
 type CourseCsvRow = z.infer<typeof courseCsvRowSchema>;
@@ -30,6 +32,15 @@ type ImportedTestimonial = {
   quote: string;
   rating: number;
   position: number;
+};
+type CoursePackageLessonRow = CoursePackageCsvRow & {
+  module_position: number;
+  module_title: string;
+  lesson_position: number;
+  lesson_slug: string;
+  lesson_title: string;
+  lesson_type: NonNullable<CoursePackageCsvRow["lesson_type"]>;
+  lesson_status: NonNullable<CoursePackageCsvRow["lesson_status"]>;
 };
 type ValidatedImportRow<Row> = {
   rowNumber: number;
@@ -401,6 +412,17 @@ function collectImportedTestimonials(rows: CoursePackageCsvRow[]): ImportedTesti
   return [...testimonials.values()].sort((a, b) => a.position - b.position);
 }
 
+function isCoursePackageLessonRow(row: CoursePackageCsvRow): row is CoursePackageLessonRow {
+  return Boolean(
+    row.module_position &&
+      row.module_title?.trim() &&
+      row.lesson_position &&
+      row.lesson_slug?.trim() &&
+      row.lesson_title?.trim() &&
+      row.lesson_type,
+  );
+}
+
 async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: ImportExecutionSummary) {
   if (rows.length === 0) {
     return null;
@@ -445,11 +467,14 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   summary.targetCourseId = course.id;
   summary.targetCourseSlug = course.slug;
   summary.targetCourseTitle = course.title;
-  summary.moduleCount = new Set(rows.map((row) => row.module_position)).size;
-  summary.lessonCount = rows.length;
+  const lessonRows = rows.filter(isCoursePackageLessonRow);
+  summary.moduleCount = new Set(lessonRows.map((row) => row.module_position)).size;
+  summary.lessonCount = lessonRows.length;
+  summary.heroImageUrl = payload.heroImageUrl || undefined;
+  summary.hasHeroImage = Boolean(payload.heroImageUrl);
   summary.testimonialCount = collectImportedTestimonials(rows).length;
-  summary.totalCount = rows.length;
-  summary.hasMore = rows.length > 0;
+  summary.totalCount = lessonRows.length;
+  summary.hasMore = lessonRows.length > 0;
 
   if (existingCourse) {
     summary.updatedCount += 1;
@@ -460,7 +485,7 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   return course;
 }
 
-async function applyCoursePackageLessonRow(courseId: string, row: CoursePackageCsvRow, summary: ImportExecutionSummary) {
+async function applyCoursePackageLessonRow(courseId: string, row: CoursePackageLessonRow, summary: ImportExecutionSummary) {
   const existingModule = await prisma.module.findUnique({
     where: {
       courseId_position: {
@@ -592,6 +617,7 @@ async function applyCoursePackageTestimonials(courseId: string, rows: CoursePack
         },
       });
       summary.createdTestimonialCount = (summary.createdTestimonialCount ?? 0) + 1;
+      summary.importedTestimonialCount = (summary.importedTestimonialCount ?? 0) + 1;
       continue;
     }
 
@@ -604,6 +630,7 @@ async function applyCoursePackageTestimonials(courseId: string, rows: CoursePack
       existingTestimonial.isApproved === data.isApproved;
 
     if (unchanged) {
+      summary.importedTestimonialCount = (summary.importedTestimonialCount ?? 0) + 1;
       continue;
     }
 
@@ -612,6 +639,7 @@ async function applyCoursePackageTestimonials(courseId: string, rows: CoursePack
       data,
     });
     summary.updatedTestimonialCount = (summary.updatedTestimonialCount ?? 0) + 1;
+    summary.importedTestimonialCount = (summary.importedTestimonialCount ?? 0) + 1;
   }
 
   summary.testimonialsApplied = true;
@@ -623,6 +651,7 @@ async function processCoursePackageChunk(
   failures: ImportRowError[],
 ) {
   const rows = entries.map((entry) => entry.row);
+  const lessonEntries = entries.filter((entry): entry is ValidatedImportRow<CoursePackageLessonRow> => isCoursePackageLessonRow(entry.row));
   const course = await ensureCoursePackageTarget(rows, summary);
 
   if (!course) {
@@ -633,7 +662,7 @@ async function processCoursePackageChunk(
   }
 
   const cursor = summary.cursor ?? 0;
-  const chunk = entries.slice(cursor, cursor + IMPORT_CHUNK_SIZE);
+  const chunk = lessonEntries.slice(cursor, cursor + IMPORT_CHUNK_SIZE);
 
   for (const entry of chunk) {
     try {
@@ -653,11 +682,20 @@ async function processCoursePackageChunk(
 
   const nextCursor = cursor + chunk.length;
   summary.cursor = nextCursor;
-  summary.lessonsApplied = nextCursor >= entries.length;
-  summary.hasMore = nextCursor < entries.length || !summary.testimonialsApplied;
+  summary.lessonsApplied = nextCursor >= lessonEntries.length;
+  summary.hasMore = nextCursor < lessonEntries.length || !summary.testimonialsApplied;
 
   if (summary.lessonsApplied && !summary.testimonialsApplied) {
     await applyCoursePackageTestimonials(course.id, rows, summary);
+    const refreshedCourse = await prisma.course.findUnique({
+      where: { id: course.id },
+      include: courseInclude,
+    });
+
+    if (refreshedCourse) {
+      await persistGeneratedPage(refreshedCourse, true);
+    }
+
     summary.hasMore = false;
   }
 

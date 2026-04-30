@@ -244,6 +244,34 @@ function getPackageTestimonialFields(row: PackageRow) {
   };
 }
 
+function getPackageHeroImageUrl(rows: PackageRow[]) {
+  return rows.map((row) => String(row.hero_image_url ?? "").trim()).find(Boolean);
+}
+
+function hasPackageLessonFields(row: PackageRow) {
+  return [
+    row.module_position,
+    row.module_title,
+    row.lesson_position,
+    row.lesson_slug,
+    row.lesson_title,
+    row.lesson_type,
+  ].some((value) => String(value ?? "").trim().length > 0);
+}
+
+function getMissingPackageLessonFields(row: PackageRow) {
+  const missing: string[] = [];
+
+  if (!String(row.module_position ?? "").trim()) missing.push("module_position");
+  if (!String(row.module_title ?? "").trim()) missing.push("module_title");
+  if (!String(row.lesson_position ?? "").trim()) missing.push("lesson_position");
+  if (!String(row.lesson_slug ?? "").trim()) missing.push("lesson_slug");
+  if (!String(row.lesson_title ?? "").trim()) missing.push("lesson_title");
+  if (!String(row.lesson_type ?? "").trim()) missing.push("lesson_type");
+
+  return missing;
+}
+
 async function enrichCoursePackageValidation(
   validation: ImportValidationResult<PackageRow>,
 ): Promise<ImportValidationResult<PackageRow>> {
@@ -310,8 +338,23 @@ async function enrichCoursePackageValidation(
       mismatches.push("testimonial_quote: Add the review text when providing testimonial_name or testimonial_email");
     }
 
+    const hasLessonFields = hasPackageLessonFields(entry.row);
+    const missingLessonFields = getMissingPackageLessonFields(entry.row);
+    if (hasLessonFields && missingLessonFields.length > 0) {
+      mismatches.push(...missingLessonFields.map((field) => `${field}: Required for lesson rows`));
+    }
+
+    if (!hasLessonFields && !testimonial.testimonial_quote) {
+      mismatches.push("lesson row or testimonial_quote: Add lesson fields or review text");
+    }
+
     if (mismatches.length > 0) {
       invalidRows.push(buildImportError(entry.rowNumber, entry.idempotencyKey, entry.row, mismatches));
+      continue;
+    }
+
+    if (!hasLessonFields) {
+      validRows.push(entry);
       continue;
     }
 
@@ -368,10 +411,14 @@ function buildSummary(
 
   if (type === ImportType.COURSE_PACKAGE && validation.validRows[0]) {
     const firstRow = validation.validRows[0].row as PackageRow;
+    const rows = validation.validRows.map((entry) => entry.row as PackageRow);
     summary.targetCourseSlug = String(firstRow.slug);
     summary.targetCourseTitle = String(firstRow.title);
-    summary.moduleCount = new Set(validation.validRows.map((entry) => String((entry.row as PackageRow).module_position))).size;
-    summary.lessonCount = validation.validRows.length;
+    const lessonRows = rows.filter(hasPackageLessonFields);
+    summary.moduleCount = new Set(lessonRows.map((row) => String(row.module_position))).size;
+    summary.lessonCount = lessonRows.length;
+    summary.heroImageUrl = getPackageHeroImageUrl(rows);
+    summary.hasHeroImage = Boolean(summary.heroImageUrl);
     summary.testimonialCount = new Set(
       validation.validRows
         .map((entry) => {

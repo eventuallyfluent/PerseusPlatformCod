@@ -5,6 +5,30 @@ import { Card } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
+function readCount(summary: unknown, key: string) {
+  return summary && typeof summary === "object" && key in summary ? Number((summary as Record<string, unknown>)[key] ?? 0) : 0;
+}
+
+function isStuckProcessing(batch: { status: string; executionSummary: unknown }) {
+  if (batch.status !== "PROCESSING") {
+    return false;
+  }
+
+  const hasMore = batch.executionSummary && typeof batch.executionSummary === "object"
+    ? Boolean((batch.executionSummary as Record<string, unknown>).hasMore)
+    : false;
+
+  return hasMore && readCount(batch.executionSummary, "processedCount") === 0;
+}
+
+function statusClassName(status: string, stuck: boolean) {
+  if (stuck) return "bg-amber-50 text-amber-800";
+  if (status === "COMPLETED") return "bg-emerald-50 text-emerald-700";
+  if (status === "FAILED") return "bg-rose-50 text-rose-700";
+  if (status === "PROCESSING") return "bg-blue-50 text-blue-700";
+  return "bg-stone-100 text-stone-700";
+}
+
 export default async function ImportsPage() {
   const [batches, courses] = await Promise.all([
     prisma.importBatch.findMany({
@@ -23,8 +47,6 @@ export default async function ImportsPage() {
       },
     }),
   ]);
-
-  void courses;
 
   return (
     <AdminShell title="Imports" description="Download the migration template, fill it with Payhip details, then upload it here.">
@@ -114,7 +136,7 @@ export default async function ImportsPage() {
 
           <p className="rounded-[20px] bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-700">email, name, enrolled_at</p>
 
-          <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3">
+          <form id="student-import" action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3">
             <label>
               Course
               <select name="courseId" required defaultValue="">
@@ -158,15 +180,32 @@ export default async function ImportsPage() {
             </tr>
           </thead>
           <tbody>
-            {batches.map((batch) => (
+            {batches.map((batch) => {
+              const stuck = isStuckProcessing(batch);
+              const dryRunSummary = batch.dryRunSummary as Record<string, unknown> | null;
+              const executionSummary = batch.executionSummary as Record<string, unknown> | null;
+              const target = String(executionSummary?.targetCourseTitle ?? dryRunSummary?.targetCourseTitle ?? dryRunSummary?.targetCourseSlug ?? "");
+
+              return (
               <tr key={batch.id}>
-                <td>{batch.type}</td>
-                <td>{batch.status}</td>
+                <td>
+                  <div className="space-y-1">
+                    <p>{batch.type}</p>
+                    {target ? <p className="text-xs text-stone-500">{target}</p> : null}
+                  </div>
+                </td>
+                <td>
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${statusClassName(batch.status, stuck)}`}>
+                    {stuck ? "Resume needed" : batch.status}
+                  </span>
+                </td>
                 <td>{batch.filename}</td>
                 <td>{batch.dryRunSummary ? "Ready" : "-"}</td>
                 <td>
-                  {batch.status === "PROCESSING"
-                    ? "Processing"
+                  {stuck
+                    ? "Stuck at 0 rows"
+                    : batch.status === "PROCESSING"
+                    ? `Processing ${readCount(batch.executionSummary, "processedCount")} / ${readCount(batch.executionSummary, "totalCount")}`
                     : batch.status === "COMPLETED" || batch.status === "FAILED"
                       ? "Recorded"
                       : "Pending"}
@@ -182,10 +221,13 @@ export default async function ImportsPage() {
                         Resume
                       </Link>
                     ) : null}
+                    <a href={`/api/imports/batches/${batch.id}/errors`} className="text-sm text-stone-700 underline">
+                      Errors
+                    </a>
                   </div>
                 </td>
               </tr>
-            ))}
+            )})}
           </tbody>
         </table>
       </Card>

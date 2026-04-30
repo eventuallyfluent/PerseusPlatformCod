@@ -27,6 +27,9 @@ async function main() {
         },
         orderBy: { position: "asc" },
       },
+      testimonials: {
+        orderBy: { position: "asc" },
+      },
       pages: true,
     },
   });
@@ -44,6 +47,10 @@ async function main() {
     throw new Error("Imported sales video was not stored as expected");
   }
 
+  if (!course.heroImageUrl?.includes("images.unsplash.com")) {
+    throw new Error("Imported hero image was not stored as expected");
+  }
+
   if (!lessons.some((lesson) => lesson.videoUrl?.includes("vimeo.com"))) {
     throw new Error("Imported Vimeo lesson video missing");
   }
@@ -54,6 +61,32 @@ async function main() {
 
   if (course.pages.length === 0) {
     throw new Error("Generated course page was not persisted");
+  }
+
+  const importedTestimonial = course.testimonials[0];
+  if (
+    !importedTestimonial ||
+    importedTestimonial.name !== "Ari M." ||
+    importedTestimonial.email !== "ari.student@example.com" ||
+    importedTestimonial.rating !== 5 ||
+    importedTestimonial.position !== 1 ||
+    !importedTestimonial.isApproved
+  ) {
+    throw new Error("Imported testimonial was not stored with the expected approval, rating, and position.");
+  }
+
+  const salesPage = course.pages.find((page) => page.pageType === "sales");
+  const generatedPayload = salesPage?.generatedPayload as {
+    hero?: { imageUrl?: string | null };
+    testimonialsSection?: { items?: Array<{ quote?: string; rating?: number }> };
+  } | null;
+
+  if (!generatedPayload?.hero?.imageUrl?.includes("images.unsplash.com")) {
+    throw new Error("Generated sales page payload is missing the imported hero image.");
+  }
+
+  if (!generatedPayload.testimonialsSection?.items?.some((item) => item.quote?.includes("clear and possible") && item.rating === 5)) {
+    throw new Error("Generated sales page payload is missing the imported testimonial.");
   }
 
   const studentDryRun = await dryRunImport("COURSE_STUDENTS", studentCsv, {
@@ -92,6 +125,8 @@ async function main() {
         course: course.slug,
         modules: course.modules.length,
         lessons: lessons.length,
+        testimonials: course.testimonials.length,
+        heroImageUrl: course.heroImageUrl,
         enrolledStudents: enrollments.map((enrollment) => enrollment.user.email),
       },
       null,

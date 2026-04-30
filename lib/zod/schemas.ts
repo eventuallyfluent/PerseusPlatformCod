@@ -40,9 +40,8 @@ const blankToUndefined = (value: unknown) => {
 
   return value;
 };
-const optionalCsvNumber = z.preprocess((value) => {
-  return blankToUndefined(value);
-}, z.coerce.number().optional());
+const optionalPositiveCsvInt = z.preprocess(blankToUndefined, z.coerce.number().int().min(1).optional());
+const optionalCsvRating = z.preprocess(blankToUndefined, z.coerce.number().int().min(1).max(5).optional());
 const csvMoney = z.preprocess(blankToUndefined, z.coerce.number().min(0).default(0));
 const optionalCsvMoney = z.preprocess(blankToUndefined, z.coerce.number().min(0).optional());
 const csvCurrency = z.preprocess((value) => {
@@ -74,6 +73,31 @@ const csvCourseStatus = z.preprocess((value) => (typeof value === "string" ? val
 const csvLessonStatus = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase() : value), z.nativeEnum(LessonStatus));
 const csvOfferType = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase().replace(/[\s-]+/g, "_") : value), z.nativeEnum(OfferType));
 const csvLessonType = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase().replace(/[\s-]+/g, "_") : value), z.nativeEnum(LessonType));
+const csvPackageLessonType = z.preprocess((value) => {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const normalized = value.trim().toUpperCase().replace(/[\s-]+/g, "_");
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (["LESSON", "CHALLENGE", "CONTACT", "REVIEW", "COMMUNITY"].includes(normalized)) {
+    return LessonType.TEXT;
+  }
+
+  return normalized;
+}, z.nativeEnum(LessonType).optional());
+const optionalCsvLessonStatus = z.preprocess((value) => {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const normalized = value.trim().toUpperCase();
+  return normalized || undefined;
+}, z.nativeEnum(LessonStatus).optional());
 const salesPageSectionKeySchema = z.enum([
   "description",
   "highlights",
@@ -301,21 +325,21 @@ export const coursePackageCsvRowSchema = z.object({
   testimonial_name: z.string().optional(),
   testimonial_email: z.string().email().optional().or(z.literal("")),
   testimonial_quote: z.string().optional(),
-  testimonial_rating: optionalCsvNumber.pipe(z.number().int().min(1).max(5).optional()),
-  testimonial_position: optionalCsvNumber.pipe(z.number().int().min(1).optional()),
-  module_position: z.coerce.number().int().min(1),
-  module_title: z.string().min(1),
-  lesson_position: z.coerce.number().int().min(1),
-  lesson_slug: z.string().min(1),
-  lesson_title: z.string().min(1),
-  lesson_type: csvLessonType,
+  testimonial_rating: optionalCsvRating,
+  testimonial_position: optionalPositiveCsvInt,
+  module_position: optionalPositiveCsvInt,
+  module_title: z.string().optional(),
+  lesson_position: optionalPositiveCsvInt,
+  lesson_slug: z.string().optional(),
+  lesson_title: z.string().optional(),
+  lesson_type: csvPackageLessonType,
   lesson_content: z.string().optional(),
   video_url: optionalUrl,
   download_url: optionalUrl,
   is_preview: csvBoolean.default(false),
   drip_days: z.coerce.number().int().min(0).optional(),
   duration_label: z.string().optional(),
-  lesson_status: csvLessonStatus.default(LessonStatus.DRAFT),
+  lesson_status: optionalCsvLessonStatus.default(LessonStatus.DRAFT),
 });
 
 export const courseStudentCsvRowSchema = z.object({

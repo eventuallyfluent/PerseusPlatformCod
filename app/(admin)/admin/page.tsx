@@ -19,7 +19,7 @@ export default async function AdminOverviewPage() {
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
-  const [courses, bundles, monthlySales, monthlyOrders, pendingReviews, latestProducts] = await Promise.all([
+  const [courses, bundles, monthlySales, monthlyOrders, pendingReviews, latestCourses, latestBundles] = await Promise.all([
     prisma.course.count(),
     prisma.bundle.count(),
     prisma.order.aggregate({
@@ -38,25 +38,56 @@ export default async function AdminOverviewPage() {
     prisma.testimonial.count({
       where: { isApproved: false },
     }),
-    prisma.generatedPage.findMany({
-      where: {
-        OR: [{ courseId: { not: null } }, { bundleId: { not: null } }],
-      },
-      include: {
-        course: {
-          include: {},
-        },
-        bundle: {
-          include: {},
-        },
-      },
+    prisma.course.findMany({
       orderBy: { updatedAt: "desc" },
       take: 5,
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        price: true,
+        currency: true,
+        publicPath: true,
+        legacyUrl: true,
+        slug: true,
+        updatedAt: true,
+      },
+    }),
+    prisma.bundle.findMany({
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        price: true,
+        currency: true,
+        publicPath: true,
+        legacyUrl: true,
+        slug: true,
+        updatedAt: true,
+      },
     }),
   ]);
 
   const totalProducts = courses + bundles;
   const salesThisMonth = Number(monthlySales._sum.totalAmount ?? 0);
+  const latestProducts = [
+    ...latestCourses.map((course) => ({
+      ...course,
+      type: "Course" as const,
+      editHref: `/admin/courses/${course.id}`,
+      viewHref: course.publicPath ?? course.legacyUrl ?? `/course/${course.slug}`,
+    })),
+    ...latestBundles.map((bundle) => ({
+      ...bundle,
+      type: "Bundle" as const,
+      editHref: `/admin/bundles/${bundle.id}`,
+      viewHref: bundle.publicPath ?? bundle.legacyUrl ?? `/bundle/${bundle.slug}`,
+    })),
+  ]
+    .sort((left, right) => right.updatedAt.getTime() - left.updatedAt.getTime())
+    .slice(0, 5);
 
   return (
     <AdminShell title="Admin overview" description="Sales, products, and pending reviews in one place.">
@@ -100,34 +131,31 @@ export default async function AdminOverviewPage() {
           </HardLink>
         </div>
         <div className="grid gap-3">
-          {latestProducts.map((page) => {
-            const product = page.course ?? page.bundle;
-            const type = page.course ? "Course" : "Bundle";
-            const editHref = page.course ? `/admin/courses/${page.course.id}` : `/admin/bundles/${page.bundle!.id}`;
-            const priceSummary = product ? `${product.price.toString()} ${product.currency}` : "No price";
+          {latestProducts.map((product) => {
+            const priceSummary = `${product.price.toString()} ${product.currency}`;
 
             return (
               <div
-                key={page.id}
+                key={`${product.type}-${product.id}`}
                 className="flex flex-col gap-4 rounded-[24px] border border-stone-200 bg-stone-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="rounded-full border border-stone-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-700">
-                      {type}
+                      {product.type}
                     </span>
                     <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">
-                      {product?.status ?? "DRAFT"}
+                      {product.status}
                     </span>
                   </div>
-                  <p className="text-xl font-semibold text-stone-950">{product?.title ?? "Untitled product"}</p>
+                  <p className="text-xl font-semibold text-stone-950">{product.title}</p>
                   <p className="text-sm text-stone-600">{priceSummary}</p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <HardLink href={page.path} className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100">
+                  <HardLink href={product.viewHref} className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100">
                     View page
                   </HardLink>
-                  <HardLink href={editHref} className="rounded-full bg-stone-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-stone-800">
+                  <HardLink href={product.editHref} className="rounded-full bg-stone-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-stone-800">
                     Manage
                   </HardLink>
                 </div>

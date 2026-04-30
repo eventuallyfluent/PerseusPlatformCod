@@ -1,83 +1,79 @@
-import { PrismaClient } from "@prisma/client";
+import { CourseStatus, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const [instructor, course, offer, bundle, bundleOffer] = await Promise.all([
-    prisma.instructor.findUnique({
-      where: { slug: "peter-example" },
-      select: { id: true, slug: true, name: true },
-    }),
-    prisma.course.findUnique({
-      where: { slug: "meta-magick-tarot" },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        publicPath: true,
-        instructorId: true,
+  const [publishedCourses, activeGateway] = await Promise.all([
+    prisma.course.findMany({
+      where: { status: CourseStatus.PUBLISHED },
+      include: {
+        offers: true,
+        pages: true,
+        accessProduct: true,
+        modules: {
+          include: { lessons: true },
+        },
       },
+      orderBy: { title: "asc" },
     }),
-    prisma.offer.findFirst({
-      where: { name: "Lifetime Access" },
+    prisma.gateway.findFirst({
+      where: { isActive: true },
       select: {
-        id: true,
-        courseId: true,
-        currency: true,
-        price: true,
-      },
-    }),
-    prisma.bundle.findUnique({
-      where: { slug: "ritual-library-bundle" },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        publicPath: true,
-      },
-    }),
-    prisma.offer.findFirst({
-      where: { name: "Bundle Access" },
-      select: {
-        id: true,
-        bundleId: true,
-        currency: true,
-        price: true,
+        provider: true,
+        displayName: true,
+        kind: true,
+        checkoutModel: true,
       },
     }),
   ]);
 
-  if (!instructor || !course || !offer || !bundle || !bundleOffer) {
-    throw new Error("Milestone 1 sanity check failed: expected seed records were not found.");
+  if (publishedCourses.length === 0) {
+    throw new Error("Catalog sanity check failed: no published courses were found.");
   }
 
-  if (course.instructorId !== instructor.id) {
-    throw new Error("Milestone 1 sanity check failed: seeded course is not linked to the seeded instructor.");
+  const brokenCourses = publishedCourses
+    .map((course) => {
+      const issues: string[] = [];
+      const lessonCount = course.modules.reduce((count, module) => count + module.lessons.length, 0);
+
+      if (!course.publicPath) issues.push("missing public path");
+      if (course.offers.filter((offer) => offer.isPublished).length === 0) issues.push("missing published offer");
+      if (!course.accessProduct) issues.push("missing access product");
+      if (!course.pages.some((page) => page.pageType === "sales")) issues.push("missing generated sales page");
+      if (!course.pages.some((page) => page.pageType === "thank-you")) issues.push("missing generated thank-you page");
+      if (lessonCount === 0) issues.push("missing lessons");
+
+      return issues.length > 0
+        ? {
+            slug: course.slug,
+            title: course.title,
+            issues,
+          }
+        : null;
+    })
+    .filter(Boolean);
+
+  if (brokenCourses.length > 0) {
+    throw new Error(`Catalog sanity check failed: ${JSON.stringify(brokenCourses, null, 2)}`);
   }
 
-  if (offer.courseId !== course.id) {
-    throw new Error("Milestone 1 sanity check failed: seeded offer is not linked to the seeded course.");
-  }
-
-  if (bundleOffer.bundleId !== bundle.id) {
-    throw new Error("Bundle sanity check failed: seeded bundle offer is not linked to the seeded bundle.");
+  if (!activeGateway) {
+    throw new Error("Catalog sanity check failed: no active gateway is configured.");
   }
 
   console.log(
     JSON.stringify(
       {
         ok: true,
-        instructor,
-        course,
-        offer: {
-          ...offer,
-          price: offer.price.toString(),
-        },
-        bundle,
-        bundleOffer: {
-          ...bundleOffer,
-          price: bundleOffer.price.toString(),
-        },
+        publishedCourses: publishedCourses.length,
+        activeGateway,
+        checkedCourses: publishedCourses.map((course) => ({
+          slug: course.slug,
+          publicPath: course.publicPath,
+          publishedOffers: course.offers.filter((offer) => offer.isPublished).length,
+          generatedPages: course.pages.length,
+          lessons: course.modules.reduce((count, module) => count + module.lessons.length, 0),
+        })),
       },
       null,
       2,

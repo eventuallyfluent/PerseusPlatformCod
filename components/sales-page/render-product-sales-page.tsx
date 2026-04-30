@@ -101,29 +101,29 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
           <SectionIntro eyebrow={payload.curriculumSection.eyebrow} title={payload.curriculumSection.title} body={payload.curriculumSection.body} />
           <div className="grid gap-5">
             {payload.curriculumSection.modules.map((module, index) => (
-              <div key={module.moduleTitle} className={`overflow-hidden ${sectionPanelStrongClass}`}>
-                <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border)] px-6 py-4">
+              <details key={module.moduleTitle} className={`group overflow-hidden ${sectionPanelStrongClass}`} open={index === 0}>
+                <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-4 border-b border-[var(--border)] px-6 py-4 marker:content-none">
                   <div className="space-y-3">
                     <Badge variant="portal">Module {index + 1}</Badge>
                     <h3 className="text-3xl leading-none tracking-[-0.03em]">{module.moduleTitle}</h3>
                   </div>
-                  <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>
-                    {module.lessonCount} lesson{module.lessonCount === 1 ? "" : "s"}
-                  </p>
-                </div>
+                  <div className="flex items-center gap-4">
+                    <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>
+                      {module.lessonCount} lesson{module.lessonCount === 1 ? "" : "s"}
+                    </p>
+                    <span className={`text-sm font-semibold text-[var(--accent)] group-open:hidden`}>Open</span>
+                    <span className={`hidden text-sm font-semibold text-[var(--accent)] group-open:inline`}>Close</span>
+                  </div>
+                </summary>
                 <ol className="grid">
                   {module.lessons.map((lesson) => (
                     <li
                       key={`${module.moduleTitle}-${lesson.title}`}
-                      className="grid gap-3 border-t border-[var(--border)] px-6 py-4 first:border-t-0 lg:grid-cols-[88px_1fr_auto]"
+                      className="grid gap-3 border-t border-[var(--border)] px-6 py-4 first:border-t-0 lg:grid-cols-[1fr_auto]"
                     >
-                      <div className={`pt-1 text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>
-                        {lesson.type.replace(/_/g, " ")}
-                      </div>
                       <div className="space-y-2">
                         <p className="text-base font-medium text-[var(--text-primary)]">{lesson.title}</p>
                         <div className="flex flex-wrap gap-2">
-                          <Badge variant="portal">{lesson.type.replace(/_/g, " ")}</Badge>
                           {lesson.durationLabel ? <Badge variant="muted">{lesson.durationLabel}</Badge> : null}
                           {lesson.dripDays ? <Badge variant="accent">Day {lesson.dripDays}</Badge> : null}
                         </div>
@@ -139,7 +139,7 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                     </li>
                   ))}
                 </ol>
-              </div>
+              </details>
             ))}
           </div>
         </section>

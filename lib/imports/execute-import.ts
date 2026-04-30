@@ -1,4 +1,4 @@
-import { ImportStatus, ImportType } from "@prisma/client";
+import { ImportStatus, ImportType, LessonType } from "@prisma/client";
 import type { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
 import { splitPipeList } from "@/lib/utils";
@@ -39,7 +39,6 @@ type CoursePackageLessonRow = CoursePackageCsvRow & {
   lesson_position: number;
   lesson_slug: string;
   lesson_title: string;
-  lesson_type: NonNullable<CoursePackageCsvRow["lesson_type"]>;
   lesson_status: NonNullable<CoursePackageCsvRow["lesson_status"]>;
 };
 type ValidatedImportRow<Row> = {
@@ -418,9 +417,20 @@ function isCoursePackageLessonRow(row: CoursePackageCsvRow): row is CoursePackag
       row.module_title?.trim() &&
       row.lesson_position &&
       row.lesson_slug?.trim() &&
-      row.lesson_title?.trim() &&
-      row.lesson_type,
+      row.lesson_title?.trim(),
   );
+}
+
+function resolveCoursePackageLessonType(row: CoursePackageLessonRow) {
+  if (row.lesson_type) {
+    return row.lesson_type;
+  }
+
+  if (row.download_url && !row.video_url) {
+    return LessonType.DOWNLOAD;
+  }
+
+  return LessonType.VIDEO;
 }
 
 async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: ImportExecutionSummary) {
@@ -536,7 +546,7 @@ async function applyCoursePackageLessonRow(courseId: string, row: CoursePackageL
     title: row.lesson_title,
     position: row.lesson_position,
     status: row.lesson_status,
-    type: row.lesson_type,
+    type: resolveCoursePackageLessonType(row),
     content: row.lesson_content || null,
     videoUrl: row.video_url || null,
     downloadUrl: row.download_url || null,

@@ -85,7 +85,7 @@ const csvPackageLessonType = z.preprocess((value) => {
   }
 
   if (["LESSON", "CHALLENGE", "CONTACT", "REVIEW", "COMMUNITY"].includes(normalized)) {
-    return LessonType.TEXT;
+    return LessonType.VIDEO;
   }
 
   return normalized;

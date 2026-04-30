@@ -255,7 +255,6 @@ function hasPackageLessonFields(row: PackageRow) {
     row.lesson_position,
     row.lesson_slug,
     row.lesson_title,
-    row.lesson_type,
   ].some((value) => String(value ?? "").trim().length > 0);
 }
 
@@ -267,7 +266,6 @@ function getMissingPackageLessonFields(row: PackageRow) {
   if (!String(row.lesson_position ?? "").trim()) missing.push("lesson_position");
   if (!String(row.lesson_slug ?? "").trim()) missing.push("lesson_slug");
   if (!String(row.lesson_title ?? "").trim()) missing.push("lesson_title");
-  if (!String(row.lesson_type ?? "").trim()) missing.push("lesson_type");
 
   return missing;
 }

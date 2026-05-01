@@ -60,7 +60,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
     version: "v2",
     productType: "course",
     hero: {
-      eyebrow: "Perseus course",
+      eyebrow: course.instructor.name,
       metadataLine: config.heroMetadataLine ?? `${course.instructor.name} • ${lessonCount} lessons`,
       title: course.title,
       subtitle: course.subtitle,

@@ -8,6 +8,7 @@ type CourseCardProps = {
     priceLabel?: string | null;
     statusLabel?: string | null;
     ctaLabel?: string | null;
+    instructorName?: string | null;
   };
 };
 
@@ -36,7 +37,7 @@ export function CourseCard({ course }: CourseCardProps) {
             <Badge variant="premium">{course.priceLabel?.toLowerCase() === "free" ? "Free" : "Premium"}</Badge>
           </div>
           <div className="perseus-course-card-copy mt-5 space-y-3">
-            <p className="text-sm text-[var(--text-secondary)]">Perseus course</p>
+            {course.instructorName ? <p className="text-sm text-[var(--text-secondary)]">{course.instructorName}</p> : null}
             <h3
               className="max-w-sm min-h-[7.5rem] text-4xl leading-none tracking-[-0.04em] text-[var(--text-primary)]"
               style={{

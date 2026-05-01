@@ -335,6 +335,7 @@ export default async function CoursesIndexPage({
                 course={{
                   ...course,
                   priceLabel: formatPriceLabel(course.price.toString(), course.currency),
+                  instructorName: course.instructor.name,
                 }}
               />
               <div className="flex flex-wrap gap-2 px-1">

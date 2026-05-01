@@ -142,7 +142,7 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
           </div>
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {instructor.courses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+              <CourseCard key={course.id} course={{ ...course, instructorName: instructor.name }} />
             ))}
           </div>
         </section>

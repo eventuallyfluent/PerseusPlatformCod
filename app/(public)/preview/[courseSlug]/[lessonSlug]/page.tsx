@@ -30,7 +30,7 @@ export default async function PublicPreviewLessonPage({
 
   return (
     <div className="min-h-screen bg-[var(--shell-background-public)]">
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mx-auto max-w-[1800px] px-6 py-10">
         <CoursePlayerLayout
           course={course}
           activeLessonSlug={lessonSlug}

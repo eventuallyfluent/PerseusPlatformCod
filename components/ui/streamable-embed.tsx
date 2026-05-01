@@ -57,7 +57,7 @@ export function StreamableEmbed({ url, title, focus = false }: StreamableEmbedPr
   };
 
   return (
-    <div ref={wrapperRef} className={`${focus ? "h-full" : "max-h-[52svh]"} group relative overflow-hidden rounded-[24px] border border-stone-200 bg-black`}>
+    <div ref={wrapperRef} className={`${focus ? "h-full" : ""} group relative overflow-hidden rounded-[24px] border border-stone-200 bg-black`}>
       <iframe
         src={embedUrl}
         title={title}

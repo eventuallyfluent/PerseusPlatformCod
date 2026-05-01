@@ -144,7 +144,15 @@ export function CoursePlayerLayout({
 }: CoursePlayerLayoutProps) {
   const [focusModeActive, setFocusModeActive] = useState(false);
 
-  const lessons = course.modules.flatMap((module) =>
+  const sortedModules = course.modules
+    .slice()
+    .sort((left, right) => left.position - right.position)
+    .map((module) => ({
+      ...module,
+      lessons: module.lessons.slice().sort((left, right) => left.position - right.position),
+    }));
+
+  const lessons = sortedModules.flatMap((module) =>
     module.lessons.map((lesson) => ({
       ...lesson,
       moduleTitle: module.title,
@@ -175,10 +183,10 @@ export function CoursePlayerLayout({
   }
   return (
     <>
-      <div className="perseus-player-shell grid gap-6 pb-4 lg:grid-cols-[340px_minmax(0,1fr)]">
+      <div className="perseus-player-shell grid gap-6 pb-4 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)]">
         <aside className="perseus-player-sidebar space-y-4 lg:flex lg:h-[calc(100svh-6.25rem)] lg:flex-col lg:overflow-hidden">
           <div className="space-y-5 rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:flex-1 lg:overflow-y-auto">
-            {course.modules.map((module, moduleIndex) => (
+            {sortedModules.map((module, moduleIndex) => (
               <div key={module.id} className="space-y-3">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.34em] text-[var(--portal-muted)]">Module {moduleIndex + 1}</p>
@@ -251,7 +259,7 @@ export function CoursePlayerLayout({
         </aside>
 
         <div className="perseus-player-main space-y-6 lg:h-[calc(100svh-6.25rem)]">
-          <div className="perseus-player-panel space-y-5 rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] p-8 text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+          <div className="perseus-player-panel space-y-5 rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] p-5 text-[var(--text-primary)] shadow-[var(--shadow-panel)] sm:p-6">
             <div className="space-y-4">
               <div className="space-y-4">
                 <LessonMedia

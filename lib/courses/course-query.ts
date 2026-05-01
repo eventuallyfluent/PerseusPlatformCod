@@ -38,7 +38,11 @@ export const courseInclude = {
   },
   modules: {
     include: {
-      lessons: true,
+      lessons: {
+        orderBy: {
+          position: "asc" as const,
+        },
+      },
     },
     orderBy: {
       position: "asc" as const,

@@ -75,10 +75,14 @@ function LessonMedia({
 function FocusModeOverlay({
   courseTitle,
   activeLesson,
+  fallbackUrl,
+  emptyMessage,
   onClose,
 }: {
   courseTitle: string;
   activeLesson: LessonRecord;
+  fallbackUrl?: string | null;
+  emptyMessage?: string | null;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -118,7 +122,7 @@ function FocusModeOverlay({
         <div className="min-h-0 flex-1 overflow-hidden rounded-[32px] border border-[var(--focus-overlay-panel-border)] bg-[var(--focus-overlay-panel-background)] p-5">
           <div className="flex h-full min-h-0 flex-col">
             <div className="min-h-0 flex-1">
-              <LessonMedia lesson={activeLesson} focus />
+              <LessonMedia lesson={activeLesson} focus fallbackUrl={fallbackUrl} emptyMessage={emptyMessage} />
             </div>
             {activeLesson.content ? (
               <div className="mt-5 max-w-4xl overflow-y-auto pr-2 text-base leading-8 text-[var(--focus-overlay-muted)]">{activeLesson.content}</div>
@@ -267,7 +271,7 @@ export function CoursePlayerLayout({
                     {!publicPreview && activeLesson.isCompleted ? <span className="text-[var(--premium)]">Completed</span> : null}
                   </div>
                 </div>
-                {!publicPreview ? <FocusModeButton active={focusModeActive} onToggle={() => setFocusModeActive((value) => !value)} /> : null}
+                <FocusModeButton active={focusModeActive} onToggle={() => setFocusModeActive((value) => !value)} />
               </div>
             </div>
             <div className="space-y-6">
@@ -296,7 +300,15 @@ export function CoursePlayerLayout({
         </div>
       </div>
 
-      {focusModeActive ? <FocusModeOverlay courseTitle={course.title} activeLesson={activeLesson} onClose={() => setFocusModeActive(false)} /> : null}
+      {focusModeActive ? (
+        <FocusModeOverlay
+          courseTitle={course.title}
+          activeLesson={activeLesson}
+          fallbackUrl={previewFallbackVideoUrl}
+          emptyMessage={lessonVideoMissingMessage}
+          onClose={() => setFocusModeActive(false)}
+        />
+      ) : null}
     </>
   );
 }

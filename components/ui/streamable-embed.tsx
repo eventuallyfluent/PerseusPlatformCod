@@ -1,3 +1,7 @@
+"use client";
+
+import { useRef } from "react";
+
 type StreamableEmbedProps = {
   url: string;
   title: string;
@@ -37,6 +41,7 @@ function resolveEmbedUrl(url: string) {
 }
 
 export function StreamableEmbed({ url, title, focus = false }: StreamableEmbedProps) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const embedUrl = resolveEmbedUrl(url);
 
   if (!embedUrl) {
@@ -47,8 +52,12 @@ export function StreamableEmbed({ url, title, focus = false }: StreamableEmbedPr
     );
   }
 
+  const enterFullscreen = () => {
+    void wrapperRef.current?.requestFullscreen?.();
+  };
+
   return (
-    <div className={`${focus ? "h-full" : "max-h-[52svh]"} overflow-hidden rounded-[24px] border border-stone-200 bg-black`}>
+    <div ref={wrapperRef} className={`${focus ? "h-full" : "max-h-[52svh]"} group relative overflow-hidden rounded-[24px] border border-stone-200 bg-black`}>
       <iframe
         src={embedUrl}
         title={title}
@@ -56,6 +65,13 @@ export function StreamableEmbed({ url, title, focus = false }: StreamableEmbedPr
         allowFullScreen
         className={`${focus ? "h-full min-h-[72svh]" : "aspect-video"} w-full`}
       />
+      <button
+        type="button"
+        className="absolute right-3 top-3 rounded-full border border-white/20 bg-black/70 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white opacity-0 shadow-lg transition hover:bg-black/90 group-hover:opacity-100 focus:opacity-100"
+        onClick={enterFullscreen}
+      >
+        Fullscreen
+      </button>
     </div>
   );
 }

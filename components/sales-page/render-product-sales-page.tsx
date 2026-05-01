@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ShieldCheck, ThumbsUp } from "lucide-react";
 import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -13,6 +14,10 @@ const sectionPanelStrongClass =
   "perseus-sales-panel-strong rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
 const panelMutedTextClass = "text-[var(--text-secondary)]";
 const panelSubtleTextClass = "text-[var(--text-muted)]";
+
+function cssUrl(url: string) {
+  return `url("${url.replace(/"/g, "%22")}")`;
+}
 
 function RatingStars({ rating }: { rating: number }) {
   return (
@@ -133,9 +138,11 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                           </Link>
                         ) : null}
                       </div>
-                      <div className="flex items-start justify-start lg:justify-end">
-                        <Badge variant={lesson.isPreview ? "premium" : "portal"}>{lesson.isPreview ? "Preview" : "Included"}</Badge>
-                      </div>
+                      {lesson.isPreview ? (
+                        <div className="flex items-start justify-start lg:justify-end">
+                          <Badge variant="premium">Free preview</Badge>
+                        </div>
+                      ) : null}
                     </li>
                   ))}
                 </ol>
@@ -161,7 +168,7 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                   style={
                     course.imageUrl
                       ? {
-                          backgroundImage: `linear-gradient(180deg, rgba(12,9,24,0.16), rgba(12,9,24,0.38)), url(${course.imageUrl})`,
+                          backgroundImage: `linear-gradient(180deg, rgba(12,9,24,0.16), rgba(12,9,24,0.38)), ${cssUrl(course.imageUrl)}`,
                         }
                       : undefined
                   }
@@ -188,7 +195,7 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
               {payload.instructorSection.imageUrl ? (
                 <div
                   className="h-80 rounded-[28px] bg-cover bg-center"
-                  style={{ backgroundImage: `linear-gradient(180deg, rgba(22,12,45,0.08), rgba(22,12,45,0.24)), url(${payload.instructorSection.imageUrl})` }}
+                  style={{ backgroundImage: `linear-gradient(180deg, rgba(22,12,45,0.08), rgba(22,12,45,0.24)), ${cssUrl(payload.instructorSection.imageUrl)}` }}
                 />
               ) : <div className="h-80 rounded-[28px] bg-[linear-gradient(135deg,#1b0c34,#2e175f)]" />}
             </div>
@@ -227,10 +234,20 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                 <div className="space-y-3 lg:border-r lg:border-[var(--border)] lg:pr-6">
                   {testimonial.name ? <footer className="text-base font-semibold text-[var(--text-primary)]">{testimonial.name}</footer> : null}
                   {testimonial.source ? <p className={`text-sm ${panelSubtleTextClass}`}>{testimonial.source}</p> : null}
+                  <div className="space-y-2 pt-2 text-sm font-medium text-[var(--text-primary)]">
+                    <p className="flex items-center gap-2">
+                      <ShieldCheck className="size-4" aria-hidden="true" />
+                      Verified Buyer
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <ThumbsUp className="size-4" aria-hidden="true" />
+                      I recommend this product
+                    </p>
+                  </div>
                 </div>
                 <div className="space-y-4">
                   <RatingStars rating={testimonial.rating} />
-                  <p className={`text-lg leading-8 ${panelMutedTextClass}`}>&ldquo;{testimonial.quote}&rdquo;</p>
+                  <p className={`whitespace-pre-wrap text-lg leading-8 ${panelMutedTextClass}`}>&ldquo;{testimonial.quote}&rdquo;</p>
                 </div>
               </blockquote>
             ))}
@@ -310,7 +327,7 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
             className="absolute inset-0 opacity-90"
             style={{
               backgroundImage: payload.hero.imageUrl
-                ? `radial-gradient(circle_at_20%_18%,rgba(168,102,255,0.24),transparent 24%),radial-gradient(circle_at_78%_24%,rgba(212,168,70,0.14),transparent 20%),var(--hero-media-overlay), url(${payload.hero.imageUrl})`
+                ? `radial-gradient(circle_at_20%_18%,rgba(168,102,255,0.24),transparent 24%),radial-gradient(circle_at_78%_24%,rgba(212,168,70,0.14),transparent 20%),var(--hero-media-overlay), ${cssUrl(payload.hero.imageUrl)}`
                 : "radial-gradient(circle_at_20%_18%,rgba(168,102,255,0.24),transparent 24%),radial-gradient(circle_at_78%_24%,rgba(212,168,70,0.14),transparent 20%),var(--hero-fallback-background)",
               backgroundSize: "cover",
               backgroundPosition: "center",

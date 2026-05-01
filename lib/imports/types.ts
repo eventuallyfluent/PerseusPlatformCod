@@ -41,6 +41,7 @@ export type ImportExecutionSummary = {
   hasMore?: boolean;
   lessonsApplied?: boolean;
   testimonialsApplied?: boolean;
+  courseMetadataApplied?: boolean;
   targetCourseId?: string;
   targetCourseSlug?: string;
   targetCourseTitle?: string;

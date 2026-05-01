@@ -438,13 +438,6 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
     return null;
   }
 
-  if (summary.targetCourseId) {
-    return prisma.course.findUnique({
-      where: { id: summary.targetCourseId },
-      select: { id: true, slug: true, title: true },
-    });
-  }
-
   const firstRow = rows[0];
   const instructor = await ensureInstructorForImport(firstRow.instructor_slug, firstRow.instructor_name);
 
@@ -471,7 +464,7 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
     legacyUrl: firstRow.legacy_url,
   };
 
-  const existingCourse = await resolveExistingCourse(firstRow);
+  const existingCourse = summary.targetCourseId ? { id: summary.targetCourseId } : await resolveExistingCourse(firstRow);
   const course = existingCourse ? await updateCourse(existingCourse.id, payload) : await createCourse(payload);
 
   summary.targetCourseId = course.id;
@@ -486,11 +479,12 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   summary.totalCount = lessonRows.length;
   summary.hasMore = lessonRows.length > 0;
 
-  if (existingCourse) {
+  if (!summary.courseMetadataApplied && existingCourse) {
     summary.updatedCount += 1;
-  } else {
+  } else if (!summary.courseMetadataApplied) {
     summary.createdCount += 1;
   }
+  summary.courseMetadataApplied = true;
 
   return course;
 }

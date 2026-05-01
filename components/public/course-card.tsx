@@ -32,9 +32,8 @@ export function CourseCard({ course }: CourseCardProps) {
           }}
         />
         <div className="perseus-course-card-body flex flex-1 flex-col p-7">
-          <div className="perseus-course-card-badges flex items-center justify-between gap-4">
+          <div className="perseus-course-card-badges flex items-center gap-4">
             <Badge variant="portal">{course.statusLabel ?? "Featured"}</Badge>
-            <Badge variant="premium">{course.priceLabel?.toLowerCase() === "free" ? "Free" : "Premium"}</Badge>
           </div>
           <div className="perseus-course-card-copy mt-5 space-y-3">
             {course.instructorName ? <p className="text-sm text-[var(--text-secondary)]">{course.instructorName}</p> : null}

@@ -73,7 +73,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 courseId: resolved.course.id,
                 email: session.user.email,
               },
-              select: { quote: true, isApproved: true, rating: true },
+              select: { quote: true, isApproved: true, rating: true, recommendsProduct: true },
             })
           : null;
       return (
@@ -114,7 +114,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             courseId: course.id,
             email: session.user.email,
           },
-          select: { quote: true, isApproved: true, rating: true },
+          select: { quote: true, isApproved: true, rating: true, recommendsProduct: true },
         })
       : null;
 

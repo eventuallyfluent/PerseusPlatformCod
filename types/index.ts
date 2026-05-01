@@ -201,6 +201,7 @@ type SalesPageBasePayload = {
       name?: string | null;
       quote: string;
       rating: number;
+      recommendsProduct: boolean;
       source?: string | null;
     }[];
   };

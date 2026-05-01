@@ -901,6 +901,7 @@ export async function saveTestimonialAction(formData: FormData) {
     rating: Number.isInteger(rating) && rating >= 1 && rating <= 5 ? rating : 5,
     position: Number(formData.get("position") ?? 1),
     isApproved: Boolean(formData.get("isApproved")),
+    recommendsProduct: formData.has("recommendsProduct") ? Boolean(formData.get("recommendsProduct")) : true,
   };
 
   try {

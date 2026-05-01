@@ -611,6 +611,7 @@ async function applyCoursePackageTestimonials(courseId: string, rows: CoursePack
       rating: testimonial.rating,
       position: testimonial.position,
       isApproved: true,
+      recommendsProduct: true,
     };
 
     if (!existingTestimonial) {
@@ -631,7 +632,8 @@ async function applyCoursePackageTestimonials(courseId: string, rows: CoursePack
       existingTestimonial.quote === data.quote &&
       existingTestimonial.rating === data.rating &&
       existingTestimonial.position === data.position &&
-      existingTestimonial.isApproved === data.isApproved;
+      existingTestimonial.isApproved === data.isApproved &&
+      existingTestimonial.recommendsProduct === data.recommendsProduct;
 
     if (unchanged) {
       summary.importedTestimonialCount = (summary.importedTestimonialCount ?? 0) + 1;

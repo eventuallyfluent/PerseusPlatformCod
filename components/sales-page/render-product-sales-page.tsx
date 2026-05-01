@@ -239,10 +239,12 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
                       <ShieldCheck className="size-4" aria-hidden="true" />
                       Verified Buyer
                     </p>
-                    <p className="flex items-center gap-2">
-                      <ThumbsUp className="size-4" aria-hidden="true" />
-                      I recommend this product
-                    </p>
+                    {testimonial.recommendsProduct ? (
+                      <p className="flex items-center gap-2">
+                        <ThumbsUp className="size-4" aria-hidden="true" />
+                        I recommend this product
+                      </p>
+                    ) : null}
                   </div>
                 </div>
                 <div className="space-y-4">

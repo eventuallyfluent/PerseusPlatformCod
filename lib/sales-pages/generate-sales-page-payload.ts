@@ -138,6 +138,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
         name: getPublicReviewName(testimonial.name),
         quote: testimonial.quote,
         rating: testimonial.rating,
+        recommendsProduct: testimonial.recommendsProduct,
         source: course.title,
       })),
     },

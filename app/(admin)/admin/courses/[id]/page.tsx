@@ -548,6 +548,7 @@ export default async function CourseDetailPage({
               <label>Rating<input name="rating" type="number" min="1" max="5" defaultValue={5} /></label>
               <label>Position<input name="position" type="number" min="1" defaultValue={course.testimonials.length + 1} /></label>
               <label className="flex items-center gap-2"><input className="w-auto" name="isApproved" type="checkbox" value="true" defaultChecked />Approved</label>
+              <label className="flex items-center gap-2"><input className="w-auto" name="recommendsProduct" type="checkbox" value="true" defaultChecked />Recommends product</label>
               <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Add testimonial</button>
             </form>
             {course.testimonials.map((testimonial) => (
@@ -565,6 +566,7 @@ export default async function CourseDetailPage({
                 <label>Rating<input name="rating" type="number" min="1" max="5" defaultValue={testimonial.rating} /></label>
                 <label>Position<input name="position" type="number" min="1" defaultValue={testimonial.position} /></label>
                 <label className="flex items-center gap-2"><input className="w-auto" name="isApproved" type="checkbox" value="true" defaultChecked={testimonial.isApproved} />Approved</label>
+                <label className="flex items-center gap-2"><input className="w-auto" name="recommendsProduct" type="checkbox" value="true" defaultChecked={testimonial.recommendsProduct} />Recommends product</label>
                 <div className="flex flex-wrap gap-3">
                   <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save testimonial</button>
                   <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteTestimonialAction} name="testimonialId" value={testimonial.id}>Delete testimonial</button>

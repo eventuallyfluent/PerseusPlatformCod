@@ -106,6 +106,7 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
         name: getPublicReviewName(testimonial.name),
         quote: testimonial.quote,
         rating: testimonial.rating,
+        recommendsProduct: testimonial.recommendsProduct,
         source: bundle.title,
       })),
     },

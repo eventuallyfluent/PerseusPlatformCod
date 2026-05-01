@@ -428,6 +428,7 @@ model Testimonial {
   rating   Int     @default(5)
   position Int
   isApproved Boolean @default(false)
+  recommendsProduct Boolean @default(true)
   course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
   bundle   Bundle? @relation(fields: [bundleId], references: [id], onDelete: Cascade)
 }

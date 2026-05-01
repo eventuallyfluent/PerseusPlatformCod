@@ -28,7 +28,7 @@ export function CourseSalesPage({
   canLeaveReview: boolean;
   isLoggedIn: boolean;
   reviewLoginHref: string;
-  existingReview?: { quote: string; isApproved: boolean; rating: number } | null;
+  existingReview?: { quote: string; isApproved: boolean; rating: number; recommendsProduct: boolean } | null;
 }) {
   const courseJsonLd = buildCourseStructuredData(course, payload);
   const productJsonLd = buildProductStructuredData(course, payload);
@@ -97,6 +97,16 @@ export function CourseSalesPage({
               defaultValue={existingReview?.quote ?? ""}
               className="w-full rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm leading-7 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
             />
+          </label>
+          <label className="flex items-center gap-3 rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm font-medium text-[var(--text-primary)]">
+            <input
+              className="size-4"
+              type="checkbox"
+              name="recommendsProduct"
+              value="true"
+              defaultChecked={existingReview?.recommendsProduct ?? true}
+            />
+            I recommend this product
           </label>
           <p className="text-sm leading-7 text-[var(--text-secondary)]">
             {existingReview ? `Your current review is ${existingReview.isApproved ? "approved" : "pending approval"}.` : "Your review will appear after approval."}

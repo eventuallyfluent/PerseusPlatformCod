@@ -70,22 +70,23 @@ async function main() {
     importedTestimonial.email !== "ari.student@example.com" ||
     importedTestimonial.rating !== 5 ||
     importedTestimonial.position !== 1 ||
-    !importedTestimonial.isApproved
+    !importedTestimonial.isApproved ||
+    !importedTestimonial.recommendsProduct
   ) {
-    throw new Error("Imported testimonial was not stored with the expected approval, rating, and position.");
+    throw new Error("Imported testimonial was not stored with the expected approval, rating, recommendation, and position.");
   }
 
   const salesPage = course.pages.find((page) => page.pageType === "sales");
   const generatedPayload = salesPage?.generatedPayload as {
     hero?: { imageUrl?: string | null };
-    testimonialsSection?: { items?: Array<{ quote?: string; rating?: number }> };
+    testimonialsSection?: { items?: Array<{ quote?: string; rating?: number; recommendsProduct?: boolean }> };
   } | null;
 
   if (!generatedPayload?.hero?.imageUrl?.includes("images.unsplash.com")) {
     throw new Error("Generated sales page payload is missing the imported hero image.");
   }
 
-  if (!generatedPayload.testimonialsSection?.items?.some((item) => item.quote?.includes("clear and possible") && item.rating === 5)) {
+  if (!generatedPayload.testimonialsSection?.items?.some((item) => item.quote?.includes("clear and possible") && item.rating === 5 && item.recommendsProduct)) {
     throw new Error("Generated sales page payload is missing the imported testimonial.");
   }
 

@@ -10,15 +10,78 @@ type CourseCardProps = {
     ctaLabel?: string | null;
     instructorName?: string | null;
   };
+  variant?: "default" | "catalog";
 };
 
-export function CourseCard({ course }: CourseCardProps) {
+export function CourseCard({ course, variant = "default" }: CourseCardProps) {
   const cardTone =
     course.priceLabel?.toLowerCase() === "free"
       ? "linear-gradient(135deg, #0c5f45, #158f6b)"
       : course.statusLabel?.toLowerCase() === "featured"
         ? "linear-gradient(135deg, #34105f, #5e2da1)"
         : "linear-gradient(135deg, #17396f, #2758a5)";
+  const isCatalog = variant === "catalog";
+
+  if (isCatalog) {
+    return (
+      <HardLink href={resolveCoursePublicPath(course)} className="group block h-full">
+        <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-panel)]">
+          <div
+            className="perseus-course-card-media h-36 bg-cover bg-center transition duration-500 group-hover:scale-[1.02] sm:h-40"
+            style={{
+              backgroundImage: course.heroImageUrl
+                ? `linear-gradient(180deg, rgba(15, 16, 32, 0.12), rgba(15, 16, 32, 0.56)), url(${course.heroImageUrl})`
+                : cardTone,
+            }}
+          />
+          <div className="perseus-course-card-body flex flex-1 flex-col p-5">
+            <div className="flex items-center justify-between gap-3">
+              {course.instructorName ? (
+                <p className="truncate text-sm font-medium text-[var(--text-secondary)]">{course.instructorName}</p>
+              ) : (
+                <p className="text-sm font-medium text-[var(--text-secondary)]">Perseus</p>
+              )}
+              <Badge variant={course.priceLabel?.toLowerCase() === "free" ? "success" : "portal"} className="shrink-0">
+                {course.priceLabel?.toLowerCase() === "free" ? "Free" : (course.statusLabel ?? "Course")}
+              </Badge>
+            </div>
+            <div className="mt-4 space-y-2">
+              <h3
+                className="text-lg font-semibold leading-snug text-[var(--text-primary)]"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                {course.title}
+              </h3>
+              {course.subtitle ? (
+                <p
+                  className="text-sm leading-6 text-[var(--text-secondary)]"
+                  style={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {course.subtitle}
+                </p>
+              ) : null}
+            </div>
+            <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
+              <p className="text-xl font-semibold text-[var(--text-primary)]">{course.priceLabel ?? "View"}</p>
+              <span className="rounded-full border border-[var(--accent)] bg-[var(--accent-soft)] px-4 py-2 text-sm font-semibold text-[var(--accent)] transition group-hover:bg-[var(--surface-panel-strong)]">
+                {course.ctaLabel ?? "View course"}
+              </span>
+            </div>
+          </div>
+        </article>
+      </HardLink>
+    );
+  }
 
   return (
     <HardLink href={resolveCoursePublicPath(course)} className="group block">

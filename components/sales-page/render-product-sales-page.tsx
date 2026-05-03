@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShieldCheck, ThumbsUp } from "lucide-react";
+import { CheckCircle2, Gem, PackageCheck, ShieldCheck, Sparkles, Target, ThumbsUp } from "lucide-react";
 import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -17,6 +17,72 @@ const panelSubtleTextClass = "text-[var(--text-muted)]";
 
 function cssUrl(url: string) {
   return `url("${url.replace(/"/g, "%22")}")`;
+}
+
+function splitIntoParagraphs(value: string) {
+  const normalized = value.trim();
+
+  if (!normalized) {
+    return [];
+  }
+
+  const explicitParagraphs = normalized
+    .split(/\n{2,}/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (explicitParagraphs.length > 1) {
+    return explicitParagraphs;
+  }
+
+  const sentences = normalized.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g)?.map((item) => item.trim()).filter(Boolean) ?? [normalized];
+
+  if (sentences.length <= 3) {
+    return [normalized];
+  }
+
+  const paragraphs: string[] = [];
+  for (let index = 0; index < sentences.length; index += 3) {
+    paragraphs.push(sentences.slice(index, index + 3).join(" "));
+  }
+
+  return paragraphs;
+}
+
+function splitHighlightItems(items: string[]) {
+  return items.flatMap((item) =>
+    item
+      .split(/\s+[•*]\s+|\n+/)
+      .map((part) => part.trim().replace(/^[•*-]\s*/, ""))
+      .filter(Boolean),
+  );
+}
+
+function getHighlightTreatment(cardId: "outcomes" | "audience" | "includes") {
+  if (cardId === "audience") {
+    return {
+      icon: Target,
+      variant: "premium" as const,
+      eyebrow: "Best fit",
+      accentClass: "from-[rgba(212,168,85,0.18)] to-transparent",
+    };
+  }
+
+  if (cardId === "includes") {
+    return {
+      icon: PackageCheck,
+      variant: "success" as const,
+      eyebrow: "You receive",
+      accentClass: "from-[rgba(52,211,153,0.16)] to-transparent",
+    };
+  }
+
+  return {
+    icon: Sparkles,
+    variant: "accent" as const,
+    eyebrow: "Transformation",
+    accentClass: "from-[rgba(123,47,190,0.2)] to-transparent",
+  };
 }
 
 function RatingStars({ rating }: { rating: number }) {
@@ -63,6 +129,10 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
 
   const renderSection = (section: SalesPageSectionKey) => {
     if (section === "description") {
+      const descriptionParagraphs = payload.descriptionSection.longDescription
+        ? splitIntoParagraphs(payload.descriptionSection.longDescription)
+        : [];
+
       return (
         <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
           <SectionIntro
@@ -74,8 +144,34 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
             {payload.media.salesVideoUrl ? (
               <StreamableEmbed url={payload.media.salesVideoUrl} title={`${payload.hero.title} sales video`} />
             ) : null}
-            {payload.descriptionSection.longDescription ? (
-              <p className={`text-sm leading-8 ${panelMutedTextClass}`}>{payload.descriptionSection.longDescription}</p>
+            {descriptionParagraphs.length > 0 ? (
+              <div className="overflow-hidden rounded-[26px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))]">
+                <div className="grid gap-0 lg:grid-cols-[240px_minmax(0,1fr)]">
+                  <aside className="border-b border-[var(--border)] bg-[linear-gradient(180deg,var(--accent-soft),transparent)] p-6 lg:border-b-0 lg:border-r">
+                    <div className="flex size-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--accent-lavender)]">
+                      <Gem className="size-5" aria-hidden="true" />
+                    </div>
+                    <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-lavender)]">Course thesis</p>
+                    <p className={`mt-3 text-sm leading-7 ${panelMutedTextClass}`}>
+                      Read this as the central promise and context for the work.
+                    </p>
+                  </aside>
+                  <div className="space-y-5 p-6 lg:p-8">
+                    {descriptionParagraphs.map((paragraph, index) => (
+                      <p
+                        key={`${paragraph.slice(0, 28)}-${index}`}
+                        className={
+                          index === 0
+                            ? "text-lg leading-9 text-[var(--text-primary)]"
+                            : `text-base leading-8 ${panelMutedTextClass}`
+                        }
+                      >
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </div>
             ) : null}
           </div>
         </section>
@@ -86,15 +182,42 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
       return (
         <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
           <SectionIntro eyebrow={payload.highlightsSection.eyebrow} title="The core promise at a glance." />
-          <div className="grid gap-4 lg:grid-cols-3">
-            {payload.highlightsSection.cards.map((card) => (
-              <div key={card.id} className={`p-6 ${sectionPanelClass}`}>
-                <Badge variant={card.id === "audience" ? "premium" : card.id === "includes" ? "success" : "accent"}>{card.title}</Badge>
-                <ul className={`mt-5 space-y-3 text-sm leading-7 ${panelMutedTextClass}`}>
-                  {card.items.length > 0 ? card.items.map((item) => <li key={item}>{item}</li>) : <li>Nothing listed yet.</li>}
+          <div className="grid gap-5 lg:grid-cols-3">
+            {payload.highlightsSection.cards.map((card) => {
+              const treatment = getHighlightTreatment(card.id);
+              const Icon = treatment.icon;
+              const items = splitHighlightItems(card.items);
+
+              return (
+              <div key={card.id} className={`relative overflow-hidden p-6 ${sectionPanelClass}`}>
+                <div className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${treatment.accentClass}`} />
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex size-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--accent-lavender)]">
+                      <Icon className="size-5" aria-hidden="true" />
+                    </div>
+                    <Badge variant={treatment.variant}>{card.title}</Badge>
+                  </div>
+                  <p className={`mt-5 text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>{treatment.eyebrow}</p>
+                  <ul className={`mt-4 space-y-4 text-sm leading-7 ${panelMutedTextClass}`}>
+                    {items.length > 0 ? (
+                      items.map((item) => (
+                        <li key={item} className="grid grid-cols-[18px_minmax(0,1fr)] gap-3">
+                          <CheckCircle2 className="mt-1 size-4 text-[var(--accent-lavender)]" aria-hidden="true" />
+                          <span>{item}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="grid grid-cols-[18px_minmax(0,1fr)] gap-3">
+                        <CheckCircle2 className="mt-1 size-4 text-[var(--accent-lavender)]" aria-hidden="true" />
+                        <span>Nothing listed yet.</span>
+                      </li>
+                    )}
                 </ul>
+                </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       );

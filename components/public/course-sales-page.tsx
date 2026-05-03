@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { submitCourseReviewAction } from "@/app/(public)/actions";
 import { buildBreadcrumbStructuredData, buildCourseStructuredData, buildFaqStructuredData, buildProductStructuredData } from "@/lib/seo/structured-data";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
+import type { CourseBundleOption } from "@/lib/courses/get-course-bundle-options";
 import type { CourseWithRelations, GeneratedSalesPagePayload } from "@/types";
 
 function RatingStars({ rating }: { rating: number }) {
@@ -18,6 +19,7 @@ function RatingStars({ rating }: { rating: number }) {
 export function CourseSalesPage({
   course,
   payload,
+  bundleOptions,
   canLeaveReview,
   isLoggedIn,
   reviewLoginHref,
@@ -25,6 +27,7 @@ export function CourseSalesPage({
 }: {
   course: CourseWithRelations;
   payload: GeneratedSalesPagePayload;
+  bundleOptions?: CourseBundleOption[];
   canLeaveReview: boolean;
   isLoggedIn: boolean;
   reviewLoginHref: string;
@@ -38,6 +41,45 @@ export function CourseSalesPage({
     { name: "Courses", path: "/courses" },
     { name: course.title, path: resolveCoursePublicPath(course) },
   ]);
+  const availableBundles = bundleOptions ?? [];
+
+  const bundleValueSlot =
+    availableBundles.length > 0 ? (
+      <section className="mx-auto max-w-7xl px-6">
+        <div className="rounded-[30px] border border-[var(--premium)] bg-[linear-gradient(135deg,var(--premium-soft),var(--accent-soft))] p-5 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-5">
+            <div className="max-w-3xl space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--premium)]">Bundle value option</p>
+              <h2 className="text-3xl leading-none tracking-[-0.03em]">This course is also available inside a bundle.</h2>
+              <p className="text-sm leading-7 text-[var(--text-secondary)]">
+                If you are planning to take more than one course, the bundle may be better value than buying this course on its own.
+              </p>
+            </div>
+            <div className="grid w-full gap-3 lg:w-auto lg:min-w-[360px]">
+              {availableBundles.map((bundle) => (
+                <a
+                  key={bundle.id}
+                  href={bundle.bundleUrl}
+                  className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-5 py-4 transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel-strong)]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-base font-semibold leading-snug">{bundle.title}</p>
+                      <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                        {bundle.courseCount} course{bundle.courseCount === 1 ? "" : "s"} included
+                      </p>
+                    </div>
+                    <p className="shrink-0 text-lg font-semibold text-[var(--premium)]">{bundle.priceLabel}</p>
+                  </div>
+                  {bundle.subtitle ? <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{bundle.subtitle}</p> : null}
+                  <p className="mt-3 text-sm font-semibold text-[var(--accent)]">View bundle</p>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    ) : null;
 
   const reviewSlot = (
     <div
@@ -129,7 +171,7 @@ export function CourseSalesPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       {faqJsonLd ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} /> : null}
-      <RenderProductSalesPage payload={payload} reviewSlot={reviewSlot} />
+      <RenderProductSalesPage payload={payload} bundleValueSlot={bundleValueSlot} reviewSlot={reviewSlot} />
     </div>
   );
 }

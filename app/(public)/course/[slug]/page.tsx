@@ -1,6 +1,7 @@
 import { notFound, permanentRedirect, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { CourseSalesPage } from "@/components/public/course-sales-page";
+import { getCourseBundleOptions } from "@/lib/courses/get-course-bundle-options";
 import { getCourseBySlug } from "@/lib/courses/get-course-by-slug";
 import { prisma } from "@/lib/db/prisma";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -76,10 +77,12 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
               select: { quote: true, isApproved: true, rating: true, recommendsProduct: true },
             })
           : null;
+      const bundleOptions = await getCourseBundleOptions(resolved.course.id);
       return (
         <CourseSalesPage
           course={resolved.course}
           payload={getCourseSalesPage(resolved.course)}
+          bundleOptions={bundleOptions}
           canLeaveReview={canLeaveReview}
           isLoggedIn={Boolean(session?.user?.email)}
           reviewLoginHref={reviewLoginHref}
@@ -97,6 +100,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   }
 
   const payload = getCourseSalesPage(course);
+  const bundleOptions = await getCourseBundleOptions(course.id);
   const canLeaveReview = Boolean(
     session?.user?.email &&
       (await prisma.enrollment.findFirst({
@@ -122,6 +126,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
     <CourseSalesPage
       course={course}
       payload={payload}
+      bundleOptions={bundleOptions}
       canLeaveReview={canLeaveReview}
       isLoggedIn={Boolean(session?.user?.email)}
       reviewLoginHref={reviewLoginHref}

@@ -24,6 +24,7 @@ import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 import { CouponScope, CourseStatus, type HomepageSectionType } from "@prisma/client";
 import type { GatewayCapabilities, GatewayCheckoutModel, GatewayKind, GatewaySettlementBehavior, GatewayTaxModel } from "@/types";
+import type { BundleFormState, BundleFormValues } from "@/lib/admin/bundle-form-state";
 
 function toArray(value: FormDataEntryValue | null) {
   return String(value ?? "")
@@ -40,6 +41,66 @@ function parseSalesPageConfig(formData: FormData) {
     thankYouSignedInLabel: String(formData.get("salesPage.thankYouSignedInLabel") ?? ""),
     thankYouSignedOutLabel: String(formData.get("salesPage.thankYouSignedOutLabel") ?? ""),
   };
+}
+
+function getBundleFormValues(formData: FormData): BundleFormValues {
+  return {
+    title: String(formData.get("title") ?? ""),
+    slug: String(formData.get("slug") ?? ""),
+    subtitle: String(formData.get("subtitle") ?? ""),
+    status: String(formData.get("status") ?? "DRAFT"),
+    shortDescription: String(formData.get("shortDescription") ?? ""),
+    longDescription: String(formData.get("longDescription") ?? ""),
+    learningOutcomes: String(formData.get("learningOutcomes") ?? ""),
+    whoItsFor: String(formData.get("whoItsFor") ?? ""),
+    includes: String(formData.get("includes") ?? ""),
+    price: String(formData.get("price") ?? "0"),
+    currency: String(formData.get("currency") ?? "USD"),
+    compareAtPrice: String(formData.get("compareAtPrice") ?? ""),
+    heroImageUrl: String(formData.get("heroImageUrl") ?? ""),
+    salesVideoUrl: String(formData.get("salesVideoUrl") ?? ""),
+    seoTitle: String(formData.get("seoTitle") ?? ""),
+    seoDescription: String(formData.get("seoDescription") ?? ""),
+    legacyUrl: String(formData.get("legacyUrl") ?? ""),
+    courseIds: formData
+      .getAll("courseIds")
+      .map((value) => String(value))
+      .filter(Boolean),
+  };
+}
+
+function parseBundleFormData(formData: FormData) {
+  const upsell = parseUpsellSelection(formData.get("upsellTarget"));
+
+  return bundleInputSchema.safeParse({
+    slug: String(formData.get("slug") ?? ""),
+    title: String(formData.get("title") ?? ""),
+    subtitle: String(formData.get("subtitle") ?? ""),
+    shortDescription: String(formData.get("shortDescription") ?? ""),
+    longDescription: String(formData.get("longDescription") ?? ""),
+    learningOutcomes: toArray(formData.get("learningOutcomes")),
+    whoItsFor: toArray(formData.get("whoItsFor")),
+    includes: toArray(formData.get("includes")),
+    heroImageUrl: String(formData.get("heroImageUrl") ?? ""),
+    salesVideoUrl: String(formData.get("salesVideoUrl") ?? ""),
+    salesPageConfig: parseSalesPageConfig(formData),
+    seoTitle: String(formData.get("seoTitle") ?? ""),
+    seoDescription: String(formData.get("seoDescription") ?? ""),
+    status: String(formData.get("status") ?? "DRAFT"),
+    ...upsell,
+    upsellDiscountType: String(formData.get("upsellDiscountType") ?? "NONE"),
+    upsellDiscountValue: parseOptionalNumber(formData.get("upsellDiscountValue")),
+    upsellHeadline: String(formData.get("upsellHeadline") ?? ""),
+    upsellBody: String(formData.get("upsellBody") ?? ""),
+    legacyUrl: String(formData.get("legacyUrl") ?? ""),
+    ...(formData.has("price")
+      ? {
+          price: Number(formData.get("price") ?? 0),
+          currency: String(formData.get("currency") ?? "USD"),
+          compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
+        }
+      : {}),
+  });
 }
 
 function parseUpsellSelection(value: FormDataEntryValue | null) {
@@ -428,36 +489,7 @@ export async function saveBundleAction(formData: FormData) {
     .getAll("courseIds")
     .map((value) => String(value))
     .filter(Boolean);
-  const upsell = parseUpsellSelection(formData.get("upsellTarget"));
-  const parsed = bundleInputSchema.safeParse({
-    slug: String(formData.get("slug") ?? ""),
-    title: String(formData.get("title") ?? ""),
-    subtitle: String(formData.get("subtitle") ?? ""),
-    shortDescription: String(formData.get("shortDescription") ?? ""),
-    longDescription: String(formData.get("longDescription") ?? ""),
-    learningOutcomes: toArray(formData.get("learningOutcomes")),
-    whoItsFor: toArray(formData.get("whoItsFor")),
-    includes: toArray(formData.get("includes")),
-    heroImageUrl: String(formData.get("heroImageUrl") ?? ""),
-    salesVideoUrl: String(formData.get("salesVideoUrl") ?? ""),
-    salesPageConfig: parseSalesPageConfig(formData),
-    seoTitle: String(formData.get("seoTitle") ?? ""),
-    seoDescription: String(formData.get("seoDescription") ?? ""),
-    status: String(formData.get("status") ?? "DRAFT"),
-    ...upsell,
-    upsellDiscountType: String(formData.get("upsellDiscountType") ?? "NONE"),
-    upsellDiscountValue: parseOptionalNumber(formData.get("upsellDiscountValue")),
-    upsellHeadline: String(formData.get("upsellHeadline") ?? ""),
-    upsellBody: String(formData.get("upsellBody") ?? ""),
-    legacyUrl: String(formData.get("legacyUrl") ?? ""),
-    ...(formData.has("price")
-      ? {
-          price: Number(formData.get("price") ?? 0),
-          currency: String(formData.get("currency") ?? "USD"),
-          compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
-        }
-      : {}),
-  });
+  const parsed = parseBundleFormData(formData);
 
   if (!parsed.success) {
     if (id) {
@@ -507,6 +539,86 @@ export async function saveBundleAction(formData: FormData) {
   revalidatePath("/");
   revalidatePath(`/bundle/${bundle.slug}`);
   revalidatePath("/admin/bundles");
+  revalidatePath(`/admin/bundles/${bundle.id}`);
+  redirect(`/admin/bundles/${bundle.id}?saved=details`);
+}
+
+export async function createBundleFormAction(_previousState: BundleFormState, formData: FormData): Promise<BundleFormState> {
+  const values = getBundleFormValues(formData);
+  const parsed = parseBundleFormData(formData);
+
+  if (!parsed.success) {
+    const flattened = parsed.error.flatten().fieldErrors;
+
+    return {
+      values,
+      fieldErrors: {
+        title: flattened.title?.[0],
+        slug: flattened.slug?.[0],
+        subtitle: flattened.subtitle?.[0],
+        status: flattened.status?.[0],
+        shortDescription: flattened.shortDescription?.[0],
+        longDescription: flattened.longDescription?.[0],
+        learningOutcomes: flattened.learningOutcomes?.[0],
+        whoItsFor: flattened.whoItsFor?.[0],
+        includes: flattened.includes?.[0],
+        price: flattened.price?.[0],
+        currency: flattened.currency?.[0],
+        compareAtPrice: flattened.compareAtPrice?.[0],
+        heroImageUrl: flattened.heroImageUrl?.[0],
+        salesVideoUrl: flattened.salesVideoUrl?.[0],
+        seoTitle: flattened.seoTitle?.[0],
+        seoDescription: flattened.seoDescription?.[0],
+        legacyUrl: flattened.legacyUrl?.[0],
+      },
+      formError: "Bundle could not be created. Fix the highlighted field and try again.",
+    };
+  }
+
+  let bundle: Awaited<ReturnType<typeof createBundle>>;
+
+  try {
+    bundle = await createBundle(parsed.data);
+
+    if (values.courseIds.length > 0) {
+      await prisma.bundleCourse.createMany({
+        data: values.courseIds.map((courseId, index) => ({
+          bundleId: bundle.id,
+          courseId,
+          position: index + 1,
+        })),
+      });
+    }
+
+    const refreshedBundle = await prisma.bundle.findUnique({
+      where: { id: bundle.id },
+      include: bundleInclude,
+    });
+
+    if (refreshedBundle) {
+      await persistGeneratedBundlePage(refreshedBundle);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bundle could not be created. Check the form fields and try again.";
+    const fieldErrors: BundleFormState["fieldErrors"] = {};
+
+    if (message.toLowerCase().includes("public path collision")) {
+      fieldErrors.legacyUrl = "This public URL is already in use. Change the legacy URL or leave it blank.";
+      fieldErrors.slug = "This slug may create a public URL that is already in use.";
+    }
+
+    return {
+      values,
+      fieldErrors,
+      formError: message,
+    };
+  }
+
+  revalidatePath("/admin/bundles");
+  revalidatePath("/admin/products");
+  revalidatePath("/courses");
+  revalidatePath("/");
+  revalidatePath(`/bundle/${bundle.slug}`);
   revalidatePath(`/admin/bundles/${bundle.id}`);
   redirect(`/admin/bundles/${bundle.id}?saved=details`);
 }

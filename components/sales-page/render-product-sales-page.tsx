@@ -57,7 +57,7 @@ function SectionIntro({ eyebrow, title, body }: { eyebrow: string; title: string
   );
 }
 
-export function RenderProductSalesPage({ payload, reviewSlot }: { payload: ProductPayload; reviewSlot?: ReactNode }) {
+export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }: { payload: ProductPayload; bundleValueSlot?: ReactNode; reviewSlot?: ReactNode }) {
   const hidden = new Set(payload.sections.hidden);
   const orderedSections = payload.sections.order.filter((section) => !hidden.has(section));
 
@@ -371,6 +371,7 @@ export function RenderProductSalesPage({ payload, reviewSlot }: { payload: Produ
         </div>
       </section>
 
+      {payload.productType === "course" ? bundleValueSlot : null}
       {orderedSections.map((section) => renderSection(section))}
     </div>
   );

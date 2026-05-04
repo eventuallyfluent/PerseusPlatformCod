@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, Gem, PackageCheck, ShieldCheck, Sparkles, Target, ThumbsUp } from "lucide-react";
+import { CheckCircle2, PackageCheck, ShieldCheck, Sparkles, Target, ThumbsUp } from "lucide-react";
 import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -145,18 +145,10 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
               <StreamableEmbed url={payload.media.salesVideoUrl} title={`${payload.hero.title} sales video`} />
             ) : null}
             {descriptionParagraphs.length > 0 ? (
-              <div className="overflow-hidden rounded-[26px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))]">
-                <div className="grid gap-0 lg:grid-cols-[240px_minmax(0,1fr)]">
-                  <aside className="border-b border-[var(--border)] bg-[linear-gradient(180deg,var(--accent-soft),transparent)] p-6 lg:border-b-0 lg:border-r">
-                    <div className="flex size-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--accent-lavender)]">
-                      <Gem className="size-5" aria-hidden="true" />
-                    </div>
-                    <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-lavender)]">Course thesis</p>
-                    <p className={`mt-3 text-sm leading-7 ${panelMutedTextClass}`}>
-                      Read this as the central promise and context for the work.
-                    </p>
-                  </aside>
-                  <div className="space-y-5 p-6 lg:p-8">
+              <div className="rounded-[26px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] p-6 lg:p-8">
+                <div className="mx-auto max-w-4xl">
+                  <p className="text-center text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-lavender)]">About the course</p>
+                  <div className="mt-6 space-y-5">
                     {descriptionParagraphs.map((paragraph, index) => (
                       <p
                         key={`${paragraph.slice(0, 28)}-${index}`}
@@ -313,20 +305,23 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
     if (section === "instructor" && payload.productType === "course") {
       return (
         <section key={section} className="mx-auto max-w-7xl px-6">
-          <div className={`grid gap-8 rounded-[34px] p-6 lg:grid-cols-[320px_1fr] lg:p-8 ${sectionPanelClass}`}>
-            <div className="space-y-4">
+          <div className={`grid gap-6 rounded-[30px] p-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start lg:p-6 ${sectionPanelClass}`}>
+            <div className="space-y-3">
               {payload.instructorSection.imageUrl ? (
                 <div
-                  className="h-80 rounded-[28px] bg-cover bg-center"
+                  className="aspect-square rounded-[24px] bg-cover bg-center"
                   style={{ backgroundImage: `linear-gradient(180deg, rgba(22,12,45,0.08), rgba(22,12,45,0.24)), ${cssUrl(payload.instructorSection.imageUrl)}` }}
                 />
-              ) : <div className="h-80 rounded-[28px] bg-[linear-gradient(135deg,#1b0c34,#2e175f)]" />}
+              ) : <div className="aspect-square rounded-[24px] bg-[linear-gradient(135deg,#1b0c34,#2e175f)]" />}
+              <Link href={payload.instructorSection.pageUrl} className="inline-flex text-sm font-semibold text-[var(--accent)] underline underline-offset-4">
+                View instructor page
+              </Link>
             </div>
-            <div className="flex items-center">
-              <div className="max-w-3xl space-y-5">
+            <div className="min-w-0">
+              <div className="space-y-4">
                 <Badge variant="premium">{payload.instructorSection.eyebrow}</Badge>
-                <h3 className="text-5xl leading-none tracking-[-0.05em] text-[var(--text-primary)]">{payload.instructorSection.name}</h3>
-                {payload.instructorSection.shortBio ? <p className={`text-sm leading-8 ${panelMutedTextClass}`}>{payload.instructorSection.shortBio}</p> : null}
+                <h3 className="text-4xl leading-none tracking-[-0.04em] text-[var(--text-primary)] lg:text-[2.75rem]">{payload.instructorSection.name}</h3>
+                {payload.instructorSection.shortBio ? <p className={`max-w-4xl text-sm leading-7 ${panelMutedTextClass}`}>{payload.instructorSection.shortBio}</p> : null}
                 <div className={`flex flex-wrap gap-3 pt-2 text-sm ${panelMutedTextClass}`}>
                   {payload.instructorSection.socialLinks.map((social) => (
                     <a key={social.label} href={social.url} target="_blank" rel="noreferrer" className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]">
@@ -334,9 +329,6 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                     </a>
                   ))}
                 </div>
-                <Link href={payload.instructorSection.pageUrl} className="inline-flex text-sm font-semibold text-[var(--accent)] underline underline-offset-4">
-                  View instructor page
-                </Link>
               </div>
             </div>
           </div>

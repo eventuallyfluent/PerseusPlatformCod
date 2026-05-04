@@ -135,6 +135,10 @@ export const instructorInputSchema = z.object({
   facebookUrl: optionalUrl,
   discordUrl: optionalUrl,
   telegramUrl: optionalUrl,
+  links: z.array(z.object({
+    label: z.string().min(1),
+    url: z.string().url(),
+  })).default([]),
 });
 
 export const courseInputSchema = z.object({

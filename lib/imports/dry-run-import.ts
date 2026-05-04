@@ -234,6 +234,31 @@ function getPackageMetaFields(row: PackageRow) {
   };
 }
 
+function getGeneratedCopyWarnings(row: PackageRow) {
+  const warnings: string[] = [];
+  const generatedCopyPatterns = [
+    /\bpublic page (?:describes|says|states|mentions)\b/i,
+    /\bpage (?:describes|says|states|mentions) (?:it|this)\b/i,
+    /\bdescribed on the public page\b/i,
+    /\baccording to the public page\b/i,
+    /\bthe source page\b/i,
+  ];
+  const fields = [
+    ["short_description", row.short_description],
+    ["long_description", row.long_description],
+    ["seo_description", row.seo_description],
+  ] as const;
+
+  for (const [field, value] of fields) {
+    const text = String(value ?? "");
+    if (generatedCopyPatterns.some((pattern) => pattern.test(text))) {
+      warnings.push(`${field}: Looks like generated commentary about the source page, not original course copy. Paste the actual course text before importing.`);
+    }
+  }
+
+  return warnings;
+}
+
 function getPackageTestimonialFields(row: PackageRow) {
   return {
     testimonial_name: String(row.testimonial_name ?? "").trim(),
@@ -331,6 +356,7 @@ async function enrichCoursePackageValidation(
     const mismatches = Object.entries(canonicalMeta)
       .filter(([key, value]) => String(currentMeta[key as keyof typeof currentMeta] ?? "") !== String(value ?? ""))
       .map(([key]) => `Course-level field ${key} must match across every row in the file`);
+    mismatches.push(...getGeneratedCopyWarnings(entry.row));
 
     if ((testimonial.testimonial_name || testimonial.testimonial_email) && !testimonial.testimonial_quote) {
       mismatches.push("testimonial_quote: Add the review text when providing testimonial_name or testimonial_email");
@@ -412,6 +438,8 @@ function buildSummary(
     const rows = validation.validRows.map((entry) => entry.row as PackageRow);
     summary.targetCourseSlug = String(firstRow.slug);
     summary.targetCourseTitle = String(firstRow.title);
+    summary.shortDescription = String(firstRow.short_description ?? "");
+    summary.longDescription = String(firstRow.long_description ?? "");
     const lessonRows = rows.filter(hasPackageLessonFields);
     summary.moduleCount = new Set(lessonRows.map((row) => String(row.module_position))).size;
     summary.lessonCount = lessonRows.length;

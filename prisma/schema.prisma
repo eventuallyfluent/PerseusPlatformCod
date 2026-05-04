@@ -133,6 +133,7 @@ model Instructor {
   facebookUrl  String?
   discordUrl   String?
   telegramUrl  String?
+  links        Json?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   courses      Course[]

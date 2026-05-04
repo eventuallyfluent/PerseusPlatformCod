@@ -68,6 +68,15 @@ export default async function NewInstructorPage({
             Telegram URL
             <input name="telegramUrl" />
           </label>
+          <label className="md:col-span-2">
+            Additional links
+            <textarea
+              name="links"
+              rows={5}
+              placeholder={"Article title | https://example.com/article\nPodcast interview | https://example.com/podcast"}
+            />
+            <span className="mt-2 block text-sm leading-6 text-stone-600">Add one link per line using: Label | URL. Use this for articles, interviews, blog posts, podcasts, or teacher resources.</span>
+          </label>
           <div className="md:col-span-2">
             <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">Create instructor</button>
           </div>

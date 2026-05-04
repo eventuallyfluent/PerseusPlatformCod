@@ -14,6 +14,7 @@ export async function upsertInstructor(input: unknown, id?: string) {
     facebookUrl: data.facebookUrl || null,
     discordUrl: data.discordUrl || null,
     telegramUrl: data.telegramUrl || null,
+    links: data.links,
   };
 
   if (id) {

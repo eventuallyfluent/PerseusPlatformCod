@@ -25,6 +25,22 @@ export default async function InstructorDetailPage({
   if (!instructor) {
     notFound();
   }
+  const additionalLinks = Array.isArray(instructor.links)
+    ? instructor.links
+        .map((link) => {
+          if (!link || typeof link !== "object" || Array.isArray(link)) {
+            return null;
+          }
+
+          const record = link as Record<string, unknown>;
+          const label = typeof record.label === "string" ? record.label : "";
+          const url = typeof record.url === "string" ? record.url : "";
+
+          return label && url ? `${label} | ${url}` : null;
+        })
+        .filter((line): line is string => Boolean(line))
+        .join("\n")
+    : "";
 
   return (
     <AdminShell title={instructor.name} description="Edit public instructor details and linked course list.">
@@ -87,6 +103,16 @@ export default async function InstructorDetailPage({
           <label>
             Telegram URL
             <input name="telegramUrl" defaultValue={instructor.telegramUrl ?? ""} />
+          </label>
+          <label className="md:col-span-2">
+            Additional links
+            <textarea
+              name="links"
+              rows={5}
+              defaultValue={additionalLinks}
+              placeholder={"Article title | https://example.com/article\nPodcast interview | https://example.com/podcast"}
+            />
+            <span className="mt-2 block text-sm leading-6 text-stone-600">Add one link per line using: Label | URL. Use this for articles, interviews, blog posts, podcasts, or teacher resources.</span>
           </label>
           <div className="md:col-span-2">
             <div className="flex flex-wrap gap-3">

@@ -8,10 +8,21 @@ const prisma = new PrismaClient();
 async function main() {
   const packageCsv = await readFile("samples/imports/perseus-course-package.csv", "utf8");
   const studentCsv = await readFile("samples/imports/perseus-course-students.csv", "utf8");
+  const expectedLongDescription =
+    "A practical starter course that combines symbolic orientation ritual structure and steady personal practice into one guided path.";
 
   const packageDryRun = await dryRunImport("COURSE_PACKAGE", packageCsv);
   if (packageDryRun.invalidRows.length > 0 || packageDryRun.conflicts.length > 0 || packageDryRun.validRows.length === 0) {
     throw new Error("Course package dry run failed");
+  }
+
+  const generatedCopyCsv = packageCsv.replace(
+    expectedLongDescription,
+    "The public page describes this as a huge course with guided practice.",
+  );
+  const generatedCopyDryRun = await dryRunImport("COURSE_PACKAGE", generatedCopyCsv);
+  if (!generatedCopyDryRun.invalidRows.some((entry) => entry.errors.some((error) => error.includes("generated commentary")))) {
+    throw new Error("Course package dry run did not reject generated source-page commentary in imported descriptions.");
   }
 
   await executeImport("COURSE_PACKAGE", "perseus-course-package.csv", packageCsv, false);
@@ -36,6 +47,10 @@ async function main() {
 
   if (!course) {
     throw new Error("Imported course not found");
+  }
+
+  if (course.longDescription !== expectedLongDescription) {
+    throw new Error("Imported course long description was not preserved exactly from the CSV.");
   }
 
   const lessons = course.modules.flatMap((module) => module.lessons);
@@ -79,11 +94,16 @@ async function main() {
   const salesPage = course.pages.find((page) => page.pageType === "sales");
   const generatedPayload = salesPage?.generatedPayload as {
     hero?: { imageUrl?: string | null };
+    descriptionSection?: { longDescription?: string | null };
     testimonialsSection?: { items?: Array<{ quote?: string; rating?: number; recommendsProduct?: boolean }> };
   } | null;
 
   if (!generatedPayload?.hero?.imageUrl?.includes("images.unsplash.com")) {
     throw new Error("Generated sales page payload is missing the imported hero image.");
+  }
+
+  if (generatedPayload.descriptionSection?.longDescription !== expectedLongDescription) {
+    throw new Error("Generated sales page payload did not preserve the imported course description.");
   }
 
   if (!generatedPayload.testimonialsSection?.items?.some((item) => item.quote?.includes("clear and possible") && item.rating === 5 && item.recommendsProduct)) {

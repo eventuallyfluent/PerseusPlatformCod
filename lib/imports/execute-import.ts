@@ -470,6 +470,8 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   summary.targetCourseId = course.id;
   summary.targetCourseSlug = course.slug;
   summary.targetCourseTitle = course.title;
+  summary.shortDescription = payload.shortDescription ?? "";
+  summary.longDescription = payload.longDescription ?? "";
   const lessonRows = rows.filter(isCoursePackageLessonRow);
   summary.moduleCount = new Set(lessonRows.map((row) => row.module_position)).size;
   summary.lessonCount = lessonRows.length;
@@ -901,8 +903,11 @@ async function processChunkedBatch(batchId: string) {
 
   const persistedContext = (batch.context as PersistedImportContext<CoursePackageCsvRow | CourseStudentCsvRow> | null) ?? undefined;
   const context = persistedContext ? { targetCourseId: persistedContext.targetCourseId } : undefined;
-  const validation = persistedContext?.preparedRows ? null : await dryRunImport(batch.type, batch.sourceContent, context);
-  const validRows = (persistedContext?.preparedRows ?? validation?.validRows ?? []) as ValidatedImportRow<CoursePackageCsvRow | CourseStudentCsvRow>[];
+  const shouldRevalidateSource = batch.type === ImportType.COURSE_PACKAGE;
+  const validation = shouldRevalidateSource || !persistedContext?.preparedRows ? await dryRunImport(batch.type, batch.sourceContent, context) : null;
+  const validRows = (shouldRevalidateSource ? validation?.validRows : persistedContext?.preparedRows ?? validation?.validRows ?? []) as ValidatedImportRow<
+    CoursePackageCsvRow | CourseStudentCsvRow
+  >[];
   const failures = normalizeErrorReport(batch.errorReport);
 
   if (failures.length === 0) {

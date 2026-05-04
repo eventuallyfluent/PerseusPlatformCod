@@ -43,6 +43,20 @@ function parseSalesPageConfig(formData: FormData) {
   };
 }
 
+function parseInstructorLinks(value: FormDataEntryValue | null) {
+  return String(value ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [rawLabel, ...urlParts] = line.split("|");
+      const label = rawLabel?.trim() ?? "";
+      const url = urlParts.join("|").trim();
+
+      return { label, url };
+    });
+}
+
 function getBundleFormValues(formData: FormData): BundleFormValues {
   return {
     title: String(formData.get("title") ?? ""),
@@ -734,6 +748,7 @@ export async function saveInstructorAction(formData: FormData) {
         facebookUrl: String(formData.get("facebookUrl") ?? ""),
         discordUrl: String(formData.get("discordUrl") ?? ""),
         telegramUrl: String(formData.get("telegramUrl") ?? ""),
+        links: parseInstructorLinks(formData.get("links")),
       },
       id || undefined,
     );

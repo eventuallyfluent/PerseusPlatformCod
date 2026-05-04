@@ -81,6 +81,8 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
   const heroDetected = executionHero || dryRunHero || Boolean(course?.heroImageUrl);
   const expectedTestimonials = readNumber(executionSummary, "testimonialCount") || readNumber(dryRunSummary, "testimonialCount");
   const importedTestimonials = readNumber(executionSummary, "importedTestimonialCount") || course?.testimonials.length || 0;
+  const importedShortDescription = readString(executionSummary, "shortDescription") || readString(dryRunSummary, "shortDescription");
+  const importedLongDescription = readString(executionSummary, "longDescription") || readString(dryRunSummary, "longDescription");
 
   return (
     <AdminShell title={`Import ${batch.filename}`} description="Dry-run and execution reports remain attached to the batch.">
@@ -151,6 +153,13 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
         ) : null}
         {!heroDetected ? (
           <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">No hero image was detected for this import. Add one before treating the sales page as Payhip-ready.</p>
+        ) : null}
+        {importedShortDescription || importedLongDescription ? (
+          <div className="rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Imported page copy</p>
+            {importedShortDescription ? <p className="mt-3 text-sm leading-6 text-stone-700">{importedShortDescription}</p> : null}
+            {importedLongDescription ? <p className="mt-3 whitespace-pre-line text-sm leading-7 text-stone-800">{importedLongDescription}</p> : null}
+          </div>
         ) : null}
       </Card>
 

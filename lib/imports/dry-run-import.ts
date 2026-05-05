@@ -269,6 +269,10 @@ function getPackageTestimonialFields(row: PackageRow) {
   };
 }
 
+function isPlaceholderTestimonialQuote(value: unknown) {
+  return /^there are no reviews yet\.?$/i.test(String(value ?? "").trim());
+}
+
 function getPackageHeroImageUrl(rows: PackageRow[]) {
   return rows.map((row) => String(row.hero_image_url ?? "").trim()).find(Boolean);
 }
@@ -368,7 +372,7 @@ async function enrichCoursePackageValidation(
       mismatches.push(...missingLessonFields.map((field) => `${field}: Required for lesson rows`));
     }
 
-    if (!hasLessonFields && !testimonial.testimonial_quote) {
+    if (!hasLessonFields && (!testimonial.testimonial_quote || isPlaceholderTestimonialQuote(testimonial.testimonial_quote))) {
       mismatches.push("lesson row or testimonial_quote: Add lesson fields or review text");
     }
 
@@ -450,7 +454,7 @@ function buildSummary(
         .map((entry) => {
           const row = entry.row as PackageRow;
           const quote = String(row.testimonial_quote ?? "").trim();
-          if (!quote) return "";
+          if (!quote || isPlaceholderTestimonialQuote(quote)) return "";
           const email = String(row.testimonial_email ?? "").trim().toLowerCase();
           const name = String(row.testimonial_name ?? "").trim().toLowerCase();
           return email || `${name}:${quote.toLowerCase()}`;

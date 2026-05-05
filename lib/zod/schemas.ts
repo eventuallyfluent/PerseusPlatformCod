@@ -40,10 +40,25 @@ const blankToUndefined = (value: unknown) => {
 
   return value;
 };
+const moneyToNumber = (value: unknown) => {
+  const normalized = blankToUndefined(value);
+
+  if (typeof normalized !== "string") {
+    return normalized;
+  }
+
+  const cleaned = normalized.trim().replace(/,/g, "");
+  if (!cleaned) {
+    return undefined;
+  }
+
+  const match = cleaned.match(/-?\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : normalized;
+};
 const optionalPositiveCsvInt = z.preprocess(blankToUndefined, z.coerce.number().int().min(1).optional());
 const optionalCsvRating = z.preprocess(blankToUndefined, z.coerce.number().int().min(1).max(5).optional());
-const csvMoney = z.preprocess(blankToUndefined, z.coerce.number().min(0).default(0));
-const optionalCsvMoney = z.preprocess(blankToUndefined, z.coerce.number().min(0).optional());
+const csvMoney = z.preprocess(moneyToNumber, z.coerce.number().min(0).default(0));
+const optionalCsvMoney = z.preprocess(moneyToNumber, z.coerce.number().min(0).optional());
 const csvCurrency = z.preprocess((value) => {
   const normalized = blankToUndefined(value);
   if (typeof normalized === "string") {

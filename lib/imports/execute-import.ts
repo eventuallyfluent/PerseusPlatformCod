@@ -390,6 +390,7 @@ function collectImportedTestimonials(rows: CoursePackageCsvRow[]): ImportedTesti
   for (const row of rows) {
     const quote = String(row.testimonial_quote ?? "").trim();
     if (!quote) continue;
+    if (/^there are no reviews yet\.?$/i.test(quote)) continue;
 
     const email = String(row.testimonial_email ?? "").trim().toLowerCase() || null;
     const name = String(row.testimonial_name ?? "").trim() || "Payhip student";

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CheckCircle2, PackageCheck, ShieldCheck, Sparkles, Target, ThumbsUp } from "lucide-react";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button-link";
 import { StreamableEmbed } from "@/components/ui/streamable-embed";
@@ -487,7 +487,12 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
       </section>
 
       {payload.productType === "course" ? bundleValueSlot : null}
-      {orderedSections.map((section) => renderSection(section))}
+      {orderedSections.map((section) => (
+        <Fragment key={section}>
+          {section === "pricing" && payload.productType === "course" ? bundleValueSlot : null}
+          {renderSection(section)}
+        </Fragment>
+      ))}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { notFound, permanentRedirect, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { BundleSalesPage } from "@/components/public/bundle-sales-page";
 import { CourseSalesPage } from "@/components/public/course-sales-page";
+import { getCourseBundleOptions } from "@/lib/courses/get-course-bundle-options";
 import { prisma } from "@/lib/db/prisma";
 import { getBundleSalesPage } from "@/lib/bundles/get-bundle-sales-page";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -77,11 +78,13 @@ export default async function LegacyCoursePage({ params }: { params: Promise<{ l
           select: { quote: true, isApproved: true, rating: true, recommendsProduct: true },
         })
       : null;
+  const bundleOptions = await getCourseBundleOptions(resolved.course.id);
 
   return (
     <CourseSalesPage
       course={resolved.course}
       payload={getCourseSalesPage(resolved.course)}
+      bundleOptions={bundleOptions}
       canLeaveReview={canLeaveReview}
       isLoggedIn={Boolean(session?.user?.email)}
       reviewLoginHref={reviewLoginHref}

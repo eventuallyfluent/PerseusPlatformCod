@@ -22,6 +22,7 @@ import { confirmManualPayment, failManualPayment } from "@/lib/payments/manual-p
 import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSectionPayloadMap } from "@/lib/homepage/sections";
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
+import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { CouponScope, CourseStatus, type HomepageSectionType } from "@prisma/client";
 import type { GatewayCapabilities, GatewayCheckoutModel, GatewayKind, GatewaySettlementBehavior, GatewayTaxModel } from "@/types";
 import type { BundleFormState, BundleFormValues } from "@/lib/admin/bundle-form-state";
@@ -1174,6 +1175,16 @@ export async function saveBundleCoursesAction(formData: FormData) {
 
   revalidatePath("/admin/products");
   revalidatePath(`/admin/bundles/${bundleId}`);
+  revalidatePath("/courses");
+  revalidatePath("/");
+  const affectedCourses = await prisma.course.findMany({
+    where: { id: { in: courseIds } },
+    select: { slug: true, publicPath: true, legacyUrl: true },
+  });
+  for (const course of affectedCourses) {
+    revalidatePath(`/course/${course.slug}`);
+    revalidatePath(resolveCoursePublicPath(course));
+  }
   redirect(`/admin/bundles/${bundleId}?saved=courses`);
 }
 

@@ -13,7 +13,8 @@ export type CourseBundleOption = {
 };
 
 export async function getCourseBundleOptions(courseId: string): Promise<CourseBundleOption[]> {
-  const bundleCourses = await prisma.bundleCourse.findMany({
+  const [bundleCourses, accessProductGrants] = await Promise.all([
+    prisma.bundleCourse.findMany({
     where: {
       courseId,
       bundle: {
@@ -42,9 +43,61 @@ export async function getCourseBundleOptions(courseId: string): Promise<CourseBu
         position: "asc",
       },
     ],
-  });
+    }),
+    prisma.accessProductGrant.findMany({
+      where: {
+        courseId,
+        accessProduct: {
+          bundle: {
+            status: CourseStatus.PUBLISHED,
+          },
+        },
+      },
+      include: {
+        accessProduct: {
+          include: {
+            bundle: {
+              include: {
+                courses: true,
+                offers: {
+                  include: {
+                    prices: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: [
+        {
+          accessProduct: {
+            bundle: {
+              updatedAt: "desc",
+            },
+          },
+        },
+        {
+          position: "asc",
+        },
+      ],
+    }),
+  ]);
 
-  return bundleCourses.flatMap(({ bundle }) => {
+  const bundles = new Map<string, (typeof bundleCourses)[number]["bundle"]>();
+
+  for (const { bundle } of bundleCourses) {
+    bundles.set(bundle.id, bundle);
+  }
+
+  for (const grant of accessProductGrants) {
+    const bundle = grant.accessProduct.bundle;
+    if (bundle) {
+      bundles.set(bundle.id, bundle);
+    }
+  }
+
+  return [...bundles.values()].flatMap((bundle) => {
       const offer = [...bundle.offers]
         .filter((item) => item.isPublished)
         .sort((left, right) => Number(right.isDefault) - Number(left.isDefault) || Number(left.price) - Number(right.price) || left.name.localeCompare(right.name))[0];

@@ -1,6 +1,5 @@
 import { CourseStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
-import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { currencyFormatter } from "@/lib/utils";
 
@@ -46,18 +45,24 @@ export async function getCourseBundleOptions(courseId: string): Promise<CourseBu
   });
 
   return bundleCourses.flatMap(({ bundle }) => {
-      const offer = getPrimaryOffer(bundle.offers);
+      const offer = [...bundle.offers]
+        .filter((item) => item.isPublished)
+        .sort((left, right) => Number(right.isDefault) - Number(left.isDefault) || Number(left.price) - Number(right.price) || left.name.localeCompare(right.name))[0];
 
-      if (!offer?.isPublished) {
+      if (!offer) {
         return [];
       }
+
+      const price = offer.prices.find((item) => item.isDefault) ?? offer.prices[0] ?? null;
+      const amount = price?.amount ?? offer.price;
+      const currency = price?.currency ?? offer.currency;
 
       return [{
         id: bundle.id,
         title: bundle.title,
         subtitle: bundle.subtitle ?? bundle.shortDescription,
         courseCount: bundle.courses.length,
-        priceLabel: currencyFormatter(bundle.price.toString(), bundle.currency),
+        priceLabel: currencyFormatter(amount.toString(), currency),
         bundleUrl: resolveBundlePublicPath(bundle),
       }];
     });

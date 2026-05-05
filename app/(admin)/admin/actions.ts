@@ -784,7 +784,9 @@ export async function saveOfferAction(formData: FormData) {
         currency: String(formData.get("currency") ?? "USD"),
         compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
         isPublished: Boolean(formData.get("isPublished")),
+        isDefault: Boolean(formData.get("isDefault")),
         checkoutPath: String(formData.get("checkoutPath") ?? ""),
+        billingInterval: String(formData.get("billingInterval") ?? "") || undefined,
       },
       offerId || undefined,
     );
@@ -821,12 +823,16 @@ export async function deleteOfferAction(formData: FormData) {
   const offerId = String(formData.get("offerId") ?? "");
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
+  const productId = String(formData.get("productId") ?? "");
 
   try {
     await prisma.offer.delete({
       where: { id: offerId },
     });
   } catch {
+    if (productId) {
+      redirect(`/admin/products/${productId}?error=offer`);
+    }
     if (courseId) {
       redirect(`/admin/courses/${courseId}?error=offer`);
     }
@@ -837,6 +843,10 @@ export async function deleteOfferAction(formData: FormData) {
   }
 
   revalidatePath("/admin/offers");
+  if (productId) {
+    revalidatePath(`/admin/products/${productId}`);
+    redirect(`/admin/products/${productId}?saved=offer`);
+  }
   if (courseId) {
     revalidatePath(`/admin/courses/${courseId}`);
     redirect(`/admin/courses/${courseId}?saved=offer`);

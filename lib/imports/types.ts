@@ -29,6 +29,7 @@ export type ImportDryRunSummary = {
   heroImageUrl?: string;
   hasHeroImage?: boolean;
   testimonialCount?: number;
+  offerOptionCount?: number;
 };
 
 export type ImportExecutionSummary = {
@@ -44,6 +45,7 @@ export type ImportExecutionSummary = {
   lessonsApplied?: boolean;
   testimonialsApplied?: boolean;
   courseMetadataApplied?: boolean;
+  courseOffersApplied?: boolean;
   targetCourseId?: string;
   targetCourseSlug?: string;
   targetCourseTitle?: string;
@@ -54,6 +56,7 @@ export type ImportExecutionSummary = {
   heroImageUrl?: string;
   hasHeroImage?: boolean;
   testimonialCount?: number;
+  offerOptionCount?: number;
   importedTestimonialCount?: number;
   createdModuleCount?: number;
   updatedModuleCount?: number;

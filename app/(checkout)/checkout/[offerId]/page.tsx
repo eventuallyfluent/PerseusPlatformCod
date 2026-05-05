@@ -49,10 +49,14 @@ export default async function CheckoutPage({
   const productKind = offer.course ? "Course checkout" : offer.bundle ? "Bundle checkout" : "Checkout";
   const upsell = buildConfiguredUpsell(offer);
   const appliedUpsellDiscount = await resolveAppliedUpsellDiscount(offer, query.upsellFrom);
-  const priceLabel = currencyFormatter(offer.price.toString(), offer.currency);
+  const defaultOfferPrice = offer.prices.find((price) => price.isDefault) ?? offer.prices[0] ?? null;
+  const offerAmount = defaultOfferPrice?.amount ?? offer.price;
+  const offerCurrency = defaultOfferPrice?.currency ?? offer.currency;
+  const intervalSuffix = offer.type === "SUBSCRIPTION" && defaultOfferPrice?.billingInterval ? `/${defaultOfferPrice.billingInterval}` : "";
+  const priceLabel = `${currencyFormatter(offerAmount.toString(), offerCurrency)}${intervalSuffix}`;
   const discountedPriceLabel =
     appliedUpsellDiscount && appliedUpsellDiscount.discountAmount > 0
-      ? currencyFormatter(Number(offer.price) - appliedUpsellDiscount.discountAmount, offer.currency)
+      ? `${currencyFormatter(Number(offerAmount) - appliedUpsellDiscount.discountAmount, offerCurrency)}${intervalSuffix}`
       : priceLabel;
   const initialQuote = {
     baseLabel: priceLabel,

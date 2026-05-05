@@ -11,6 +11,7 @@ import { validatePublicPathAvailability } from "@/lib/urls/validate-public-path"
 import { normalizePublicPathInput } from "@/lib/urls/normalize-public-path";
 import { coursePackageCsvRowSchema, courseStudentCsvRowSchema } from "@/lib/zod/schemas";
 import { validateRows } from "@/lib/imports/shared";
+import { parseImportedCourseOfferOptions } from "@/lib/imports/course-offer-options";
 
 export type ImportContext = {
   targetCourseId?: string;
@@ -38,6 +39,8 @@ const COURSE_PACKAGE_CARRY_FIELDS = [
   "seo_description",
   "status",
   "price",
+  "price_text",
+  "offer_options",
   "currency",
   "compare_at_price",
   "testimonial_name",
@@ -65,8 +68,12 @@ function normalizeCoursePackageRows(rows: Record<string, string>[]) {
   for (const row of rows) {
     const normalizedRow: Record<string, string> = { ...row };
 
+    if (String(row.price ?? "").trim() && !String(row.price_text ?? "").trim()) {
+      normalizedRow.price_text = row.price;
+    }
+
     for (const field of COURSE_PACKAGE_CARRY_FIELDS) {
-      const rawValue = String(row[field] ?? "");
+      const rawValue = String(normalizedRow[field] ?? "");
       if (rawValue.trim()) {
         currentCourse[field] = rawValue;
       } else if (field in currentCourse) {
@@ -461,6 +468,14 @@ function buildSummary(
         })
         .filter(Boolean),
     ).size;
+    summary.offerOptionCount = parseImportedCourseOfferOptions({
+      title: String(firstRow.title ?? ""),
+      price: Number(firstRow.price ?? 0),
+      priceText: String(firstRow.price_text ?? firstRow.price ?? ""),
+      currency: String(firstRow.currency ?? "USD"),
+      compareAtPrice: firstRow.compare_at_price === undefined || firstRow.compare_at_price === null ? null : Number(firstRow.compare_at_price),
+      offerOptions: String(firstRow.offer_options ?? ""),
+    }).length;
   }
 
   if (type === ImportType.COURSE_STUDENTS && context?.targetCourseId) {

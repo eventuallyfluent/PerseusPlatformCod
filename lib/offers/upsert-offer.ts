@@ -30,8 +30,16 @@ export async function upsertOffer(input: unknown, id?: string) {
     currency: data.currency.toUpperCase(),
     compareAtPrice: data.compareAtPrice,
     isPublished: data.isPublished,
+    isDefault: data.isDefault,
     checkoutPath: data.checkoutPath || buildCheckoutPath(ownerId, data.name),
   };
+
+  if (data.isDefault) {
+    await prisma.offer.updateMany({
+      where: data.courseId ? { courseId: data.courseId } : { bundleId: data.bundleId },
+      data: { isDefault: false },
+    });
+  }
 
   if (id) {
     return prisma.offer.update({
@@ -43,6 +51,8 @@ export async function upsertOffer(input: unknown, id?: string) {
           create: {
             amount: data.price,
             currency: data.currency.toUpperCase(),
+            billingInterval: data.type === "SUBSCRIPTION" ? data.billingInterval ?? "month" : null,
+            billingCount: data.type === "SUBSCRIPTION" ? 1 : null,
             isDefault: true,
           },
         },
@@ -57,6 +67,8 @@ export async function upsertOffer(input: unknown, id?: string) {
         create: {
           amount: data.price,
           currency: data.currency.toUpperCase(),
+          billingInterval: data.type === "SUBSCRIPTION" ? data.billingInterval ?? "month" : null,
+          billingCount: data.type === "SUBSCRIPTION" ? 1 : null,
           isDefault: true,
         },
       },

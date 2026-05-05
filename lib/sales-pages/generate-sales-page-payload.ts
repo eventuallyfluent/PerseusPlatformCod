@@ -2,7 +2,6 @@ import { currencyFormatter } from "@/lib/utils";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { normalizeSectionOrder, parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import type { CourseWithRelations, GeneratedSalesPagePayload, SalesPageOfferSummary } from "@/types";
-import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 import { getPublicReviewName } from "@/lib/testimonials/public-review-name";
 
 function readStringArray(value: unknown) {
@@ -14,28 +13,30 @@ function readStringArray(value: unknown) {
 }
 
 function buildOffers(course: CourseWithRelations): SalesPageOfferSummary[] {
-  const offer = getPrimaryOffer(course.offers);
+  return [...course.offers]
+    .filter((offer) => offer.isPublished)
+    .sort((left, right) => Number(right.isDefault) - Number(left.isDefault) || Number(left.price) - Number(right.price) || left.name.localeCompare(right.name))
+    .map((offer) => {
+      const defaultPrice = offer.prices.find((price) => price.isDefault) ?? offer.prices[0] ?? null;
+      const amount = defaultPrice?.amount ?? offer.price;
+      const currency = defaultPrice?.currency ?? offer.currency;
+      const price = `${currencyFormatter(amount.toString(), currency)}${offer.type === "SUBSCRIPTION" && defaultPrice?.billingInterval ? `/${defaultPrice.billingInterval}` : ""}`;
+      const compareAtPrice = offer.compareAtPrice ? currencyFormatter(offer.compareAtPrice.toString(), currency) : null;
+      const savingsLabel =
+        offer.compareAtPrice && Number(offer.compareAtPrice) > Number(amount)
+          ? `Save ${Math.round(((Number(offer.compareAtPrice) - Number(amount)) / Number(offer.compareAtPrice)) * 100)}%`
+          : null;
 
-  if (!offer) {
-    return [];
-  }
-
-  const price = currencyFormatter(course.price.toString(), course.currency);
-  const compareAtPrice = course.compareAtPrice ? currencyFormatter(course.compareAtPrice.toString(), course.currency) : null;
-  const savingsLabel =
-    course.compareAtPrice && Number(course.compareAtPrice) > Number(course.price)
-      ? `Save ${Math.round(((Number(course.compareAtPrice) - Number(course.price)) / Number(course.compareAtPrice)) * 100)}%`
-      : null;
-
-  return [{
-    offerId: offer.id,
-    name: `${course.title} access`,
-    price,
-    currency: course.currency,
-    checkoutUrl: `/checkout/${offer.id}`,
-    compareAtPrice,
-    savingsLabel,
-  }];
+      return {
+        offerId: offer.id,
+        name: offer.name,
+        price,
+        currency,
+        checkoutUrl: `/checkout/${offer.id}`,
+        compareAtPrice,
+        savingsLabel,
+      };
+    });
 }
 
 export function generateSalesPagePayload(course: CourseWithRelations): GeneratedSalesPagePayload {
@@ -153,7 +154,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
     pricingSection: {
       eyebrow: "Pricing",
       badge: config.pricingBadge || "Instant access",
-      headline: config.pricingHeadline || "A single clear offer, then straight into study.",
+      headline: config.pricingHeadline || (offers.length > 1 ? "Choose the payment path that fits." : "A single clear offer, then straight into study."),
       body:
         config.pricingBody ||
         "Use the sales page to understand the promise. Use checkout only when you are ready to enter the course.",

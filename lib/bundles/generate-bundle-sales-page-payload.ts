@@ -2,7 +2,6 @@ import { currencyFormatter } from "@/lib/utils";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { normalizeSectionOrder, parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import type { BundleSalesPagePayload, BundleWithRelations, SalesPageOfferSummary } from "@/types";
-import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 import { getPublicReviewName } from "@/lib/testimonials/public-review-name";
 
 function readStringArray(value: unknown) {
@@ -14,28 +13,30 @@ function readStringArray(value: unknown) {
 }
 
 function buildOffers(bundle: BundleWithRelations): SalesPageOfferSummary[] {
-  const offer = getPrimaryOffer(bundle.offers);
+  return [...bundle.offers]
+    .filter((offer) => offer.isPublished)
+    .sort((left, right) => Number(right.isDefault) - Number(left.isDefault) || Number(left.price) - Number(right.price) || left.name.localeCompare(right.name))
+    .map((offer) => {
+      const defaultPrice = offer.prices.find((price) => price.isDefault) ?? offer.prices[0] ?? null;
+      const amount = defaultPrice?.amount ?? offer.price;
+      const currency = defaultPrice?.currency ?? offer.currency;
+      const price = `${currencyFormatter(amount.toString(), currency)}${offer.type === "SUBSCRIPTION" && defaultPrice?.billingInterval ? `/${defaultPrice.billingInterval}` : ""}`;
+      const compareAtPrice = offer.compareAtPrice ? currencyFormatter(offer.compareAtPrice.toString(), currency) : null;
+      const savingsLabel =
+        offer.compareAtPrice && Number(offer.compareAtPrice) > Number(amount)
+          ? `Save ${Math.round(((Number(offer.compareAtPrice) - Number(amount)) / Number(offer.compareAtPrice)) * 100)}%`
+          : null;
 
-  if (!offer) {
-    return [];
-  }
-
-  const price = currencyFormatter(bundle.price.toString(), bundle.currency);
-  const compareAtPrice = bundle.compareAtPrice ? currencyFormatter(bundle.compareAtPrice.toString(), bundle.currency) : null;
-  const savingsLabel =
-    bundle.compareAtPrice && Number(bundle.compareAtPrice) > Number(bundle.price)
-      ? `Save ${Math.round(((Number(bundle.compareAtPrice) - Number(bundle.price)) / Number(bundle.compareAtPrice)) * 100)}%`
-      : null;
-
-  return [{
-    offerId: offer.id,
-    name: `${bundle.title} access`,
-    price,
-    currency: bundle.currency,
-    checkoutUrl: `/checkout/${offer.id}`,
-    compareAtPrice,
-    savingsLabel,
-  }];
+      return {
+        offerId: offer.id,
+        name: offer.name,
+        price,
+        currency,
+        checkoutUrl: `/checkout/${offer.id}`,
+        compareAtPrice,
+        savingsLabel,
+      };
+    });
 }
 
 export function generateBundleSalesPagePayload(bundle: BundleWithRelations): BundleSalesPagePayload {

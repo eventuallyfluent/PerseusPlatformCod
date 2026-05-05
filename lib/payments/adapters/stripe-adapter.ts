@@ -75,6 +75,8 @@ export const stripeConnector: PaymentGatewayConnector = {
     }
 
     const productTitle = offer.course?.title ?? offer.bundle?.title ?? "Perseus Product";
+    const defaultPrice = offer.prices.find((price) => price.isDefault) ?? offer.prices[0] ?? null;
+    const billingInterval = defaultPrice?.billingInterval === "year" ? "year" : "month";
     const session = await stripe.checkout.sessions.create({
       mode: offer.type === "SUBSCRIPTION" ? "subscription" : "payment",
       success_url: input.successUrl,
@@ -89,7 +91,7 @@ export const stripeConnector: PaymentGatewayConnector = {
               name: `${productTitle} | ${offer.name}`,
             },
             unit_amount: Math.round((input.amountOverride ?? Number(offer.price)) * 100),
-            recurring: offer.type === "SUBSCRIPTION" ? { interval: "month" } : undefined,
+            recurring: offer.type === "SUBSCRIPTION" ? { interval: billingInterval } : undefined,
           },
         },
       ],

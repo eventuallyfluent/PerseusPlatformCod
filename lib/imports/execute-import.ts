@@ -19,6 +19,7 @@ import {
 import { ensureEnrollment } from "@/lib/enrollments/ensure-enrollment";
 import { courseInclude } from "@/lib/courses/course-query";
 import { persistGeneratedPage } from "@/lib/sales-pages/persist-generated-page";
+import { parseImportedCourseOfferOptions, type ImportedCourseOfferOption } from "@/lib/imports/course-offer-options";
 
 type InstructorCsvRow = z.infer<typeof instructorCsvRowSchema>;
 type CourseCsvRow = z.infer<typeof courseCsvRowSchema>;
@@ -33,6 +34,7 @@ type ImportedTestimonial = {
   rating: number;
   position: number;
 };
+type ImportedOfferSyncResult = "created" | "updated" | "skipped";
 type CoursePackageLessonRow = CoursePackageCsvRow & {
   module_position: number;
   module_title: string;
@@ -96,6 +98,7 @@ function buildExecutionSummary(type: ImportType, totalCount = 0): ImportExecutio
     hasMore: totalCount > 0,
     lessonsApplied: false,
     testimonialsApplied: false,
+    courseOffersApplied: false,
   };
 }
 
@@ -368,6 +371,118 @@ async function executeOfferRow(row: OfferCsvRow) {
   return "created";
 }
 
+async function upsertImportedCourseOffer(
+  courseId: string,
+  option: ImportedCourseOfferOption,
+  isDefault: boolean,
+): Promise<ImportedOfferSyncResult> {
+  const existing =
+    (await prisma.offer.findFirst({
+      where: isDefault
+        ? { courseId, isDefault: true }
+        : {
+            courseId,
+            name: option.name,
+          },
+      include: { prices: true },
+    })) ?? null;
+
+  const accessProductId = await prisma.accessProduct
+    .findFirst({
+      where: { courseId },
+      select: { id: true },
+    })
+    .then((product) => product?.id ?? null);
+  const currency = option.currency.toUpperCase();
+  const defaultPrice = existing?.prices.find((price) => price.isDefault) ?? existing?.prices[0] ?? null;
+  const data = {
+    courseId,
+    accessProductId,
+    name: option.name,
+    type: option.type,
+    price: option.price,
+    currency,
+    compareAtPrice: option.compareAtPrice ?? null,
+    isPublished: true,
+    isDefault,
+  };
+
+  if (existing) {
+    const unchanged =
+      existing.name === data.name &&
+      existing.type === data.type &&
+      Number(existing.price) === Number(option.price) &&
+      existing.currency === data.currency &&
+      (existing.compareAtPrice === null ? null : Number(existing.compareAtPrice)) === (data.compareAtPrice === null ? null : Number(data.compareAtPrice)) &&
+      existing.isPublished === data.isPublished &&
+      existing.isDefault === data.isDefault &&
+      (existing.accessProductId ?? null) === accessProductId &&
+      Number(defaultPrice?.amount ?? -1) === Number(option.price) &&
+      defaultPrice?.currency === currency &&
+      (defaultPrice?.billingInterval ?? null) === (option.billingInterval ?? null);
+
+    if (unchanged) {
+      return "skipped";
+    }
+
+    await prisma.offer.update({
+      where: { id: existing.id },
+      data: {
+        ...data,
+        prices: {
+          deleteMany: {},
+          create: {
+            amount: option.price,
+            currency,
+            billingInterval: option.billingInterval ?? null,
+            billingCount: option.billingInterval ? 1 : null,
+            isDefault: true,
+          },
+        },
+      },
+    });
+    return "updated";
+  }
+
+  await prisma.offer.create({
+    data: {
+      ...data,
+      prices: {
+        create: {
+          amount: option.price,
+          currency,
+          billingInterval: option.billingInterval ?? null,
+          billingCount: option.billingInterval ? 1 : null,
+          isDefault: true,
+        },
+      },
+    },
+  });
+
+  return "created";
+}
+
+async function applyCoursePackageOffers(courseId: string, firstRow: CoursePackageCsvRow, summary: ImportExecutionSummary, countChanges: boolean) {
+  const options = parseImportedCourseOfferOptions({
+    title: firstRow.title,
+    price: firstRow.price,
+    priceText: firstRow.price_text || String(firstRow.price),
+    currency: firstRow.currency,
+    compareAtPrice: firstRow.compare_at_price,
+    offerOptions: firstRow.offer_options,
+  });
+
+  summary.offerOptionCount = options.length;
+
+  for (const [index, option] of options.entries()) {
+    const result = await upsertImportedCourseOffer(courseId, option, index === 0);
+    if (!countChanges) continue;
+    if (result === "created") summary.createdCount += 1;
+    if (result === "updated") summary.updatedCount += 1;
+    if (result === "skipped") summary.skippedCount += 1;
+  }
+}
+
 async function resolveExistingCourse(row: CoursePackageCsvRow) {
   return (
     (row.legacy_course_id
@@ -468,6 +583,13 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   const existingCourse = summary.targetCourseId ? { id: summary.targetCourseId } : await resolveExistingCourse(firstRow);
   const course = existingCourse ? await updateCourse(existingCourse.id, payload) : await createCourse(payload);
 
+  if (!summary.courseOffersApplied) {
+    await applyCoursePackageOffers(course.id, firstRow, summary, true);
+    summary.courseOffersApplied = true;
+  } else {
+    await applyCoursePackageOffers(course.id, firstRow, summary, false);
+  }
+
   summary.targetCourseId = course.id;
   summary.targetCourseSlug = course.slug;
   summary.targetCourseTitle = course.title;
@@ -479,6 +601,14 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   summary.heroImageUrl = payload.heroImageUrl || undefined;
   summary.hasHeroImage = Boolean(payload.heroImageUrl);
   summary.testimonialCount = collectImportedTestimonials(rows).length;
+  summary.offerOptionCount = parseImportedCourseOfferOptions({
+    title: firstRow.title,
+    price: firstRow.price,
+    priceText: firstRow.price_text || String(firstRow.price),
+    currency: firstRow.currency,
+    compareAtPrice: firstRow.compare_at_price,
+    offerOptions: firstRow.offer_options,
+  }).length;
   summary.totalCount = lessonRows.length;
   summary.hasMore = lessonRows.length > 0;
 

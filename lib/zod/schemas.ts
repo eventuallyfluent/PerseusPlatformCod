@@ -241,7 +241,9 @@ export const offerInputSchema = z.object({
   currency: z.string().min(3).max(3),
   compareAtPrice: z.coerce.number().min(0).optional(),
   isPublished: csvBoolean.default(false),
+  isDefault: csvBoolean.default(false),
   checkoutPath: z.string().optional(),
+  billingInterval: z.enum(["month", "year"]).optional(),
 });
 
 export const checkoutSessionSchema = z.object({
@@ -275,6 +277,8 @@ export const courseCsvRowSchema = z.object({
   seo_description: z.string().optional(),
   status: csvCourseStatus.default(CourseStatus.DRAFT),
   price: csvMoney,
+  price_text: z.string().optional(),
+  offer_options: z.string().optional(),
   currency: csvCurrency,
   compare_at_price: optionalCsvMoney,
 });
@@ -339,6 +343,8 @@ export const coursePackageCsvRowSchema = z.object({
   seo_description: z.string().optional(),
   status: csvCourseStatus.default(CourseStatus.DRAFT),
   price: csvMoney,
+  price_text: z.string().optional(),
+  offer_options: z.string().optional(),
   currency: csvCurrency,
   compare_at_price: optionalCsvMoney,
   testimonial_name: z.string().optional(),

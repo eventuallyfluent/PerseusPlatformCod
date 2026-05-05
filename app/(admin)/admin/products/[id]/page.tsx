@@ -6,7 +6,7 @@ import { HardLink } from "@/components/ui/hard-link";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 import { resolveBundlePublicPath, resolveBundleThankYouPath } from "@/lib/urls/resolve-bundle-path";
 import { resolveCoursePublicPath, resolveCourseThankYouPath } from "@/lib/urls/resolve-course-path";
-import { saveOfferAction } from "@/app/(admin)/admin/actions";
+import { deleteOfferAction, saveOfferAction } from "@/app/(admin)/admin/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -85,6 +85,7 @@ export default async function ProductDetailPage({
   const primaryOfferPrice = primaryOffer?.prices[0]?.amount ?? primaryOffer?.price ?? product.course?.price ?? product.bundle?.price ?? 0;
   const primaryOfferCurrency = primaryOffer?.prices[0]?.currency ?? primaryOffer?.currency ?? product.course?.currency ?? product.bundle?.currency ?? "USD";
   const primaryOfferCompareAt = primaryOffer?.compareAtPrice ?? product.course?.compareAtPrice ?? product.bundle?.compareAtPrice ?? null;
+  const primaryOfferBillingInterval = primaryOffer?.prices.find((price) => price.isDefault)?.billingInterval ?? primaryOffer?.prices[0]?.billingInterval ?? "month";
   const feedbackMessage = resolvedSearchParams?.saved === "offer" ? "Checkout settings saved." : "";
   const errorMessage = resolvedSearchParams?.error === "offer" ? "Checkout settings could not be saved. Check the offer fields and try again." : "";
   const contentKindLabel = product.course ? "Course" : product.bundle ? "Bundle" : formatTypeLabel(product.type);
@@ -201,6 +202,13 @@ export default async function ProductDetailPage({
                 </select>
               </label>
               <label>
+                Subscription interval
+                <select name="billingInterval" defaultValue={primaryOfferBillingInterval ?? "month"}>
+                  <option value="month">Monthly</option>
+                  <option value="year">Yearly</option>
+                </select>
+              </label>
+              <label>
                 Price
                 <input name="price" type="number" min="0" step="0.01" defaultValue={primaryOfferPrice.toString()} required />
               </label>
@@ -219,6 +227,13 @@ export default async function ProductDetailPage({
                   Published and available for checkout
                 </span>
               </label>
+              <label>
+                Primary option
+                <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
+                  <input className="w-auto" type="checkbox" name="isDefault" value="true" defaultChecked={primaryOffer?.isDefault ?? true} />
+                  Show first on sales pages
+                </span>
+              </label>
               <div className="md:col-span-2 rounded-[22px] border border-stone-200 bg-stone-50 px-5 py-4 text-sm leading-7 text-stone-700">
                 This page is the checkout layer. For a normal course, it just controls the buying path for that one course. If you want one purchase to include multiple courses, that should be a bundle.
               </div>
@@ -228,6 +243,146 @@ export default async function ProductDetailPage({
                 </button>
               </div>
             </form>
+          </Card>
+
+          <Card className="space-y-5 bg-white p-8">
+            <div className="space-y-1">
+              <h3 className="text-xl font-semibold text-stone-950">Buying options</h3>
+              <p className="text-sm leading-7 text-stone-600">A product can have more than one checkout path, for example a one-off payment and a monthly subscription. Each option still unlocks this same product access.</p>
+            </div>
+            <div className="grid gap-4">
+              {product.offers.map((offer) => {
+                const offerPrice = offer.prices.find((price) => price.isDefault) ?? offer.prices[0] ?? null;
+                return (
+                  <div key={offer.id} className="rounded-[22px] border border-stone-200 bg-stone-50 p-5">
+                    <form action={saveOfferAction} className="grid gap-4 md:grid-cols-3">
+                      <input type="hidden" name="id" value={offer.id} />
+                      <input type="hidden" name="productId" value={product.id} />
+                      {product.course ? <input type="hidden" name="courseId" value={sourceOwnerId} /> : null}
+                      {product.bundle ? <input type="hidden" name="bundleId" value={sourceOwnerId} /> : null}
+                      <label>
+                        Offer name
+                        <input name="name" defaultValue={offer.name} required />
+                      </label>
+                      <label>
+                        Offer type
+                        <select name="type" defaultValue={offer.type}>
+                          <option value="ONE_TIME">One-off payment</option>
+                          <option value="SUBSCRIPTION">Subscription</option>
+                        </select>
+                      </label>
+                      <label>
+                        Subscription interval
+                        <select name="billingInterval" defaultValue={offerPrice?.billingInterval ?? "month"}>
+                          <option value="month">Monthly</option>
+                          <option value="year">Yearly</option>
+                        </select>
+                      </label>
+                      <label>
+                        Price
+                        <input name="price" type="number" min="0" step="0.01" defaultValue={(offerPrice?.amount ?? offer.price).toString()} required />
+                      </label>
+                      <label>
+                        Currency
+                        <input name="currency" defaultValue={offerPrice?.currency ?? offer.currency} required />
+                      </label>
+                      <label>
+                        Compare-at price
+                        <input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={offer.compareAtPrice?.toString() ?? ""} />
+                      </label>
+                      <label>
+                        Checkout status
+                        <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
+                          <input className="w-auto" type="checkbox" name="isPublished" value="true" defaultChecked={offer.isPublished} />
+                          Published and visible on the sales page
+                        </span>
+                      </label>
+                      <label>
+                        Primary option
+                        <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
+                          <input className="w-auto" type="checkbox" name="isDefault" value="true" defaultChecked={offer.isDefault} />
+                          Show first on sales pages
+                        </span>
+                      </label>
+                      <div className="flex flex-wrap items-end gap-3">
+                        <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
+                          Save option
+                        </button>
+                        <HardLink href={`/checkout/${offer.id}`} className="rounded-full border border-stone-200 bg-white px-5 py-3 text-sm font-medium text-stone-700">
+                          Preview checkout
+                        </HardLink>
+                      </div>
+                    </form>
+                    <form action={deleteOfferAction} className="mt-3">
+                      <input type="hidden" name="offerId" value={offer.id} />
+                      <input type="hidden" name="productId" value={product.id} />
+                      {product.course ? <input type="hidden" name="courseId" value={sourceOwnerId} /> : null}
+                      {product.bundle ? <input type="hidden" name="bundleId" value={sourceOwnerId} /> : null}
+                      <button className="text-sm font-medium text-rose-700 underline underline-offset-4" type="submit">
+                        Delete buying option
+                      </button>
+                    </form>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="rounded-[22px] border border-dashed border-stone-300 bg-white p-5">
+              <h4 className="text-base font-semibold text-stone-950">Add another buying option</h4>
+              <form action={saveOfferAction} className="mt-4 grid gap-4 md:grid-cols-3">
+                <input type="hidden" name="productId" value={product.id} />
+                {product.course ? <input type="hidden" name="courseId" value={sourceOwnerId} /> : null}
+                {product.bundle ? <input type="hidden" name="bundleId" value={sourceOwnerId} /> : null}
+                <label>
+                  Offer name
+                  <input name="name" placeholder="Monthly subscription" required />
+                </label>
+                <label>
+                  Offer type
+                  <select name="type" defaultValue="ONE_TIME">
+                    <option value="ONE_TIME">One-off payment</option>
+                    <option value="SUBSCRIPTION">Subscription</option>
+                  </select>
+                </label>
+                <label>
+                  Subscription interval
+                  <select name="billingInterval" defaultValue="month">
+                    <option value="month">Monthly</option>
+                    <option value="year">Yearly</option>
+                  </select>
+                </label>
+                <label>
+                  Price
+                  <input name="price" type="number" min="0" step="0.01" required />
+                </label>
+                <label>
+                  Currency
+                  <input name="currency" defaultValue={primaryOfferCurrency} required />
+                </label>
+                <label>
+                  Compare-at price
+                  <input name="compareAtPrice" type="number" min="0" step="0.01" />
+                </label>
+                <label>
+                  Checkout status
+                  <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
+                    <input className="w-auto" type="checkbox" name="isPublished" value="true" defaultChecked />
+                    Published and visible on the sales page
+                  </span>
+                </label>
+                <label>
+                  Primary option
+                  <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
+                    <input className="w-auto" type="checkbox" name="isDefault" value="true" />
+                    Show first on sales pages
+                  </span>
+                </label>
+                <div className="flex items-end">
+                  <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
+                    Add buying option
+                  </button>
+                </div>
+              </form>
+            </div>
           </Card>
 
           {product.bundle ? (

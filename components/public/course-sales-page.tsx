@@ -47,7 +47,7 @@ export function CourseSalesPage({
     availableBundles.length > 0 ? (
       <section className="mx-auto max-w-7xl px-6">
         <div className="rounded-[30px] border border-[var(--premium)] bg-[linear-gradient(135deg,var(--premium-soft),var(--accent-soft))] p-5 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:p-6">
-          <div className="flex flex-wrap items-start justify-between gap-5">
+          <div className="mx-auto flex max-w-4xl flex-col items-center gap-5 text-center">
             <div className="max-w-3xl space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--premium)]">Bundle value option</p>
               <h2 className="text-3xl leading-none tracking-[-0.03em]">This course is also available inside a bundle.</h2>
@@ -55,12 +55,12 @@ export function CourseSalesPage({
                 If you are planning to take more than one course, the bundle may be better value than buying this course on its own.
               </p>
             </div>
-            <div className="grid w-full gap-3 lg:w-auto lg:min-w-[360px]">
+            <div className="grid w-full max-w-3xl gap-3">
               {availableBundles.map((bundle) => (
                 <a
                   key={bundle.id}
                   href={bundle.bundleUrl}
-                  className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-5 py-4 transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel-strong)]"
+                  className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-5 py-4 text-left transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel-strong)]"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">

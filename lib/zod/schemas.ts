@@ -56,6 +56,15 @@ const moneyToNumber = (value: unknown) => {
   return match ? Number(match[0]) : normalized;
 };
 const optionalPositiveCsvInt = z.preprocess(blankToUndefined, z.coerce.number().int().min(1).optional());
+const optionalTestimonialPosition = z.preprocess((value) => {
+  const normalized = blankToUndefined(value);
+  if (typeof normalized !== "string") {
+    return normalized;
+  }
+
+  const trimmed = normalized.trim();
+  return /^\d+$/.test(trimmed) ? Number(trimmed) : undefined;
+}, z.coerce.number().int().min(1).optional());
 const optionalCsvRating = z.preprocess(blankToUndefined, z.coerce.number().int().min(1).max(5).optional());
 const csvMoney = z.preprocess(moneyToNumber, z.coerce.number().min(0).default(0));
 const optionalCsvMoney = z.preprocess(moneyToNumber, z.coerce.number().min(0).optional());
@@ -363,7 +372,7 @@ export const coursePackageCsvRowSchema = z.object({
   testimonial_email: z.string().email().optional().or(z.literal("")),
   testimonial_quote: z.string().optional(),
   testimonial_rating: optionalCsvRating,
-  testimonial_position: optionalPositiveCsvInt,
+  testimonial_position: optionalTestimonialPosition,
   module_position: optionalPositiveCsvInt,
   module_title: z.string().optional(),
   lesson_position: optionalPositiveCsvInt,

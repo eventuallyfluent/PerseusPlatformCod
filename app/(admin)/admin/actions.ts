@@ -34,8 +34,19 @@ function toArray(value: FormDataEntryValue | null) {
     .filter(Boolean);
 }
 
+function toUrlArray(value: FormDataEntryValue | null) {
+  return String(value ?? "")
+    .split(/\r?\n|\|/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function parseSalesPageConfig(formData: FormData) {
   return {
+    galleryImageUrls: toUrlArray(formData.get("salesPage.galleryImageUrls")),
+    galleryHidden: formData.has("salesPage.galleryControls") ? !Boolean(formData.get("salesPage.galleryVisible")) : false,
+    galleryEyebrow: String(formData.get("salesPage.galleryEyebrow") ?? ""),
+    galleryTitle: String(formData.get("salesPage.galleryTitle") ?? ""),
     thankYouEyebrow: String(formData.get("salesPage.thankYouEyebrow") ?? ""),
     thankYouHeadline: String(formData.get("salesPage.thankYouHeadline") ?? ""),
     thankYouBody: String(formData.get("salesPage.thankYouBody") ?? ""),

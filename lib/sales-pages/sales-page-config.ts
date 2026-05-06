@@ -2,6 +2,7 @@ import type { SalesPageConfig, SalesPageSectionKey } from "@/types";
 
 const sectionKeySet = new Set<SalesPageSectionKey>([
   "description",
+  "gallery",
   "highlights",
   "curriculum",
   "included-courses",
@@ -21,6 +22,14 @@ function normalizeSectionKeys(value: unknown) {
     .filter((item): item is SalesPageSectionKey => sectionKeySet.has(item as SalesPageSectionKey));
 }
 
+function normalizeStringArray(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.map((item) => String(item).trim()).filter(Boolean);
+}
+
 export function parseSalesPageConfig(value: unknown): SalesPageConfig {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
@@ -34,6 +43,10 @@ export function parseSalesPageConfig(value: unknown): SalesPageConfig {
     secondaryCtaLabel: typeof source.secondaryCtaLabel === "string" ? source.secondaryCtaLabel : undefined,
     sectionOrder: normalizeSectionKeys(source.sectionOrder),
     hiddenSections: normalizeSectionKeys(source.hiddenSections),
+    galleryImageUrls: normalizeStringArray(source.galleryImageUrls),
+    galleryHidden: typeof source.galleryHidden === "boolean" ? source.galleryHidden : undefined,
+    galleryEyebrow: typeof source.galleryEyebrow === "string" ? source.galleryEyebrow : undefined,
+    galleryTitle: typeof source.galleryTitle === "string" ? source.galleryTitle : undefined,
     pricingBadge: typeof source.pricingBadge === "string" ? source.pricingBadge : undefined,
     pricingHeadline: typeof source.pricingHeadline === "string" ? source.pricingHeadline : undefined,
     pricingBody: typeof source.pricingBody === "string" ? source.pricingBody : undefined,

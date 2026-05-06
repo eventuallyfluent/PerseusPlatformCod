@@ -115,6 +115,7 @@ const optionalCsvLessonStatus = z.preprocess((value) => {
 }, z.nativeEnum(LessonStatus).optional());
 const salesPageSectionKeySchema = z.enum([
   "description",
+  "gallery",
   "highlights",
   "curriculum",
   "included-courses",
@@ -130,11 +131,20 @@ export const salesPageConfigSchema = z.object({
   secondaryCtaLabel: z.string().optional(),
   sectionOrder: z.array(salesPageSectionKeySchema).default([]),
   hiddenSections: z.array(salesPageSectionKeySchema).default([]),
+  galleryImageUrls: z.array(z.string().url()).default([]),
+  galleryHidden: z.boolean().optional(),
+  galleryEyebrow: z.string().optional(),
+  galleryTitle: z.string().optional(),
   pricingBadge: z.string().optional(),
   pricingHeadline: z.string().optional(),
   pricingBody: z.string().optional(),
   finalCtaLabel: z.string().optional(),
   finalCtaBody: z.string().optional(),
+  thankYouEyebrow: z.string().optional(),
+  thankYouHeadline: z.string().optional(),
+  thankYouBody: z.string().optional(),
+  thankYouSignedInLabel: z.string().optional(),
+  thankYouSignedOutLabel: z.string().optional(),
 });
 
 export const instructorInputSchema = z.object({
@@ -271,6 +281,7 @@ export const courseCsvRowSchema = z.object({
   includes: z.string().optional(),
   hero_image_url: optionalUrl,
   sales_video_url: optionalUrl,
+  sales_image_urls: z.string().optional(),
   instructor_slug: z.string().min(1),
   instructor_name: z.string().optional(),
   seo_title: z.string().optional(),
@@ -337,6 +348,7 @@ export const coursePackageCsvRowSchema = z.object({
   includes: z.string().optional(),
   hero_image_url: optionalUrl,
   sales_video_url: optionalUrl,
+  sales_image_urls: z.string().optional(),
   instructor_slug: z.string().min(1),
   instructor_name: z.string().optional(),
   seo_title: z.string().optional(),

@@ -122,6 +122,7 @@ export type AccessProductWithRelations = Prisma.AccessProductGetPayload<{
 
 export type SalesPageSectionKey =
   | "description"
+  | "gallery"
   | "highlights"
   | "curriculum"
   | "included-courses"
@@ -136,6 +137,10 @@ export type SalesPageConfig = {
   secondaryCtaLabel?: string | null;
   sectionOrder?: SalesPageSectionKey[];
   hiddenSections?: SalesPageSectionKey[];
+  galleryImageUrls?: string[];
+  galleryHidden?: boolean | null;
+  galleryEyebrow?: string | null;
+  galleryTitle?: string | null;
   pricingBadge?: string | null;
   pricingHeadline?: string | null;
   pricingBody?: string | null;
@@ -185,6 +190,12 @@ type SalesPageBasePayload = {
     title: string;
     shortDescription?: string | null;
     longDescription?: string | null;
+  };
+  gallerySection: {
+    eyebrow: string;
+    title: string;
+    images: string[];
+    hidden?: boolean | null;
   };
   highlightsSection: {
     eyebrow: string;

@@ -54,6 +54,13 @@ type PersistedImportContext<Row = Record<string, unknown>> = ImportContext & {
 
 const IMPORT_CHUNK_SIZE = 20;
 
+function splitUrlList(value: string | null | undefined) {
+  return String(value ?? "")
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function humanizeSlug(slug: string) {
   return slug
     .split(/[-_]+/)
@@ -194,6 +201,7 @@ async function executeCourseRow(row: CourseCsvRow) {
         })) ?? null;
 
   const instructor = await ensureInstructorForImport(row.instructor_slug, row.instructor_name);
+  const galleryImageUrls = splitUrlList(row.sales_image_urls);
 
   const payload = {
     slug: row.slug,
@@ -206,6 +214,7 @@ async function executeCourseRow(row: CourseCsvRow) {
     includes: splitPipeList(row.includes),
     heroImageUrl: row.hero_image_url,
     salesVideoUrl: row.sales_video_url,
+    ...(galleryImageUrls.length > 0 ? { salesPageConfig: { galleryImageUrls, galleryHidden: false } } : {}),
     instructorId: instructor.id,
     seoTitle: row.seo_title,
     seoDescription: row.seo_description,
@@ -556,6 +565,7 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
 
   const firstRow = rows[0];
   const instructor = await ensureInstructorForImport(firstRow.instructor_slug, firstRow.instructor_name);
+  const galleryImageUrls = splitUrlList(pickFirstNonEmptyPackageValue(rows, (row) => row.sales_image_urls) ?? firstRow.sales_image_urls);
 
   const payload = {
     slug: firstRow.slug,
@@ -568,6 +578,7 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
     includes: splitPipeList(firstRow.includes),
     heroImageUrl: pickFirstNonEmptyPackageValue(rows, (row) => row.hero_image_url) ?? firstRow.hero_image_url,
     salesVideoUrl: pickFirstNonEmptyPackageValue(rows, (row) => row.sales_video_url) ?? firstRow.sales_video_url,
+    ...(galleryImageUrls.length > 0 ? { salesPageConfig: { galleryImageUrls, galleryHidden: false } } : {}),
     instructorId: instructor.id,
     seoTitle: firstRow.seo_title,
     seoDescription: firstRow.seo_description,

@@ -215,6 +215,27 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
       );
     }
 
+    if (section === "gallery" && !payload.gallerySection.hidden && payload.gallerySection.images.length > 0) {
+      return (
+        <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
+          <SectionIntro eyebrow={payload.gallerySection.eyebrow} title={payload.gallerySection.title} />
+          <div className="grid gap-4 md:grid-cols-2">
+            {payload.gallerySection.images.map((imageUrl, index) => (
+              <div
+                key={`${imageUrl}-${index}`}
+                className={`min-h-[280px] rounded-[30px] bg-cover bg-center shadow-[var(--shadow-panel)] ${payload.gallerySection.images.length === 1 ? "md:col-span-2 md:min-h-[440px]" : ""}`}
+                style={{
+                  backgroundImage: `linear-gradient(180deg, rgba(12,9,24,0.05), rgba(12,9,24,0.18)), ${cssUrl(imageUrl)}`,
+                }}
+                aria-label={`${payload.hero.title} sales image ${index + 1}`}
+                role="img"
+              />
+            ))}
+          </div>
+        </section>
+      );
+    }
+
     if (section === "curriculum" && payload.productType === "course") {
       return (
         <section key={section} id="curriculum" className="mx-auto max-w-7xl space-y-7 px-6">

@@ -45,6 +45,7 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
   const approvedTestimonials = bundle.testimonials.filter((testimonial) => testimonial.isApproved);
   const sectionOrder = normalizeSectionOrder(config.sectionOrder, [
     "description",
+    "gallery",
     "highlights",
     "included-courses",
     "testimonials",
@@ -79,6 +80,12 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
       title: "What this unlocks in one step.",
       shortDescription: bundle.shortDescription,
       longDescription: bundle.longDescription,
+    },
+    gallerySection: {
+      eyebrow: config.galleryEyebrow || "Sales gallery",
+      title: config.galleryTitle || "A closer look inside the bundle.",
+      images: config.galleryImageUrls ?? [],
+      hidden: config.galleryHidden,
     },
     highlightsSection: {
       eyebrow: "At a glance",

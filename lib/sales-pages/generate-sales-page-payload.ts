@@ -45,6 +45,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
   const approvedTestimonials = course.testimonials.filter((testimonial) => testimonial.isApproved);
   const sectionOrder = normalizeSectionOrder(config.sectionOrder, [
     "description",
+    "gallery",
     "highlights",
     "curriculum",
     "instructor",
@@ -84,6 +85,12 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
       title: "What this course opens up.",
       shortDescription: course.shortDescription,
       longDescription: course.longDescription,
+    },
+    gallerySection: {
+      eyebrow: config.galleryEyebrow || "Sales gallery",
+      title: config.galleryTitle || "A closer look inside the work.",
+      images: config.galleryImageUrls ?? [],
+      hidden: config.galleryHidden,
     },
     highlightsSection: {
       eyebrow: "At a glance",

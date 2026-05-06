@@ -216,8 +216,16 @@ export default async function CourseDetailPage({
                 collapsible
               >
                 <div className="lg:col-span-2 rounded-[20px] border border-stone-200 bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
-                  Edit the course once above, then use the right-side page actions to view the public surfaces. The only editable copy here is the thank-you page.
+                  Edit the course once above, then use these page settings for optional sales-page media and thank-you copy.
                 </div>
+                <input type="hidden" name="salesPage.galleryControls" value="true" />
+                <label className="lg:col-span-2 flex items-center gap-3 rounded-[18px] border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700">
+                  <input className="w-auto" type="checkbox" name="salesPage.galleryVisible" value="true" defaultChecked={!salesPageConfig.galleryHidden} />
+                  Show sales image gallery
+                </label>
+                <label>Gallery eyebrow<input name="salesPage.galleryEyebrow" defaultValue={salesPageConfig.galleryEyebrow ?? ""} placeholder="Sales gallery" /></label>
+                <label>Gallery title<input name="salesPage.galleryTitle" defaultValue={salesPageConfig.galleryTitle ?? ""} placeholder="A closer look inside the work." /></label>
+                <label className="lg:col-span-2">Gallery image URLs<textarea name="salesPage.galleryImageUrls" rows={5} defaultValue={(salesPageConfig.galleryImageUrls ?? []).join("\n")} placeholder="One image URL per line" /></label>
                 <label>Thank-you eyebrow<input name="salesPage.thankYouEyebrow" defaultValue={salesPageConfig.thankYouEyebrow ?? ""} /></label>
                 <label>Signed-in CTA label<input name="salesPage.thankYouSignedInLabel" defaultValue={salesPageConfig.thankYouSignedInLabel ?? ""} /></label>
                 <label>Signed-out CTA label<input name="salesPage.thankYouSignedOutLabel" defaultValue={salesPageConfig.thankYouSignedOutLabel ?? ""} /></label>

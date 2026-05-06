@@ -116,8 +116,8 @@ async function main() {
   }
 
   const multiOfferCsv = [
-    "legacy_course_id,slug,legacy_slug,legacy_url,title,subtitle,short_description,long_description,learning_outcomes,who_its_for,includes,hero_image_url,sales_video_url,instructor_slug,instructor_name,seo_title,seo_description,status,price,currency,compare_at_price,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,lesson_status",
-    "multi-offer-001,multi-offer-import-check,multi-offer-import-check,/course/multi-offer-import-check,Multi Offer Import Check,Monthly and annual checkout paths.,A course used to verify multiple buying options.,A direct source description preserved from the import CSV.,Outcome one,Focused students,Video lessons,https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=1200&q=80,https://www.youtube.com/watch?v=dQw4w9WgXcQ,peter-example,Peter Example,Multi Offer Import Check,Multiple checkout paths.,PUBLISHED,49 monthly / 360 annual,USD,,1,Start here,1,welcome,Welcome,VIDEO,Welcome lesson,https://vimeo.com/76979871,,true,0,5 min,PUBLISHED",
+    "legacy_course_id,slug,legacy_slug,legacy_url,title,subtitle,short_description,long_description,learning_outcomes,who_its_for,includes,hero_image_url,sales_video_url,sales_image_urls,instructor_slug,instructor_name,seo_title,seo_description,status,price,currency,compare_at_price,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,lesson_status",
+    "multi-offer-001,multi-offer-import-check,multi-offer-import-check,/course/multi-offer-import-check,Multi Offer Import Check,Monthly and annual checkout paths.,A course used to verify multiple buying options.,A direct source description preserved from the import CSV.,Outcome one,Focused students,Video lessons,https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=1200&q=80,https://www.youtube.com/watch?v=dQw4w9WgXcQ,https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80|https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80,peter-example,Peter Example,Multi Offer Import Check,Multiple checkout paths.,PUBLISHED,49 monthly / 360 annual,USD,,1,Start here,1,welcome,Welcome,VIDEO,Welcome lesson,https://vimeo.com/76979871,,true,0,5 min,PUBLISHED",
   ].join("\n");
   const multiOfferDryRun = await dryRunImport("COURSE_PACKAGE", multiOfferCsv);
 
@@ -150,10 +150,15 @@ async function main() {
   const multiOfferPayload = multiOfferCourse.pages.find((page) => page.pageType === "sales")?.generatedPayload as {
     offers?: Array<{ name?: string; price?: string; checkoutUrl?: string }>;
     pricingSection?: { offers?: Array<{ name?: string; price?: string; checkoutUrl?: string }> };
+    gallerySection?: { images?: string[]; hidden?: boolean | null };
   } | null;
 
   if ((multiOfferPayload?.offers?.length ?? 0) < 2 || (multiOfferPayload?.pricingSection?.offers?.length ?? 0) < 2) {
     throw new Error("Generated sales page payload does not expose all imported buying options.");
+  }
+
+  if ((multiOfferPayload?.gallerySection?.images?.length ?? 0) !== 2 || multiOfferPayload?.gallerySection?.hidden) {
+    throw new Error("Generated sales page payload does not expose imported sales gallery images.");
   }
 
   const studentDryRun = await dryRunImport("COURSE_STUDENTS", studentCsv, {

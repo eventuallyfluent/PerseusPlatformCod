@@ -1186,6 +1186,11 @@ export async function processImportBatchChunk(batchId: string) {
   }
 }
 
+export async function startAndProcessImportBatchChunk(batchId: string) {
+  await startImportBatch(batchId);
+  return processImportBatchChunk(batchId);
+}
+
 export async function executeImportBatch(batchId: string) {
   let batch = await startImportBatch(batchId);
 

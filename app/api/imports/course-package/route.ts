@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createFailedImportBatch, createImportBatch, executeImportBatch } from "@/lib/imports/execute-import";
+import { createFailedImportBatch, createImportBatch, startAndProcessImportBatchChunk } from "@/lib/imports/execute-import";
 
 export const maxDuration = 60;
 
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   try {
     batch = await createImportBatch("COURSE_PACKAGE", file.name, csvContent, dryRun);
     if (!dryRun) {
-      batch = await executeImportBatch(batch.id);
+      batch = await startAndProcessImportBatchChunk(batch.id);
     }
   } catch (error) {
     const failedBatch = await createFailedImportBatch("COURSE_PACKAGE", file.name, csvContent, error);

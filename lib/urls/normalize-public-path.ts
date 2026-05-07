@@ -1,5 +1,13 @@
 function cleanPathname(pathname: string) {
-  const withLeadingSlash = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  let decoded = pathname;
+
+  try {
+    decoded = decodeURI(pathname);
+  } catch {
+    decoded = pathname;
+  }
+
+  const withLeadingSlash = decoded.startsWith("/") ? decoded : `/${decoded}`;
   const collapsed = withLeadingSlash.replace(/\/{2,}/g, "/");
 
   if (collapsed.length > 1 && collapsed.endsWith("/")) {

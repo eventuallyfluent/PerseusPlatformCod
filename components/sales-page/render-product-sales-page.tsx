@@ -126,6 +126,7 @@ function SectionIntro({ eyebrow, title, body }: { eyebrow: string; title: string
 export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }: { payload: ProductPayload; bundleValueSlot?: ReactNode; reviewSlot?: ReactNode }) {
   const hidden = new Set(payload.sections.hidden);
   const orderedSections = payload.sections.order.filter((section) => !hidden.has(section));
+  const rendersReviewsSection = orderedSections.includes("testimonials");
 
   const renderSection = (section: SalesPageSectionKey) => {
     if (section === "description") {
@@ -528,6 +529,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
           {renderSection(section)}
         </Fragment>
       ))}
+      {reviewSlot && !rendersReviewsSection ? <section className="mx-auto max-w-7xl px-6">{reviewSlot}</section> : null}
     </div>
   );
 }

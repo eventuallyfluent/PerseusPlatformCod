@@ -1,11 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { CourseStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { CourseCard } from "@/components/public/course-card";
 import { HardLink } from "@/components/ui/hard-link";
 import { resolveCollectionPublicPath } from "@/lib/urls/resolve-collection-path";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { buildBreadcrumbStructuredData, buildItemListStructuredData } from "@/lib/seo/structured-data";
+import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +24,79 @@ function formatPriceLabel(amount: string | number, currency: string) {
 
 function normalizeSearchParam(value: string | string[] | undefined) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function BundleCatalogCard({
+  bundle,
+}: {
+  bundle: {
+    title: string;
+    subtitle: string | null;
+    shortDescription: string | null;
+    heroImageUrl: string | null;
+    priceLabel: string;
+    courseCount: number;
+    slug: string;
+    publicPath: string | null;
+    legacyUrl: string | null;
+  };
+}) {
+  return (
+    <HardLink href={resolveBundlePublicPath(bundle)} className="group block h-full">
+      <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-panel)]">
+        <div
+          className="perseus-course-card-media h-36 bg-cover bg-center transition duration-500 group-hover:scale-[1.02] sm:h-40"
+          style={{
+            backgroundImage: bundle.heroImageUrl
+              ? `linear-gradient(180deg, rgba(15, 16, 32, 0.12), rgba(15, 16, 32, 0.56)), url(${bundle.heroImageUrl})`
+              : "linear-gradient(135deg, #2b1149, #4b247d)",
+          }}
+        />
+        <div className="perseus-course-card-body flex flex-1 flex-col p-5">
+          <div className="flex items-center justify-between gap-3">
+            <p className="truncate text-sm font-medium text-[var(--text-secondary)]">
+              {bundle.courseCount} course{bundle.courseCount === 1 ? "" : "s"} included
+            </p>
+            <span className="shrink-0 rounded-full border border-[var(--premium-soft)] bg-[var(--premium-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--premium)]">
+              Bundle
+            </span>
+          </div>
+          <div className="mt-4 space-y-2">
+            <h3
+              className="text-lg font-semibold leading-snug text-[var(--text-primary)]"
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {bundle.title}
+            </h3>
+            {bundle.subtitle ?? bundle.shortDescription ? (
+              <p
+                className="text-sm leading-6 text-[var(--text-secondary)]"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                {bundle.subtitle ?? bundle.shortDescription}
+              </p>
+            ) : null}
+          </div>
+          <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
+            <p className="text-xl font-semibold text-[var(--text-primary)]">{bundle.priceLabel}</p>
+            <span className="rounded-full border border-[var(--accent)] bg-[var(--accent-soft)] px-4 py-2 text-sm font-semibold text-[var(--accent)] transition group-hover:bg-[var(--surface-panel-strong)]">
+              View bundle
+            </span>
+          </div>
+        </div>
+      </article>
+    </HardLink>
+  );
 }
 
 export async function generateMetadata({
@@ -84,61 +159,141 @@ export default async function CoursesIndexPage({
   const selectedCollection = collectionSlug ? collections.find((collection) => collection.slug === collectionSlug) ?? null : null;
   const selectedInstructor = instructorSlug ? instructors.find((instructor) => instructor.slug === instructorSlug) ?? null : null;
 
-  const courses = await prisma.course.findMany({
-    where: {
-      status: "PUBLISHED",
-      ...(query
-        ? {
-            OR: [
-              { title: { contains: query, mode: "insensitive" } },
-              { subtitle: { contains: query, mode: "insensitive" } },
-              { shortDescription: { contains: query, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-      ...(selectedCollection
-        ? {
-            collectionCourses: {
-              some: {
-                collection: {
-                  slug: selectedCollection.slug,
+  const courseWhere = {
+    status: CourseStatus.PUBLISHED,
+    ...(query
+      ? {
+          OR: [
+            { title: { contains: query, mode: "insensitive" as const } },
+            { subtitle: { contains: query, mode: "insensitive" as const } },
+            { shortDescription: { contains: query, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+    ...(selectedCollection
+      ? {
+          collectionCourses: {
+            some: {
+              collection: {
+                slug: selectedCollection.slug,
+              },
+            },
+          },
+        }
+      : {}),
+    ...(selectedInstructor
+      ? {
+          instructor: {
+            slug: selectedInstructor.slug,
+          },
+        }
+      : {}),
+  };
+
+  const [courses, bundles] = await Promise.all([
+    prisma.course.findMany({
+      where: courseWhere,
+      include: {
+        instructor: true,
+        collectionCourses: {
+          include: {
+            collection: {
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+              },
+            },
+          },
+          orderBy: { position: "asc" },
+        },
+      },
+      orderBy:
+        sort === "title"
+          ? { title: "asc" }
+          : sort === "price-low"
+            ? { price: "asc" }
+            : sort === "price-high"
+              ? { price: "desc" }
+              : { updatedAt: "desc" },
+    }),
+    prisma.bundle.findMany({
+      where: {
+        status: CourseStatus.PUBLISHED,
+        ...(query
+          ? {
+              OR: [
+                { title: { contains: query, mode: "insensitive" } },
+                { subtitle: { contains: query, mode: "insensitive" } },
+                { shortDescription: { contains: query, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+        ...(selectedCollection
+          ? {
+              courses: {
+                some: {
+                  course: {
+                    collectionCourses: {
+                      some: {
+                        collection: {
+                          slug: selectedCollection.slug,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }
+          : {}),
+        ...(selectedInstructor
+          ? {
+              courses: {
+                some: {
+                  course: {
+                    instructor: {
+                      slug: selectedInstructor.slug,
+                    },
+                  },
+                },
+              },
+            }
+          : {}),
+      },
+      include: {
+        courses: {
+          include: {
+            course: {
+              include: {
+                collectionCourses: {
+                  include: {
+                    collection: {
+                      select: {
+                        id: true,
+                        title: true,
+                        slug: true,
+                      },
+                    },
+                  },
+                  orderBy: { position: "asc" },
                 },
               },
             },
-          }
-        : {}),
-      ...(selectedInstructor
-        ? {
-            instructor: {
-              slug: selectedInstructor.slug,
-            },
-          }
-        : {}),
-    },
-    include: {
-      instructor: true,
-      collectionCourses: {
-        include: {
-          collection: {
-            select: {
-              id: true,
-              title: true,
-              slug: true,
-            },
           },
+          orderBy: { position: "asc" },
         },
-        orderBy: { position: "asc" },
       },
-    },
-    orderBy:
-      sort === "title"
-        ? { title: "asc" }
-        : sort === "price-low"
-          ? { price: "asc" }
-          : sort === "price-high"
-            ? { price: "desc" }
-            : { updatedAt: "desc" },
-  });
+      orderBy:
+        sort === "title"
+          ? { title: "asc" }
+          : sort === "price-low"
+            ? { price: "asc" }
+            : sort === "price-high"
+              ? { price: "desc" }
+              : { updatedAt: "desc" },
+    }),
+  ]);
+  const totalProducts = courses.length + bundles.length;
 
   const breadcrumbJsonLd = buildBreadcrumbStructuredData([
     { name: "Home", path: "/" },
@@ -147,10 +302,16 @@ export default async function CoursesIndexPage({
   const itemListJsonLd = buildItemListStructuredData({
     name: "Courses",
     path: "/courses",
-    items: courses.map((course) => ({
-      name: course.title,
-      path: resolveCoursePublicPath(course),
-    })),
+    items: [
+      ...bundles.map((bundle) => ({
+        name: bundle.title,
+        path: resolveBundlePublicPath(bundle),
+      })),
+      ...courses.map((course) => ({
+        name: course.title,
+        path: resolveCoursePublicPath(course),
+      })),
+    ],
   });
 
   return (
@@ -171,7 +332,7 @@ export default async function CoursesIndexPage({
             href="/courses"
             className={`font-medium transition ${selectedCollection ? "text-[var(--foreground-soft)] hover:text-[var(--portal-text)]" : "text-[var(--accent-lavender)] underline underline-offset-4"}`}
           >
-            All Courses
+            All products
           </HardLink>
           {collections.map((collection) => {
             const active = selectedCollection?.id === collection.id;
@@ -293,7 +454,7 @@ export default async function CoursesIndexPage({
             Clear filters
           </Link>
           <span className="text-sm text-[var(--foreground-soft)]">
-            {courses.length} course{courses.length === 1 ? "" : "s"}
+            {totalProducts} product{totalProducts === 1 ? "" : "s"}
           </span>
         </div>
       </form>
@@ -318,8 +479,40 @@ export default async function CoursesIndexPage({
         </div>
       )}
 
-      {courses.length > 0 ? (
+      {totalProducts > 0 ? (
         <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {bundles.map((bundle) => (
+            <div key={bundle.id} className="space-y-3">
+              <BundleCatalogCard
+                bundle={{
+                  title: bundle.title,
+                  subtitle: bundle.subtitle,
+                  shortDescription: bundle.shortDescription,
+                  heroImageUrl: bundle.heroImageUrl,
+                  priceLabel: formatPriceLabel(bundle.price.toString(), bundle.currency),
+                  courseCount: bundle.courses.length,
+                  slug: bundle.slug,
+                  publicPath: bundle.publicPath,
+                  legacyUrl: bundle.legacyUrl,
+                }}
+              />
+              <div className="flex flex-wrap gap-2 px-1">
+                {[
+                  ...new Map(
+                    bundle.courses.flatMap((item) => item.course.collectionCourses.map(({ collection }) => [collection.id, collection] as const)),
+                  ).values(),
+                ].map((collection) => (
+                  <Link
+                    key={collection.id}
+                    href={`/courses?collection=${encodeURIComponent(collection.slug)}`}
+                    className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent-lavender)]"
+                  >
+                    {collection.title}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
           {courses.map((course) => (
             <div key={course.id} className="space-y-3">
               <CourseCard
@@ -346,7 +539,7 @@ export default async function CoursesIndexPage({
         </div>
       ) : (
         <div className="mx-auto mt-12 max-w-3xl rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-8 text-center text-lg leading-8 text-[var(--foreground-soft)] shadow-[var(--shadow-soft)]">
-          No published courses matched the current search and filters.
+          No published products matched the current search and filters.
         </div>
       )}
     </div>

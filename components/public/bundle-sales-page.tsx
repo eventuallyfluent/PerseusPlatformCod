@@ -36,6 +36,7 @@ export function BundleSalesPage({
     { name: "Home", path: "/" },
     { name: bundle.title, path: resolveBundlePublicPath(bundle) },
   ]);
+  const publicPath = resolveBundlePublicPath(bundle);
   const reviewSlot = (
     <div
       id="leave-review"
@@ -52,7 +53,7 @@ export function BundleSalesPage({
             <Button>Leave a Review</Button>
           </a>
         ) : (
-          <a href={reviewLoginHref ?? `/login?returnTo=${encodeURIComponent(`${resolveBundlePublicPath(bundle)}#leave-review-form`)}`}>
+          <a href={reviewLoginHref ?? `/login?returnTo=${encodeURIComponent(`${publicPath}#leave-review-form`)}`}>
             <Button>Sign in to Leave a Review</Button>
           </a>
         )}
@@ -65,6 +66,7 @@ export function BundleSalesPage({
         <form id="leave-review-form" action={submitBundleReviewAction} className="mt-6 grid gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] p-5">
           <input type="hidden" name="bundleId" value={bundle.id} />
           <input type="hidden" name="bundleSlug" value={bundle.slug} />
+          <input type="hidden" name="returnPath" value={publicPath} />
           <div className="space-y-2">
             <span className="text-sm font-medium text-[var(--text-primary)]">Rating</span>
             <div className="flex flex-wrap gap-2">

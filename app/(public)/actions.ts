@@ -92,17 +92,19 @@ export async function submitCourseReviewAction(formData: FormData) {
 export async function submitBundleReviewAction(formData: FormData) {
   const bundleId = String(formData.get("bundleId") ?? "");
   const bundleSlug = String(formData.get("bundleSlug") ?? "");
+  const submittedReturnPath = String(formData.get("returnPath") ?? "").trim();
+  const returnPath = submittedReturnPath.startsWith("/") && !submittedReturnPath.startsWith("//") ? submittedReturnPath : `/bundle/${bundleSlug}`;
   const { quote, name: formName, rating, recommendsProduct } = readReviewForm(formData);
   const session = await auth();
 
   if (!session?.user?.email) {
-    redirect(`/login?returnTo=${encodeURIComponent(`/bundle/${bundleSlug}#leave-review-form`)}`);
+    redirect(`/login?returnTo=${encodeURIComponent(`${returnPath}#leave-review-form`)}`);
   }
 
   const name = formName || session.user.name || "Student";
 
   if (!bundleId || !bundleSlug || !quote || !Number.isInteger(rating) || rating < 1 || rating > 5) {
-    redirect(`/bundle/${bundleSlug}#leave-review-form`);
+    redirect(`${returnPath}#leave-review-form`);
   }
 
   const user = await prisma.user.findUnique({
@@ -111,7 +113,7 @@ export async function submitBundleReviewAction(formData: FormData) {
   });
 
   if (!user) {
-    redirect(`/bundle/${bundleSlug}`);
+    redirect(returnPath);
   }
 
   const bundle = await prisma.bundle.findUnique({
@@ -129,7 +131,7 @@ export async function submitBundleReviewAction(formData: FormData) {
   });
 
   if (!bundle) {
-    redirect(`/bundle/${bundleSlug}`);
+    redirect(returnPath);
   }
 
   const paidBundleOrder = await prisma.order.findFirst({
@@ -153,7 +155,7 @@ export async function submitBundleReviewAction(formData: FormData) {
       : null;
 
   if (!paidBundleOrder && !grantedEnrollment) {
-    redirect(`/bundle/${bundleSlug}`);
+    redirect(returnPath);
   }
 
   const existing = await prisma.testimonial.findFirst({
@@ -197,9 +199,10 @@ export async function submitBundleReviewAction(formData: FormData) {
   }
 
   revalidatePath(`/bundle/${bundleSlug}`);
+  revalidatePath(returnPath);
   revalidatePath("/dashboard");
   revalidatePath("/admin");
-  redirect(`/bundle/${bundleSlug}#leave-review-form`);
+  redirect(`${returnPath}#leave-review-form`);
 }
 
 export async function markLessonCompleteAction(formData: FormData) {

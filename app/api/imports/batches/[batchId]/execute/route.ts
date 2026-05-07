@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { markImportBatchFailed, startAndProcessImportBatchChunk } from "@/lib/imports/execute-import";
+import { markImportBatchFailed, startImportBatch } from "@/lib/imports/execute-import";
 
 export const maxDuration = 60;
 
@@ -8,7 +8,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ bat
   let batch;
 
   try {
-    batch = await startAndProcessImportBatchChunk(batchId);
+    batch = await startImportBatch(batchId);
   } catch (error) {
     const failedBatch = await markImportBatchFailed(batchId, error);
     return NextResponse.redirect(new URL(`/admin/imports/${failedBatch.id}`, request.url), { status: 303 });

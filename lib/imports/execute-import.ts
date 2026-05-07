@@ -1045,9 +1045,8 @@ async function processChunkedBatch(batchId: string) {
 
   const persistedContext = (batch.context as PersistedImportContext<CoursePackageCsvRow | CourseStudentCsvRow> | null) ?? undefined;
   const context = persistedContext ? { targetCourseId: persistedContext.targetCourseId } : undefined;
-  const shouldRevalidateSource = batch.type === ImportType.COURSE_PACKAGE;
-  const validation = shouldRevalidateSource || !persistedContext?.preparedRows ? await dryRunImport(batch.type, batch.sourceContent, context) : null;
-  const validRows = (shouldRevalidateSource ? validation?.validRows : persistedContext?.preparedRows ?? validation?.validRows ?? []) as ValidatedImportRow<
+  const validation = !persistedContext?.preparedRows ? await dryRunImport(batch.type, batch.sourceContent, context) : null;
+  const validRows = (persistedContext?.preparedRows ?? validation?.validRows ?? []) as ValidatedImportRow<
     CoursePackageCsvRow | CourseStudentCsvRow
   >[];
   const failures = normalizeErrorReport(batch.errorReport);

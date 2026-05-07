@@ -130,8 +130,7 @@ export default async function SettingsPage({
         course: { select: { title: true } },
         bundle: { select: { title: true } },
       },
-      orderBy: [{ position: "asc" }],
-      take: 12,
+      orderBy: [{ course: { title: "asc" } }, { bundle: { title: "asc" } }, { position: "asc" }],
     }),
     prisma.collection.findMany({
       orderBy: [{ position: "asc" }, { title: "asc" }],
@@ -225,7 +224,7 @@ export default async function SettingsPage({
         <SectionFrame
           type="TESTIMONIES"
           title="Testimonies"
-          description="Homepage proof now comes from the approved testimonial bank used across products."
+          description="Choose latest approved reviews automatically or manually feature specific approved reviews from the searchable bank."
           position={testimonies.position}
           enabled={testimonies.enabled}
         >
@@ -248,7 +247,9 @@ export default async function SettingsPage({
             </label>
             <div className="rounded-2xl border border-stone-200 p-4">
               <p className="text-sm font-medium text-stone-900">Approved testimonial bank</p>
-              <p className="mt-1 text-sm leading-6 text-stone-600">Select specific testimonials or leave the section on latest approved.</p>
+              <p className="mt-1 text-sm leading-6 text-stone-600">
+                Search by student, course, bundle, or review text. Use source mode above to decide whether this list is manual or automatic.
+              </p>
               <div className="mt-4">
                 <MultiSelectPicker
                   name="selectedTestimonialIds"
@@ -256,7 +257,7 @@ export default async function SettingsPage({
                     value: testimonial.id,
                     title: testimonial.name ?? "Anonymous",
                     subtitle: `${testimonial.course?.title ?? testimonial.bundle?.title ?? "General"} • ${testimonial.quote}`,
-                    badge: "Review",
+                    badge: testimonial.course?.title ? "Course review" : testimonial.bundle?.title ? "Bundle review" : "Review",
                   }))}
                   selectedValues={selectedHomepageTestimonials}
                   headerLabel="Homepage reviews"

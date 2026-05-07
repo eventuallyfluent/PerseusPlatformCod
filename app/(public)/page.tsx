@@ -237,7 +237,8 @@ export default async function HomePage() {
       })
     : [];
 
-  const selectedTestimonialIds = testimoniesPayload?.selectedTestimonialIds ?? [];
+  const useSelectedTestimonials = testimoniesPayload?.sourceMode === "selected";
+  const selectedTestimonialIds = useSelectedTestimonials ? (testimoniesPayload?.selectedTestimonialIds ?? []) : [];
   const approvedTestimonials = testimoniesPayload
     ? await prisma.testimonial.findMany({
         where: {
@@ -248,7 +249,7 @@ export default async function HomePage() {
           course: { select: { title: true } },
           bundle: { select: { title: true } },
         },
-        orderBy: [{ position: "asc" }],
+        orderBy: useSelectedTestimonials ? [{ position: "asc" }] : [{ position: "desc" }],
         take: selectedTestimonialIds.length > 0 ? selectedTestimonialIds.length : 6,
       })
     : [];

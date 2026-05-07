@@ -199,12 +199,12 @@ export default async function CoursesIndexPage({
                 className="group block"
               >
                 <article
-                  className={`grid min-h-full grid-cols-[96px_minmax(0,1fr)] overflow-hidden rounded-[24px] border bg-[var(--perseus-collection-panel)] shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] ${
+                  className={`grid min-h-full overflow-hidden rounded-[24px] border bg-[var(--perseus-collection-panel)] shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] sm:grid-cols-[168px_minmax(0,1fr)] ${
                     active ? "border-[var(--accent)]" : "border-[var(--border)]"
                   }`}
                 >
                   <div
-                    className="min-h-32 bg-cover bg-center"
+                    className="min-h-44 bg-cover bg-center sm:min-h-full"
                     style={{
                       backgroundImage: collection.imageUrl
                         ? `linear-gradient(180deg, rgba(13,15,29,0.18), rgba(13,15,29,0.62)), url(${collection.imageUrl})`

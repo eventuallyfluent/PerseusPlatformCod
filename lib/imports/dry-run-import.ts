@@ -19,6 +19,8 @@ export type ImportContext = {
 
 type PackageRow = Record<string, string | number | boolean | undefined>;
 
+const COURSE_IMAGE_ALIAS_FIELDS = ["hero_image_url", "product_image_url", "payhip_image_url", "image_url"] as const;
+
 const COURSE_PACKAGE_CARRY_FIELDS = [
   "legacy_course_id",
   "slug",
@@ -115,6 +117,17 @@ function normalizeCoursePackageRows(rows: Record<string, string>[]) {
   }
 
   return normalizedRows;
+}
+
+function normalizeCourseImageAliases(rows: Record<string, string>[]) {
+  return rows.map((row) => {
+    if (String(row.hero_image_url ?? "").trim()) {
+      return row;
+    }
+
+    const aliasImageUrl = COURSE_IMAGE_ALIAS_FIELDS.map((field) => String(row[field] ?? "").trim()).find(Boolean);
+    return aliasImageUrl ? { ...row, hero_image_url: aliasImageUrl } : row;
+  });
 }
 
 async function enrichCourseValidation(
@@ -489,7 +502,12 @@ function buildSummary(
 
 export async function dryRunImport(type: ImportType, csvContent: string, context?: ImportContext) {
   const parsedRows = parseCsv<Record<string, string>>(csvContent);
-  const rows = type === ImportType.COURSE_PACKAGE ? normalizeCoursePackageRows(parsedRows) : parsedRows;
+  const rows =
+    type === ImportType.COURSE_PACKAGE
+      ? normalizeCoursePackageRows(normalizeCourseImageAliases(parsedRows))
+      : type === ImportType.COURSES
+        ? normalizeCourseImageAliases(parsedRows)
+        : parsedRows;
 
   let validation: ImportValidationResult<Record<string, unknown>>;
 

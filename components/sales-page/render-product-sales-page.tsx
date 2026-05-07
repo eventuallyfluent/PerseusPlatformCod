@@ -508,6 +508,20 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
       </section>
 
       {payload.productType === "course" ? bundleValueSlot : null}
+      {payload.productType === "course" && payload.hero.imageUrl ? (
+        <section className="mx-auto max-w-7xl px-6">
+          <div className="overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--surface-panel)] p-3 shadow-[var(--shadow-panel)]">
+            <div
+              className="min-h-[260px] rounded-[26px] bg-[var(--surface-panel-strong)] bg-contain bg-center bg-no-repeat sm:min-h-[380px] lg:min-h-[520px]"
+              style={{
+                backgroundImage: cssUrl(payload.hero.imageUrl),
+              }}
+              role="img"
+              aria-label={`${payload.hero.title} course image`}
+            />
+          </div>
+        </section>
+      ) : null}
       {orderedSections.map((section) => (
         <Fragment key={section}>
           {section === "pricing" && payload.productType === "course" ? bundleValueSlot : null}

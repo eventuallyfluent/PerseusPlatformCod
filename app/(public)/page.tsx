@@ -93,7 +93,6 @@ function CollectionCourseRow({ course }: { course: HomepageCourse }) {
 function CollectionPanel({
   eyebrow,
   title,
-  description,
   imageUrl,
   tone,
   href,
@@ -101,7 +100,6 @@ function CollectionPanel({
 }: {
   eyebrow: string;
   title: string;
-  description: string;
   imageUrl?: string;
   tone: CollectionTone;
   href: string;
@@ -128,7 +126,6 @@ function CollectionPanel({
       >
         <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[rgba(240,234,248,0.76)]">{eyebrow}</p>
         <h2 className="mt-5 font-serif text-4xl leading-none tracking-[-0.04em] text-[var(--portal-text)]">{title}</h2>
-        <p className="mt-5 max-w-sm text-base leading-8 text-[rgba(240,234,248,0.76)]">{description}</p>
         <Link href={href} className="mt-5 inline-flex text-sm font-semibold text-[var(--premium)]">
           View collection
         </Link>
@@ -210,7 +207,6 @@ function CollectionsSection({
             key={`${collection.id}-${index}`}
             eyebrow={collection.eyebrow ?? `Collection ${index + 1}`}
             title={collection.title}
-            description={collection.description}
             imageUrl={collection.imageUrl ?? undefined}
             tone={(collection.tone as CollectionTone) ?? "arcane"}
             href={resolveCollectionPublicPath(collection)}

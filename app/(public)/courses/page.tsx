@@ -211,25 +211,14 @@ export default async function CoursesIndexPage({
                         : "linear-gradient(135deg,#1c1534,#302555)",
                     }}
                   />
-                  <div className="flex min-w-0 flex-col justify-between gap-3 p-4">
-                    <div className="space-y-2">
+                  <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
+                    <div>
                       <div className="flex items-start justify-between gap-3">
                         <h2 className="text-base font-semibold leading-snug text-[var(--portal-text)]">{collection.title}</h2>
                         <span className="shrink-0 rounded-full border border-[var(--border)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground-soft)]">
                         {collection._count.courses} course{collection._count.courses === 1 ? "" : "s"}
                         </span>
                       </div>
-                      <p
-                        className="text-sm leading-6 text-[var(--foreground-soft)]"
-                        style={{
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                        }}
-                      >
-                        {collection.description || "Browse the full collection."}
-                      </p>
                     </div>
                     <p className="text-sm font-semibold text-[var(--accent-lavender)]">{active ? "Viewing collection" : "Open collection"}</p>
                   </div>

@@ -2,6 +2,8 @@
 
 These rules preserve the original Perseus Arcane Academy direction shown in the reference screenshots. They are the source of truth before changing public or learner UI.
 
+For the consolidated source extracted from the original `CreatorOS_DesignSystem.html`, read `design-rules/original-design-reference.md` first.
+
 ## Core Influence Map
 
 - GroupApp gives the structure: fixed learner navigation, clear course grids, progress states, and practical layouts.

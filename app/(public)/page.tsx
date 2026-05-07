@@ -2,14 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
-import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { resolveCollectionPublicPath } from "@/lib/urls/resolve-collection-path";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { buildOrganizationStructuredData, buildWebsiteStructuredData } from "@/lib/seo/structured-data";
 import { getPublicReviewName } from "@/lib/testimonials/public-review-name";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
-import { HardLink } from "@/components/ui/hard-link";
 import type {
   HomepageCollectionsPayload,
   HomepageEmailSignupPayload,
@@ -23,16 +21,6 @@ export const metadata: Metadata = buildMetadata({
   description: "Browse Perseus Arcane Academy courses, bundles, instructors, and public training paths on their canonical public URLs.",
   path: "/",
 });
-
-function formatPrice(amount: string | number, currency: string) {
-  const numericAmount = typeof amount === "number" ? amount : Number(amount);
-
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: numericAmount % 1 === 0 ? 0 : 2,
-  }).format(numericAmount);
-}
 
 function PerseusHeroMark() {
   return (
@@ -50,45 +38,7 @@ function normalizeHeroText(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
-type HomepageCourse = {
-  id: string;
-  title: string;
-  slug: string;
-  subtitle: string | null;
-  publicPath: string | null;
-  legacyUrl: string | null;
-  priceLabel: string | null;
-  statusLabel: string;
-  ctaLabel: string;
-};
-
 type CollectionTone = "arcane" | "discipline" | "gateway";
-
-function CollectionCourseRow({ course }: { course: HomepageCourse }) {
-  return (
-    <HardLink
-      href={resolveCoursePublicPath(course)}
-      className="perseus-collection-row flex items-start justify-between gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] p-4 transition hover:border-[var(--border-strong)] hover:bg-[var(--collection-row-hover)]"
-    >
-      <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
-          <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--accent-lavender)]">
-            {course.statusLabel}
-          </span>
-          <span className="rounded-full bg-[var(--premium-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--premium)]">
-            {course.priceLabel?.toLowerCase() === "free" ? "Free" : "Premium"}
-          </span>
-        </div>
-        <h3 className="text-2xl leading-none tracking-[-0.03em] text-[var(--portal-text)]">{course.title}</h3>
-        {course.subtitle ? <p className="max-w-sm text-sm leading-7 text-[var(--portal-muted)]">{course.subtitle}</p> : null}
-      </div>
-      <div className="pt-1 text-right">
-        <p className="text-lg font-semibold text-[var(--portal-text)]">{course.priceLabel ?? "View"}</p>
-        <p className="mt-3 text-sm font-semibold text-[var(--accent-lavender)]">{course.ctaLabel}</p>
-      </div>
-    </HardLink>
-  );
-}
 
 function CollectionPanel({
   eyebrow,
@@ -96,14 +46,12 @@ function CollectionPanel({
   imageUrl,
   tone,
   href,
-  courses,
 }: {
   eyebrow: string;
   title: string;
   imageUrl?: string;
   tone: CollectionTone;
   href: string;
-  courses: HomepageCourse[];
 }) {
   const toneVar =
     tone === "arcane"
@@ -113,33 +61,27 @@ function CollectionPanel({
         : "var(--collection-gateway)";
 
   return (
-    <article className="perseus-collection-panel flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] shadow-[var(--collection-panel-shadow)]">
-      <div
-        className="min-h-[220px] border-b border-[var(--border)] px-7 py-7"
+    <Link href={href} className="group block h-full">
+      <article
+        className="perseus-collection-panel relative flex min-h-[360px] h-full overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] shadow-[var(--collection-panel-shadow)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)]"
         style={{
           backgroundImage: imageUrl
-            ? `linear-gradient(180deg, rgba(13,15,29,0.36), rgba(13,15,29,0.74)), ${toneVar}, url(${imageUrl})`
+            ? `linear-gradient(180deg, rgba(13,15,29,0.12), rgba(13,15,29,0.86)), ${toneVar}, url(${imageUrl})`
             : toneVar,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[rgba(240,234,248,0.76)]">{eyebrow}</p>
-        <h2 className="mt-5 font-serif text-4xl leading-none tracking-[-0.04em] text-[var(--portal-text)]">{title}</h2>
-        <Link href={href} className="mt-5 inline-flex text-sm font-semibold text-[var(--premium)]">
-          View collection
-        </Link>
-      </div>
-      <div className="flex flex-1 flex-col gap-4 p-6">
-        {courses.length > 0 ? (
-          courses.map((course) => <CollectionCourseRow key={course.id} course={course} />)
-        ) : (
-          <div className="rounded-[24px] border border-dashed border-[var(--border)] bg-[var(--perseus-collection-elevated)] p-6 text-sm leading-7 text-[var(--foreground-soft)]">
-            Add course slugs to this collection in admin settings to populate the panel.
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(192,132,252,0.2),transparent_24%)] opacity-90 transition group-hover:opacity-100" />
+        <div className="relative flex h-full w-full flex-col justify-between p-8 lg:p-9">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[rgba(240,234,248,0.76)]">{eyebrow}</p>
+          <div>
+            <h2 className="max-w-sm font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)] lg:text-[3.6rem]">{title}</h2>
+            <p className="mt-6 text-sm font-semibold text-[var(--premium)] transition group-hover:text-[var(--accent-lavender)]">View collection</p>
           </div>
-        )}
-      </div>
-    </article>
+        </div>
+      </article>
+    </Link>
   );
 }
 
@@ -190,7 +132,6 @@ function CollectionsSection({
     description: string;
     imageUrl: string | null;
     tone: string;
-    courses: HomepageCourse[];
   }>;
 }) {
   return (
@@ -201,7 +142,7 @@ function CollectionsSection({
         <p className="text-lg leading-8 text-[var(--foreground-soft)]">{payload.description}</p>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {collections.map((collection, index) => (
           <CollectionPanel
             key={`${collection.id}-${index}`}
@@ -210,7 +151,6 @@ function CollectionsSection({
             imageUrl={collection.imageUrl ?? undefined}
             tone={(collection.tone as CollectionTone) ?? "arcane"}
             href={resolveCollectionPublicPath(collection)}
-            courses={collection.courses}
           />
         ))}
       </div>
@@ -292,26 +232,6 @@ export default async function HomePage() {
   const collectionRecords = collectionsPayload
     ? await prisma.collection.findMany({
         where: featuredCollectionIds.length > 0 ? { id: { in: featuredCollectionIds } } : undefined,
-        include: {
-          courses: {
-            orderBy: { position: "asc" },
-            include: {
-              course: {
-                select: {
-                  id: true,
-                  title: true,
-                  slug: true,
-                  subtitle: true,
-                  publicPath: true,
-                  legacyUrl: true,
-                  price: true,
-                  currency: true,
-                  status: true,
-                },
-              },
-            },
-          },
-        },
         orderBy: [{ position: "asc" }, { title: "asc" }],
         take: featuredCollectionIds.length > 0 ? undefined : 3,
       })
@@ -383,17 +303,6 @@ export default async function HomePage() {
             description: collection.description,
             imageUrl: collection.imageUrl,
             tone: collection.tone,
-            courses: collection.courses.map(({ course }, index) => ({
-              id: course.id,
-              title: course.title,
-              slug: course.slug,
-              subtitle: course.subtitle,
-              publicPath: course.publicPath,
-              legacyUrl: course.legacyUrl,
-              priceLabel: formatPrice(course.price.toString(), course.currency),
-              statusLabel: index === 0 ? "Featured" : course.status === "PUBLISHED" ? "Open now" : "Draft",
-              ctaLabel: "View course",
-            })),
           }))}
         />
       );

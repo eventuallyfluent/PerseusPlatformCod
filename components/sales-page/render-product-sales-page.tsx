@@ -172,11 +172,17 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
     }
 
     if (section === "highlights") {
+      const cards = payload.highlightsSection.cards.filter((card) => splitHighlightItems(card.items).length > 0);
+
+      if (cards.length === 0) {
+        return null;
+      }
+
       return (
         <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
           <SectionIntro eyebrow={payload.highlightsSection.eyebrow} title="The core promise at a glance." />
           <div className="grid gap-5 lg:grid-cols-3">
-            {payload.highlightsSection.cards.map((card) => {
+            {cards.map((card) => {
               const treatment = getHighlightTreatment(card.id);
               const Icon = treatment.icon;
               const items = splitHighlightItems(card.items);
@@ -193,19 +199,12 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                   </div>
                   <p className={`mt-5 text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>{treatment.eyebrow}</p>
                   <ul className={`mt-4 space-y-4 text-sm leading-7 ${panelMutedTextClass}`}>
-                    {items.length > 0 ? (
-                      items.map((item) => (
-                        <li key={item} className="grid grid-cols-[18px_minmax(0,1fr)] gap-3">
-                          <CheckCircle2 className="mt-1 size-4 text-[var(--accent-lavender)]" aria-hidden="true" />
-                          <span>{item}</span>
-                        </li>
-                      ))
-                    ) : (
-                      <li className="grid grid-cols-[18px_minmax(0,1fr)] gap-3">
+                    {items.map((item) => (
+                      <li key={item} className="grid grid-cols-[18px_minmax(0,1fr)] gap-3">
                         <CheckCircle2 className="mt-1 size-4 text-[var(--accent-lavender)]" aria-hidden="true" />
-                        <span>Nothing listed yet.</span>
+                        <span>{item}</span>
                       </li>
-                    )}
+                    ))}
                 </ul>
                 </div>
               </div>

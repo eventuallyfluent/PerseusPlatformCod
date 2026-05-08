@@ -4,12 +4,34 @@ import { normalizeSectionOrder, parseSalesPageConfig } from "@/lib/sales-pages/s
 import type { BundleSalesPagePayload, BundleWithRelations, SalesPageOfferSummary } from "@/types";
 import { getPublicReviewName } from "@/lib/testimonials/public-review-name";
 
+type HighlightCard = {
+  id: "outcomes" | "audience" | "includes";
+  title: string;
+  items: string[];
+};
+
 function readStringArray(value: unknown) {
   if (Array.isArray(value)) {
-    return value.map((item) => String(item));
+    return value.map((item) => String(item).trim()).filter(Boolean);
   }
 
   return [];
+}
+
+function uniqueItems(items: string[], limit = 8) {
+  const seen = new Set<string>();
+  const unique: string[] = [];
+
+  for (const item of items) {
+    const key = item.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(item);
+    }
+    if (unique.length >= limit) break;
+  }
+
+  return unique;
 }
 
 function buildOffers(bundle: BundleWithRelations): SalesPageOfferSummary[] {
@@ -43,6 +65,18 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
   const config = parseSalesPageConfig(bundle.salesPageConfig);
   const offers = buildOffers(bundle);
   const approvedTestimonials = bundle.testimonials.filter((testimonial) => testimonial.isApproved);
+  const bundleOutcomes = readStringArray(bundle.learningOutcomes);
+  const bundleAudience = readStringArray(bundle.whoItsFor);
+  const bundleIncludes = readStringArray(bundle.includes);
+  const courseOutcomes = uniqueItems(bundle.courses.flatMap((item) => readStringArray(item.course.learningOutcomes)));
+  const courseAudience = uniqueItems(bundle.courses.flatMap((item) => readStringArray(item.course.whoItsFor)));
+  const courseTitles = bundle.courses.map((item) => item.course.title).filter(Boolean);
+  const allHighlightCards: HighlightCard[] = [
+    { id: "outcomes", title: "Outcomes", items: bundleOutcomes.length > 0 ? bundleOutcomes : courseOutcomes },
+    { id: "audience", title: "Who it is for", items: bundleAudience.length > 0 ? bundleAudience : courseAudience },
+    { id: "includes", title: "Bundle includes", items: bundleIncludes.length > 0 ? bundleIncludes : courseTitles },
+  ];
+  const highlightCards = allHighlightCards.filter((card) => card.items.length > 0);
   const sectionOrder = normalizeSectionOrder(config.sectionOrder, [
     "description",
     "gallery",
@@ -51,7 +85,7 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
     "testimonials",
     "faqs",
     "pricing",
-  ]);
+  ]).filter((section) => section !== "highlights" || highlightCards.length > 0);
 
   return {
     version: "v2",
@@ -89,11 +123,7 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
     },
     highlightsSection: {
       eyebrow: "At a glance",
-      cards: [
-        { id: "outcomes", title: "Outcomes", items: readStringArray(bundle.learningOutcomes) },
-        { id: "audience", title: "Who it is for", items: readStringArray(bundle.whoItsFor) },
-        { id: "includes", title: "Bundle includes", items: readStringArray(bundle.includes) },
-      ],
+      cards: highlightCards,
     },
     includedCoursesSection: {
       eyebrow: "Included courses",

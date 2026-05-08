@@ -1,6 +1,6 @@
 import { buildBreadcrumbStructuredData, buildBundleProductStructuredData, buildFaqStructuredData } from "@/lib/seo/structured-data";
 import { RenderProductSalesPage } from "@/components/sales-page/render-product-sales-page";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClassName } from "@/components/ui/button";
 import { submitBundleReviewAction } from "@/app/(public)/actions";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import type { BundleSalesPagePayload, BundleWithRelations } from "@/types";
@@ -49,64 +49,66 @@ export function BundleSalesPage({
           <p className="text-sm leading-7 text-[var(--text-secondary)]">Verified bundle reviews are published after approval.</p>
         </div>
         {isLoggedIn ? (
-          <a href="#leave-review-form">
-            <Button>Leave a Review</Button>
+          <a href="#leave-review-form" className={buttonClassName()}>
+            Leave a Review
           </a>
         ) : (
-          <a href={reviewLoginHref ?? `/login?returnTo=${encodeURIComponent(`${publicPath}#leave-review-form`)}`}>
-            <Button>Sign in to Leave a Review</Button>
+          <a href={reviewLoginHref ?? `/login?returnTo=${encodeURIComponent(`${publicPath}#leave-review-form`)}`} className={buttonClassName()}>
+            Sign in to Leave a Review
           </a>
         )}
       </div>
-      {!isLoggedIn ? (
-        <p className="mt-6 rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm leading-7 text-[var(--text-secondary)]">
-          Sign in with your learner email and you will land directly in the review form.
-        </p>
-      ) : canLeaveReview ? (
-        <form id="leave-review-form" action={submitBundleReviewAction} className="mt-6 grid gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] p-5">
-          <input type="hidden" name="bundleId" value={bundle.id} />
-          <input type="hidden" name="bundleSlug" value={bundle.slug} />
-          <input type="hidden" name="returnPath" value={publicPath} />
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-[var(--text-primary)]">Rating</span>
-            <div className="flex flex-wrap gap-2">
-              {([5, 4, 3, 2, 1] as const).map((value) => (
-                <label
-                  key={value}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm text-[var(--text-primary)] transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]"
-                >
-                  <input className="sr-only" type="radio" name="rating" value={value} defaultChecked={(existingReview?.rating ?? 5) === value} />
-                  <RatingStars rating={value} />
-                </label>
-              ))}
-            </div>
-          </div>
-          <label className="space-y-2">
-            <span className="text-sm font-medium text-[var(--text-primary)]">Your review</span>
-            <textarea
-              name="quote"
-              rows={4}
-              required
-              defaultValue={existingReview?.quote ?? ""}
-              className="w-full rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm leading-7 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
-            />
-          </label>
-          <label className="flex items-center gap-3 rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm font-medium text-[var(--text-primary)]">
-            <input className="size-4" type="checkbox" name="recommendsProduct" value="true" defaultChecked={existingReview?.recommendsProduct ?? true} />
-            I recommend this product
-          </label>
-          <p className="text-sm leading-7 text-[var(--text-secondary)]">
-            {existingReview ? `Your current review is ${existingReview.isApproved ? "approved" : "pending approval"}.` : "Your review will appear after approval."}
+      <div id="leave-review-form" className="scroll-mt-28">
+        {!isLoggedIn ? (
+          <p className="mt-6 rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm leading-7 text-[var(--text-secondary)]">
+            Sign in with your learner email and you will land directly in the review form.
           </p>
-          <div>
-            <Button type="submit">{existingReview ? "Update review" : "Submit review"}</Button>
-          </div>
-        </form>
-      ) : (
-        <p id="leave-review-form" className="mt-6 rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm leading-7 text-[var(--text-secondary)]">
-          Reviews are available to bundle buyers after purchase.
-        </p>
-      )}
+        ) : canLeaveReview ? (
+          <form action={submitBundleReviewAction} className="mt-6 grid gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] p-5">
+            <input type="hidden" name="bundleId" value={bundle.id} />
+            <input type="hidden" name="bundleSlug" value={bundle.slug} />
+            <input type="hidden" name="returnPath" value={publicPath} />
+            <div className="space-y-2">
+              <span className="text-sm font-medium text-[var(--text-primary)]">Rating</span>
+              <div className="flex flex-wrap gap-2">
+                {([5, 4, 3, 2, 1] as const).map((value) => (
+                  <label
+                    key={value}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm text-[var(--text-primary)] transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]"
+                  >
+                    <input className="sr-only" type="radio" name="rating" value={value} defaultChecked={(existingReview?.rating ?? 5) === value} />
+                    <RatingStars rating={value} />
+                  </label>
+                ))}
+              </div>
+            </div>
+            <label className="space-y-2">
+              <span className="text-sm font-medium text-[var(--text-primary)]">Your review</span>
+              <textarea
+                name="quote"
+                rows={4}
+                required
+                defaultValue={existingReview?.quote ?? ""}
+                className="w-full rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm leading-7 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+              />
+            </label>
+            <label className="flex items-center gap-3 rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm font-medium text-[var(--text-primary)]">
+              <input className="size-4" type="checkbox" name="recommendsProduct" value="true" defaultChecked={existingReview?.recommendsProduct ?? true} />
+              I recommend this product
+            </label>
+            <p className="text-sm leading-7 text-[var(--text-secondary)]">
+              {existingReview ? `Your current review is ${existingReview.isApproved ? "approved" : "pending approval"}.` : "Your review will appear after approval."}
+            </p>
+            <div>
+              <Button type="submit">{existingReview ? "Update review" : "Submit review"}</Button>
+            </div>
+          </form>
+        ) : (
+          <p className="mt-6 rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm leading-7 text-[var(--text-secondary)]">
+            Reviews are available to bundle buyers after purchase.
+          </p>
+        )}
+      </div>
     </div>
   );
 

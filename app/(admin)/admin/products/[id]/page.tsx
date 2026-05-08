@@ -4,6 +4,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
+import { getActiveGatewayRecord } from "@/lib/payments/gateway-queries";
 import { resolveBundlePublicPath, resolveBundleThankYouPath } from "@/lib/urls/resolve-bundle-path";
 import { resolveCoursePublicPath, resolveCourseThankYouPath } from "@/lib/urls/resolve-course-path";
 import { deleteOfferAction, saveOfferAction } from "@/app/(admin)/admin/actions";
@@ -25,6 +26,26 @@ function formatTypeLabel(type: string) {
     .replace(/\b\w/g, (value) => value.toUpperCase());
 }
 
+function formatOfferType(type: string) {
+  if (type === "ONE_TIME") return "One-off";
+  if (type === "SUBSCRIPTION") return "Subscription";
+  if (type === "PAYMENT_PLAN") return "Payment plan";
+  return formatTypeLabel(type);
+}
+
+function formatOfferPrice(offer: { price: unknown; currency: string; type: string; prices: Array<{ amount: unknown; currency: string; billingInterval: string | null; isDefault: boolean }> }) {
+  const price = offer.prices.find((item) => item.isDefault) ?? offer.prices[0] ?? null;
+  const amount = Number(price?.amount ?? offer.price ?? 0);
+  const currency = price?.currency ?? offer.currency;
+  const formatted = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
+  }).format(amount);
+
+  return `${formatted}${offer.type === "SUBSCRIPTION" && price?.billingInterval ? `/${price.billingInterval}` : ""}`;
+}
+
 export default async function ProductDetailPage({
   params,
   searchParams,
@@ -34,41 +55,50 @@ export default async function ProductDetailPage({
 }) {
   const { id } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const product = await prisma.accessProduct.findUnique({
-    where: { id },
-    include: {
-      course: true,
-      bundle: {
-        include: {
-          courses: {
-            include: {
-              course: true,
-            },
-            orderBy: { position: "asc" },
-          },
-        },
-      },
-      grants: {
-        include: {
-          course: {
-            include: {
-              instructor: true,
+  const [product, activeGateway] = await Promise.all([
+    prisma.accessProduct.findUnique({
+      where: { id },
+      include: {
+        course: true,
+        bundle: {
+          include: {
+            courses: {
+              include: {
+                course: true,
+              },
+              orderBy: { position: "asc" },
             },
           },
         },
-        orderBy: { position: "asc" },
-      },
-      offers: {
-        include: {
-          prices: true,
+        grants: {
+          include: {
+            course: {
+              include: {
+                instructor: true,
+              },
+            },
+          },
+          orderBy: { position: "asc" },
+        },
+        offers: {
+          include: {
+            prices: true,
+          },
         },
       },
-    },
-  });
+    }),
+    getActiveGatewayRecord(),
+  ]);
 
   if (!product) notFound();
 
   const primaryOffer = getPrimaryOffer(product.offers);
+  const sortedOffers = [...product.offers].sort(
+    (left, right) =>
+      Number(right.isDefault) - Number(left.isDefault) ||
+      Number(right.isPublished) - Number(left.isPublished) ||
+      left.name.localeCompare(right.name),
+  );
   const salesPagePath = product.course
     ? resolveCoursePublicPath(product.course)
     : product.bundle
@@ -86,11 +116,9 @@ export default async function ProductDetailPage({
   const primaryOfferCurrency = primaryOffer?.prices[0]?.currency ?? primaryOffer?.currency ?? product.course?.currency ?? product.bundle?.currency ?? "USD";
   const primaryOfferCompareAt = primaryOffer?.compareAtPrice ?? product.course?.compareAtPrice ?? product.bundle?.compareAtPrice ?? null;
   const primaryOfferBillingInterval = primaryOffer?.prices.find((price) => price.isDefault)?.billingInterval ?? primaryOffer?.prices[0]?.billingInterval ?? "month";
-  const feedbackMessage = resolvedSearchParams?.saved === "offer" ? "Checkout settings saved." : "";
-  const errorMessage = resolvedSearchParams?.error === "offer" ? "Checkout settings could not be saved. Check the offer fields and try again." : "";
-  const contentKindLabel = product.course ? "Course" : product.bundle ? "Bundle" : formatTypeLabel(product.type);
-  const checkoutLabel = product.checkoutMode === "managed_checkout" ? "Managed" : product.checkoutMode.replace(/_/g, " ");
-  const accessSummary = product.bundle ? `${product.grants.length} included courses` : "Single course access";
+  const feedbackMessage = resolvedSearchParams?.saved === "offer" ? "Buying option saved." : "";
+  const errorMessage = resolvedSearchParams?.error === "offer" ? "Buying option could not be saved. Check the offer fields and try again." : "";
+  const activeGatewayLabel = activeGateway ? `${activeGateway.displayName}${activeGateway.isActive ? "" : " inactive"}` : "No active gateway";
   const actionLinkClass =
     "inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-5 py-3 text-sm font-medium text-stone-700 transition hover:border-stone-300 hover:text-stone-950";
   const infoCardClass = "rounded-[22px] border border-stone-200 bg-stone-50 px-5 py-4 text-sm text-stone-700";
@@ -137,53 +165,28 @@ export default async function ProductDetailPage({
 
             <div className="grid gap-4 lg:grid-cols-4">
               <div className={infoCardClass}>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Sells</span>
-                <span className="mt-2 block text-base font-semibold text-stone-950">{contentKindLabel}</span>
-              </div>
-              <div className={infoCardClass}>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Status</span>
-                <span className="mt-2 block text-base font-semibold text-stone-950">{product.status}</span>
-              </div>
-              <div className={infoCardClass}>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Checkout</span>
-                <span className="mt-2 block text-base font-semibold text-stone-950">{checkoutLabel}</span>
-              </div>
-              <div className={infoCardClass}>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">{product.bundle ? "Includes" : "Access"}</span>
-                <span className="mt-2 block text-base font-semibold text-stone-950">{accessSummary}</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="space-y-5 bg-white p-8">
-            <div className="space-y-1">
-              <h3 className="text-xl font-semibold text-stone-950">Checkout and page surfaces</h3>
-              <p className="text-sm leading-7 text-stone-600">This is where the product sends buyers during the sales, checkout, and post-purchase flow.</p>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className={infoCardClass}>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Checkout page</span>
-                <span className="mt-2 block break-all text-stone-950">{primaryOffer ? `/checkout/${primaryOffer.id}` : "No published checkout offer"}</span>
-              </div>
-              <div className={infoCardClass}>
                 <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Sales page</span>
-                <span className="mt-2 block break-all text-stone-950">{salesPagePath ?? "No product sales page linked yet"}</span>
+                <span className="mt-2 block break-all text-stone-950">{salesPagePath ?? "No sales page linked"}</span>
               </div>
               <div className={infoCardClass}>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Thank-you page</span>
-                <span className="mt-2 block break-all text-stone-950">{thankYouPagePath ?? "No thank-you page linked yet"}</span>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Default checkout</span>
+                <span className="mt-2 block break-all text-stone-950">{primaryOffer ? `/checkout/${primaryOffer.id}` : "Missing checkout offer"}</span>
               </div>
               <div className={infoCardClass}>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Offer count</span>
-                <span className="mt-2 block text-base font-semibold text-stone-950">{product.offers.length} checkout offer{product.offers.length === 1 ? "" : "s"}</span>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Active gateway</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{activeGatewayLabel}</span>
+              </div>
+              <div className={infoCardClass}>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Buying options</span>
+                <span className="mt-2 block text-base font-semibold text-stone-950">{product.offers.length} option{product.offers.length === 1 ? "" : "s"}</span>
               </div>
             </div>
           </Card>
 
           <Card className="space-y-5 bg-white p-8">
             <div className="space-y-1">
-              <h3 className="text-xl font-semibold text-stone-950">Checkout settings</h3>
-              <p className="text-sm leading-7 text-stone-600">Edit the primary checkout offer here. This product is the commerce object, so one product can unlock one or many courses without changing the product count.</p>
+              <h3 className="text-xl font-semibold text-stone-950">Default buying option</h3>
+              <p className="text-sm leading-7 text-stone-600">This is the option used first on the sales page. Add other ways to buy below.</p>
             </div>
             <form action={saveOfferAction} className="grid gap-4 md:grid-cols-2">
               <input type="hidden" name="id" value={primaryOffer?.id ?? ""} />
@@ -197,8 +200,9 @@ export default async function ProductDetailPage({
               <label>
                 Offer type
                 <select name="type" defaultValue={primaryOffer?.type ?? "ONE_TIME"}>
-                  <option value="ONE_TIME">ONE_TIME</option>
-                  <option value="SUBSCRIPTION">SUBSCRIPTION</option>
+                  <option value="ONE_TIME">One-off payment</option>
+                  <option value="SUBSCRIPTION">Subscription</option>
+                  <option value="PAYMENT_PLAN">Payment plan</option>
                 </select>
               </label>
               <label>
@@ -234,12 +238,9 @@ export default async function ProductDetailPage({
                   Show first on sales pages
                 </span>
               </label>
-              <div className="md:col-span-2 rounded-[22px] border border-stone-200 bg-stone-50 px-5 py-4 text-sm leading-7 text-stone-700">
-                This page is the checkout layer. For a normal course, it just controls the buying path for that one course. If you want one purchase to include multiple courses, that should be a bundle.
-              </div>
               <div className="md:col-span-2">
                 <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
-                  Save checkout settings
+                  Save default option
                 </button>
               </div>
             </form>
@@ -247,72 +248,97 @@ export default async function ProductDetailPage({
 
           <Card className="space-y-5 bg-white p-8">
             <div className="space-y-1">
-              <h3 className="text-xl font-semibold text-stone-950">Buying options</h3>
-              <p className="text-sm leading-7 text-stone-600">A product can have more than one checkout path, for example a one-off payment and a monthly subscription. Each option still unlocks this same product access.</p>
+              <h3 className="text-xl font-semibold text-stone-950">All buying options</h3>
+              <p className="text-sm leading-7 text-stone-600">Each option unlocks this same product. Keep only the active ways customers should buy.</p>
             </div>
             <div className="grid gap-4">
-              {product.offers.map((offer) => {
+              {sortedOffers.map((offer) => {
                 const offerPrice = offer.prices.find((price) => price.isDefault) ?? offer.prices[0] ?? null;
                 return (
                   <div key={offer.id} className="rounded-[22px] border border-stone-200 bg-stone-50 p-5">
-                    <form action={saveOfferAction} className="grid gap-4 md:grid-cols-3">
-                      <input type="hidden" name="id" value={offer.id} />
-                      <input type="hidden" name="productId" value={product.id} />
-                      {product.course ? <input type="hidden" name="courseId" value={sourceOwnerId} /> : null}
-                      {product.bundle ? <input type="hidden" name="bundleId" value={sourceOwnerId} /> : null}
-                      <label>
-                        Offer name
-                        <input name="name" defaultValue={offer.name} required />
-                      </label>
-                      <label>
-                        Offer type
-                        <select name="type" defaultValue={offer.type}>
-                          <option value="ONE_TIME">One-off payment</option>
-                          <option value="SUBSCRIPTION">Subscription</option>
-                        </select>
-                      </label>
-                      <label>
-                        Subscription interval
-                        <select name="billingInterval" defaultValue={offerPrice?.billingInterval ?? "month"}>
-                          <option value="month">Monthly</option>
-                          <option value="year">Yearly</option>
-                        </select>
-                      </label>
-                      <label>
-                        Price
-                        <input name="price" type="number" min="0" step="0.01" defaultValue={(offerPrice?.amount ?? offer.price).toString()} required />
-                      </label>
-                      <label>
-                        Currency
-                        <input name="currency" defaultValue={offerPrice?.currency ?? offer.currency} required />
-                      </label>
-                      <label>
-                        Compare-at price
-                        <input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={offer.compareAtPrice?.toString() ?? ""} />
-                      </label>
-                      <label>
-                        Checkout status
-                        <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
-                          <input className="w-auto" type="checkbox" name="isPublished" value="true" defaultChecked={offer.isPublished} />
-                          Published and visible on the sales page
-                        </span>
-                      </label>
-                      <label>
-                        Primary option
-                        <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
-                          <input className="w-auto" type="checkbox" name="isDefault" value="true" defaultChecked={offer.isDefault} />
-                          Show first on sales pages
-                        </span>
-                      </label>
-                      <div className="flex flex-wrap items-end gap-3">
-                        <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
-                          Save option
-                        </button>
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div className="min-w-0 space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {offer.isDefault ? <span className="rounded-full bg-stone-950 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">Default</span> : null}
+                          <span className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${offer.isPublished ? "bg-emerald-50 text-emerald-700" : "bg-stone-200 text-stone-600"}`}>
+                            {offer.isPublished ? "Published" : "Hidden"}
+                          </span>
+                          <span className="rounded-full border border-stone-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-600">
+                            {formatOfferType(offer.type)}
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="truncate text-lg font-semibold text-stone-950">{offer.name}</h4>
+                          <p className="mt-1 text-sm text-stone-600">{formatOfferPrice(offer)} via /checkout/{offer.id}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
                         <HardLink href={`/checkout/${offer.id}`} className="rounded-full border border-stone-200 bg-white px-5 py-3 text-sm font-medium text-stone-700">
                           Preview checkout
                         </HardLink>
                       </div>
-                    </form>
+                    </div>
+                    <details className="mt-4">
+                      <summary className="inline-flex cursor-pointer rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50 marker:content-['']">
+                        Edit option
+                      </summary>
+                      <form action={saveOfferAction} className="grid gap-4 rounded-[20px] border border-stone-200 bg-white p-5 md:grid-cols-3">
+                        <input type="hidden" name="id" value={offer.id} />
+                        <input type="hidden" name="productId" value={product.id} />
+                        {product.course ? <input type="hidden" name="courseId" value={sourceOwnerId} /> : null}
+                        {product.bundle ? <input type="hidden" name="bundleId" value={sourceOwnerId} /> : null}
+                        <label>
+                          Offer name
+                          <input name="name" defaultValue={offer.name} required />
+                        </label>
+                        <label>
+                          Offer type
+                          <select name="type" defaultValue={offer.type}>
+                            <option value="ONE_TIME">One-off payment</option>
+                            <option value="SUBSCRIPTION">Subscription</option>
+                            <option value="PAYMENT_PLAN">Payment plan</option>
+                          </select>
+                        </label>
+                        <label>
+                          Subscription interval
+                          <select name="billingInterval" defaultValue={offerPrice?.billingInterval ?? "month"}>
+                            <option value="month">Monthly</option>
+                            <option value="year">Yearly</option>
+                          </select>
+                        </label>
+                        <label>
+                          Price
+                          <input name="price" type="number" min="0" step="0.01" defaultValue={(offerPrice?.amount ?? offer.price).toString()} required />
+                        </label>
+                        <label>
+                          Currency
+                          <input name="currency" defaultValue={offerPrice?.currency ?? offer.currency} required />
+                        </label>
+                        <label>
+                          Compare-at price
+                          <input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={offer.compareAtPrice?.toString() ?? ""} />
+                        </label>
+                        <label>
+                          Checkout status
+                          <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
+                            <input className="w-auto" type="checkbox" name="isPublished" value="true" defaultChecked={offer.isPublished} />
+                            Published and visible on the sales page
+                          </span>
+                        </label>
+                        <label>
+                          Primary option
+                          <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
+                            <input className="w-auto" type="checkbox" name="isDefault" value="true" defaultChecked={offer.isDefault} />
+                            Show first on sales pages
+                          </span>
+                        </label>
+                        <div className="flex flex-wrap items-end gap-3">
+                          <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
+                            Save option
+                          </button>
+                        </div>
+                      </form>
+                    </details>
                     <form action={deleteOfferAction} className="mt-3">
                       <input type="hidden" name="offerId" value={offer.id} />
                       <input type="hidden" name="productId" value={product.id} />
@@ -341,6 +367,7 @@ export default async function ProductDetailPage({
                   <select name="type" defaultValue="ONE_TIME">
                     <option value="ONE_TIME">One-off payment</option>
                     <option value="SUBSCRIPTION">Subscription</option>
+                    <option value="PAYMENT_PLAN">Payment plan</option>
                   </select>
                 </label>
                 <label>

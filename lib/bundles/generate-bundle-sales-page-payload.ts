@@ -78,14 +78,15 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
   ];
   const highlightCards = allHighlightCards.filter((card) => card.items.length > 0);
   const sectionOrder = normalizeSectionOrder(config.sectionOrder, [
+    "included-courses",
+    "highlights",
     "description",
     "gallery",
-    "highlights",
-    "included-courses",
     "testimonials",
     "faqs",
     "pricing",
   ]).filter((section) => section !== "highlights" || highlightCards.length > 0);
+  const primaryOffer = offers[0] ?? null;
 
   return {
     version: "v2",
@@ -96,11 +97,11 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
       title: bundle.title,
       subtitle: bundle.subtitle,
       imageUrl: bundle.heroImageUrl,
-      primaryCtaLabel: config.primaryCtaLabel || "Get the bundle",
-      primaryCtaHref: offers[0]?.checkoutUrl ?? resolveBundlePublicPath(bundle),
+      primaryCtaLabel: config.primaryCtaLabel || "Get the Complete Bundle",
+      primaryCtaHref: primaryOffer?.checkoutUrl ?? resolveBundlePublicPath(bundle),
       secondaryCtaLabel: config.secondaryCtaLabel || "See included courses",
       secondaryCtaHref: "#included-courses",
-      primaryOffer: offers[0] ?? null,
+      primaryOffer,
     },
     media: {
       salesVideoUrl: bundle.salesVideoUrl,

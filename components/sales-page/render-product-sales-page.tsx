@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, PackageCheck, ShieldCheck, Sparkles, Target, ThumbsUp } from "lucide-react";
+import { BookOpen, CheckCircle2, ChevronDown, Layers3, PackageCheck, ShieldCheck, Sparkles, Star, Target, ThumbsUp } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -15,6 +15,15 @@ const sectionPanelStrongClass =
   "perseus-sales-panel-strong rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
 const panelMutedTextClass = "text-[var(--text-secondary)]";
 const panelSubtleTextClass = "text-[var(--text-muted)]";
+
+type DescriptionBlock =
+  | { kind: "heading"; text: string }
+  | { kind: "paragraph"; text: string; isCallout?: boolean };
+
+type ParsedHighlight = {
+  bullets: string[];
+  chips: string[];
+};
 
 function splitIntoParagraphs(value: string) {
   const normalized = value.trim();
@@ -46,6 +55,50 @@ function splitIntoParagraphs(value: string) {
   return paragraphs;
 }
 
+function looksLikeHeading(value: string) {
+  const text = value.trim();
+
+  if (text.length < 4 || text.length > 84) return false;
+  if (/[.!?]$/.test(text)) return false;
+  if (/^[-*]/.test(text)) return false;
+
+  return /[:：]$/.test(text) || /^[A-Z0-9][A-Za-z0-9\s,'&/()-]+$/.test(text);
+}
+
+function isCalloutParagraph(value: string) {
+  return /\b(continue|master course|advanced|next step|requirements?|included|bonus|enrol|enroll|access)\b/i.test(value);
+}
+
+function parseDescriptionBlocks(value?: string | null): DescriptionBlock[] {
+  if (!value) return [];
+
+  const normalized = value.trim();
+  if (!normalized) return [];
+
+  const explicitLines = normalized
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (explicitLines.length > 1) {
+    return explicitLines.flatMap((line) =>
+      looksLikeHeading(line)
+        ? [{ kind: "heading", text: line } as DescriptionBlock]
+        : splitIntoParagraphs(line).map((paragraph) => ({
+            kind: "paragraph",
+            text: paragraph,
+            isCallout: isCalloutParagraph(paragraph),
+          })),
+    );
+  }
+
+  return splitIntoParagraphs(normalized).map((paragraph) => ({
+    kind: "paragraph",
+    text: paragraph,
+    isCallout: isCalloutParagraph(paragraph),
+  }));
+}
+
 function splitHighlightItems(items: string[]) {
   return items.flatMap((item) =>
     item
@@ -53,6 +106,94 @@ function splitHighlightItems(items: string[]) {
       .map((part) => part.trim().replace(/^[•*-]\s*/, ""))
       .filter(Boolean),
   );
+}
+
+function parseHighlightItems(items: string[], cardId?: "outcomes" | "audience" | "includes"): ParsedHighlight {
+  const rawItems = splitHighlightItems(items).flatMap((item) =>
+    item
+      .split(/\s+(?:•|â€¢|\*)\s+|\n+/)
+      .map((part) => part.trim().replace(/^(?:•|â€¢|\*|-)\s*/, ""))
+      .filter(Boolean),
+  );
+  const chips: string[] = [];
+  const bullets: string[] = [];
+
+  rawItems.forEach((item) => {
+    const parts =
+      cardId === "includes"
+        ? item
+            .split(";")
+            .map((part) => part.trim())
+            .filter(Boolean)
+        : [item];
+
+    parts.forEach((part) => {
+      const normalized = part.replace(/^requirements?:\s*/i, "").trim();
+      const shouldChip =
+        cardId === "includes" &&
+        (/\b(module|lesson|course|preview|requirement|access)\b/i.test(part) || normalized.length <= 32);
+
+      if (shouldChip) {
+        chips.push(/^requirements?:/i.test(part) && /^none$/i.test(normalized) ? "No requirements" : normalized);
+      } else {
+        bullets.push(part);
+      }
+    });
+  });
+
+  return {
+    chips: Array.from(new Set(chips)).slice(0, 8),
+    bullets: Array.from(new Set(bullets)),
+  };
+}
+
+function isFreeOffer(offer?: SalesPageOfferSummary | null) {
+  return Boolean(offer && /(^|\s)(free|\$0|£0|€0|0\.00)/i.test(offer.price));
+}
+
+function getPrimaryCtaLabel(payload: ProductPayload) {
+  if (payload.productType === "bundle") return "Get the Complete Bundle";
+  if (isFreeOffer(payload.hero.primaryOffer)) return "Start Free Course";
+  return "Enroll Now";
+}
+
+function getPriceLabel(offer?: SalesPageOfferSummary | null) {
+  if (!offer) return null;
+  return isFreeOffer(offer) ? "Free" : offer.price;
+}
+
+function getValueLabel(offer?: SalesPageOfferSummary | null) {
+  if (!offer?.compareAtPrice) return null;
+  return isFreeOffer(offer) ? `${offer.compareAtPrice} value` : offer.compareAtPrice;
+}
+
+function buildFacts(payload: ProductPayload) {
+  const facts: Array<{ label: string; value: string; icon: typeof BookOpen }> = [];
+
+  if (payload.productType === "course") {
+    const moduleCount = payload.curriculumSection.modules.length;
+    const lessons = payload.curriculumSection.modules.flatMap((module) => module.lessons);
+    const previewCount = lessons.filter((lesson) => lesson.isPreview).length;
+
+    if (moduleCount > 0) facts.push({ label: "Modules", value: String(moduleCount), icon: Layers3 });
+    if (lessons.length > 0) facts.push({ label: "Lessons", value: String(lessons.length), icon: BookOpen });
+    if (previewCount > 0) facts.push({ label: "Free previews", value: String(previewCount), icon: Sparkles });
+    if (payload.instructorSection.name) facts.push({ label: "Instructor", value: payload.instructorSection.name, icon: ShieldCheck });
+  } else {
+    const courseCount = payload.includedCoursesSection.courses.length;
+    if (courseCount > 0) facts.push({ label: "Courses", value: String(courseCount), icon: Layers3 });
+    if (payload.hero.metadataLine) facts.push({ label: "Bundle", value: payload.hero.metadataLine, icon: PackageCheck });
+  }
+
+  if (payload.testimonialsSection.items.length > 0) {
+    facts.push({ label: "Reviews", value: String(payload.testimonialsSection.items.length), icon: Star });
+  }
+
+  if (payload.offers.length > 1) {
+    facts.push({ label: "Payment paths", value: String(payload.offers.length), icon: PackageCheck });
+  }
+
+  return facts.slice(0, 5);
 }
 
 function getHighlightTreatment(cardId: "outcomes" | "audience" | "includes") {
@@ -94,14 +235,14 @@ function RatingStars({ rating }: { rating: number }) {
 
 function OfferButtons({ offers, primaryLabel }: { offers: SalesPageOfferSummary[]; primaryLabel: string }) {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
       {offers.map((offer) => (
         <ButtonLink
           key={offer.offerId}
           href={offer.checkoutUrl}
-          className="min-w-[240px] bg-[linear-gradient(135deg,var(--accent),#c16bff)] px-6 shadow-[0_18px_34px_rgba(143,44,255,0.24)]"
+          className="min-h-12 w-full justify-center whitespace-normal bg-[linear-gradient(135deg,var(--accent),#c16bff)] px-6 text-center shadow-[0_18px_34px_rgba(143,44,255,0.24)] sm:w-auto sm:min-w-[240px]"
         >
-          {primaryLabel} {offer.price}
+          {primaryLabel}
         </ButtonLink>
       ))}
     </div>
@@ -124,12 +265,14 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
   const hidden = new Set(payload.sections.hidden);
   const orderedSections = payload.sections.order.filter((section) => !hidden.has(section));
   const rendersReviewsSection = orderedSections.includes("testimonials");
+  const facts = buildFacts(payload);
+  const primaryCtaLabel = getPrimaryCtaLabel(payload);
+  const priceLabel = getPriceLabel(payload.hero.primaryOffer);
+  const valueLabel = getValueLabel(payload.hero.primaryOffer);
 
   const renderSection = (section: SalesPageSectionKey) => {
     if (section === "description") {
-      const descriptionParagraphs = payload.descriptionSection.longDescription
-        ? splitIntoParagraphs(payload.descriptionSection.longDescription)
-        : [];
+      const descriptionBlocks = parseDescriptionBlocks(payload.descriptionSection.longDescription);
 
       return (
         <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
@@ -138,27 +281,37 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
             title={payload.descriptionSection.title}
             body={payload.descriptionSection.shortDescription}
           />
-          <div className={`mx-auto max-w-4xl space-y-5 p-6 ${sectionPanelClass}`}>
+          <div className={`mx-auto max-w-4xl space-y-5 p-4 sm:p-6 ${sectionPanelClass}`}>
             {payload.media.salesVideoUrl ? (
               <StreamableEmbed url={payload.media.salesVideoUrl} title={`${payload.hero.title} sales video`} />
             ) : null}
-            {descriptionParagraphs.length > 0 ? (
-              <div className="rounded-[26px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] p-6 lg:p-8">
-                <div className="mx-auto max-w-4xl">
-                  <p className="text-center text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-lavender)]">About the course</p>
-                  <div className="mt-6 space-y-5">
-                    {descriptionParagraphs.map((paragraph, index) => (
-                      <p
-                        key={`${paragraph.slice(0, 28)}-${index}`}
-                        className={
-                          index === 0
-                            ? "text-lg leading-9 text-[var(--text-primary)]"
-                            : `text-base leading-8 ${panelMutedTextClass}`
-                        }
-                      >
-                        {paragraph}
-                      </p>
-                    ))}
+            {descriptionBlocks.length > 0 ? (
+              <div className="rounded-[22px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] p-5 sm:p-6 lg:p-8">
+                <div className="mx-auto max-w-3xl">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--accent-lavender)]">
+                    {payload.productType === "bundle" ? "About the bundle" : "About the course"}
+                  </p>
+                  <div className="mt-5 space-y-5">
+                    {descriptionBlocks.map((block, index) =>
+                      block.kind === "heading" ? (
+                        <h3 key={`${block.text}-${index}`} className="pt-3 text-xl leading-tight text-[var(--text-primary)]">
+                          {block.text.replace(/[:：]$/, "")}
+                        </h3>
+                      ) : (
+                        <p
+                          key={`${block.text.slice(0, 28)}-${index}`}
+                          className={
+                            block.isCallout
+                              ? "rounded-[18px] border border-[var(--premium)]/35 bg-[var(--premium-soft)] px-4 py-3 text-base leading-8 text-[var(--text-primary)]"
+                              : index === 0
+                                ? "text-lg leading-9 text-[var(--text-primary)]"
+                                : `text-base leading-8 ${panelMutedTextClass}`
+                          }
+                        >
+                          {block.text}
+                        </p>
+                      ),
+                    )}
                   </div>
                 </div>
               </div>
@@ -169,7 +322,10 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
     }
 
     if (section === "highlights") {
-      const cards = payload.highlightsSection.cards.filter((card) => splitHighlightItems(card.items).length > 0);
+      const cards = payload.highlightsSection.cards.filter((card) => {
+        const parsed = parseHighlightItems(card.items, card.id);
+        return parsed.bullets.length > 0 || parsed.chips.length > 0;
+      });
 
       if (cards.length === 0) {
         return null;
@@ -182,7 +338,9 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
             {cards.map((card) => {
               const treatment = getHighlightTreatment(card.id);
               const Icon = treatment.icon;
-              const items = splitHighlightItems(card.items);
+              const parsed = parseHighlightItems(card.items, card.id);
+              const visibleItems = parsed.bullets.slice(0, 6);
+              const hiddenItems = parsed.bullets.slice(6);
 
               return (
               <div key={card.id} className={`relative overflow-hidden p-6 ${sectionPanelClass}`}>
@@ -195,14 +353,39 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                     <Badge variant={treatment.variant}>{card.title}</Badge>
                   </div>
                   <p className={`mt-5 text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>{treatment.eyebrow}</p>
+                  {parsed.chips.length > 0 ? (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {parsed.chips.map((chip) => (
+                        <span key={chip} className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-3 py-1 text-xs font-semibold text-[var(--text-primary)]">
+                          {chip}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
                   <ul className={`mt-4 space-y-4 text-sm leading-7 ${panelMutedTextClass}`}>
-                    {items.map((item) => (
+                    {visibleItems.map((item) => (
                       <li key={item} className="grid grid-cols-[18px_minmax(0,1fr)] gap-3">
                         <CheckCircle2 className="mt-1 size-4 text-[var(--accent-lavender)]" aria-hidden="true" />
                         <span>{item}</span>
                       </li>
                     ))}
                 </ul>
+                  {hiddenItems.length > 0 ? (
+                    <details className={`mt-4 text-sm ${panelMutedTextClass}`}>
+                      <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-[var(--border)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-lavender)] marker:content-none">
+                        Show {hiddenItems.length} more
+                        <ChevronDown className="size-3" aria-hidden="true" />
+                      </summary>
+                      <ul className="mt-4 space-y-4 leading-7">
+                        {hiddenItems.map((item) => (
+                          <li key={item} className="grid grid-cols-[18px_minmax(0,1fr)] gap-3">
+                            <CheckCircle2 className="mt-1 size-4 text-[var(--accent-lavender)]" aria-hidden="true" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : null}
                 </div>
               </div>
               );
@@ -216,13 +399,20 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
       return (
         <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
           <SectionIntro eyebrow={payload.gallerySection.eyebrow} title={payload.gallerySection.title} />
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className={`grid gap-4 ${payload.gallerySection.images.length === 2 ? "md:grid-cols-[1.2fr_0.8fr]" : "md:grid-cols-2 lg:grid-cols-3"}`}>
             {payload.gallerySection.images.map((imageUrl, index) => (
               <SalesSmartImage
                 key={`${imageUrl}-${index}`}
                 src={imageUrl}
                 alt={`${payload.hero.title} sales image ${index + 1}`}
-                className={`aspect-[4/3] ${payload.gallerySection.images.length === 1 ? "md:col-span-2 md:aspect-[16/9]" : ""}`}
+                variant={index === 0 ? "feature" : "gallery"}
+                className={`aspect-[4/3] ${
+                  payload.gallerySection.images.length === 1
+                    ? "md:col-span-2 lg:col-span-3 md:aspect-[16/9]"
+                    : index === 0 && payload.gallerySection.images.length > 2
+                      ? "md:col-span-2 md:row-span-2"
+                      : ""
+                }`}
               />
             ))}
           </div>
@@ -296,8 +486,8 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                 <SalesSmartImage
                   src={course.imageUrl}
                   alt={`${course.title} course image`}
+                  variant="card"
                   className="aspect-video rounded-[20px]"
-                  imageClassName="inset-3 sm:inset-3"
                 />
                 <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>Included course {index + 1}</p>
                 <h3 className="mt-4 text-2xl leading-tight tracking-[-0.03em] text-[var(--text-primary)]">{course.title}</h3>
@@ -321,8 +511,9 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
               <SalesSmartImage
                 src={payload.instructorSection.imageUrl}
                 alt={payload.instructorSection.name}
+                variant="avatar"
+                fit="cover"
                 className="aspect-square rounded-[22px]"
-                imageClassName="inset-0 bg-cover"
               />
               <Link href={payload.instructorSection.pageUrl} className="inline-flex text-sm font-semibold text-[var(--accent)] underline underline-offset-4">
                 View instructor page
@@ -437,7 +628,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                 <h3 className="text-3xl leading-none tracking-[-0.04em] lg:text-[2.45rem]">{payload.finalCta.label}</h3>
                 <p className={`mt-3 text-base leading-8 ${panelMutedTextClass}`}>{payload.finalCta.body}</p>
               </div>
-              <OfferButtons offers={payload.pricingSection.offers} primaryLabel={payload.hero.primaryCtaLabel} />
+              <OfferButtons offers={payload.pricingSection.offers} primaryLabel={primaryCtaLabel} />
             </div>
           </div>
         </section>
@@ -448,14 +639,16 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
   };
 
   return (
-    <div className="perseus-sales-page space-y-14 lg:space-y-16">
+    <div className="perseus-sales-page space-y-14 overflow-x-hidden lg:space-y-16">
       <section className="px-4 sm:px-6">
         <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[30px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] p-4 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] sm:p-5 lg:p-6">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,rgba(168,102,255,0.18),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(212,168,70,0.12),transparent_22%)]" />
           <div className="relative grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.82fr)] lg:items-center">
             <div className="px-2 py-5 sm:px-4 lg:px-5 lg:py-8">
               <div className="perseus-sales-hero-badges flex flex-wrap items-center gap-3">
-                <Badge variant="accent">{payload.hero.eyebrow}</Badge>
+                <Badge variant={isFreeOffer(payload.hero.primaryOffer) ? "success" : "accent"}>
+                  {isFreeOffer(payload.hero.primaryOffer) ? "Free Course" : payload.hero.eyebrow}
+                </Badge>
                 {payload.hero.primaryOffer?.savingsLabel ? <Badge variant="premium">{payload.hero.primaryOffer.savingsLabel}</Badge> : null}
               </div>
 
@@ -465,30 +658,58 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                 ) : null}
                 <h1 className="max-w-3xl text-balance break-words text-3xl leading-[1.02] tracking-[-0.045em] text-[var(--hero-text-primary)] sm:text-5xl lg:text-[4.6rem]">{payload.hero.title}</h1>
                 {payload.hero.subtitle ? <p className="max-w-2xl text-base leading-7 text-[var(--hero-text-secondary)] sm:text-lg sm:leading-8">{payload.hero.subtitle}</p> : null}
+                {payload.descriptionSection.shortDescription ? (
+                  <p className="line-clamp-3 max-w-2xl text-sm leading-7 text-[var(--hero-text-secondary)] sm:text-base">
+                    {payload.descriptionSection.shortDescription}
+                  </p>
+                ) : null}
               </div>
 
               {payload.hero.primaryOffer ? (
                 <div className="perseus-sales-hero-price mt-7 flex flex-wrap items-end gap-x-4 gap-y-2">
-                  <p className="text-4xl font-semibold text-[var(--hero-text-primary)]">{payload.hero.primaryOffer.price}</p>
-                  {payload.hero.primaryOffer.compareAtPrice ? <p className="text-lg text-[var(--hero-price-muted)] line-through">{payload.hero.primaryOffer.compareAtPrice}</p> : null}
+                  <p className="text-4xl font-semibold text-[var(--hero-text-primary)]">{priceLabel}</p>
+                  {valueLabel ? (
+                    <p className={`text-lg ${isFreeOffer(payload.hero.primaryOffer) ? "text-[var(--premium)]" : "text-[var(--hero-price-muted)] line-through"}`}>
+                      {valueLabel}
+                    </p>
+                  ) : null}
                 </div>
               ) : null}
 
               <div className="perseus-sales-hero-actions mt-7 flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <ButtonLink href={payload.hero.primaryCtaHref} className="min-h-12 w-full max-w-full justify-center whitespace-normal px-5 text-center sm:w-auto sm:px-6">
-                  {payload.hero.primaryCtaLabel}
+                  {primaryCtaLabel}
                 </ButtonLink>
                 <ButtonLink href={payload.hero.secondaryCtaHref} variant="secondary" className="min-h-12 w-full max-w-full justify-center whitespace-normal px-5 text-center sm:w-auto sm:px-6">
                   {payload.hero.secondaryCtaLabel}
                 </ButtonLink>
               </div>
+
+              {facts.length > 0 ? (
+                <div className="mt-7 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                  {facts.map((fact) => {
+                    const Icon = fact.icon;
+
+                    return (
+                      <div key={`${fact.label}-${fact.value}`} className="flex min-h-12 items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2">
+                        <Icon className="size-4 shrink-0 text-[var(--accent-lavender)]" aria-hidden="true" />
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--hero-text-muted)]">{fact.label}</p>
+                          <p className="truncate text-sm font-semibold text-[var(--hero-text-primary)]">{fact.value}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
 
             <SalesSmartImage
               src={payload.hero.imageUrl}
               alt={`${payload.hero.title} course image`}
               priority
-              className="mx-auto aspect-[0.86/1] w-full max-w-[520px] rounded-[24px]"
+              variant="hero"
+              className="mx-auto aspect-[4/3] w-full max-w-[560px] rounded-[24px] sm:aspect-[1/1] lg:aspect-[0.92/1]"
             />
           </div>
         </div>

@@ -48,8 +48,8 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
     "gallery",
     "highlights",
     "curriculum",
-    "instructor",
     "testimonials",
+    "instructor",
     "faqs",
     "pricing",
   ]);
@@ -57,6 +57,8 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
   const audience = readStringArray(course.whoItsFor);
   const includes = readStringArray(course.includes);
   const lessonCount = course.modules.reduce((count, module) => count + module.lessons.length, 0);
+  const primaryOffer = offers[0] ?? null;
+  const isFreeCourse = primaryOffer ? /(^|\s)(free|\$0|£0|€0|0\.00)/i.test(primaryOffer.price) : false;
 
   return {
     version: "v2",
@@ -67,11 +69,11 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
       title: course.title,
       subtitle: course.subtitle,
       imageUrl: course.heroImageUrl,
-      primaryCtaLabel: config.primaryCtaLabel || "Enroll now - get instant access",
-      primaryCtaHref: offers[0]?.checkoutUrl ?? resolveCoursePublicPath(course),
+      primaryCtaLabel: config.primaryCtaLabel || (isFreeCourse ? "Start Free Course" : "Enroll Now"),
+      primaryCtaHref: primaryOffer?.checkoutUrl ?? resolveCoursePublicPath(course),
       secondaryCtaLabel: config.secondaryCtaLabel || "See full curriculum",
       secondaryCtaHref: "#curriculum",
-      primaryOffer: offers[0] ?? null,
+      primaryOffer,
     },
     media: {
       salesVideoUrl: course.salesVideoUrl,

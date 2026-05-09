@@ -28,6 +28,7 @@ const linkGroups = [
     heading: "People & Ops",
     links: [
       { href: "/admin/students", label: "Students" },
+      { href: "/admin/reviews", label: "Reviews" },
       { href: "/admin/imports", label: "Imports" },
       { href: "/admin/settings", label: "Settings" },
     ],

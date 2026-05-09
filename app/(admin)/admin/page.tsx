@@ -102,11 +102,11 @@ export default async function AdminOverviewPage() {
           <p className="mt-3 text-3xl font-semibold text-stone-950">{formatMoney(salesThisMonth)}</p>
           <p className="mt-2 text-sm text-stone-600">{monthlyOrders} paid order{monthlyOrders === 1 ? "" : "s"}</p>
         </Card>
-        <Card className="border-stone-200 bg-white text-stone-950">
+        <HardLink href="/admin/reviews" className="block rounded-[var(--radius-card)] border border-stone-200 bg-white p-5 text-stone-950 transition hover:border-stone-300 hover:bg-stone-50">
           <p className="text-sm text-stone-600">Reviews to approve</p>
           <p className="mt-3 text-3xl font-semibold text-stone-950">{pendingReviews}</p>
-          <p className="mt-2 text-sm text-stone-600">Pending reviews waiting for approval</p>
-        </Card>
+          <p className="mt-2 text-sm text-stone-600">Open review queue</p>
+        </HardLink>
         <Card className="border-stone-200 bg-white text-stone-950">
           <p className="text-sm text-stone-600">Catalog actions</p>
           <div className="mt-4 flex flex-wrap gap-3">

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
+import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 import { getActiveGatewayRecord } from "@/lib/payments/gateway-queries";
 import { resolveBundlePublicPath, resolveBundleThankYouPath } from "@/lib/urls/resolve-bundle-path";
@@ -224,20 +225,24 @@ export default async function ProductDetailPage({
                 Compare-at price
                 <input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={primaryOfferCompareAt?.toString() ?? ""} />
               </label>
-              <label>
-                Checkout status
-                <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
-                  <input className="w-auto" type="checkbox" name="isPublished" value="true" defaultChecked={primaryOffer?.isPublished ?? true} />
-                  Published and available for checkout
-                </span>
-              </label>
-              <label>
-                Primary option
-                <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
-                  <input className="w-auto" type="checkbox" name="isDefault" value="true" defaultChecked={primaryOffer?.isDefault ?? true} />
-                  Show first on sales pages
-                </span>
-              </label>
+              <BooleanChoiceField
+                label="Checkout status"
+                name="isPublished"
+                defaultValue={primaryOffer?.isPublished ?? true}
+                trueLabel="Published"
+                falseLabel="Hidden"
+                trueDescription="Available for checkout."
+                falseDescription="Not shown to buyers."
+              />
+              <BooleanChoiceField
+                label="Primary option"
+                name="isDefault"
+                defaultValue={primaryOffer?.isDefault ?? true}
+                trueLabel="Primary"
+                falseLabel="Secondary"
+                trueDescription="Show first on sales pages."
+                falseDescription="Keep below the main option."
+              />
               <div className="md:col-span-2">
                 <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
                   Save default option
@@ -318,20 +323,24 @@ export default async function ProductDetailPage({
                           Compare-at price
                           <input name="compareAtPrice" type="number" min="0" step="0.01" defaultValue={offer.compareAtPrice?.toString() ?? ""} />
                         </label>
-                        <label>
-                          Checkout status
-                          <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
-                            <input className="w-auto" type="checkbox" name="isPublished" value="true" defaultChecked={offer.isPublished} />
-                            Published and visible on the sales page
-                          </span>
-                        </label>
-                        <label>
-                          Primary option
-                          <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
-                            <input className="w-auto" type="checkbox" name="isDefault" value="true" defaultChecked={offer.isDefault} />
-                            Show first on sales pages
-                          </span>
-                        </label>
+                        <BooleanChoiceField
+                          label="Checkout status"
+                          name="isPublished"
+                          defaultValue={offer.isPublished}
+                          trueLabel="Published"
+                          falseLabel="Hidden"
+                          trueDescription="Visible on the sales page."
+                          falseDescription="Unavailable to buyers."
+                        />
+                        <BooleanChoiceField
+                          label="Primary option"
+                          name="isDefault"
+                          defaultValue={offer.isDefault}
+                          trueLabel="Primary"
+                          falseLabel="Secondary"
+                          trueDescription="Show first on sales pages."
+                          falseDescription="Keep below the main option."
+                        />
                         <div className="flex flex-wrap items-end gap-3">
                           <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
                             Save option
@@ -389,20 +398,24 @@ export default async function ProductDetailPage({
                   Compare-at price
                   <input name="compareAtPrice" type="number" min="0" step="0.01" />
                 </label>
-                <label>
-                  Checkout status
-                  <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
-                    <input className="w-auto" type="checkbox" name="isPublished" value="true" defaultChecked />
-                    Published and visible on the sales page
-                  </span>
-                </label>
-                <label>
-                  Primary option
-                  <span className="mt-2 flex items-center gap-3 text-sm text-stone-700">
-                    <input className="w-auto" type="checkbox" name="isDefault" value="true" />
-                    Show first on sales pages
-                  </span>
-                </label>
+                <BooleanChoiceField
+                  label="Checkout status"
+                  name="isPublished"
+                  defaultValue
+                  trueLabel="Published"
+                  falseLabel="Hidden"
+                  trueDescription="Visible on the sales page."
+                  falseDescription="Unavailable to buyers."
+                />
+                <BooleanChoiceField
+                  label="Primary option"
+                  name="isDefault"
+                  defaultValue={false}
+                  trueLabel="Primary"
+                  falseLabel="Secondary"
+                  trueDescription="Show first on sales pages."
+                  falseDescription="Keep below the main option."
+                />
                 <div className="flex items-end">
                   <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
                     Add buying option

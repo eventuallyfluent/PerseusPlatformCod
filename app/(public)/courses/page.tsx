@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { CourseStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
@@ -44,14 +45,20 @@ function BundleCatalogCard({
   return (
     <HardLink href={resolveBundlePublicPath(bundle)} className="group block h-full">
       <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-panel)]">
-        <div
-          className="perseus-course-card-media h-36 bg-cover bg-center transition duration-500 group-hover:scale-[1.02] sm:h-40"
-          style={{
-            backgroundImage: bundle.heroImageUrl
-              ? `linear-gradient(180deg, rgba(15, 16, 32, 0.12), rgba(15, 16, 32, 0.56)), url(${bundle.heroImageUrl})`
-              : "linear-gradient(135deg, #2b1149, #4b247d)",
-          }}
-        />
+        <div className="perseus-course-card-media relative aspect-video overflow-hidden bg-[linear-gradient(135deg,#2b1149,#4b247d)]">
+          {bundle.heroImageUrl ? (
+            <>
+              <Image
+                src={bundle.heroImageUrl}
+                alt={`${bundle.title} cover`}
+                fill
+                sizes="(min-width: 1536px) 22vw, (min-width: 1280px) 30vw, (min-width: 640px) 45vw, 90vw"
+                className="object-cover transition duration-500 group-hover:scale-[1.02]"
+              />
+              <span className="absolute inset-0 bg-gradient-to-b from-slate-950/10 to-slate-950/35" />
+            </>
+          ) : null}
+        </div>
         <div className="perseus-course-card-body flex flex-1 flex-col p-5">
           <div className="flex items-center justify-between gap-3">
             <p className="truncate text-sm font-medium text-[var(--text-secondary)]">
@@ -193,10 +200,24 @@ export default async function CoursesIndexPage({
   const [courses, bundles] = await Promise.all([
     prisma.course.findMany({
       where: courseWhere,
-      include: {
-        instructor: true,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        subtitle: true,
+        shortDescription: true,
+        heroImageUrl: true,
+        price: true,
+        currency: true,
+        publicPath: true,
+        legacyUrl: true,
+        instructor: {
+          select: {
+            name: true,
+          },
+        },
         collectionCourses: {
-          include: {
+          select: {
             collection: {
               select: {
                 id: true,
@@ -260,13 +281,23 @@ export default async function CoursesIndexPage({
             }
           : {}),
       },
-      include: {
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        subtitle: true,
+        shortDescription: true,
+        heroImageUrl: true,
+        price: true,
+        currency: true,
+        publicPath: true,
+        legacyUrl: true,
         courses: {
-          include: {
+          select: {
             course: {
-              include: {
+              select: {
                 collectionCourses: {
-                  include: {
+                  select: {
                     collection: {
                       select: {
                         id: true,
@@ -364,14 +395,20 @@ export default async function CoursesIndexPage({
                     active ? "border-[var(--accent)]" : "border-[var(--border)]"
                   }`}
                 >
-                  <div
-                    className="min-h-44 bg-cover bg-center sm:min-h-full"
-                    style={{
-                      backgroundImage: collection.imageUrl
-                        ? `linear-gradient(180deg, rgba(13,15,29,0.18), rgba(13,15,29,0.62)), url(${collection.imageUrl})`
-                        : "linear-gradient(135deg,#1c1534,#302555)",
-                    }}
-                  />
+                  <div className="relative min-h-44 overflow-hidden bg-[linear-gradient(135deg,#1c1534,#302555)] sm:min-h-full">
+                    {collection.imageUrl ? (
+                      <>
+                        <Image
+                          src={collection.imageUrl}
+                          alt={`${collection.title} collection`}
+                          fill
+                          sizes="(min-width: 1536px) 168px, (min-width: 640px) 168px, 90vw"
+                          className="object-cover transition duration-500 group-hover:scale-[1.02]"
+                        />
+                        <span className="absolute inset-0 bg-gradient-to-b from-slate-950/20 to-slate-950/60" />
+                      </>
+                    ) : null}
+                  </div>
                   <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
                     <div>
                       <div className="flex items-start justify-between gap-3">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Instructor } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 
@@ -6,14 +7,20 @@ export function InstructorCard({ instructor }: { instructor: Pick<Instructor, "s
   return (
     <Link href={`/instructors/${instructor.slug}`} className="group block">
       <article className="perseus-card h-full overflow-hidden rounded-[32px] border border-[var(--border)] bg-[var(--surface-panel)] shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-panel)]">
-        <div
-          className="h-60 bg-cover bg-center transition duration-500 group-hover:scale-[1.02]"
-          style={{
-            backgroundImage: instructor.imageUrl
-              ? `linear-gradient(135deg, rgba(17, 24, 39, 0.18), rgba(120, 53, 15, 0.08)), url(${instructor.imageUrl})`
-              : "linear-gradient(135deg, #ede7ff, #fff6db)",
-          }}
-        />
+        <div className="relative h-60 overflow-hidden bg-[linear-gradient(135deg,#ede7ff,#fff6db)]">
+          {instructor.imageUrl ? (
+            <>
+              <Image
+                src={instructor.imageUrl}
+                alt={`${instructor.name} portrait`}
+                fill
+                sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 92vw"
+                className="object-cover transition duration-500 group-hover:scale-[1.02]"
+              />
+              <span className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-amber-900/10" />
+            </>
+          ) : null}
+        </div>
         <div className="space-y-3 p-7">
           <Badge variant="muted">Instructor</Badge>
           <h3 className="text-4xl leading-none tracking-[-0.04em] text-[var(--foreground)]">{instructor.name}</h3>

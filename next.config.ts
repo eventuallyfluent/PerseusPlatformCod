@@ -7,6 +7,12 @@ const useLocalBuildDir =
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "**" },
+      { protocol: "http", hostname: "**" },
+    ],
+  },
   ...(useLocalBuildDir ? { distDir: ".build" } : {}),
 };
 

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Course } from "@prisma/client";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { Badge } from "@/components/ui/badge";
@@ -26,14 +27,20 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
     return (
       <HardLink href={resolveCoursePublicPath(course)} className="group block h-full">
         <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-panel)]">
-          <div
-            className="perseus-course-card-media h-36 bg-cover bg-center transition duration-500 group-hover:scale-[1.02] sm:h-40"
-            style={{
-              backgroundImage: course.heroImageUrl
-                ? `linear-gradient(180deg, rgba(15, 16, 32, 0.12), rgba(15, 16, 32, 0.56)), url(${course.heroImageUrl})`
-                : cardTone,
-            }}
-          />
+          <div className="perseus-course-card-media relative aspect-video overflow-hidden" style={{ background: course.heroImageUrl ? undefined : cardTone }}>
+            {course.heroImageUrl ? (
+              <>
+                <Image
+                  src={course.heroImageUrl}
+                  alt={`${course.title} cover`}
+                  fill
+                  sizes="(min-width: 1536px) 22vw, (min-width: 1280px) 30vw, (min-width: 640px) 45vw, 90vw"
+                  className="object-cover transition duration-500 group-hover:scale-[1.02]"
+                />
+                <span className="absolute inset-0 bg-gradient-to-b from-slate-950/10 to-slate-950/35" />
+              </>
+            ) : null}
+          </div>
           <div className="perseus-course-card-body flex flex-1 flex-col p-5">
             <div className="flex items-center justify-between gap-3">
               {course.instructorName ? (
@@ -86,14 +93,20 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
   return (
     <HardLink href={resolveCoursePublicPath(course)} className="group block">
       <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-panel)]">
-        <div
-          className="perseus-course-card-media h-72 bg-cover bg-center transition duration-500 group-hover:scale-[1.02]"
-          style={{
-            backgroundImage: course.heroImageUrl
-              ? `linear-gradient(180deg, rgba(15, 16, 32, 0.2), rgba(15, 16, 32, 0.58)), url(${course.heroImageUrl})`
-              : cardTone,
-          }}
-        />
+        <div className="perseus-course-card-media relative aspect-video overflow-hidden" style={{ background: course.heroImageUrl ? undefined : cardTone }}>
+          {course.heroImageUrl ? (
+            <>
+              <Image
+                src={course.heroImageUrl}
+                alt={`${course.title} cover`}
+                fill
+                sizes="(min-width: 1024px) 42vw, 92vw"
+                className="object-cover transition duration-500 group-hover:scale-[1.02]"
+              />
+              <span className="absolute inset-0 bg-gradient-to-b from-slate-950/10 to-slate-950/35" />
+            </>
+          ) : null}
+        </div>
         <div className="perseus-course-card-body flex flex-1 flex-col p-7">
           <div className="perseus-course-card-badges flex items-center gap-4">
             <Badge variant="portal">{course.statusLabel ?? "Featured"}</Badge>

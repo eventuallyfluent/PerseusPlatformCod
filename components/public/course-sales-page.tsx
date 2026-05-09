@@ -1,5 +1,6 @@
 import { RenderProductSalesPage } from "@/components/sales-page/render-product-sales-page";
 import { Button, buttonClassName } from "@/components/ui/button";
+import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
 import { submitCourseReviewAction } from "@/app/(public)/actions";
 import { buildBreadcrumbStructuredData, buildCourseStructuredData, buildFaqStructuredData, buildProductStructuredData } from "@/lib/seo/structured-data";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
@@ -141,16 +142,15 @@ export function CourseSalesPage({
                 className="w-full rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm leading-7 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
               />
             </label>
-            <label className="flex items-center gap-3 rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm font-medium text-[var(--text-primary)]">
-              <input
-                className="size-4"
-                type="checkbox"
-                name="recommendsProduct"
-                value="true"
-                defaultChecked={existingReview?.recommendsProduct ?? true}
-              />
-              I recommend this product
-            </label>
+            <BooleanChoiceField
+              label="Recommendation"
+              name="recommendsProduct"
+              defaultValue={existingReview?.recommendsProduct ?? true}
+              trueLabel="Recommend"
+              falseLabel="Do not recommend"
+              trueDescription="This review can appear as a recommendation."
+              falseDescription="Share feedback without recommending."
+            />
             <p className="text-sm leading-7 text-[var(--text-secondary)]">
               {existingReview ? `Your current review is ${existingReview.isApproved ? "approved" : "pending approval"}.` : "Your review will appear after approval."}
             </p>

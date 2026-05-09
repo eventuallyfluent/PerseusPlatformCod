@@ -2,6 +2,8 @@ import type { PropsWithChildren } from "react";
 import { SiteHeader } from "@/components/public/site-header";
 import { SiteFooter } from "@/components/public/site-footer";
 
+export const dynamic = "force-dynamic";
+
 export default async function PublicLayout({ children }: PropsWithChildren) {
   return (
     <div className="flex min-h-screen flex-col">

@@ -7,6 +7,7 @@ import { ProductFormSection } from "@/components/admin/product-form-shell";
 import { BundleCoursePicker } from "@/components/admin/bundle-course-picker";
 import { RelatedOfferPicker } from "@/components/admin/related-offer-picker";
 import { HardLink } from "@/components/ui/hard-link";
+import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import { resolveBundlePublicPath, resolveBundleThankYouPath } from "@/lib/urls/resolve-bundle-path";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
@@ -189,10 +190,16 @@ export default async function BundleDetailPage({
                 Edit the bundle once above, then use these page settings for optional sales-page media and thank-you copy.
               </div>
               <input type="hidden" name="salesPage.galleryControls" value="true" />
-              <label className="lg:col-span-2 flex items-center gap-3 rounded-[18px] border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700">
-                <input className="w-auto" type="checkbox" name="salesPage.galleryVisible" value="true" defaultChecked={!salesPageConfig.galleryHidden} />
-                Show sales image gallery
-              </label>
+              <BooleanChoiceField
+                className="lg:col-span-2"
+                label="Sales image gallery"
+                name="salesPage.galleryVisible"
+                defaultValue={!salesPageConfig.galleryHidden}
+                trueLabel="Show gallery"
+                falseLabel="Hide gallery"
+                trueDescription="Display gallery images on the sales page."
+                falseDescription="Keep gallery images saved but hidden."
+              />
               <label>Gallery eyebrow<input name="salesPage.galleryEyebrow" defaultValue={salesPageConfig.galleryEyebrow ?? ""} placeholder="Sales gallery" /></label>
               <label>Gallery title<input name="salesPage.galleryTitle" defaultValue={salesPageConfig.galleryTitle ?? ""} placeholder="A closer look inside the bundle." /></label>
               <label className="lg:col-span-2">Gallery image URLs<textarea name="salesPage.galleryImageUrls" rows={5} defaultValue={(salesPageConfig.galleryImageUrls ?? []).join("\n")} placeholder="One image URL per line" /></label>
@@ -349,8 +356,8 @@ export default async function BundleDetailPage({
               <label>Quote<textarea name="quote" rows={3} /></label>
               <label>Rating<input name="rating" type="number" min="1" max="5" defaultValue={5} /></label>
               <label>Position<input name="position" type="number" min="1" defaultValue={bundle.testimonials.length + 1} /></label>
-              <label className="flex items-center gap-2"><input className="w-auto" name="isApproved" type="checkbox" value="true" defaultChecked />Approved</label>
-              <label className="flex items-center gap-2"><input className="w-auto" name="recommendsProduct" type="checkbox" value="true" defaultChecked />Recommends product</label>
+              <BooleanChoiceField label="Review status" name="isApproved" defaultValue trueLabel="Approved" falseLabel="Pending" />
+              <BooleanChoiceField label="Recommendation" name="recommendsProduct" defaultValue trueLabel="Recommends" falseLabel="Does not recommend" />
               <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Add testimonial</button>
             </form>
             {bundle.testimonials.map((testimonial) => (
@@ -367,8 +374,8 @@ export default async function BundleDetailPage({
                 <label>Quote<textarea name="quote" rows={3} defaultValue={testimonial.quote} /></label>
                 <label>Rating<input name="rating" type="number" min="1" max="5" defaultValue={testimonial.rating} /></label>
                 <label>Position<input name="position" type="number" min="1" defaultValue={testimonial.position} /></label>
-                <label className="flex items-center gap-2"><input className="w-auto" name="isApproved" type="checkbox" value="true" defaultChecked={testimonial.isApproved} />Approved</label>
-                <label className="flex items-center gap-2"><input className="w-auto" name="recommendsProduct" type="checkbox" value="true" defaultChecked={testimonial.recommendsProduct} />Recommends product</label>
+                <BooleanChoiceField label="Review status" name="isApproved" defaultValue={testimonial.isApproved} trueLabel="Approved" falseLabel="Pending" />
+                <BooleanChoiceField label="Recommendation" name="recommendsProduct" defaultValue={testimonial.recommendsProduct} trueLabel="Recommends" falseLabel="Does not recommend" />
                 <div className="flex flex-wrap gap-3">
                   <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save testimonial</button>
                   <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteTestimonialAction} name="testimonialId" value={testimonial.id}>Delete testimonial</button>

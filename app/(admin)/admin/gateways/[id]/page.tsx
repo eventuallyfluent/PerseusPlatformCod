@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
 import { saveGatewayConfigurationAction, setGatewayActiveStateAction, testGatewayConnectionAction } from "@/app/(admin)/admin/actions";
 import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
@@ -223,10 +224,15 @@ export default async function GatewayDetailPage({
                   ["supportsManualConfirmation", "Supports manual confirmation"],
                   ["suitableForHighRisk", "Suitable for high-risk products"],
                 ].map(([name, label]) => (
-                  <label key={name} className="flex items-center gap-3 rounded-2xl border border-stone-200 px-4 py-3 text-sm text-stone-700">
-                    <input type="checkbox" name={name} defaultChecked={definition.capabilities[name as keyof typeof definition.capabilities] as boolean} />
-                    <span className="font-medium text-stone-950">{label}</span>
-                  </label>
+                  <BooleanChoiceField
+                    key={name}
+                    label={label}
+                    name={name}
+                    defaultValue={definition.capabilities[name as keyof typeof definition.capabilities] as boolean}
+                    trueLabel="Yes"
+                    falseLabel="No"
+                    columnsClassName="grid-cols-2"
+                  />
                 ))}
               </div>
             ) : null}

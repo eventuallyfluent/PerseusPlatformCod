@@ -23,9 +23,17 @@ import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSecti
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
-import { CouponScope, CourseStatus, type HomepageSectionType } from "@prisma/client";
+import { CourseStatus, type HomepageSectionType } from "@prisma/client";
 import type { GatewayCapabilities, GatewayCheckoutModel, GatewayKind, GatewaySettlementBehavior, GatewayTaxModel } from "@/types";
 import type { BundleFormState, BundleFormValues } from "@/lib/admin/bundle-form-state";
+import {
+  deleteCouponAction as deleteCouponActionImpl,
+  saveCouponAction as saveCouponActionImpl,
+} from "./actions/coupons";
+import {
+  deleteTestimonialAction as deleteTestimonialActionImpl,
+  saveTestimonialAction as saveTestimonialActionImpl,
+} from "./actions/reviews";
 
 function toArray(value: FormDataEntryValue | null) {
   return String(value ?? "")
@@ -44,7 +52,7 @@ function toUrlArray(value: FormDataEntryValue | null) {
 function parseSalesPageConfig(formData: FormData) {
   return {
     galleryImageUrls: toUrlArray(formData.get("salesPage.galleryImageUrls")),
-    galleryHidden: formData.has("salesPage.galleryControls") ? !Boolean(formData.get("salesPage.galleryVisible")) : false,
+    galleryHidden: formData.has("salesPage.galleryControls") ? !parseBooleanField(formData, "salesPage.galleryVisible") : false,
     galleryEyebrow: String(formData.get("salesPage.galleryEyebrow") ?? ""),
     galleryTitle: String(formData.get("salesPage.galleryTitle") ?? ""),
     thankYouEyebrow: String(formData.get("salesPage.thankYouEyebrow") ?? ""),
@@ -152,8 +160,15 @@ function parseOptionalNumber(value: FormDataEntryValue | null) {
   return raw ? Number(raw) : undefined;
 }
 
-function parseBooleanField(formData: FormData, name: string) {
-  return formData.get(name) === "on";
+function parseBooleanField(formData: FormData, name: string, defaultValue = false) {
+  const value = formData.get(name);
+
+  if (value === null || value === undefined) {
+    return defaultValue;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+  return ["true", "1", "yes", "y", "on"].includes(normalized);
 }
 
 function slugifyProvider(value: string) {
@@ -795,8 +810,8 @@ export async function saveOfferAction(formData: FormData) {
         price: Number(formData.get("price") ?? 0),
         currency: String(formData.get("currency") ?? "USD"),
         compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
-        isPublished: Boolean(formData.get("isPublished")),
-        isDefault: Boolean(formData.get("isDefault")),
+        isPublished: parseBooleanField(formData, "isPublished"),
+        isDefault: parseBooleanField(formData, "isDefault"),
         checkoutPath: String(formData.get("checkoutPath") ?? ""),
         billingInterval: String(formData.get("billingInterval") ?? "") || undefined,
       },
@@ -871,100 +886,11 @@ export async function deleteOfferAction(formData: FormData) {
 }
 
 export async function saveCouponAction(formData: FormData) {
-  const couponId = String(formData.get("couponId") ?? "");
-  const code = String(formData.get("code") ?? "").trim().toUpperCase();
-  const scope = String(formData.get("scope") ?? "TOTAL_ORDER").trim();
-  const productTarget = String(formData.get("productTarget") ?? "").trim();
-  const collectionId = String(formData.get("collectionId") ?? "").trim();
-  const discountType = String(formData.get("discountType") ?? "").trim();
-  const amountOffRaw = String(formData.get("amountOff") ?? "").trim();
-  const percentOffRaw = String(formData.get("percentOff") ?? "").trim();
-  const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
-  const redirectBase = `/admin/coupons${couponId ? "?saved=updated" : "?saved=created"}`;
-
-  if (!code) {
-    redirect("/admin/coupons?error=code");
-  }
-
-  if (!["TOTAL_ORDER", "PRODUCT", "COLLECTION"].includes(scope)) {
-    redirect("/admin/coupons?error=scope");
-  }
-
-  if (discountType !== "amount" && discountType !== "percent") {
-    redirect("/admin/coupons?error=discountType");
-  }
-
-  const amountOff = amountOffRaw ? Number(amountOffRaw) : null;
-  const percentOff = percentOffRaw ? Number(percentOffRaw) : null;
-
-  if (discountType === "amount" && (!amountOff || amountOff <= 0)) {
-    redirect("/admin/coupons?error=amount");
-  }
-
-  if (discountType === "percent" && (!percentOff || percentOff < 1 || percentOff > 100)) {
-    redirect("/admin/coupons?error=percent");
-  }
-
-  let courseId: string | null = null;
-  let bundleId: string | null = null;
-
-  if (scope === "PRODUCT") {
-    const [kind, id] = productTarget.split(":");
-
-    if (!id || (kind !== "course" && kind !== "bundle")) {
-      redirect("/admin/coupons?error=product");
-    }
-
-    courseId = kind === "course" ? id : null;
-    bundleId = kind === "bundle" ? id : null;
-  }
-
-  if (scope === "COLLECTION" && !collectionId) {
-    redirect("/admin/coupons?error=collection");
-  }
-
-  const payload = {
-      code,
-      scope: scope as CouponScope,
-      courseId,
-      bundleId,
-      collectionId: scope === "COLLECTION" ? collectionId : null,
-      amountOff: discountType === "amount" ? amountOff : null,
-      percentOff: discountType === "percent" ? percentOff : null,
-      isActive: Boolean(formData.get("isActive")),
-      expiresAt: expiresAtRaw ? new Date(expiresAtRaw) : null,
-    };
-
-  try {
-    if (couponId) {
-      await prisma.coupon.update({
-        where: { id: couponId },
-        data: payload,
-      });
-    } else {
-      await prisma.coupon.create({
-        data: payload,
-      });
-    }
-  } catch {
-    redirect("/admin/coupons?error=save");
-  }
-
-  revalidatePath("/admin/coupons");
-  redirect(redirectBase);
+  return saveCouponActionImpl(formData);
 }
 
 export async function deleteCouponAction(formData: FormData) {
-  const couponId = String(formData.get("couponId") ?? "");
-  try {
-    await prisma.coupon.delete({
-      where: { id: couponId },
-    });
-  } catch {
-    redirect("/admin/coupons?error=delete");
-  }
-  revalidatePath("/admin/coupons");
-  redirect("/admin/coupons?saved=deleted");
+  return deleteCouponActionImpl(formData);
 }
 
 export async function saveFaqAction(formData: FormData) {
@@ -1038,96 +964,11 @@ export async function deleteFaqAction(formData: FormData) {
 }
 
 export async function saveTestimonialAction(formData: FormData) {
-  const testimonialId = String(formData.get("testimonialId") ?? "");
-  const courseId = String(formData.get("courseId") ?? "");
-  const bundleId = String(formData.get("bundleId") ?? "");
-  const reviewReturnPath = String(formData.get("reviewReturnPath") ?? "");
-  const rating = Number(formData.get("rating") ?? 5);
-  const payload = {
-    courseId: courseId || null,
-    bundleId: bundleId || null,
-    name: String(formData.get("name") ?? "") || null,
-    email: formData.has("email") ? String(formData.get("email") ?? "") || null : undefined,
-    quote: String(formData.get("quote") ?? ""),
-    rating: Number.isInteger(rating) && rating >= 1 && rating <= 5 ? rating : 5,
-    position: Number(formData.get("position") ?? 1),
-    isApproved: Boolean(formData.get("isApproved")),
-    recommendsProduct: formData.has("recommendsProduct") ? Boolean(formData.get("recommendsProduct")) : true,
-  };
-
-  try {
-    if (testimonialId) {
-      await prisma.testimonial.update({
-        where: { id: testimonialId },
-        data: payload,
-      });
-    } else {
-      await prisma.testimonial.create({
-        data: payload,
-      });
-    }
-  } catch {
-    if (reviewReturnPath) {
-      redirect(`${reviewReturnPath}?error=reviews`);
-    }
-    if (courseId) {
-      redirect(`/admin/courses/${courseId}?error=reviews`);
-    }
-    if (bundleId) {
-      redirect(`/admin/bundles/${bundleId}?error=reviews`);
-    }
-  }
-
-  revalidatePath("/admin");
-  revalidatePath("/admin/reviews");
-  if (reviewReturnPath) {
-    redirect(`${reviewReturnPath}?saved=reviews`);
-  }
-  if (courseId) {
-    revalidatePath(`/admin/courses/${courseId}`);
-    redirect(`/admin/courses/${courseId}?saved=reviews`);
-  }
-  if (bundleId) {
-    revalidatePath(`/admin/bundles/${bundleId}`);
-    redirect(`/admin/bundles/${bundleId}?saved=reviews`);
-  }
+  return saveTestimonialActionImpl(formData);
 }
 
 export async function deleteTestimonialAction(formData: FormData) {
-  const testimonialId = String(formData.get("testimonialId") ?? "");
-  const courseId = String(formData.get("courseId") ?? "");
-  const bundleId = String(formData.get("bundleId") ?? "");
-  const reviewReturnPath = String(formData.get("reviewReturnPath") ?? "");
-
-  try {
-    await prisma.testimonial.delete({
-      where: { id: testimonialId },
-    });
-  } catch {
-    if (reviewReturnPath) {
-      redirect(`${reviewReturnPath}?error=reviews`);
-    }
-    if (courseId) {
-      redirect(`/admin/courses/${courseId}?error=reviews`);
-    }
-    if (bundleId) {
-      redirect(`/admin/bundles/${bundleId}?error=reviews`);
-    }
-  }
-
-  revalidatePath("/admin");
-  revalidatePath("/admin/reviews");
-  if (reviewReturnPath) {
-    redirect(`${reviewReturnPath}?saved=reviews`);
-  }
-  if (courseId) {
-    revalidatePath(`/admin/courses/${courseId}`);
-    redirect(`/admin/courses/${courseId}?saved=reviews`);
-  }
-  if (bundleId) {
-    revalidatePath(`/admin/bundles/${bundleId}`);
-    redirect(`/admin/bundles/${bundleId}?saved=reviews`);
-  }
+  return deleteTestimonialActionImpl(formData);
 }
 
 export async function regeneratePageAction(formData: FormData) {

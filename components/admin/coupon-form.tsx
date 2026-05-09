@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
 
 type SelectOption = {
   value: string;
@@ -138,10 +139,15 @@ export function CouponForm({
             <span className="text-sm font-medium text-stone-900">End date</span>
             <input name="expiresAt" type="date" defaultValue={defaultExpiresAt} />
           </label>
-          <label className="flex items-center gap-3 text-stone-700 md:pt-8">
-            <input className="w-auto" name="isActive" type="checkbox" value="true" defaultChecked={defaultIsActive} />
-            Active
-          </label>
+          <BooleanChoiceField
+            label="Coupon status"
+            name="isActive"
+            defaultValue={defaultIsActive}
+            trueLabel="Active"
+            falseLabel="Inactive"
+            trueDescription="Can be used at checkout."
+            falseDescription="Keep saved but unavailable."
+          />
         </div>
       </details>
     </form>

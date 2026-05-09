@@ -10,7 +10,8 @@ function readReviewForm(formData: FormData) {
   const quote = String(formData.get("quote") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   const rating = Number(formData.get("rating") ?? 0);
-  const recommendsProduct = formData.get("recommendsProduct") === "true";
+  const recommendationValue = formData.get("recommendsProduct");
+  const recommendsProduct = recommendationValue === null ? true : recommendationValue === "true";
 
   return { quote, name, rating, recommendsProduct };
 }

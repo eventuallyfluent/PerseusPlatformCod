@@ -9,6 +9,8 @@ type ImageFieldProps = {
   previewLabel: string;
   uploadFolder: "courses" | "bundles" | "collections" | "instructors";
   uploadEnabled?: boolean;
+  guidance?: string;
+  previewFrameClassName?: string;
 };
 
 export function ImageField({
@@ -18,6 +20,8 @@ export function ImageField({
   previewLabel,
   uploadFolder,
   uploadEnabled = false,
+  guidance = "Recommended: 16:9 landscape, 1920x1080. Keep key subject centered.",
+  previewFrameClassName = "aspect-video",
 }: ImageFieldProps) {
   const inputId = useId();
   const fileId = useId();
@@ -90,12 +94,13 @@ export function ImageField({
           }}
         />
         <span className="text-sm text-stone-600">{uploadEnabled ? "Paste a URL or upload directly." : "URL entry is available now."}</span>
+        <span className="rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-semibold text-stone-600">{guidance}</span>
       </div>
       {message ? <p className="mt-3 text-sm leading-6 text-stone-600">{message}</p> : null}
       <div className="mt-4">
         <p className="mb-3 text-sm font-medium text-stone-900">{previewLabel}</p>
         <div
-          className="h-48 rounded-[20px] border border-stone-200 bg-stone-100 bg-cover bg-center"
+          className={`${previewFrameClassName} rounded-[20px] border border-stone-200 bg-stone-100 bg-cover bg-center`}
           style={{
             backgroundImage: value
               ? `linear-gradient(180deg, rgba(28,25,23,0.12), rgba(28,25,23,0.42)), url(${value})`

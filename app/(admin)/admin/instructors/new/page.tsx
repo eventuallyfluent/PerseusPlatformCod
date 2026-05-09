@@ -30,6 +30,8 @@ export default async function NewInstructorPage({
               previewLabel="Instructor image preview"
               uploadFolder="instructors"
               uploadEnabled={uploadEnabled}
+              guidance="Recommended: 4:5 portrait or square. Keep the face centered."
+              previewFrameClassName="aspect-[4/5] max-w-sm"
             />
           </div>
           <label>

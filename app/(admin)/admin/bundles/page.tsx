@@ -1,14 +1,22 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
+import { AdminActionBar, AdminDataTable, AdminStatusBadge, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminBundlesPage() {
   const bundles = await prisma.bundle.findMany({
-    include: {
-      courses: true,
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      price: true,
+      currency: true,
+      updatedAt: true,
+      courses: {
+        select: { id: true },
+      },
     },
     orderBy: { updatedAt: "desc" },
   });
@@ -16,40 +24,29 @@ export default async function AdminBundlesPage() {
   return (
     <AdminShell title="Bundles" description="Bundle pricing now lives directly on the bundle product.">
       <div className="flex justify-end">
-        <HardLink href="/admin/bundles/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+        <HardLink href="/admin/bundles/new" className={adminButtonClass}>
           New bundle
         </HardLink>
       </div>
-      <Card className="overflow-hidden p-0">
-        <table>
-          <thead className="bg-stone-50 text-stone-500">
-            <tr>
-              <th>Title</th>
-              <th>Courses</th>
-              <th>Status</th>
-              <th>Price</th>
-              <th>Updated</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {bundles.map((bundle) => (
-              <tr key={bundle.id}>
-                <td>{bundle.title}</td>
-                <td>{bundle.courses.length}</td>
-                <td>{bundle.status}</td>
-                <td>{bundle.price.toString()} {bundle.currency}</td>
-                <td>{bundle.updatedAt.toLocaleDateString()}</td>
-                <td>
-                  <HardLink href={`/admin/bundles/${bundle.id}`} className="underline">
-                    Edit
-                  </HardLink>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+      <AdminDataTable
+        columns={[{ header: "Title" }, { header: "Courses" }, { header: "Status" }, { header: "Price" }, { header: "Updated" }, { header: "Actions" }]}
+        rows={bundles.map((bundle) => ({
+          key: bundle.id,
+          cells: [
+            <span key="title" className="font-semibold text-[var(--text-primary)]">{bundle.title}</span>,
+            bundle.courses.length,
+            <AdminStatusBadge key="status" tone={bundle.status === "PUBLISHED" ? "success" : bundle.status === "ARCHIVED" ? "neutral" : "warning"}>{bundle.status}</AdminStatusBadge>,
+            `${bundle.price.toString()} ${bundle.currency}`,
+            bundle.updatedAt.toLocaleDateString(),
+            <AdminActionBar key="actions">
+              <HardLink href={`/admin/bundles/${bundle.id}`} className={adminSecondaryButtonClass}>
+                Edit
+              </HardLink>
+            </AdminActionBar>,
+          ],
+        }))}
+        empty="No bundles yet."
+      />
     </AdminShell>
   );
 }

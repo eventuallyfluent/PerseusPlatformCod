@@ -1,5 +1,6 @@
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { AdminActionBar, AdminDataTable, AdminStatusBadge, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
 import { listPaymentConnectors, findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { evaluateGatewayPolicy, summarizeGatewayCapabilities } from "@/lib/payments/policy";
 import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
@@ -86,7 +87,7 @@ export default async function GatewaysPage({
                 <option value="bank_transfer">Bank transfer</option>
               </select>
             </label>
-            <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+            <button className={adminButtonClass}>
               Create gateway profile
             </button>
           </form>
@@ -98,49 +99,38 @@ export default async function GatewaysPage({
           ) : null}
         </Card>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {gateways.map((gateway) => (
-            <Card key={gateway.id} className="space-y-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
-                  {gateway.definition.kind.replaceAll("_", " ")}
-                </span>
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${gateway.isActive ? "bg-emerald-50 text-emerald-700" : "bg-stone-100 text-stone-600"}`}>
-                  {gateway.isActive ? "Active" : "Inactive"}
-                </span>
-              </div>
-              <div className="space-y-1">
-                <h2 className="text-lg font-semibold text-stone-950">{gateway.displayName}</h2>
-                <p className="text-sm text-stone-500">{gateway.provider}</p>
-              </div>
-              <div className="grid gap-2 text-sm text-stone-600">
-                <div>Capabilities: {summarizeGatewayCapabilities(gateway.definition.capabilities) || "Manual configuration"}</div>
-                <div>Checkout model: {gateway.definition.checkoutModel.replaceAll("_", " ")}</div>
-                <div>Tax model: {gateway.definition.taxModel.replaceAll("_", " ")}</div>
-                <div>Settlement: {gateway.definition.settlementBehavior.replaceAll("_", " ")}</div>
-                <div>Credentials stored: {gateway.credentials.length}</div>
-                <div>Webhook events: {gateway.webhookEvents.length}</div>
-              </div>
-              <p
-                className={`rounded-2xl px-4 py-3 text-sm ${
-                  gateway.readiness.status === "ready"
-                    ? "bg-emerald-50 text-emerald-700"
-                    : gateway.readiness.status === "attention"
-                      ? "bg-amber-50 text-amber-800"
-                      : "bg-rose-50 text-rose-700"
-                }`}
-              >
-                <span className="font-medium">{gateway.readiness.heading}.</span> {gateway.readiness.detail}
-              </p>
-              <p className={`rounded-2xl px-4 py-3 text-sm ${gateway.policy.tone === "success" ? "bg-emerald-50 text-emerald-700" : gateway.policy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
-                <span className="font-medium">{gateway.policy.heading}.</span> {gateway.policy.detail}
-              </p>
-              <HardLink href={`/admin/gateways/${gateway.id}`} className="inline-flex text-sm font-medium text-stone-950 underline">
-                Configure gateway
-              </HardLink>
-            </Card>
-          ))}
-        </div>
+        <AdminDataTable
+          columns={[{ header: "Gateway" }, { header: "State" }, { header: "Capabilities" }, { header: "Readiness" }, { header: "Policy" }, { header: "Actions" }]}
+          rows={gateways.map((gateway) => ({
+            key: gateway.id,
+            cells: [
+              <div key="gateway" className="space-y-1">
+                <p className="font-semibold text-[var(--text-primary)]">{gateway.displayName}</p>
+                <p className="text-xs text-[var(--text-secondary)]">{gateway.provider} · {gateway.definition.kind.replaceAll("_", " ")}</p>
+              </div>,
+              <AdminStatusBadge key="active" tone={gateway.isActive ? "success" : "neutral"}>{gateway.isActive ? "Active" : "Inactive"}</AdminStatusBadge>,
+              <div key="capabilities" className="max-w-sm text-sm leading-6">{summarizeGatewayCapabilities(gateway.definition.capabilities) || "Manual configuration"}</div>,
+              <div key="readiness" className="space-y-1">
+                <AdminStatusBadge tone={gateway.readiness.status === "ready" ? "success" : gateway.readiness.status === "attention" ? "warning" : "danger"}>
+                  {gateway.readiness.heading}
+                </AdminStatusBadge>
+                <p className="text-xs leading-5 text-[var(--text-secondary)]">{gateway.readiness.detail}</p>
+              </div>,
+              <div key="policy" className="space-y-1">
+                <AdminStatusBadge tone={gateway.policy.tone === "success" ? "success" : gateway.policy.tone === "warning" ? "warning" : "danger"}>
+                  {gateway.policy.heading}
+                </AdminStatusBadge>
+                <p className="text-xs leading-5 text-[var(--text-secondary)]">{gateway.policy.detail}</p>
+              </div>,
+              <AdminActionBar key="actions">
+                <HardLink href={`/admin/gateways/${gateway.id}`} className={adminSecondaryButtonClass}>
+                  Configure
+                </HardLink>
+              </AdminActionBar>,
+            ],
+          }))}
+          empty="No gateways yet."
+        />
       </div>
     </AdminShell>
   );

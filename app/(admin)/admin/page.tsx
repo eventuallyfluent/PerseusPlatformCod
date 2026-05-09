@@ -1,169 +1,98 @@
-import { OrderStatus } from "@prisma/client";
-import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { Card } from "@/components/ui/card";
+import { AdminActionBar, AdminDataTable, AdminStat, AdminStatusBadge, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
 import { HardLink } from "@/components/ui/hard-link";
+import { formatAdminMoney, getAdminDashboardData } from "@/lib/admin/dashboard";
 
 export const dynamic = "force-dynamic";
 
-function formatMoney(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format(value);
-}
-
 export default async function AdminOverviewPage() {
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  monthStart.setHours(0, 0, 0, 0);
-
-  const [courses, bundles, monthlySales, monthlyOrders, pendingReviews, latestCourses, latestBundles] = await Promise.all([
-    prisma.course.count(),
-    prisma.bundle.count(),
-    prisma.order.aggregate({
-      _sum: { totalAmount: true },
-      where: {
-        status: OrderStatus.PAID,
-        createdAt: { gte: monthStart },
-      },
-    }),
-    prisma.order.count({
-      where: {
-        status: OrderStatus.PAID,
-        createdAt: { gte: monthStart },
-      },
-    }),
-    prisma.testimonial.count({
-      where: { isApproved: false },
-    }),
-    prisma.course.findMany({
-      orderBy: { updatedAt: "desc" },
-      take: 5,
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        price: true,
-        currency: true,
-        publicPath: true,
-        legacyUrl: true,
-        slug: true,
-        updatedAt: true,
-      },
-    }),
-    prisma.bundle.findMany({
-      orderBy: { updatedAt: "desc" },
-      take: 5,
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        price: true,
-        currency: true,
-        publicPath: true,
-        legacyUrl: true,
-        slug: true,
-        updatedAt: true,
-      },
-    }),
-  ]);
-
-  const totalProducts = courses + bundles;
-  const salesThisMonth = Number(monthlySales._sum.totalAmount ?? 0);
-  const latestProducts = [
-    ...latestCourses.map((course) => ({
-      ...course,
-      type: "Course" as const,
-      editHref: `/admin/courses/${course.id}`,
-      viewHref: course.publicPath ?? course.legacyUrl ?? `/course/${course.slug}`,
-    })),
-    ...latestBundles.map((bundle) => ({
-      ...bundle,
-      type: "Bundle" as const,
-      editHref: `/admin/bundles/${bundle.id}`,
-      viewHref: bundle.publicPath ?? bundle.legacyUrl ?? `/bundle/${bundle.slug}`,
-    })),
-  ]
-    .sort((left, right) => right.updatedAt.getTime() - left.updatedAt.getTime())
-    .slice(0, 5);
+  const data = await getAdminDashboardData();
 
   return (
-    <AdminShell title="Admin overview" description="Sales, products, and pending reviews in one place.">
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <Card className="border-stone-200 bg-white text-stone-950">
-          <p className="text-sm text-stone-600">Products</p>
-          <p className="mt-3 text-3xl font-semibold text-stone-950">{totalProducts}</p>
-          <p className="mt-2 text-sm text-stone-600">{courses} courses, {bundles} bundles</p>
-        </Card>
-        <Card className="border-stone-200 bg-white text-stone-950">
-          <p className="text-sm text-stone-600">Sales this month</p>
-          <p className="mt-3 text-3xl font-semibold text-stone-950">{formatMoney(salesThisMonth)}</p>
-          <p className="mt-2 text-sm text-stone-600">{monthlyOrders} paid order{monthlyOrders === 1 ? "" : "s"}</p>
-        </Card>
-        <HardLink href="/admin/reviews" className="block rounded-[var(--radius-card)] border border-stone-200 bg-white p-5 text-stone-950 transition hover:border-stone-300 hover:bg-stone-50">
-          <p className="text-sm text-stone-600">Reviews to approve</p>
-          <p className="mt-3 text-3xl font-semibold text-stone-950">{pendingReviews}</p>
-          <p className="mt-2 text-sm text-stone-600">Open review queue</p>
-        </HardLink>
-        <Card className="border-stone-200 bg-white text-stone-950">
-          <p className="text-sm text-stone-600">Catalog actions</p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <HardLink href="/admin/products" className="rounded-full border border-stone-200 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100">
-              All products
-            </HardLink>
-            <HardLink href="/admin/courses/new" className="rounded-full bg-stone-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-stone-800">
-              Add product
-            </HardLink>
-          </div>
-        </Card>
+    <AdminShell title="Admin overview" description="Sales, students, payments, reviews, and recent activity.">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminStat label="Revenue this month" value={formatAdminMoney(data.revenueThisMonth)} detail={`${data.monthlyOrders} paid order${data.monthlyOrders === 1 ? "" : "s"}`} />
+        <AdminStat label="Students" value={data.totalStudents} detail={`${data.newStudents} new this month`} />
+        <AdminStat label="Enrollments" value={data.newEnrollments} detail="New course enrollments this month" />
+        <AdminStat
+          label="Needs action"
+          value={data.manualPaymentOrders + data.pendingReviews}
+          detail={`${data.manualPaymentOrders} payment queue, ${data.pendingReviews} reviews`}
+          tone={data.manualPaymentOrders + data.pendingReviews > 0 ? "warning" : "success"}
+        />
       </div>
 
-      <Card className="space-y-5 border-stone-200 bg-white text-stone-950">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-stone-950">Latest products</h2>
-            <p className="text-sm text-stone-600">Open a product or jump straight into editing.</p>
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.48fr)]">
+        <section className="space-y-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">Recent orders</h2>
+              <p className="text-sm text-[var(--text-secondary)]">Latest checkout activity across all products.</p>
+            </div>
+            <AdminActionBar>
+              <HardLink href="/admin/orders" className={adminSecondaryButtonClass}>
+                View orders
+              </HardLink>
+              <HardLink href="/admin/courses/new" className={adminButtonClass}>
+                New course
+              </HardLink>
+            </AdminActionBar>
           </div>
-          <HardLink href="/admin/products" className="text-sm font-medium text-stone-950 underline underline-offset-4">
-            Manage all products
-          </HardLink>
-        </div>
-        <div className="grid gap-3">
-          {latestProducts.map((product) => {
-            const priceSummary = `${product.price.toString()} ${product.currency}`;
+          <AdminDataTable
+            columns={[
+              { header: "Order" },
+              { header: "Customer" },
+              { header: "Product" },
+              { header: "Status" },
+              { header: "Total" },
+              { header: "Created" },
+            ]}
+            rows={data.recentOrders.map((order) => ({
+              key: order.id,
+              cells: [
+                <span key="id" className="font-semibold text-[var(--text-primary)]">{order.id.slice(0, 8)}</span>,
+                order.user?.email ?? "Guest",
+                order.offer.course?.title ?? order.offer.bundle?.title ?? order.offer.name,
+                <AdminStatusBadge key="status" tone={order.status === "PAID" ? "success" : order.status === "FAILED" ? "danger" : "warning"}>{order.status.replaceAll("_", " ")}</AdminStatusBadge>,
+                formatAdminMoney(Number(order.totalAmount), order.currency),
+                order.createdAt.toLocaleDateString(),
+              ],
+            }))}
+            empty="No orders yet."
+          />
+        </section>
 
-            return (
-              <div
-                key={`${product.type}-${product.id}`}
-                className="flex flex-col gap-4 rounded-[24px] border border-stone-200 bg-stone-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
-              >
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className="rounded-full border border-stone-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-700">
-                      {product.type}
-                    </span>
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">
-                      {product.status}
-                    </span>
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Recent content</h2>
+            <p className="text-sm text-[var(--text-secondary)]">Recently edited courses and bundles.</p>
+          </div>
+          <div className="grid gap-3">
+            {data.latestContent.map((product) => (
+              <div key={`${product.type}-${product.id}`} className="rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0 space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                      <AdminStatusBadge tone="accent">{product.type}</AdminStatusBadge>
+                      <AdminStatusBadge tone={product.status === "PUBLISHED" ? "success" : product.status === "ARCHIVED" ? "neutral" : "warning"}>{product.status}</AdminStatusBadge>
+                    </div>
+                    <h3 className="truncate text-base font-semibold text-[var(--text-primary)]">{product.title}</h3>
+                    <p className="text-sm text-[var(--text-secondary)]">{formatAdminMoney(Number(product.price), product.currency)}</p>
                   </div>
-                  <p className="text-xl font-semibold text-stone-950">{product.title}</p>
-                  <p className="text-sm text-stone-600">{priceSummary}</p>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <HardLink href={product.viewHref} className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100">
-                    View page
-                  </HardLink>
-                  <HardLink href={product.editHref} className="rounded-full bg-stone-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-stone-800">
-                    Manage
-                  </HardLink>
+                  <AdminActionBar>
+                    <HardLink href={product.viewHref} className={adminSecondaryButtonClass}>
+                      View
+                    </HardLink>
+                    <HardLink href={product.editHref} className={adminButtonClass}>
+                      Edit
+                    </HardLink>
+                  </AdminActionBar>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </Card>
+            ))}
+          </div>
+        </section>
+      </div>
     </AdminShell>
   );
 }

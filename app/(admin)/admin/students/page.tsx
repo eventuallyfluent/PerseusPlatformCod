@@ -1,15 +1,22 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { Card } from "@/components/ui/card";
+import { AdminDataTable } from "@/components/admin/admin-ui";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudentsPage() {
   const students = await prisma.user.findMany({
-    include: {
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      createdAt: true,
       enrollments: {
-        include: {
-          course: true,
+        select: {
+          id: true,
+          course: {
+            select: { title: true },
+          },
         },
       },
     },
@@ -18,18 +25,19 @@ export default async function StudentsPage() {
 
   return (
     <AdminShell title="Students" description="Single-tenant student list with enrollment visibility.">
-      <div className="grid gap-4">
-        {students.map((student) => (
-          <Card key={student.id} className="space-y-3">
-            <h2 className="text-lg font-semibold text-stone-950">{student.email}</h2>
-            <ul className="space-y-2 text-sm text-stone-600">
-              {student.enrollments.map((enrollment) => (
-                <li key={enrollment.id}>{enrollment.course.title}</li>
-              ))}
-            </ul>
-          </Card>
-        ))}
-      </div>
+      <AdminDataTable
+        columns={[{ header: "Student" }, { header: "Name" }, { header: "Enrollments" }, { header: "Joined" }]}
+        rows={students.map((student) => ({
+          key: student.id,
+          cells: [
+            <span key="email" className="font-semibold text-[var(--text-primary)]">{student.email}</span>,
+            student.name ?? "-",
+            student.enrollments.length > 0 ? student.enrollments.map((enrollment) => enrollment.course.title).join(", ") : "No enrollments",
+            student.createdAt.toLocaleDateString(),
+          ],
+        }))}
+        empty="No students yet."
+      />
     </AdminShell>
   );
 }

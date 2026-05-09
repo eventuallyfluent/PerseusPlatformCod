@@ -1,14 +1,21 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
+import { AdminActionBar, AdminDataTable, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminCollectionsPage() {
   const collections = await prisma.collection.findMany({
-    include: {
-      courses: true,
+    select: {
+      id: true,
+      position: true,
+      title: true,
+      slug: true,
+      updatedAt: true,
+      courses: {
+        select: { id: true },
+      },
     },
     orderBy: [{ position: "asc" }, { updatedAt: "desc" }],
   });
@@ -22,44 +29,33 @@ export default async function AdminCollectionsPage() {
         <div className="text-sm text-stone-600">
           {collections.length} collection{collections.length === 1 ? "" : "s"}
         </div>
-        <HardLink href="/admin/collections/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+        <HardLink href="/admin/collections/new" className={adminButtonClass}>
           Add collection
         </HardLink>
       </div>
 
-      <Card className="overflow-hidden p-0">
-        <table>
-          <thead className="bg-stone-50 text-stone-500">
-            <tr>
-              <th>Position</th>
-              <th>Title</th>
-              <th>Slug</th>
-              <th>Courses</th>
-              <th>Updated</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {collections.map((collection) => (
-              <tr key={collection.id}>
-                <td>{collection.position}</td>
-                <td>{collection.title}</td>
-                <td>{collection.slug}</td>
-                <td>{collection.courses.length}</td>
-                <td>{collection.updatedAt.toLocaleDateString()}</td>
-                <td className="space-x-3">
-                  <HardLink href={`/courses?collection=${encodeURIComponent(collection.slug)}`} className="underline">
-                    View in store
-                  </HardLink>
-                  <HardLink href={`/admin/collections/${collection.id}`} className="underline">
-                    Edit
-                  </HardLink>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+      <AdminDataTable
+        columns={[{ header: "Position" }, { header: "Title" }, { header: "Slug" }, { header: "Courses" }, { header: "Updated" }, { header: "Actions" }]}
+        rows={collections.map((collection) => ({
+          key: collection.id,
+          cells: [
+            collection.position,
+            <span key="title" className="font-semibold text-[var(--text-primary)]">{collection.title}</span>,
+            collection.slug,
+            collection.courses.length,
+            collection.updatedAt.toLocaleDateString(),
+            <AdminActionBar key="actions">
+              <HardLink href={`/courses?collection=${encodeURIComponent(collection.slug)}`} className={adminSecondaryButtonClass}>
+                View
+              </HardLink>
+              <HardLink href={`/admin/collections/${collection.id}`} className={adminSecondaryButtonClass}>
+                Edit
+              </HardLink>
+            </AdminActionBar>,
+          ],
+        }))}
+        empty="No collections yet."
+      />
     </AdminShell>
   );
 }

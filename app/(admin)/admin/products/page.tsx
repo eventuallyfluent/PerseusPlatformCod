@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
+import { AdminActionBar, AdminDataTable, AdminStatusBadge, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
@@ -65,26 +65,29 @@ function getCheckoutStatusClass(tone: "muted" | "warning" | "success") {
 
 export default async function AdminProductsPage() {
   const products = await prisma.accessProduct.findMany({
-    include: {
-      course: true,
+    select: {
+      id: true,
+      title: true,
+      type: true,
+      status: true,
+      course: {
+        select: { id: true, title: true, slug: true, publicPath: true, legacyUrl: true },
+      },
       bundle: {
-        include: {
-          courses: true,
-        },
+        select: { id: true, title: true, slug: true, publicPath: true, legacyUrl: true },
       },
       grants: {
-        include: {
-          course: {
-            include: {
-              instructor: true,
-            },
-          },
-        },
+        select: { id: true },
         orderBy: { position: "asc" },
       },
       offers: {
-        include: {
-          prices: true,
+        select: {
+          isDefault: true,
+          isPublished: true,
+          price: true,
+          prices: {
+            select: { amount: true },
+          },
         },
       },
     },
@@ -103,77 +106,63 @@ export default async function AdminProductsPage() {
           </span>
         </div>
         <div className="flex flex-wrap gap-3">
-          <HardLink href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+          <HardLink href="/admin/courses/new" className={adminButtonClass}>
             Add course content
           </HardLink>
-          <HardLink href="/admin/bundles/new" className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-medium text-stone-800">
+          <HardLink href="/admin/bundles/new" className={adminSecondaryButtonClass}>
             Add bundle content
           </HardLink>
         </div>
       </div>
 
-      <Card className="overflow-hidden p-0">
-        <table>
-          <thead className="bg-stone-50 text-stone-500">
-            <tr>
-              <th>Type</th>
-              <th>Title</th>
-              <th>Unlocks</th>
-              <th>Checkout</th>
-              <th>Status</th>
-              <th>Content Source</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => {
-              const checkoutReadiness = getCheckoutReadiness(product);
-              const sourceHref = product.course
-                ? `/admin/courses/${product.course.id}`
-                : product.bundle
-                  ? `/admin/bundles/${product.bundle.id}`
-                  : `/admin/products/${product.id}`;
-              const publicHref = product.course
-                ? resolveCoursePublicPath(product.course)
-                : product.bundle
-                  ? resolveBundlePublicPath(product.bundle)
-                  : null;
+      <AdminDataTable
+        columns={[
+          { header: "Type" },
+          { header: "Title" },
+          { header: "Unlocks" },
+          { header: "Checkout" },
+          { header: "Status" },
+          { header: "Source" },
+          { header: "Actions" },
+        ]}
+        rows={products.map((product) => {
+          const checkoutReadiness = getCheckoutReadiness(product);
+          const sourceHref = product.course
+            ? `/admin/courses/${product.course.id}`
+            : product.bundle
+              ? `/admin/bundles/${product.bundle.id}`
+              : `/admin/products/${product.id}`;
+          const publicHref = product.course
+            ? resolveCoursePublicPath(product.course)
+            : product.bundle
+              ? resolveBundlePublicPath(product.bundle)
+              : null;
 
-              return (
-                <tr key={product.id}>
-                  <td>
-                    <span className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-600">
-                      {formatTypeLabel(product.type)}
-                    </span>
-                  </td>
-                  <td>{product.course?.title ?? product.bundle?.title ?? product.title}</td>
-                  <td>{product.bundle ? `${product.grants.length} courses` : "Course"}</td>
-                  <td>
-                    <span className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${getCheckoutStatusClass(checkoutReadiness.tone)}`}>
-                      {checkoutReadiness.label}
-                    </span>
-                  </td>
-                  <td>{product.status}</td>
-                  <td>{product.course ? "Course" : product.bundle ? "Bundle" : "Standalone"}</td>
-                  <td className="space-x-3">
-                    <HardLink href={`/admin/products/${product.id}`} className="underline">
-                      Manage product
-                    </HardLink>
-                    <HardLink href={sourceHref} className="underline">
-                      Content
-                    </HardLink>
-                    {publicHref ? (
-                      <HardLink href={publicHref} className="underline">
-                        View
-                      </HardLink>
-                    ) : null}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </Card>
+          return {
+            key: product.id,
+            cells: [
+              <AdminStatusBadge key="type" tone="accent">{formatTypeLabel(product.type)}</AdminStatusBadge>,
+              <span key="title" className="font-semibold text-[var(--text-primary)]">{product.course?.title ?? product.bundle?.title ?? product.title}</span>,
+              product.bundle ? `${product.grants.length} courses` : "Course",
+              <span key="checkout" className={`inline-flex rounded-md border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${getCheckoutStatusClass(checkoutReadiness.tone)}`}>
+                {checkoutReadiness.label}
+              </span>,
+              <AdminStatusBadge key="status" tone={product.status === "PUBLISHED" ? "success" : product.status === "ARCHIVED" ? "neutral" : "warning"}>{product.status}</AdminStatusBadge>,
+              product.course ? "Course" : product.bundle ? "Bundle" : "Standalone",
+              <AdminActionBar key="actions">
+                <HardLink href={`/admin/products/${product.id}`} className={adminSecondaryButtonClass}>
+                  Manage
+                </HardLink>
+                <HardLink href={sourceHref} className={adminSecondaryButtonClass}>
+                  Content
+                </HardLink>
+                {publicHref ? <HardLink href={publicHref} className={adminSecondaryButtonClass}>View</HardLink> : null}
+              </AdminActionBar>,
+            ],
+          };
+        })}
+        empty="No products yet."
+      />
     </AdminShell>
   );
 }

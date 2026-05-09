@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { AdminActionBar, AdminDataTable, AdminStatusBadge, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -22,11 +23,11 @@ function isStuckProcessing(batch: { status: string; executionSummary: unknown })
 }
 
 function statusClassName(status: string, stuck: boolean) {
-  if (stuck) return "bg-amber-50 text-amber-800";
-  if (status === "COMPLETED") return "bg-emerald-50 text-emerald-700";
-  if (status === "FAILED") return "bg-rose-50 text-rose-700";
-  if (status === "PROCESSING") return "bg-blue-50 text-blue-700";
-  return "bg-stone-100 text-stone-700";
+  if (stuck) return "warning";
+  if (status === "COMPLETED") return "success";
+  if (status === "FAILED") return "danger";
+  if (status === "PROCESSING") return "accent";
+  return "neutral";
 }
 
 export default async function ImportsPage() {
@@ -53,7 +54,7 @@ export default async function ImportsPage() {
       <Card className="space-y-5 bg-white">
         <div className="space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Migration workflow</p>
-          <h2 className="text-3xl leading-none tracking-[-0.04em] text-stone-950">Run migration as controlled QA, not blind bulk upload.</h2>
+          <h2 className="text-xl font-semibold text-stone-950">Run migration as controlled QA, not blind bulk upload.</h2>
           <p className="text-sm leading-7 text-stone-700">
             Preserve the existing Payhip-backed public path, dry run every course first, then verify the public page before importing students.
           </p>
@@ -92,7 +93,7 @@ export default async function ImportsPage() {
           </div>
 
           <div className="space-y-3">
-            <Link href="/api/imports/templates/course-package" className="inline-flex rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+            <Link href="/api/imports/templates/course-package" className={adminButtonClass}>
               Download Course CSV
             </Link>
             <p className="text-sm text-stone-700">Filename: <span className="font-medium text-stone-950">course-package-template.csv</span></p>
@@ -109,10 +110,10 @@ export default async function ImportsPage() {
               <input type="file" name="file" accept=".csv" required />
             </label>
             <div className="flex flex-wrap gap-3">
-              <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
+              <button className={adminButtonClass} type="submit" name="mode" value="dry-run">
                 Dry run
               </button>
-              <button className="rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800" type="submit" name="mode" value="execute">
+              <button className={adminSecondaryButtonClass} type="submit" name="mode" value="execute">
                 Execute import
               </button>
             </div>
@@ -127,7 +128,7 @@ export default async function ImportsPage() {
           </div>
 
           <div className="space-y-3">
-            <Link href="/api/imports/templates/course-students" className="inline-flex rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+            <Link href="/api/imports/templates/course-students" className={adminButtonClass}>
               Download Course Students CSV
             </Link>
             <p className="text-sm text-stone-700">Filename: <span className="font-medium text-stone-950">course-students-template.csv</span></p>
@@ -155,10 +156,10 @@ export default async function ImportsPage() {
               <input type="file" name="file" accept=".csv" required />
             </label>
             <div className="flex flex-wrap gap-3">
-              <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">
+              <button className={adminButtonClass} type="submit" name="mode" value="dry-run">
                 Dry run
               </button>
-              <button className="rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800" type="submit" name="mode" value="execute">
+              <button className={adminSecondaryButtonClass} type="submit" name="mode" value="execute">
                 Import students
               </button>
             </div>
@@ -166,71 +167,45 @@ export default async function ImportsPage() {
         </Card>
       </div>
 
-      <Card className="overflow-hidden bg-white p-0">
-        <table>
-          <thead className="bg-stone-50 text-stone-600">
-            <tr>
-              <th>Type</th>
-              <th>Status</th>
-              <th>Filename</th>
-              <th>Dry Run</th>
-              <th>Execution</th>
-              <th>Created</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {batches.map((batch) => {
-              const stuck = isStuckProcessing(batch);
-              const dryRunSummary = batch.dryRunSummary as Record<string, unknown> | null;
-              const executionSummary = batch.executionSummary as Record<string, unknown> | null;
-              const target = String(executionSummary?.targetCourseTitle ?? dryRunSummary?.targetCourseTitle ?? dryRunSummary?.targetCourseSlug ?? "");
+      <AdminDataTable
+        columns={[{ header: "Type" }, { header: "Status" }, { header: "Filename" }, { header: "Dry run" }, { header: "Execution" }, { header: "Created" }, { header: "Actions" }]}
+        rows={batches.map((batch) => {
+          const stuck = isStuckProcessing(batch);
+          const dryRunSummary = batch.dryRunSummary as Record<string, unknown> | null;
+          const executionSummary = batch.executionSummary as Record<string, unknown> | null;
+          const target = String(executionSummary?.targetCourseTitle ?? dryRunSummary?.targetCourseTitle ?? dryRunSummary?.targetCourseSlug ?? "");
 
-              return (
-              <tr key={batch.id}>
-                <td>
-                  <div className="space-y-1">
-                    <p>{batch.type}</p>
-                    {target ? <p className="text-xs text-stone-500">{target}</p> : null}
-                  </div>
-                </td>
-                <td>
-                  <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${statusClassName(batch.status, stuck)}`}>
-                    {stuck ? "Resume needed" : batch.status}
-                  </span>
-                </td>
-                <td>{batch.filename}</td>
-                <td>{batch.dryRunSummary ? "Ready" : "-"}</td>
-                <td>
-                  {stuck
-                    ? "Stuck at 0 rows"
-                    : batch.status === "PROCESSING"
-                    ? `Processing ${readCount(batch.executionSummary, "processedCount")} / ${readCount(batch.executionSummary, "totalCount")}`
-                    : batch.status === "COMPLETED" || batch.status === "FAILED"
-                      ? "Recorded"
-                      : "Pending"}
-                </td>
-                <td>{batch.createdAt.toLocaleString()}</td>
-                <td>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Link href={`/admin/imports/${batch.id}`} className="underline">
-                      View
-                    </Link>
-                    {batch.status === "PROCESSING" ? (
-                      <Link href={`/admin/imports/${batch.id}`} className="text-sm font-medium text-stone-950 underline">
-                        Resume
-                      </Link>
-                    ) : null}
-                    <a href={`/api/imports/batches/${batch.id}/errors`} className="text-sm text-stone-700 underline">
-                      Errors
-                    </a>
-                  </div>
-                </td>
-              </tr>
-            )})}
-          </tbody>
-        </table>
-      </Card>
+          return {
+            key: batch.id,
+            cells: [
+              <div key="type" className="space-y-1">
+                <p className="font-semibold text-[var(--text-primary)]">{batch.type.replaceAll("_", " ")}</p>
+                {target ? <p className="text-xs text-[var(--text-secondary)]">{target}</p> : null}
+              </div>,
+              <AdminStatusBadge key="status" tone={statusClassName(batch.status, stuck)}>{stuck ? "Resume needed" : batch.status}</AdminStatusBadge>,
+              batch.filename,
+              batch.dryRunSummary ? "Ready" : "-",
+              stuck
+                ? "Stuck at 0 rows"
+                : batch.status === "PROCESSING"
+                  ? `Processing ${readCount(batch.executionSummary, "processedCount")} / ${readCount(batch.executionSummary, "totalCount")}`
+                  : batch.status === "COMPLETED" || batch.status === "FAILED"
+                    ? "Recorded"
+                    : "Pending",
+              batch.createdAt.toLocaleString(),
+              <AdminActionBar key="actions">
+                <Link href={`/admin/imports/${batch.id}`} className={adminSecondaryButtonClass}>
+                  {batch.status === "PROCESSING" ? "Resume" : "View"}
+                </Link>
+                <a href={`/api/imports/batches/${batch.id}/errors`} className={adminSecondaryButtonClass}>
+                  Errors
+                </a>
+              </AdminActionBar>,
+            ],
+          };
+        })}
+        empty="No import batches yet."
+      />
     </AdminShell>
   );
 }

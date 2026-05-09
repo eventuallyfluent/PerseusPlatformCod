@@ -1,48 +1,45 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
+import { AdminActionBar, AdminDataTable, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
 
 export const dynamic = "force-dynamic";
 
 export default async function InstructorsPage() {
   const instructors = await prisma.instructor.findMany({
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      updatedAt: true,
+    },
     orderBy: { updatedAt: "desc" },
   });
 
   return (
     <AdminShell title="Instructors" description="Manage instructor bios, social links, and public profile pages.">
       <div className="flex justify-end">
-        <HardLink href="/admin/instructors/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+        <HardLink href="/admin/instructors/new" className={adminButtonClass}>
           New instructor
         </HardLink>
       </div>
-      <Card className="overflow-hidden p-0">
-        <table>
-          <thead className="bg-stone-50 text-stone-500">
-            <tr>
-              <th>Name</th>
-              <th>Slug</th>
-              <th>Updated</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {instructors.map((instructor) => (
-              <tr key={instructor.id}>
-                <td>{instructor.name}</td>
-                <td>{instructor.slug}</td>
-                <td>{instructor.updatedAt.toLocaleDateString()}</td>
-                <td>
-                  <HardLink href={`/admin/instructors/${instructor.id}`} className="underline">
-                    Edit
-                  </HardLink>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+      <AdminDataTable
+        columns={[{ header: "Name" }, { header: "Slug" }, { header: "Updated" }, { header: "Actions" }]}
+        rows={instructors.map((instructor) => ({
+          key: instructor.id,
+          cells: [
+            <span key="name" className="font-semibold text-[var(--text-primary)]">{instructor.name}</span>,
+            instructor.slug,
+            instructor.updatedAt.toLocaleDateString(),
+            <AdminActionBar key="actions">
+              <HardLink href={`/admin/instructors/${instructor.id}`} className={adminSecondaryButtonClass}>
+                Edit
+              </HardLink>
+            </AdminActionBar>,
+          ],
+        }))}
+        empty="No instructors yet."
+      />
     </AdminShell>
   );
 }

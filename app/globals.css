@@ -297,9 +297,9 @@
   --shadow-glow: 0 16px 30px rgba(123, 47, 190, 0.08);
   --shadow-panel: var(--shadow-soft);
   --shadow-brand: var(--shadow-glow);
-  --radius-panel: 28px;
-  --radius-card: 22px;
-  --radius-field: 18px;
+  --radius-panel: 12px;
+  --radius-card: 10px;
+  --radius-field: 10px;
   --radius-pill: 999px;
   --button-primary-background: var(--accent);
   --button-primary-hover: var(--accent-strong);
@@ -354,6 +354,16 @@ body {
 
 .admin-theme label {
   color: var(--text-secondary);
+}
+
+.admin-theme h1,
+.admin-theme h2,
+.admin-theme h3,
+.admin-theme h4,
+.admin-theme h5,
+.admin-theme h6 {
+  font-family: var(--font-body), sans-serif;
+  letter-spacing: -0.025em;
 }
 
 .admin-theme th,

@@ -1,14 +1,22 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
+import { AdminActionBar, AdminDataTable, AdminStatusBadge, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminCoursesPage() {
   const courses = await prisma.course.findMany({
-    include: {
-      instructor: true,
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      price: true,
+      currency: true,
+      updatedAt: true,
+      instructor: {
+        select: { name: true },
+      },
     },
     orderBy: { updatedAt: "desc" },
   });
@@ -16,40 +24,29 @@ export default async function AdminCoursesPage() {
   return (
     <AdminShell title="Courses" description="Create, edit, publish, and manage course pricing from one product screen.">
       <div className="flex justify-end">
-        <HardLink href="/admin/courses/new" className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+        <HardLink href="/admin/courses/new" className={adminButtonClass}>
           Add new product
         </HardLink>
       </div>
-      <Card className="overflow-hidden p-0">
-        <table>
-          <thead className="bg-stone-50 text-stone-500">
-            <tr>
-              <th>Title</th>
-              <th>Instructor</th>
-              <th>Status</th>
-              <th>Price</th>
-              <th>Updated</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {courses.map((course) => (
-              <tr key={course.id}>
-                <td>{course.title}</td>
-                <td>{course.instructor.name}</td>
-                <td>{course.status}</td>
-                <td>{course.price.toString()} {course.currency}</td>
-                <td>{course.updatedAt.toLocaleDateString()}</td>
-                <td>
-                  <HardLink href={`/admin/courses/${course.id}`} className="underline">
-                    Edit
-                  </HardLink>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+      <AdminDataTable
+        columns={[{ header: "Title" }, { header: "Instructor" }, { header: "Status" }, { header: "Price" }, { header: "Updated" }, { header: "Actions" }]}
+        rows={courses.map((course) => ({
+          key: course.id,
+          cells: [
+            <span key="title" className="font-semibold text-[var(--text-primary)]">{course.title}</span>,
+            course.instructor.name,
+            <AdminStatusBadge key="status" tone={course.status === "PUBLISHED" ? "success" : course.status === "ARCHIVED" ? "neutral" : "warning"}>{course.status}</AdminStatusBadge>,
+            `${course.price.toString()} ${course.currency}`,
+            course.updatedAt.toLocaleDateString(),
+            <AdminActionBar key="actions">
+              <HardLink href={`/admin/courses/${course.id}`} className={adminSecondaryButtonClass}>
+                Edit
+              </HardLink>
+            </AdminActionBar>,
+          ],
+        }))}
+        empty="No courses yet."
+      />
     </AdminShell>
   );
 }

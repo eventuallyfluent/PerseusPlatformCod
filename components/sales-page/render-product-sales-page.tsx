@@ -3,21 +3,18 @@ import { CheckCircle2, PackageCheck, ShieldCheck, Sparkles, Target, ThumbsUp } f
 import { Fragment, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button-link";
+import { SalesSmartImage } from "@/components/sales-page/sales-smart-image";
 import { StreamableEmbed } from "@/components/ui/streamable-embed";
 import type { BundleSalesPagePayload, GeneratedSalesPagePayload, SalesPageOfferSummary, SalesPageSectionKey } from "@/types";
 
 type ProductPayload = GeneratedSalesPagePayload | BundleSalesPagePayload;
 
 const sectionPanelClass =
-  "perseus-sales-panel rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
+  "perseus-sales-panel rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
 const sectionPanelStrongClass =
-  "perseus-sales-panel-strong rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
+  "perseus-sales-panel-strong rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
 const panelMutedTextClass = "text-[var(--text-secondary)]";
 const panelSubtleTextClass = "text-[var(--text-muted)]";
-
-function cssUrl(url: string) {
-  return `url("${url.replace(/"/g, "%22")}")`;
-}
 
 function splitIntoParagraphs(value: string) {
   const normalized = value.trim();
@@ -117,8 +114,8 @@ function SectionIntro({ eyebrow, title, body }: { eyebrow: string; title: string
       <div className="flex justify-center">
         <Badge variant="accent">{eyebrow}</Badge>
       </div>
-      <h2 className="text-4xl leading-none tracking-[-0.045em] text-[var(--foreground)] lg:text-[3.1rem]">{title}</h2>
-      {body ? <p className="text-base leading-8 text-[var(--text-secondary)]">{body}</p> : null}
+      <h2 className="text-3xl leading-tight tracking-[-0.04em] text-[var(--foreground)] lg:text-[2.8rem]">{title}</h2>
+      {body ? <p className="text-base leading-7 text-[var(--text-secondary)]">{body}</p> : null}
     </div>
   );
 }
@@ -221,14 +218,11 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
           <SectionIntro eyebrow={payload.gallerySection.eyebrow} title={payload.gallerySection.title} />
           <div className="grid gap-4 md:grid-cols-2">
             {payload.gallerySection.images.map((imageUrl, index) => (
-              <div
+              <SalesSmartImage
                 key={`${imageUrl}-${index}`}
-                className={`min-h-[280px] rounded-[30px] bg-cover bg-center shadow-[var(--shadow-panel)] ${payload.gallerySection.images.length === 1 ? "md:col-span-2 md:min-h-[440px]" : ""}`}
-                style={{
-                  backgroundImage: `linear-gradient(180deg, rgba(12,9,24,0.05), rgba(12,9,24,0.18)), ${cssUrl(imageUrl)}`,
-                }}
-                aria-label={`${payload.hero.title} sales image ${index + 1}`}
-                role="img"
+                src={imageUrl}
+                alt={`${payload.hero.title} sales image ${index + 1}`}
+                className={`aspect-[4/3] ${payload.gallerySection.images.length === 1 ? "md:col-span-2 md:aspect-[16/9]" : ""}`}
               />
             ))}
           </div>
@@ -298,19 +292,15 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {payload.includedCoursesSection.courses.map((course, index) => (
-              <div key={course.courseUrl} className={`rounded-[28px] p-6 ${sectionPanelClass}`}>
-                <div
-                  className="h-48 rounded-[22px] bg-[linear-gradient(135deg,#1b0c34,#2e175f)] bg-cover bg-center"
-                  style={
-                    course.imageUrl
-                      ? {
-                          backgroundImage: `linear-gradient(180deg, rgba(12,9,24,0.16), rgba(12,9,24,0.38)), ${cssUrl(course.imageUrl)}`,
-                        }
-                      : undefined
-                  }
+              <div key={course.courseUrl} className={`rounded-[24px] p-5 ${sectionPanelClass}`}>
+                <SalesSmartImage
+                  src={course.imageUrl}
+                  alt={`${course.title} course image`}
+                  className="aspect-video rounded-[20px]"
+                  imageClassName="inset-3 sm:inset-3"
                 />
                 <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>Included course {index + 1}</p>
-                <h3 className="mt-4 text-3xl leading-none tracking-[-0.03em] text-[var(--text-primary)]">{course.title}</h3>
+                <h3 className="mt-4 text-2xl leading-tight tracking-[-0.03em] text-[var(--text-primary)]">{course.title}</h3>
                 {course.subtitle ? <p className={`mt-3 text-sm leading-7 ${panelMutedTextClass}`}>{course.subtitle}</p> : null}
                 {course.instructorName ? <p className={`mt-4 text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>{course.instructorName}</p> : null}
                 <Link href={course.courseUrl} className="mt-5 inline-flex text-sm font-semibold text-[var(--accent)] underline underline-offset-4">
@@ -328,12 +318,12 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
         <section key={section} className="mx-auto max-w-7xl px-6">
           <div className={`grid gap-6 rounded-[30px] p-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start lg:p-6 ${sectionPanelClass}`}>
             <div className="space-y-3">
-              {payload.instructorSection.imageUrl ? (
-                <div
-                  className="aspect-square rounded-[24px] bg-cover bg-center"
-                  style={{ backgroundImage: `linear-gradient(180deg, rgba(22,12,45,0.08), rgba(22,12,45,0.24)), ${cssUrl(payload.instructorSection.imageUrl)}` }}
-                />
-              ) : <div className="aspect-square rounded-[24px] bg-[linear-gradient(135deg,#1b0c34,#2e175f)]" />}
+              <SalesSmartImage
+                src={payload.instructorSection.imageUrl}
+                alt={payload.instructorSection.name}
+                className="aspect-square rounded-[22px]"
+                imageClassName="inset-0 bg-cover"
+              />
               <Link href={payload.instructorSection.pageUrl} className="inline-flex text-sm font-semibold text-[var(--accent)] underline underline-offset-4">
                 View instructor page
               </Link>
@@ -458,70 +448,53 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
   };
 
   return (
-    <div className="perseus-sales-page space-y-16">
-      <section className="px-6">
-        <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[42px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] px-8 py-12 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] lg:px-12 lg:py-16">
-          <div
-            className="absolute inset-0 opacity-90"
-            style={{
-              backgroundImage: payload.hero.imageUrl
-                ? `radial-gradient(circle_at_20%_18%,rgba(168,102,255,0.24),transparent 24%),radial-gradient(circle_at_78%_24%,rgba(212,168,70,0.14),transparent 20%),var(--hero-media-overlay), ${cssUrl(payload.hero.imageUrl)}`
-                : "radial-gradient(circle_at_20%_18%,rgba(168,102,255,0.24),transparent 24%),radial-gradient(circle_at_78%_24%,rgba(212,168,70,0.14),transparent 20%),var(--hero-fallback-background)",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-          <div className="absolute inset-0 bg-[var(--hero-shell-overlay)]" />
-
-          <div className="perseus-sales-hero-content relative mx-auto max-w-4xl text-center">
-            <div className="perseus-sales-hero-badges flex flex-wrap items-center justify-center gap-3">
-              <Badge variant="accent">{payload.hero.eyebrow}</Badge>
-              {payload.hero.primaryOffer?.savingsLabel ? <Badge variant="premium">{payload.hero.primaryOffer.savingsLabel}</Badge> : null}
-            </div>
-
-            <div className="perseus-sales-hero-copy mt-10 space-y-6">
-              {payload.hero.metadataLine ? (
-                <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--hero-text-muted)]">{payload.hero.metadataLine}</p>
-              ) : null}
-              <h1 className="text-6xl leading-[0.9] tracking-[-0.06em] text-[var(--hero-text-primary)] sm:text-7xl lg:text-[5.8rem]">{payload.hero.title}</h1>
-              {payload.hero.subtitle ? <p className="mx-auto max-w-3xl text-xl leading-9 text-[var(--hero-text-secondary)]">{payload.hero.subtitle}</p> : null}
-            </div>
-
-            {payload.hero.primaryOffer ? (
-              <div className="perseus-sales-hero-price mt-10 flex flex-wrap items-end justify-center gap-x-4 gap-y-2">
-                <p className="text-5xl font-semibold text-[var(--hero-text-primary)]">{payload.hero.primaryOffer.price}</p>
-                {payload.hero.primaryOffer.compareAtPrice ? <p className="text-xl text-[var(--hero-price-muted)] line-through">{payload.hero.primaryOffer.compareAtPrice}</p> : null}
-                {payload.hero.primaryOffer.savingsLabel ? <Badge variant="premium">{payload.hero.primaryOffer.savingsLabel}</Badge> : null}
+    <div className="perseus-sales-page space-y-14 lg:space-y-16">
+      <section className="px-4 sm:px-6">
+        <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[30px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] p-4 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] sm:p-5 lg:p-6">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,rgba(168,102,255,0.18),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(212,168,70,0.12),transparent_22%)]" />
+          <div className="relative grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.82fr)] lg:items-center">
+            <div className="px-2 py-5 sm:px-4 lg:px-5 lg:py-8">
+              <div className="perseus-sales-hero-badges flex flex-wrap items-center gap-3">
+                <Badge variant="accent">{payload.hero.eyebrow}</Badge>
+                {payload.hero.primaryOffer?.savingsLabel ? <Badge variant="premium">{payload.hero.primaryOffer.savingsLabel}</Badge> : null}
               </div>
-            ) : null}
 
-            <div className="perseus-sales-hero-actions mt-10 flex flex-wrap justify-center gap-3">
-              <ButtonLink href={payload.hero.primaryCtaHref} className="min-w-[280px]">
-                {payload.hero.primaryCtaLabel}
-              </ButtonLink>
-              <ButtonLink href={payload.hero.secondaryCtaHref} variant="secondary" className="min-w-[220px]">
-                {payload.hero.secondaryCtaLabel}
-              </ButtonLink>
+              <div className="perseus-sales-hero-copy mt-7 space-y-5">
+                {payload.hero.metadataLine ? (
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--hero-text-muted)]">{payload.hero.metadataLine}</p>
+                ) : null}
+                <h1 className="max-w-3xl text-balance break-words text-3xl leading-[1.02] tracking-[-0.045em] text-[var(--hero-text-primary)] sm:text-5xl lg:text-[4.6rem]">{payload.hero.title}</h1>
+                {payload.hero.subtitle ? <p className="max-w-2xl text-base leading-7 text-[var(--hero-text-secondary)] sm:text-lg sm:leading-8">{payload.hero.subtitle}</p> : null}
+              </div>
+
+              {payload.hero.primaryOffer ? (
+                <div className="perseus-sales-hero-price mt-7 flex flex-wrap items-end gap-x-4 gap-y-2">
+                  <p className="text-4xl font-semibold text-[var(--hero-text-primary)]">{payload.hero.primaryOffer.price}</p>
+                  {payload.hero.primaryOffer.compareAtPrice ? <p className="text-lg text-[var(--hero-price-muted)] line-through">{payload.hero.primaryOffer.compareAtPrice}</p> : null}
+                </div>
+              ) : null}
+
+              <div className="perseus-sales-hero-actions mt-7 flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <ButtonLink href={payload.hero.primaryCtaHref} className="min-h-12 w-full max-w-full justify-center whitespace-normal px-5 text-center sm:w-auto sm:px-6">
+                  {payload.hero.primaryCtaLabel}
+                </ButtonLink>
+                <ButtonLink href={payload.hero.secondaryCtaHref} variant="secondary" className="min-h-12 w-full max-w-full justify-center whitespace-normal px-5 text-center sm:w-auto sm:px-6">
+                  {payload.hero.secondaryCtaLabel}
+                </ButtonLink>
+              </div>
             </div>
+
+            <SalesSmartImage
+              src={payload.hero.imageUrl}
+              alt={`${payload.hero.title} course image`}
+              priority
+              className="mx-auto aspect-[0.86/1] w-full max-w-[520px] rounded-[24px]"
+            />
           </div>
         </div>
       </section>
 
       {payload.productType === "course" ? bundleValueSlot : null}
-      {payload.productType === "course" && payload.hero.imageUrl ? (
-        <section className="mx-auto max-w-7xl px-6">
-          <div className="overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--surface-panel)] p-3 shadow-[var(--shadow-panel)]">
-            <div
-              className="min-h-[260px] rounded-[26px] bg-[var(--surface-panel-strong)] bg-contain bg-center bg-no-repeat sm:min-h-[380px] lg:min-h-[520px]"
-              style={{
-                backgroundImage: cssUrl(payload.hero.imageUrl),
-              }}
-              role="img"
-              aria-label={`${payload.hero.title} course image`}
-            />
-          </div>
-        </section>
-      ) : null}
       {orderedSections.map((section) => (
         <Fragment key={section}>
           {section === "pricing" && payload.productType === "course" ? bundleValueSlot : null}

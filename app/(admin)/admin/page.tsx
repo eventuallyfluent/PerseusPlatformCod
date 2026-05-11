@@ -9,15 +9,15 @@ export default async function AdminOverviewPage() {
   const data = await getAdminDashboardData();
 
   return (
-    <AdminShell title="Admin overview" description="Sales, students, payments, reviews, and recent activity.">
+    <AdminShell title="Admin overview" description="Month-to-date earnings, recent sales, and reviews needing approval.">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminStat label="Revenue this month" value={formatAdminMoney(data.revenueThisMonth)} detail={`${data.monthlyOrders} paid order${data.monthlyOrders === 1 ? "" : "s"}`} />
+        <AdminStat label="Month-to-date earnings" value={formatAdminMoney(data.revenueThisMonth)} detail={`${data.monthlyOrders} paid sale${data.monthlyOrders === 1 ? "" : "s"} this month`} />
         <AdminStat label="Students" value={data.totalStudents} detail={`${data.newStudents} new this month`} />
         <AdminStat label="Enrollments" value={data.newEnrollments} detail="New course enrollments this month" />
         <AdminStat
-          label="Needs action"
-          value={data.manualPaymentOrders + data.pendingReviews}
-          detail={`${data.manualPaymentOrders} payment queue, ${data.pendingReviews} reviews`}
+          label="Reviews to check"
+          value={data.pendingReviews}
+          detail={data.manualPaymentOrders > 0 ? `${data.manualPaymentOrders} payment order${data.manualPaymentOrders === 1 ? "" : "s"} also waiting` : "New reviews needing approval"}
           tone={data.manualPaymentOrders + data.pendingReviews > 0 ? "warning" : "success"}
         />
       </div>
@@ -26,7 +26,7 @@ export default async function AdminOverviewPage() {
         <section className="space-y-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-[var(--text-primary)]">Recent orders</h2>
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">Recent sales</h2>
               <p className="text-sm text-[var(--text-secondary)]">Latest checkout activity across all products.</p>
             </div>
             <AdminActionBar>
@@ -58,38 +58,49 @@ export default async function AdminOverviewPage() {
                 order.createdAt.toLocaleDateString(),
               ],
             }))}
-            empty="No orders yet."
+            empty="No sales yet."
           />
         </section>
 
         <section className="space-y-3">
-          <div>
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Recent content</h2>
-            <p className="text-sm text-[var(--text-secondary)]">Recently edited courses and bundles.</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">Reviews needing check</h2>
+              <p className="text-sm text-[var(--text-secondary)]">New student reviews waiting for approval.</p>
+            </div>
+            <HardLink href="/admin/reviews" className={adminSecondaryButtonClass}>
+              View reviews
+            </HardLink>
           </div>
           <div className="grid gap-3">
-            {data.latestContent.map((product) => (
-              <div key={`${product.type}-${product.id}`} className="rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] p-4">
+            {data.reviewsNeedingCheck.length > 0 ? (
+              data.reviewsNeedingCheck.map((review) => (
+              <div key={review.id} className="rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0 space-y-2">
                     <div className="flex flex-wrap gap-2">
-                      <AdminStatusBadge tone="accent">{product.type}</AdminStatusBadge>
-                      <AdminStatusBadge tone={product.status === "PUBLISHED" ? "success" : product.status === "ARCHIVED" ? "neutral" : "warning"}>{product.status}</AdminStatusBadge>
+                      <AdminStatusBadge tone="warning">Needs check</AdminStatusBadge>
+                      <AdminStatusBadge tone={review.recommendsProduct ? "success" : "neutral"}>{review.rating}/5 stars</AdminStatusBadge>
                     </div>
-                    <h3 className="truncate text-base font-semibold text-[var(--text-primary)]">{product.title}</h3>
-                    <p className="text-sm text-[var(--text-secondary)]">{formatAdminMoney(Number(product.price), product.currency)}</p>
+                    <h3 className="text-base font-semibold text-[var(--text-primary)]">{review.name || "Anonymous student"}</h3>
+                    <p className="line-clamp-3 text-sm leading-6 text-[var(--text-secondary)]">{review.quote}</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                      {review.course?.title ?? review.bundle?.title ?? "General review"}
+                    </p>
                   </div>
                   <AdminActionBar>
-                    <HardLink href={product.viewHref} className={adminSecondaryButtonClass}>
-                      View
-                    </HardLink>
-                    <HardLink href={product.editHref} className={adminButtonClass}>
-                      Edit
+                    <HardLink href="/admin/reviews" className={adminButtonClass}>
+                      Check
                     </HardLink>
                   </AdminActionBar>
                 </div>
               </div>
-            ))}
+              ))
+            ) : (
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] p-4 text-sm text-[var(--text-secondary)]">
+                No reviews waiting for approval.
+              </div>
+            )}
           </div>
         </section>
       </div>

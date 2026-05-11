@@ -434,65 +434,104 @@ export default async function CourseDetailPage({
                 </form>
                 <div className="space-y-3">
                   {module.lessons.map((lesson) => (
-                    <details key={lesson.id} className="rounded-[20px] border border-stone-200 bg-white p-4">
-                      <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-semibold text-stone-950">{lesson.title}</p>
-                          <p className="mt-1 text-xs uppercase tracking-[0.22em] text-stone-500">
-                            {formatLessonType(lesson.type)} / {lesson.status} / {formatDripSummary(lesson.dripDays)}
-                          </p>
-                        </div>
-                        <p className="text-sm text-stone-600">Open</p>
-                      </summary>
-                      <form action={addLessonAction} className="mt-4 grid gap-3">
-                        <input type="hidden" name="courseId" value={course.id} />
-                        <input type="hidden" name="moduleId" value={module.id} />
-                        <input type="hidden" name="lessonId" value={lesson.id} />
-                        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                          <label>Lesson title<input name="title" defaultValue={lesson.title} /></label>
-                          <label>Lesson slug<input name="slug" defaultValue={lesson.slug} /></label>
-                          <label>Position<input name="position" type="number" min="1" defaultValue={lesson.position} /></label>
-                          <label>Type<select name="type" defaultValue={lesson.type}><option value="VIDEO">VIDEO</option><option value="TEXT">TEXT</option><option value="DOWNLOAD">DOWNLOAD</option><option value="MIXED">MIXED</option></select></label>
-                        </div>
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <label>Text content<textarea name="content" rows={3} defaultValue={lesson.content ?? ""} /></label>
-                          <label>
-                            Video embed URL
-                            <input name="videoUrl" defaultValue={lesson.videoUrl ?? ""} />
-                            <span className="mt-1 block text-xs leading-5 text-stone-500">Paste either a direct video URL or the iframe embed code.</span>
-                          </label>
-                        </div>
-                        <details className="rounded-[18px] border border-stone-200 bg-stone-50 px-4 py-3">
-                          <summary className="cursor-pointer text-sm font-medium text-stone-700">Advanced lesson fields</summary>
-                          <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                            <label>Download URL<input name="downloadUrl" defaultValue={lesson.downloadUrl ?? ""} /></label>
-                            <label>Duration<input name="durationLabel" defaultValue={lesson.durationLabel ?? ""} /></label>
-                            <label>
-                              Unlock after enrollment (days)
-                              <input name="dripDays" type="number" min="0" defaultValue={lesson.dripDays ?? ""} />
-                            </label>
-                            <label>Status<select name="status" defaultValue={lesson.status}><option value="DRAFT">DRAFT</option><option value="PUBLISHED">PUBLISHED</option></select></label>
+                    <div key={lesson.id} className="rounded-[20px] border border-stone-200 bg-white p-4 shadow-sm">
+                      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                        <div className="flex min-w-0 items-center gap-4">
+                          <span className="size-2.5 shrink-0 rounded-full bg-stone-300" aria-hidden="true" />
+                          <div className="min-w-0">
+                            <p className="truncate text-base font-semibold text-stone-950">{lesson.title}</p>
+                            <p className="mt-1 text-xs uppercase tracking-[0.22em] text-stone-500">
+                              {formatLessonType(lesson.type)} / {lesson.status} / {formatDripSummary(lesson.dripDays)}
+                            </p>
                           </div>
-                          <div className="mt-3 space-y-2">
-                            <p className="text-sm leading-6 text-stone-600">Leave blank or set 0 to make the lesson available immediately. Any positive number delays access from the learner&apos;s enrollment date.</p>
-                            <BooleanChoiceField
-                              label="Preview access"
-                              name="isPreview"
-                              defaultValue={lesson.isPreview}
-                              trueLabel="Preview lesson"
-                              falseLabel="Buyer-only lesson"
-                              trueDescription="Show a public Watch preview link."
-                              falseDescription="Only enrolled learners can open it."
+                        </div>
+                        <form action={addLessonAction} className="flex flex-wrap items-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 px-3 py-2">
+                          <input type="hidden" name="courseId" value={course.id} />
+                          <input type="hidden" name="moduleId" value={module.id} />
+                          <input type="hidden" name="lessonId" value={lesson.id} />
+                          <input type="hidden" name="title" value={lesson.title} />
+                          <input type="hidden" name="slug" value={lesson.slug} />
+                          <input type="hidden" name="position" value={lesson.position} />
+                          <input type="hidden" name="type" value={lesson.type} />
+                          <input type="hidden" name="status" value={lesson.status} />
+                          <input type="hidden" name="content" value={lesson.content ?? ""} />
+                          <input type="hidden" name="videoUrl" value={lesson.videoUrl ?? ""} />
+                          <input type="hidden" name="downloadUrl" value={lesson.downloadUrl ?? ""} />
+                          <input type="hidden" name="durationLabel" value={lesson.durationLabel ?? ""} />
+                          <input type="hidden" name="isPreview" value={lesson.isPreview ? "true" : "false"} />
+                          <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+                            Drip delay
+                            <input
+                              className="h-11 w-16 rounded-xl border-stone-200 bg-white px-3 text-center text-base font-semibold text-stone-950"
+                              name="dripDays"
+                              type="number"
+                              min="0"
+                              defaultValue={lesson.dripDays ?? 0}
                             />
-                            <p className="text-sm leading-6 text-stone-600">Preview lessons get a public Watch preview link on the sales page. Leave this off for buyer-only lessons.</p>
+                          </label>
+                          <span className="text-sm text-stone-500">days</span>
+                          <button className="min-h-11 rounded-full bg-stone-950 px-4 text-sm font-medium text-stone-50" type="submit">
+                            Save
+                          </button>
+                        </form>
+                      </div>
+                      <details className="mt-3 rounded-[18px] border border-stone-200 bg-stone-50 px-4 py-3">
+                        <summary className="cursor-pointer list-none text-sm font-semibold text-stone-700 marker:content-none">
+                          Edit lesson details
+                        </summary>
+                        <form action={addLessonAction} className="mt-4 grid gap-3">
+                          <input type="hidden" name="courseId" value={course.id} />
+                          <input type="hidden" name="moduleId" value={module.id} />
+                          <input type="hidden" name="lessonId" value={lesson.id} />
+                          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                            <label>Lesson title<input name="title" defaultValue={lesson.title} /></label>
+                            <label>Lesson slug<input name="slug" defaultValue={lesson.slug} /></label>
+                            <label>Position<input name="position" type="number" min="1" defaultValue={lesson.position} /></label>
+                            <label>Type<select name="type" defaultValue={lesson.type}><option value="VIDEO">VIDEO</option><option value="TEXT">TEXT</option><option value="DOWNLOAD">DOWNLOAD</option><option value="MIXED">MIXED</option></select></label>
                           </div>
-                        </details>
-                        <div className="flex flex-wrap gap-3">
-                          <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Save lesson</button>
-                          <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteLessonAction} name="lessonId" value={lesson.id}>Delete</button>
-                        </div>
-                      </form>
-                    </details>
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <label>Text content<textarea name="content" rows={3} defaultValue={lesson.content ?? ""} /></label>
+                            <label>
+                              Video embed URL
+                              <input name="videoUrl" defaultValue={lesson.videoUrl ?? ""} />
+                              <span className="mt-1 block text-xs leading-5 text-stone-500">Paste either a direct video URL or the iframe embed code.</span>
+                            </label>
+                          </div>
+                          <details className="rounded-[18px] border border-stone-200 bg-white px-4 py-3">
+                            <summary className="cursor-pointer text-sm font-medium text-stone-700">Advanced lesson fields</summary>
+                            <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                              <label>Download URL<input name="downloadUrl" defaultValue={lesson.downloadUrl ?? ""} /></label>
+                              <label>Duration<input name="durationLabel" defaultValue={lesson.durationLabel ?? ""} /></label>
+                              <label>
+                                Drip delay
+                                <div className="flex items-center gap-2">
+                                  <input name="dripDays" type="number" min="0" defaultValue={lesson.dripDays ?? 0} />
+                                  <span className="text-sm text-stone-500">days</span>
+                                </div>
+                              </label>
+                              <label>Status<select name="status" defaultValue={lesson.status}><option value="DRAFT">DRAFT</option><option value="PUBLISHED">PUBLISHED</option></select></label>
+                            </div>
+                            <div className="mt-3 space-y-2">
+                              <p className="text-sm leading-6 text-stone-600">Set 0 to make the lesson available immediately. Any positive number delays access from the learner&apos;s enrollment date.</p>
+                              <BooleanChoiceField
+                                label="Preview access"
+                                name="isPreview"
+                                defaultValue={lesson.isPreview}
+                                trueLabel="Preview lesson"
+                                falseLabel="Buyer-only lesson"
+                                trueDescription="Show a public Watch preview link."
+                                falseDescription="Only enrolled learners can open it."
+                              />
+                              <p className="text-sm leading-6 text-stone-600">Preview lessons get a public Watch preview link on the sales page. Leave this off for buyer-only lessons.</p>
+                            </div>
+                          </details>
+                          <div className="flex flex-wrap gap-3">
+                            <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Save lesson</button>
+                            <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteLessonAction} name="lessonId" value={lesson.id}>Delete</button>
+                          </div>
+                        </form>
+                      </details>
+                    </div>
                   ))}
                 </div>
                 <details className="rounded-[20px] border border-dashed border-stone-200 bg-white p-4">
@@ -512,6 +551,16 @@ export default async function CourseDetailPage({
                         Video embed URL
                         <input name="videoUrl" />
                         <span className="mt-1 block text-xs leading-5 text-stone-500">Paste either a direct video URL or the iframe embed code.</span>
+                      </label>
+                    </div>
+                    <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_160px]">
+                      <label>Duration<input name="durationLabel" /></label>
+                      <label>
+                        Drip delay
+                        <div className="flex items-center gap-2">
+                          <input name="dripDays" type="number" min="0" defaultValue={0} />
+                          <span className="text-sm text-stone-500">days</span>
+                        </div>
                       </label>
                     </div>
                     <button className="w-fit rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Create lesson</button>

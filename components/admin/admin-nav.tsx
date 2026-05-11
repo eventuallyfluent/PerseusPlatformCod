@@ -10,6 +10,7 @@ const links = [
   { href: "/admin/courses", label: "Courses" },
   { href: "/admin/bundles", label: "Bundles" },
   { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/reports", label: "Reports" },
   { href: "/admin/coupons", label: "Coupons" },
   { href: "/admin/students", label: "Students" },
   { href: "/admin/collections", label: "Collections" },
@@ -17,6 +18,8 @@ const links = [
   { href: "/admin/reviews", label: "Reviews" },
   { href: "/admin/imports", label: "Imports" },
   { href: "/admin/gateways", label: "Gateways" },
+  { href: "/admin/settings/taxes", label: "Taxes" },
+  { href: "/admin/settings", label: "Settings" },
 ];
 
 function isActive(pathname: string, href: string) {

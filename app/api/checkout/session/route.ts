@@ -15,6 +15,11 @@ export async function POST(request: Request) {
       customerEmail: session?.user?.email ?? undefined,
       couponCode: input.couponCode,
       upsellFromOfferId: input.upsellFromOfferId,
+      taxLocation: {
+        country: input.taxCountry,
+        region: input.taxRegion,
+        postalCode: input.taxPostalCode,
+      },
     });
 
     return NextResponse.json(checkout);

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminDataTable } from "@/components/admin/admin-ui";
+import { HardLink } from "@/components/ui/hard-link";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,9 @@ export default async function StudentsPage() {
           key: student.id,
           cells: [
             <span key="email" className="font-semibold text-[var(--text-primary)]">{student.email}</span>,
-            student.name ?? "-",
+            <HardLink key="name" href={`/admin/students/${student.id}`} className="font-semibold text-[var(--accent)] underline underline-offset-4">
+              {student.name ?? "View customer"}
+            </HardLink>,
             student.enrollments.length > 0 ? student.enrollments.map((enrollment) => enrollment.course.title).join(", ") : "No enrollments",
             student.createdAt.toLocaleDateString(),
           ],

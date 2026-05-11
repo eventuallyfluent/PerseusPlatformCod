@@ -778,6 +778,74 @@ export async function updateLessonDripAction(formData: FormData) {
   redirect(`/admin/courses/${courseId}?saved=curriculum`);
 }
 
+export async function saveTaxSettingsAction(formData: FormData) {
+  await prisma.taxSetting.upsert({
+    where: { id: "global" },
+    create: {
+      id: "global",
+      enabled: parseBooleanField(formData, "enabled"),
+      pricesIncludeTax: parseBooleanField(formData, "pricesIncludeTax"),
+      requireTaxLocation: parseBooleanField(formData, "requireTaxLocation"),
+      collectForAllCountries: parseBooleanField(formData, "collectForAllCountries"),
+      defaultTaxName: String(formData.get("defaultTaxName") ?? "Tax").trim() || "Tax",
+    },
+    update: {
+      enabled: parseBooleanField(formData, "enabled"),
+      pricesIncludeTax: parseBooleanField(formData, "pricesIncludeTax"),
+      requireTaxLocation: parseBooleanField(formData, "requireTaxLocation"),
+      collectForAllCountries: parseBooleanField(formData, "collectForAllCountries"),
+      defaultTaxName: String(formData.get("defaultTaxName") ?? "Tax").trim() || "Tax",
+    },
+  });
+
+  revalidatePath("/admin/settings/taxes");
+  redirect("/admin/settings/taxes?saved=settings");
+}
+
+export async function saveTaxRateAction(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const country = String(formData.get("country") ?? "").trim().toUpperCase();
+  const label = String(formData.get("label") ?? "").trim() || "Tax";
+  const ratePercent = Number(formData.get("ratePercent") ?? 0);
+
+  if (!country || !Number.isFinite(ratePercent) || ratePercent < 0) {
+    redirect("/admin/settings/taxes?error=rate");
+  }
+
+  const data = {
+    country,
+    region: String(formData.get("region") ?? "").trim().toUpperCase() || null,
+    postalCode: String(formData.get("postalCode") ?? "").trim().toUpperCase() || null,
+    label,
+    ratePercent,
+    ruleType: String(formData.get("ruleType") ?? "REPLACE") === "ADD" ? "ADD" as const : "REPLACE" as const,
+    appliesToCourses: parseBooleanField(formData, "appliesToCourses"),
+    appliesToBundles: parseBooleanField(formData, "appliesToBundles"),
+    appliesToSubscriptions: parseBooleanField(formData, "appliesToSubscriptions"),
+    appliesToAccessProducts: parseBooleanField(formData, "appliesToAccessProducts"),
+    isActive: parseBooleanField(formData, "isActive"),
+  };
+
+  if (id) {
+    await prisma.taxRate.update({ where: { id }, data });
+  } else {
+    await prisma.taxRate.create({ data });
+  }
+
+  revalidatePath("/admin/settings/taxes");
+  redirect("/admin/settings/taxes?saved=rate");
+}
+
+export async function deleteTaxRateAction(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (id) {
+    await prisma.taxRate.delete({ where: { id } });
+  }
+
+  revalidatePath("/admin/settings/taxes");
+  redirect("/admin/settings/taxes?saved=deleted");
+}
+
 export async function saveInstructorAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   let instructor;

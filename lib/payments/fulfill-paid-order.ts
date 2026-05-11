@@ -1,8 +1,8 @@
-import { OrderStatus } from "@prisma/client";
+import { AccessGrantSourceType, OrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
-import { ensureEnrollment } from "@/lib/enrollments/ensure-enrollment";
 import { sendOnboardingEmail } from "@/lib/email/send-onboarding-email";
 import { sendPurchaseConfirmation } from "@/lib/email/send-purchase-confirmation";
+import { grantCourseAccess } from "@/lib/access/course-access-grants";
 
 export async function fulfillPaidOrder(orderId: string) {
   const order = await prisma.order.findUnique({
@@ -57,7 +57,14 @@ export async function fulfillPaidOrder(orderId: string) {
         ? [order.offer.courseId]
         : order.offer.bundle?.courses.map((item) => item.courseId) ?? [];
 
-  await Promise.all(courseIds.map((courseId) => ensureEnrollment(order.userId!, courseId)));
+  if (courseIds.length > 0) {
+    await grantCourseAccess({
+      userId: order.userId,
+      courseIds,
+      orderId: order.id,
+      sourceType: order.offer.type === "SUBSCRIPTION" ? AccessGrantSourceType.SUBSCRIPTION : AccessGrantSourceType.ONE_TIME_PURCHASE,
+    });
+  }
 
   const purchaseTitle = order.offer.accessProduct?.title ?? order.offer.course?.title ?? order.offer.bundle?.title ?? order.offer.name;
   await sendPurchaseConfirmation({

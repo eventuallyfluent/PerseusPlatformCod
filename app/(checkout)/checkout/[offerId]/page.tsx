@@ -62,6 +62,10 @@ export default async function CheckoutPage({
     baseLabel: priceLabel,
     upsellDiscountLabel: appliedUpsellDiscount && appliedUpsellDiscount.discountAmount > 0 ? `-${currencyFormatter(appliedUpsellDiscount.discountAmount, offer.currency)}` : null,
     couponDiscountLabel: null,
+    taxLabel: activeGatewayDefinition?.capabilities.supportsHostedTaxCollection ? "Calculated by payment provider" : null,
+    taxMode: activeGatewayDefinition?.capabilities.supportsHostedTaxCollection ? "provider_collected" : "not_collected",
+    requiresTaxLocation: false,
+    taxLines: [],
     totalLabel: discountedPriceLabel,
     couponCode: null,
   };

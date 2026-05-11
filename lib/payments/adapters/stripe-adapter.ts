@@ -32,6 +32,8 @@ function mapStripeEvent(eventType: string): CanonicalPaymentEvent | undefined {
       return "subscription.started";
     case "customer.subscription.updated":
       return "subscription.renewed";
+    case "customer.subscription.deleted":
+      return "subscription.canceled";
     case "charge.refunded":
       return "refund.created";
     default:
@@ -82,6 +84,7 @@ export const stripeConnector: PaymentGatewayConnector = {
       success_url: input.successUrl,
       cancel_url: input.cancelUrl,
       customer_email: input.customerEmail,
+      automatic_tax: input.collectTaxWithProvider ? { enabled: true } : undefined,
       line_items: [
         {
           quantity: 1,
@@ -100,6 +103,16 @@ export const stripeConnector: PaymentGatewayConnector = {
         orderId: input.orderId,
         ...input.metadata,
       },
+      subscription_data:
+        offer.type === "SUBSCRIPTION"
+          ? {
+              metadata: {
+                offerId: input.offerId,
+                orderId: input.orderId,
+                ...input.metadata,
+              },
+            }
+          : undefined,
     });
 
     if (!session.url) {
@@ -150,7 +163,10 @@ export const stripeConnector: PaymentGatewayConnector = {
     const event = stripe.webhooks.constructEvent(rawBody, signature, resolvedSecret);
 
     return {
-      externalEventId: event.id,
+      externalEventId:
+        event.data.object && typeof event.data.object === "object" && "id" in event.data.object
+          ? String(event.data.object.id)
+          : event.id,
       eventType: event.type,
       canonicalEvent: mapStripeEvent(event.type),
       payload: event,

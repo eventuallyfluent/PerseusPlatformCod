@@ -1,6 +1,7 @@
 import { OrderStatus, PaymentStatus, SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { fulfillPaidOrder } from "@/lib/payments/fulfill-paid-order";
+import { linkSubscriptionGrants, revokeSubscriptionAccess } from "@/lib/access/course-access-grants";
 import type { CanonicalPaymentEvent } from "@/types";
 
 type EventContext = {
@@ -24,6 +25,14 @@ export async function handleCanonicalEvent(context: EventContext) {
       ? (context.payload.data.object.metadata as Record<string, string | undefined> | undefined)
       : undefined;
   const orderId = metadata?.orderId ?? metadata?.order_id;
+
+  if (!orderId && (context.canonicalEvent === "subscription.canceled" || context.canonicalEvent === "subscription.expired")) {
+    const subscription = context.externalEventId
+      ? await prisma.subscription.findFirst({ where: { externalSubscriptionId: context.externalEventId } })
+      : null;
+    await revokeSubscriptionAccess({ subscriptionId: subscription?.id ?? null });
+    return;
+  }
 
   if (!orderId) {
     return;
@@ -137,11 +146,12 @@ export async function handleCanonicalEvent(context: EventContext) {
   }
 
   if (context.canonicalEvent === "subscription.started" || context.canonicalEvent === "subscription.renewed") {
-    await prisma.subscription.upsert({
+    const subscription = await prisma.subscription.upsert({
       where: { orderId: order.id },
       update: {
         status: SubscriptionStatus.ACTIVE,
         externalSubscriptionId: context.externalEventId,
+        endedAt: null,
       },
       create: {
         orderId: order.id,
@@ -150,6 +160,12 @@ export async function handleCanonicalEvent(context: EventContext) {
         externalSubscriptionId: context.externalEventId,
       },
     });
+    await linkSubscriptionGrants(order.id, subscription.id);
+  }
+
+  if (context.canonicalEvent === "subscription.canceled" || context.canonicalEvent === "subscription.expired") {
+    const subscription = await prisma.subscription.findUnique({ where: { orderId: order.id } });
+    await revokeSubscriptionAccess({ orderId: order.id, subscriptionId: subscription?.id ?? null });
   }
 
   if (context.canonicalEvent === "refund.created") {

@@ -311,6 +311,8 @@ export type CanonicalPaymentEvent =
   | "payment.failed"
   | "subscription.started"
   | "subscription.renewed"
+  | "subscription.canceled"
+  | "subscription.expired"
   | "refund.created";
 
 export type GatewayCredentialField = {
@@ -385,6 +387,7 @@ export interface PaymentGatewayConnector {
     cancelUrl: string;
     customerEmail?: string;
     amountOverride?: number;
+    collectTaxWithProvider?: boolean;
     metadata?: Record<string, string>;
   }): Promise<{
     checkoutUrl: string;

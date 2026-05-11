@@ -269,6 +269,9 @@ export const checkoutSessionSchema = z.object({
   offerId: z.string().min(1),
   couponCode: z.string().optional(),
   upsellFromOfferId: z.string().optional(),
+  taxCountry: z.string().optional(),
+  taxRegion: z.string().optional(),
+  taxPostalCode: z.string().optional(),
 });
 
 export const gatewayConnectionSchema = z.object({

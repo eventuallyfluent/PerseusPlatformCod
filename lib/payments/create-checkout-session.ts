@@ -11,6 +11,7 @@ import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
 import { evaluateGatewayOperationalReadiness } from "@/lib/payments/readiness";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
+import { getTaxSettings, type TaxLocationInput } from "@/lib/taxes/tax-calculation";
 
 function interpolateCheckoutTemplate(template: string, values: Record<string, string>) {
   return Object.entries(values).reduce(
@@ -25,6 +26,7 @@ export async function createCheckoutSession(input: {
   customerEmail?: string;
   couponCode?: string | null;
   upsellFromOfferId?: string | null;
+  taxLocation?: TaxLocationInput;
 }) {
   const gateway = await getActiveGateway();
 
@@ -35,6 +37,16 @@ export async function createCheckoutSession(input: {
   const connector = findPaymentConnector(gateway.provider);
   const gatewayDefinition = resolveGatewayDefinition(gateway, connector);
   const gatewayPolicy = evaluateGatewayPolicy(gatewayDefinition.capabilities);
+  const taxSettings = await getTaxSettings();
+  const providerHandlesTax =
+    taxSettings.enabled &&
+    (gatewayDefinition.capabilities.actsAsMerchantOfRecord ||
+      (gatewayDefinition.capabilities.supportsHostedTaxCollection && gatewayDefinition.capabilities.supportsTaxCalculation));
+  const collectPlatformTax = taxSettings.enabled && !providerHandlesTax;
+
+  if (taxSettings.enabled && gatewayDefinition.capabilities.taxModel === "unsupported") {
+    throw new Error("Tax collection is enabled, but the active gateway does not support a safe tax collection path.");
+  }
   const gatewayReadiness = evaluateGatewayOperationalReadiness({
     gateway,
     definition: gatewayDefinition,
@@ -68,13 +80,21 @@ export async function createCheckoutSession(input: {
     couponCode: input.couponCode,
     upsellDiscountAmount: upsellDiscount?.discountAmount ?? 0,
     offer,
+    taxLocation: input.taxLocation,
+    collectPlatformTax,
   });
+
+  if (pricing.requiresTaxLocation) {
+    throw new Error("Tax location is required before checkout can continue.");
+  }
 
   const order = await createOrder({
     offerId: input.offerId,
     userId: input.userId,
     couponCode: input.couponCode,
     upsellFromOfferId: input.upsellFromOfferId,
+    taxLocation: input.taxLocation,
+    collectPlatformTax,
   });
 
   const successUrl = absoluteUrl(`/api/checkout/confirm?orderId=${order.id}`);
@@ -116,8 +136,9 @@ export async function createCheckoutSession(input: {
       successUrl,
       cancelUrl,
       amountOverride: pricing.totalAmount,
+      collectTaxWithProvider: providerHandlesTax && gatewayDefinition.capabilities.supportsTaxCalculation,
       metadata:
-        pricing.coupon || pricing.upsellDiscountAmount > 0
+        pricing.coupon || pricing.upsellDiscountAmount > 0 || pricing.taxAmount > 0 || providerHandlesTax
           ? {
               ...(pricing.coupon
                 ? {
@@ -130,6 +151,8 @@ export async function createCheckoutSession(input: {
                     upsellDiscountAmount: pricing.upsellDiscountAmount.toFixed(2),
                   }
                 : {}),
+              ...(pricing.taxAmount > 0 ? { taxAmount: pricing.taxAmount.toFixed(2), taxMode: pricing.taxMode } : {}),
+              ...(providerHandlesTax ? { taxMode: gatewayDefinition.capabilities.actsAsMerchantOfRecord ? "provider_merchant_of_record" : "provider_tax_collection" } : {}),
             }
           : undefined,
     });

@@ -9,6 +9,7 @@ import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
 import { evaluateGatewayPolicy } from "@/lib/payments/policy";
 import { evaluateGatewayOperationalReadiness } from "@/lib/payments/readiness";
+import { getTaxSettings } from "@/lib/taxes/tax-calculation";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,7 @@ export default async function CheckoutPage({
   }
 
   const productTitle = offer.course?.title ?? offer.bundle?.title ?? offer.name;
-  const activeGateway = await getActiveGateway();
+  const [activeGateway, taxSettings] = await Promise.all([getActiveGateway(), getTaxSettings()]);
   const activeConnector = activeGateway ? findPaymentConnector(activeGateway.provider) : null;
   const activeGatewayDefinition = activeGateway ? resolveGatewayDefinition(activeGateway, activeConnector) : null;
   const gatewayPolicy = activeGatewayDefinition ? evaluateGatewayPolicy(activeGatewayDefinition.capabilities) : null;
@@ -58,17 +59,25 @@ export default async function CheckoutPage({
     appliedUpsellDiscount && appliedUpsellDiscount.discountAmount > 0
       ? `${currencyFormatter(Number(offerAmount) - appliedUpsellDiscount.discountAmount, offerCurrency)}${intervalSuffix}`
       : priceLabel;
+  const providerHandlesTax =
+    taxSettings.enabled &&
+    Boolean(
+      activeGatewayDefinition?.capabilities.actsAsMerchantOfRecord ||
+        (activeGatewayDefinition?.capabilities.supportsHostedTaxCollection && activeGatewayDefinition?.capabilities.supportsTaxCalculation),
+    );
   const initialQuote = {
     baseLabel: priceLabel,
     upsellDiscountLabel: appliedUpsellDiscount && appliedUpsellDiscount.discountAmount > 0 ? `-${currencyFormatter(appliedUpsellDiscount.discountAmount, offer.currency)}` : null,
     couponDiscountLabel: null,
-    taxLabel: activeGatewayDefinition?.capabilities.supportsHostedTaxCollection ? "Calculated by payment provider" : null,
-    taxMode: activeGatewayDefinition?.capabilities.supportsHostedTaxCollection ? "provider_collected" : "not_collected",
+    taxLabel: providerHandlesTax ? "Calculated by payment provider" : null,
+    taxMode: providerHandlesTax ? "provider_collected" : "not_collected",
     requiresTaxLocation: false,
     taxLines: [],
     totalLabel: discountedPriceLabel,
     couponCode: null,
   };
+  const showTaxLocationInitially =
+    taxSettings.enabled && !providerHandlesTax && (taxSettings.requireTaxLocation || taxSettings.collectForAllCountries);
   const paymentHeadline =
     activeGatewayDefinition?.kind === "bank_transfer"
       ? "Review what is included, apply any discount, then continue to the transfer instructions."
@@ -93,88 +102,42 @@ export default async function CheckoutPage({
       : activeGatewayDefinition?.capabilities.mayRequireManualReview
         ? "Access after approval"
         : "Immediate access";
+  const checkoutModeNote =
+    activeGatewayDefinition?.kind === "bank_transfer"
+      ? "Access begins after payment confirmation."
+      : activeGatewayDefinition?.capabilities.mayRequireManualReview
+        ? "Access may require approval after payment."
+        : "Secure payment handled by the active payment provider.";
+  const checkoutAvailable = Boolean(gatewayPolicy?.allowed && gatewayReadiness?.canRunCheckout);
 
   return (
-    <div className="mx-auto flex min-h-[calc(100svh-5.5rem)] w-full max-w-6xl items-center px-6 py-4">
-      <div className="grid w-full gap-5 lg:grid-cols-[0.7fr_1.3fr]">
-        <section className="perseus-checkout-hero rounded-[34px] border border-[var(--checkout-hero-panel-border)] bg-[var(--checkout-hero-panel-background)] px-8 py-7 text-[var(--checkout-hero-text)] shadow-[var(--checkout-hero-shadow)]">
-          <p className="text-[11px] uppercase tracking-[0.34em] text-[var(--checkout-hero-chip)]">{productKind}</p>
-          <h1 className="mt-4 max-w-lg text-3xl leading-[0.98] tracking-[-0.045em] lg:text-[2.55rem]">{productTitle}</h1>
-          <p className="mt-4 max-w-lg text-sm leading-7 text-[var(--checkout-hero-muted)]">
-            {activeGatewayDefinition?.kind === "bank_transfer"
-              ? "Review the offer now, then follow the transfer instructions to complete your purchase."
-              : "Review the offer now, then complete your purchase through one clear payment step."}
-          </p>
-          <div className="mt-5 flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--checkout-hero-chip)]">
-            <span className="rounded-full border border-[var(--checkout-hero-panel-border)] px-4 py-2">Secure</span>
-            <span className="rounded-full border border-[var(--checkout-hero-panel-border)] px-4 py-2">{checkoutChipLabel}</span>
-            <span className="rounded-full border border-[var(--checkout-hero-panel-border)] px-4 py-2">{accessChipLabel}</span>
+    <div className="mx-auto w-full max-w-6xl overflow-x-hidden px-4 py-5 sm:px-6 lg:py-8">
+      <div className="grid w-full gap-5 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+        <aside className="perseus-checkout-hero order-2 rounded-[28px] border border-[var(--checkout-hero-panel-border)] bg-[var(--checkout-hero-panel-background)] px-5 py-5 text-[var(--checkout-hero-text)] shadow-[var(--checkout-hero-shadow)] lg:order-1 lg:sticky lg:top-24 lg:px-7 lg:py-6">
+          <p className="text-[11px] uppercase tracking-[0.3em] text-[var(--checkout-hero-chip)]">Checkout details</p>
+          <p className="mt-3 text-sm leading-7 text-[var(--checkout-hero-muted)]">{paymentHeadline}</p>
+          <div className="mt-5 grid gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--checkout-hero-chip)]">
+            <span className="rounded-full border border-[var(--checkout-hero-panel-border)] px-4 py-3">Secure checkout</span>
+            <span className="rounded-full border border-[var(--checkout-hero-panel-border)] px-4 py-3">{checkoutChipLabel}</span>
+            <span className="rounded-full border border-[var(--checkout-hero-panel-border)] px-4 py-3">{accessChipLabel}</span>
           </div>
-        </section>
+        </aside>
 
-        <section className="perseus-checkout-form rounded-[34px] border border-[var(--checkout-form-panel-border)] bg-[var(--checkout-form-panel-background)] px-8 py-7 text-[var(--checkout-form-text)] shadow-[var(--checkout-form-shadow)]">
-          <div className="space-y-2">
-            <p className="text-[11px] uppercase tracking-[0.3em] text-[var(--checkout-form-muted)]">Checkout</p>
-            <p className="text-sm leading-7 text-[var(--checkout-form-muted)]">{paymentHeadline}</p>
-          </div>
-          {gatewayPolicy ? (
-            <p className={`mt-5 rounded-2xl px-4 py-3 text-sm ${gatewayPolicy.tone === "success" ? "bg-emerald-50 text-emerald-700" : gatewayPolicy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
-              <span className="font-medium">{gatewayPolicy.heading}.</span> {gatewayPolicy.detail}
-            </p>
-          ) : (
-            <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">No active payment gateway is configured.</p>
-          )}
-          {gatewayReadiness ? (
-            <p
-              className={`mt-3 rounded-2xl px-4 py-3 text-sm ${
-                gatewayReadiness.status === "ready"
-                  ? "bg-emerald-50 text-emerald-700"
-                  : gatewayReadiness.status === "attention"
-                    ? "bg-amber-50 text-amber-800"
-                    : "bg-rose-50 text-rose-700"
-              }`}
-            >
-              <span className="font-medium">{gatewayReadiness.heading}.</span> {gatewayReadiness.detail}
-            </p>
-          ) : null}
+        <section className="perseus-checkout-form order-1 rounded-[28px] border border-[var(--checkout-form-panel-border)] bg-[var(--checkout-form-panel-background)] px-4 py-5 text-[var(--checkout-form-text)] shadow-[var(--checkout-form-shadow)] sm:px-6 lg:order-2 lg:px-8 lg:py-7">
           {query.status === "cancelled" ? (
             <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Checkout was cancelled. You can try again at any time.</p>
           ) : null}
-          <div className="perseus-checkout-summary mt-5 grid gap-3 rounded-[24px] bg-[var(--checkout-summary-background)] px-5 py-4 text-sm shadow-[0_16px_28px_rgba(15,23,42,0.07)]">
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-[var(--checkout-summary-muted)]">Product</span>
-              <span className="max-w-[20rem] text-right font-medium text-[var(--checkout-summary-text)] [overflow-wrap:anywhere]">{productTitle}</span>
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-[var(--checkout-summary-muted)]">Price</span>
-              <span className="font-medium text-[var(--checkout-summary-text)]">{discountedPriceLabel}</span>
-            </div>
-            {appliedUpsellDiscount && appliedUpsellDiscount.discountAmount > 0 ? (
-              <>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-[var(--checkout-summary-muted)]">Original price</span>
-                  <span className="font-medium text-[var(--checkout-summary-muted)] line-through">{appliedUpsellDiscount.originalPrice}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-[var(--checkout-summary-muted)]">Upsell discount</span>
-                  <span className="font-medium text-emerald-700">{appliedUpsellDiscount.savingsLabel ?? "Discount applied"}</span>
-                </div>
-              </>
-            ) : null}
-            {productMeta ? (
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-[var(--checkout-summary-muted)]">{productMeta.label}</span>
-                <span className="font-medium text-[var(--checkout-summary-text)]">{productMeta.value}</span>
-              </div>
-            ) : null}
-          </div>
-
-          <div className="mt-5">
-            {gatewayPolicy?.allowed && gatewayReadiness?.canRunCheckout ? (
+          <div>
+            {checkoutAvailable ? (
             <CheckoutForm
               offerId={offer.id}
+              productTitle={productTitle}
+              productKind={productKind}
+              productMeta={productMeta}
+              checkoutModeNote={checkoutModeNote}
               initialUpsellFromOfferId={query.upsellFrom ?? ""}
               initialQuote={initialQuote}
+              showTaxLocationInitially={showTaxLocationInitially}
               submitLabel={submitLabel}
               pendingLabel={pendingLabel}
               paymentNote={paymentNote}
@@ -204,7 +167,7 @@ export default async function CheckoutPage({
             </CheckoutForm>
             ) : (
               <div className="rounded-[24px] border border-[var(--checkout-unavailable-border)] bg-[var(--checkout-unavailable-background)] px-5 py-5 text-sm leading-7 text-[var(--checkout-unavailable-text)]">
-                Checkout is unavailable until the active gateway is configured for a real payment path, has the required credentials, and passes the current payment policy.
+                Checkout is temporarily unavailable. Please return to the course page and try again later.
               </div>
             )}
           </div>

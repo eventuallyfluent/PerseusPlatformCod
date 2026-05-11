@@ -11,7 +11,7 @@ import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import { resolveCoursePublicPath, resolveCourseThankYouPath } from "@/lib/urls/resolve-course-path";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
-import { addLessonAction, addModuleAction, deleteCourseAction, deleteFaqAction, deleteLessonAction, deleteModuleAction, deleteTestimonialAction, regeneratePageAction, saveCourseAction, saveFaqAction, saveTestimonialAction, setCourseStatusAction } from "@/app/(admin)/admin/actions";
+import { addLessonAction, addModuleAction, deleteCourseAction, deleteFaqAction, deleteLessonAction, deleteModuleAction, deleteTestimonialAction, regeneratePageAction, saveCourseAction, saveFaqAction, saveTestimonialAction, setCourseStatusAction, updateLessonDripAction } from "@/app/(admin)/admin/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -384,7 +384,7 @@ export default async function CourseDetailPage({
 
       <div className="grid gap-6">
         <div id="curriculum">
-          <details className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]">
+          <details className="rounded-[24px] border border-stone-200 bg-white p-6 shadow-[var(--shadow-panel)]" open>
             <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
               <div className="space-y-1">
                 <h2 className="text-lg font-semibold text-stone-950">Curriculum</h2>
@@ -408,7 +408,7 @@ export default async function CourseDetailPage({
               </div>
             </div>
             {course.modules.map((module) => (
-              <details key={module.id} className="rounded-[24px] border border-stone-200 bg-stone-50 p-4">
+              <details key={module.id} className="rounded-[24px] border border-stone-200 bg-stone-50 p-4" open>
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">Module {module.position}</p>
@@ -445,20 +445,9 @@ export default async function CourseDetailPage({
                             </p>
                           </div>
                         </div>
-                        <form action={addLessonAction} className="flex flex-wrap items-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 px-3 py-2">
+                        <form action={updateLessonDripAction} className="flex flex-wrap items-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 px-3 py-2">
                           <input type="hidden" name="courseId" value={course.id} />
-                          <input type="hidden" name="moduleId" value={module.id} />
                           <input type="hidden" name="lessonId" value={lesson.id} />
-                          <input type="hidden" name="title" value={lesson.title} />
-                          <input type="hidden" name="slug" value={lesson.slug} />
-                          <input type="hidden" name="position" value={lesson.position} />
-                          <input type="hidden" name="type" value={lesson.type} />
-                          <input type="hidden" name="status" value={lesson.status} />
-                          <input type="hidden" name="content" value={lesson.content ?? ""} />
-                          <input type="hidden" name="videoUrl" value={lesson.videoUrl ?? ""} />
-                          <input type="hidden" name="downloadUrl" value={lesson.downloadUrl ?? ""} />
-                          <input type="hidden" name="durationLabel" value={lesson.durationLabel ?? ""} />
-                          <input type="hidden" name="isPreview" value={lesson.isPreview ? "true" : "false"} />
                           <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
                             Drip delay
                             <input

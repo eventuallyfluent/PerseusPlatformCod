@@ -756,6 +756,28 @@ export async function addLessonAction(formData: FormData) {
   redirect(`/admin/courses/${courseId}?saved=curriculum`);
 }
 
+export async function updateLessonDripAction(formData: FormData) {
+  const courseId = String(formData.get("courseId"));
+  const lessonId = String(formData.get("lessonId") ?? "");
+  const dripDays = Number(formData.get("dripDays") ?? 0);
+
+  if (!courseId || !lessonId || !Number.isInteger(dripDays) || dripDays < 0) {
+    redirect(`/admin/courses/${courseId}?error=lesson`);
+  }
+
+  try {
+    await prisma.lesson.update({
+      where: { id: lessonId },
+      data: { dripDays },
+    });
+  } catch {
+    redirect(`/admin/courses/${courseId}?error=lesson`);
+  }
+
+  revalidatePath(`/admin/courses/${courseId}`);
+  redirect(`/admin/courses/${courseId}?saved=curriculum`);
+}
+
 export async function saveInstructorAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   let instructor;

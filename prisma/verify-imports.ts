@@ -22,6 +22,12 @@ async function main() {
     throw new Error("Course package dry run did not tolerate Payhip audio lesson types.");
   }
 
+  const externalLinkLessonTypeCsv = packageCsv.replace(",VIDEO,", ",external_link,");
+  const externalLinkLessonTypeDryRun = await dryRunImport("COURSE_PACKAGE", externalLinkLessonTypeCsv);
+  if (externalLinkLessonTypeDryRun.invalidRows.length > 0 || externalLinkLessonTypeDryRun.validRows[0]?.row.lesson_type !== LessonType.MIXED) {
+    throw new Error("Course package dry run did not tolerate Payhip external link lesson types.");
+  }
+
   const payhipVerifiedBuyerPositionCsv = packageCsv.replace(",5,1,1,Orientation and practice,", ",5,Verified Buyer,1,Orientation and practice,");
   const payhipVerifiedBuyerPositionDryRun = await dryRunImport("COURSE_PACKAGE", payhipVerifiedBuyerPositionCsv);
   if (payhipVerifiedBuyerPositionDryRun.invalidRows.length > 0 || payhipVerifiedBuyerPositionDryRun.validRows[0]?.row.testimonial_position !== undefined) {

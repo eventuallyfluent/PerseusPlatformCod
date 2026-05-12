@@ -111,6 +111,10 @@ function normalizeCsvLessonType(value: unknown) {
     return LessonType.MIXED;
   }
 
+  if (["EXTERNAL_LINK", "EXTERNAL_URL", "LINK", "URL"].includes(normalized)) {
+    return LessonType.MIXED;
+  }
+
   return normalized;
 }
 

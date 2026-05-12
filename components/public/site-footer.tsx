@@ -30,8 +30,8 @@ export async function SiteFooter() {
     .filter((link, index, items) => items.findIndex((candidate) => candidate.label === link.label && candidate.href === link.href) === index);
 
   return (
-    <footer className="perseus-site-footer mt-auto mx-auto w-full max-w-7xl px-6 py-16">
-      <div className="perseus-footer-shell rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-8 shadow-[var(--shadow-soft)] sm:px-10 sm:py-10">
+    <footer className="perseus-site-footer mx-auto mt-auto w-full max-w-7xl px-5 py-12 sm:px-6">
+      <div className="perseus-footer-shell rounded-[26px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-6 py-7 shadow-[var(--shadow-soft)] sm:px-8 sm:py-8">
         <div className="grid gap-10 border-b border-[var(--border)] pb-10 lg:grid-cols-[1.4fr_0.9fr_0.9fr]">
           <div className="space-y-6">
             <div className="space-y-3">
@@ -53,7 +53,7 @@ export async function SiteFooter() {
 
           <div className="space-y-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-lavender)]">{payload.platformHeading}</p>
-            <nav className="flex flex-col gap-3 text-lg text-[var(--foreground-soft)]">
+            <nav className="flex flex-col gap-2.5 text-base text-[var(--foreground-soft)]">
               {browseLinks.map((link) => (
                 <Link key={`${link.label}-${link.href}`} href={link.href} className="transition hover:text-[var(--portal-text)]">
                   {link.label}
@@ -64,7 +64,7 @@ export async function SiteFooter() {
 
           <div className="space-y-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--accent-lavender)]">{payload.legalHeading}</p>
-            <div className="flex flex-col gap-3 text-lg text-[var(--foreground-soft)]">
+            <div className="flex flex-col gap-2.5 text-base text-[var(--foreground-soft)]">
               {legalLinks.map((link) => (
                 <Link key={`${link.label}-${link.href}`} href={link.href} className="transition hover:text-[var(--portal-text)]">
                   {link.label}

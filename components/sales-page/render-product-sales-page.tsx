@@ -10,9 +10,9 @@ import type { BundleSalesPagePayload, GeneratedSalesPagePayload, SalesPageOfferS
 type ProductPayload = GeneratedSalesPagePayload | BundleSalesPagePayload;
 
 const sectionPanelClass =
-  "perseus-sales-panel rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
+  "perseus-sales-panel rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
 const sectionPanelStrongClass =
-  "perseus-sales-panel-strong rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
+  "perseus-sales-panel-strong rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
 const panelMutedTextClass = "text-[var(--text-secondary)]";
 const panelSubtleTextClass = "text-[var(--text-muted)]";
 
@@ -102,8 +102,8 @@ function parseDescriptionBlocks(value?: string | null): DescriptionBlock[] {
 function splitHighlightItems(items: string[]) {
   return items.flatMap((item) =>
     item
-      .split(/\s+[•*]\s+|\n+/)
-      .map((part) => part.trim().replace(/^[•*-]\s*/, ""))
+      .split(/\s+(?:\u2022|\u00e2\u20ac\u00a2|\u00c3\u00a2\u00e2\u201a\u00ac\u00c2\u00a2|\*)\s+|\n+/)
+      .map((part) => part.trim().replace(/^(?:\u2022|\u00e2\u20ac\u00a2|\u00c3\u00a2\u00e2\u201a\u00ac\u00c2\u00a2|\*|-)\s*/, ""))
       .filter(Boolean),
   );
 }
@@ -111,8 +111,8 @@ function splitHighlightItems(items: string[]) {
 function parseHighlightItems(items: string[], cardId?: "outcomes" | "audience" | "includes"): ParsedHighlight {
   const rawItems = splitHighlightItems(items).flatMap((item) =>
     item
-      .split(/\s+(?:•|â€¢|\*)\s+|\n+/)
-      .map((part) => part.trim().replace(/^(?:•|â€¢|\*|-)\s*/, ""))
+      .split(/\s+(?:\u2022|\u00e2\u20ac\u00a2|\u00c3\u00a2\u00e2\u201a\u00ac\u00c2\u00a2|\*)\s+|\n+/)
+      .map((part) => part.trim().replace(/^(?:\u2022|\u00e2\u20ac\u00a2|\u00c3\u00a2\u00e2\u201a\u00ac\u00c2\u00a2|\*|-)\s*/, ""))
       .filter(Boolean),
   );
   const chips: string[] = [];
@@ -255,7 +255,7 @@ function SectionIntro({ eyebrow, title, body }: { eyebrow: string; title: string
       <div className="flex justify-center">
         <Badge variant="accent">{eyebrow}</Badge>
       </div>
-      <h2 className="text-3xl leading-tight tracking-[-0.04em] text-[var(--foreground)] lg:text-[2.8rem]">{title}</h2>
+      <h2 className="text-3xl leading-tight tracking-[-0.035em] text-[var(--foreground)] lg:text-[2.65rem]">{title}</h2>
       {body ? <p className="text-base leading-7 text-[var(--text-secondary)]">{body}</p> : null}
     </div>
   );
@@ -281,12 +281,12 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
             title={payload.descriptionSection.title}
             body={payload.descriptionSection.shortDescription}
           />
-          <div className={`mx-auto max-w-4xl space-y-5 p-4 sm:p-6 ${sectionPanelClass}`}>
+          <div className={`mx-auto max-w-4xl space-y-5 p-3 sm:p-5 ${sectionPanelClass}`}>
             {payload.media.salesVideoUrl ? (
               <StreamableEmbed url={payload.media.salesVideoUrl} title={`${payload.hero.title} sales video`} />
             ) : null}
             {descriptionBlocks.length > 0 ? (
-              <div className="rounded-[22px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] p-5 sm:p-6 lg:p-8">
+              <div className="rounded-[20px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] p-5 sm:p-6 lg:p-8">
                 <div className="mx-auto max-w-3xl">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--accent-lavender)]">
                     {payload.productType === "bundle" ? "About the bundle" : "About the course"}
@@ -343,7 +343,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
               const hiddenItems = parsed.bullets.slice(6);
 
               return (
-              <div key={card.id} className={`relative overflow-hidden p-6 ${sectionPanelClass}`}>
+              <div key={card.id} className={`relative overflow-hidden p-5 sm:p-6 ${sectionPanelClass}`}>
                 <div className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${treatment.accentClass}`} />
                 <div className="relative">
                   <div className="flex items-start justify-between gap-4">
@@ -482,14 +482,14 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {payload.includedCoursesSection.courses.map((course, index) => (
-              <div key={course.courseUrl} className={`rounded-[24px] p-5 ${sectionPanelClass}`}>
+              <div key={course.courseUrl} className={`rounded-[22px] p-4 sm:p-5 ${sectionPanelClass}`}>
                 <SalesSmartImage
                   src={course.imageUrl}
                   alt={`${course.title} course image`}
                   variant="card"
                   className="aspect-video rounded-[20px]"
                 />
-                <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>Included course {index + 1}</p>
+                <p className={`mt-4 text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>Included course {index + 1}</p>
                 <h3 className="mt-4 text-2xl leading-tight tracking-[-0.03em] text-[var(--text-primary)]">{course.title}</h3>
                 {course.subtitle ? <p className={`mt-3 text-sm leading-7 ${panelMutedTextClass}`}>{course.subtitle}</p> : null}
                 {course.instructorName ? <p className={`mt-4 text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>{course.instructorName}</p> : null}
@@ -506,7 +506,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
     if (section === "instructor" && payload.productType === "course") {
       return (
         <section key={section} className="mx-auto max-w-7xl px-6">
-          <div className={`grid gap-6 rounded-[30px] p-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start lg:p-6 ${sectionPanelClass}`}>
+          <div className={`grid gap-6 rounded-[26px] p-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start lg:p-6 ${sectionPanelClass}`}>
             <div className="space-y-3">
               <SalesSmartImage
                 src={payload.instructorSection.imageUrl}
@@ -546,7 +546,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
             {payload.testimonialsSection.items.map((testimonial, index) => (
               <blockquote
                 key={`${testimonial.quote}-${index}`}
-                className={`grid gap-6 p-6 lg:grid-cols-[220px_1fr] ${sectionPanelClass}`}
+                className={`grid gap-6 p-5 sm:p-6 lg:grid-cols-[220px_1fr] ${sectionPanelClass}`}
               >
                 <div className="space-y-3 lg:border-r lg:border-[var(--border)] lg:pr-6">
                   {testimonial.name ? <footer className="text-base font-semibold text-[var(--text-primary)]">{testimonial.name}</footer> : null}
@@ -582,10 +582,13 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
           <SectionIntro eyebrow={payload.faqSection.eyebrow} title={payload.faqSection.title} />
           <div className="grid gap-4">
             {payload.faqSection.items.map((faq) => (
-              <div key={faq.question} className={`rounded-[28px] p-6 ${sectionPanelClass}`}>
-                <h3 className="text-xl leading-none tracking-[-0.02em] text-[var(--text-primary)]">{faq.question}</h3>
+              <details key={faq.question} className={`group rounded-[22px] p-5 sm:p-6 ${sectionPanelClass}`}>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 marker:content-none">
+                  <h3 className="text-xl leading-tight tracking-[-0.02em] text-[var(--text-primary)]">{faq.question}</h3>
+                  <ChevronDown className="size-5 shrink-0 text-[var(--accent-lavender)] transition group-open:rotate-180" aria-hidden="true" />
+                </summary>
                 <p className={`mt-3 text-sm leading-8 ${panelMutedTextClass}`}>{faq.answer}</p>
-              </div>
+              </details>
             ))}
           </div>
         </section>
@@ -595,7 +598,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
     if (section === "pricing") {
       return (
         <section key={section} className="mx-auto max-w-7xl px-6">
-          <div className="rounded-[38px] border border-[var(--border)] bg-[var(--surface-panel)] px-8 py-9 text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+          <div className="rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] px-5 py-7 text-[var(--text-primary)] shadow-[var(--shadow-panel)] sm:px-8 sm:py-9">
             <div className="grid gap-7 lg:grid-cols-[1fr_0.9fr] lg:items-end">
               <div>
                 <Badge variant="premium">{payload.pricingSection.badge}</Badge>
@@ -607,7 +610,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                   <Link
                     key={offer.offerId}
                     href={offer.checkoutUrl}
-                    className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-5 py-4 text-[var(--text-primary)] transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]"
+                    className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-5 py-4 text-[var(--text-primary)] transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-sm font-semibold">{offer.name}</span>
@@ -623,7 +626,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                 ))}
               </div>
             </div>
-            <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--accent-soft),var(--premium-soft))] p-6">
+            <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--accent-soft),var(--premium-soft))] p-5 sm:p-6">
               <div className="max-w-2xl">
                 <h3 className="text-3xl leading-none tracking-[-0.04em] lg:text-[2.45rem]">{payload.finalCta.label}</h3>
                 <p className={`mt-3 text-base leading-8 ${panelMutedTextClass}`}>{payload.finalCta.body}</p>
@@ -641,7 +644,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
   return (
     <div className="perseus-sales-page space-y-14 overflow-x-hidden lg:space-y-16">
       <section className="px-4 sm:px-6">
-        <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[30px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] p-4 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] sm:p-5 lg:p-6">
+        <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[26px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] p-4 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] sm:p-5 lg:p-6">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,rgba(168,102,255,0.18),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(212,168,70,0.12),transparent_22%)]" />
           <div className="relative grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.82fr)] lg:items-center">
             <div className="px-2 py-5 sm:px-4 lg:px-5 lg:py-8">
@@ -656,7 +659,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                 {payload.hero.metadataLine ? (
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--hero-text-muted)]">{payload.hero.metadataLine}</p>
                 ) : null}
-                <h1 className="max-w-3xl text-balance break-words text-3xl leading-[1.02] tracking-[-0.045em] text-[var(--hero-text-primary)] sm:text-5xl lg:text-[4.6rem]">{payload.hero.title}</h1>
+                <h1 className="max-w-3xl text-balance break-words text-3xl leading-[1.02] tracking-[-0.04em] text-[var(--hero-text-primary)] sm:text-5xl lg:text-[4.35rem]">{payload.hero.title}</h1>
                 {payload.hero.subtitle ? <p className="max-w-2xl text-base leading-7 text-[var(--hero-text-secondary)] sm:text-lg sm:leading-8">{payload.hero.subtitle}</p> : null}
                 {payload.descriptionSection.shortDescription ? (
                   <p className="line-clamp-3 max-w-2xl text-sm leading-7 text-[var(--hero-text-secondary)] sm:text-base">

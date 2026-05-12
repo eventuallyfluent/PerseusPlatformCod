@@ -8,6 +8,7 @@ import { buildOrganizationStructuredData, buildWebsiteStructuredData } from "@/l
 import { getPublicReviewName } from "@/lib/testimonials/public-review-name";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
+import { PublicSmartImage } from "@/components/public/public-smart-image";
 import type {
   HomepageCollectionsPayload,
   HomepageEmailSignupPayload,
@@ -62,17 +63,19 @@ function CollectionPanel({
 
   return (
     <Link href={href} className="group block h-full">
-      <article
-        className="perseus-collection-panel relative flex min-h-[360px] h-full overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] shadow-[var(--collection-panel-shadow)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)]"
-        style={{
-          backgroundImage: imageUrl
-            ? `linear-gradient(180deg, rgba(13,15,29,0.12), rgba(13,15,29,0.86)), ${toneVar}, url(${imageUrl})`
-            : toneVar,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(192,132,252,0.2),transparent_24%)] opacity-90 transition group-hover:opacity-100" />
+      <article className="perseus-collection-panel relative flex min-h-[360px] h-full overflow-hidden rounded-[28px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] shadow-[var(--collection-panel-shadow)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)]">
+        <div className="absolute inset-0" style={{ background: toneVar }} />
+        {imageUrl ? (
+          <PublicSmartImage
+            src={imageUrl}
+            alt={`${title} collection`}
+            sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 92vw"
+            className="absolute inset-0"
+            imageClassName="group-hover:scale-[1.035]"
+          />
+        ) : null}
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(13,15,29,0.08),rgba(13,15,29,0.86))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(192,132,252,0.2),transparent_24%)] opacity-80 transition group-hover:opacity-100" />
         <div className="relative flex h-full w-full flex-col justify-between p-8 lg:p-9">
           <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[rgba(240,234,248,0.76)]">{eyebrow}</p>
           <div>
@@ -85,29 +88,41 @@ function CollectionPanel({
   );
 }
 
-function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
+function HeroSection({ payload, imageUrl }: { payload: HomepageHeroPayload; imageUrl?: string | null }) {
   const normalizedBrand = normalizeHeroText("Perseus Arcane Academy");
   const showEyebrow = normalizeHeroText(payload.eyebrow) !== normalizedBrand && normalizeHeroText(payload.eyebrow) !== normalizeHeroText(payload.title);
 
   return (
-    <section className="perseus-home-hero relative overflow-hidden border-b border-[var(--border)]">
+    <section className="perseus-home-hero relative min-h-[calc(100svh-76px)] overflow-hidden border-b border-[var(--border)]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_22%,var(--perseus-hero-glow),transparent_24%),radial-gradient(circle_at_72%_18%,rgba(212,168,85,0.12),transparent_22%)]" />
-      <div className="perseus-home-hero-inner relative mx-auto max-w-7xl px-6 py-12 lg:py-18">
-        <div className="perseus-home-hero-grid flex min-h-[calc(100svh-74px)] flex-col items-center justify-center gap-12">
-          <div className="perseus-home-hero-copy flex max-w-5xl -translate-y-6 flex-col items-center text-center lg:-translate-y-10">
+      {imageUrl ? (
+        <PublicSmartImage
+          src={imageUrl}
+          alt="Perseus Arcane Academy study artwork"
+          priority
+          variant="hero"
+          sizes="100vw"
+          className="absolute inset-0 opacity-80"
+          imageClassName="object-cover"
+        />
+      ) : null}
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,8,20,0.94),rgba(9,8,20,0.72)_48%,rgba(9,8,20,0.42)),linear-gradient(180deg,rgba(9,8,20,0.18),rgba(9,8,20,0.88))]" />
+      <div className="perseus-home-hero-inner relative mx-auto flex min-h-[calc(100svh-76px)] max-w-7xl items-center px-5 py-10 sm:px-6 lg:py-14">
+        <div className="perseus-home-hero-grid w-full">
+          <div className="perseus-home-hero-copy flex max-w-4xl flex-col items-start text-left">
             <PerseusHeroMark />
             {showEyebrow ? (
-              <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.42em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
+              <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.36em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
             ) : null}
-            <h1 className="mt-5 max-w-6xl font-serif text-6xl leading-[0.88] tracking-[-0.06em] text-[var(--portal-text)] sm:text-7xl lg:text-[6.8rem]">
+            <h1 className="mt-5 max-w-5xl font-serif text-5xl leading-[0.9] tracking-[-0.04em] text-[var(--portal-text)] sm:text-7xl lg:text-[6.2rem]">
               {payload.title}
             </h1>
-            <p className="mt-8 max-w-3xl text-xl leading-9 text-[var(--foreground-soft)]">{payload.description}</p>
-            <div className="perseus-home-hero-actions mt-10 flex flex-wrap justify-center gap-4">
-              <ButtonLink href={payload.primaryCtaHref} className="min-w-[220px]">
+            <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--hero-text-secondary)] sm:text-xl sm:leading-9">{payload.description}</p>
+            <div className="perseus-home-hero-actions mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
+              <ButtonLink href={payload.primaryCtaHref} className="min-h-12 min-w-[220px] justify-center">
                 {payload.primaryCtaLabel}
               </ButtonLink>
-              <ButtonLink href={payload.secondaryCtaHref} variant="secondary" className="min-w-[220px]">
+              <ButtonLink href={payload.secondaryCtaHref} variant="secondary" className="min-h-12 min-w-[220px] justify-center">
                 {payload.secondaryCtaLabel}
               </ButtonLink>
             </div>
@@ -135,14 +150,14 @@ function CollectionsSection({
   }>;
 }) {
   return (
-    <section className="perseus-home-collections mx-auto max-w-7xl px-6 py-16">
+    <section className="perseus-home-collections mx-auto max-w-7xl px-5 py-16 sm:px-6">
       <div className="mx-auto mb-10 max-w-4xl space-y-4 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
         <h2 className="font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">{payload.title}</h2>
         <p className="text-lg leading-8 text-[var(--foreground-soft)]">{payload.description}</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {collections.map((collection, index) => (
           <CollectionPanel
             key={`${collection.id}-${index}`}
@@ -170,7 +185,7 @@ function TestimoniesSection({
   }
 
   return (
-    <section className="perseus-home-testimonies mx-auto max-w-7xl px-6 py-16">
+    <section className="perseus-home-testimonies mx-auto max-w-7xl px-5 py-16 sm:px-6">
       <div className="mx-auto mb-10 max-w-4xl space-y-4 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--premium)]">{payload.eyebrow}</p>
         <h2 className="font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">{payload.title}</h2>
@@ -178,7 +193,7 @@ function TestimoniesSection({
       </div>
       <div className="grid gap-6 xl:grid-cols-3">
         {items.map((testimonial) => (
-          <figure key={testimonial.id} className="perseus-testimonial-card rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-7 shadow-[var(--collection-panel-shadow)]">
+          <figure key={testimonial.id} className="perseus-testimonial-card rounded-[24px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-6 shadow-[var(--collection-panel-shadow)]">
             <blockquote className="text-lg leading-9 text-[var(--portal-text)]">&ldquo;{testimonial.quote}&rdquo;</blockquote>
             <figcaption className="mt-6 space-y-1">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--accent-lavender)]">{testimonial.name}</p>
@@ -193,8 +208,8 @@ function TestimoniesSection({
 
 function EmailSignupSection({ payload }: { payload: HomepageEmailSignupPayload }) {
   return (
-    <section className="perseus-home-email mx-auto max-w-7xl px-6 py-16">
-      <div className="perseus-email-signup rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-10 shadow-[var(--collection-panel-shadow)] sm:px-10 lg:px-14">
+    <section className="perseus-home-email mx-auto max-w-7xl px-5 py-16 sm:px-6">
+      <div className="perseus-email-signup rounded-[28px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-6 py-9 shadow-[var(--collection-panel-shadow)] sm:px-10 lg:px-14">
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
           <h2 className="mt-4 font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">{payload.title}</h2>
@@ -277,10 +292,11 @@ export default async function HomePage() {
           source: testimonial.course?.title ?? testimonial.bundle?.title ?? "Student",
           quote: testimonial.quote,
         }));
+  const homepageHeroImageUrl = collectionRecords.find((collection) => collection.imageUrl)?.imageUrl ?? null;
 
   const sectionRenderers = sections.map((section) => {
     if (section.type === "HERO") {
-      return <HeroSection key={section.type} payload={section.payload as HomepageHeroPayload} />;
+      return <HeroSection key={section.type} payload={section.payload as HomepageHeroPayload} imageUrl={homepageHeroImageUrl} />;
     }
 
     if (section.type === "COLLECTIONS") {

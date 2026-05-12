@@ -3,6 +3,7 @@ import { getInstructorBySlug } from "@/lib/instructors/get-instructor-by-slug";
 import { CourseCard } from "@/components/public/course-card";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { buildBreadcrumbStructuredData, buildPersonStructuredData, buildProfilePageStructuredData } from "@/lib/seo/structured-data";
+import { PublicSmartImage } from "@/components/public/public-smart-image";
 
 export const dynamic = "force-dynamic";
 
@@ -82,12 +83,12 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(profilePageJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <section className="border-b border-[var(--hero-shell-border)] px-6 py-8 lg:py-10">
-        <div className="mx-auto grid max-w-7xl gap-7 rounded-[34px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] p-5 shadow-[var(--shadow-panel)] lg:grid-cols-[minmax(0,1fr)_340px] lg:p-7">
+      <section className="border-b border-[var(--hero-shell-border)] px-5 py-8 sm:px-6 lg:py-10">
+        <div className="mx-auto grid max-w-7xl gap-7 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
           <div className="min-w-0 space-y-6">
             <div className="space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Instructor</p>
-              <h1 className="text-5xl leading-none tracking-[-0.05em] text-[var(--hero-text-primary)] sm:text-6xl lg:text-[4.1rem]">{instructor.name}</h1>
+              <h1 className="break-words text-5xl leading-none tracking-[-0.04em] text-[var(--hero-text-primary)] sm:text-6xl lg:text-[4.1rem]">{instructor.name}</h1>
               {instructor.shortBio ? <p className="max-w-4xl text-lg leading-8 text-[var(--accent-lavender)]">{instructor.shortBio}</p> : null}
             </div>
             {bioParagraphs.length > 0 ? (
@@ -99,19 +100,21 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
             ) : null}
           </div>
           <aside className="grid gap-4 sm:grid-cols-[180px_minmax(0,1fr)] lg:grid-cols-1">
-            <div
-              className="aspect-[4/5] w-full rounded-[26px] border border-[var(--border)] bg-cover bg-center shadow-[0_16px_40px_rgba(10,11,24,0.24)]"
-              style={{
-                backgroundImage: instructor.imageUrl ? `url(${instructor.imageUrl})` : "var(--hero-fallback-background)",
-              }}
+            <PublicSmartImage
+              src={instructor.imageUrl}
+              alt={`${instructor.name} portrait`}
+              variant="portrait"
+              priority
+              sizes="(min-width: 1024px) 340px, (min-width: 640px) 180px, 92vw"
+              className="aspect-[4/5] w-full rounded-[24px] border border-[var(--border)] shadow-[0_16px_40px_rgba(10,11,24,0.24)]"
             />
             <div className="space-y-4">
-              <div className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3">
+              <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3">
                 <p className="text-3xl font-semibold text-[var(--hero-text-primary)]">{instructor.courses.length}</p>
                 <p className="mt-1 text-[11px] uppercase tracking-[0.28em] text-[var(--portal-muted)]">Courses</p>
               </div>
               {profileLinks.length > 0 ? (
-                <div className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] p-3">
+                <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel)] p-3">
                   <p className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-[0.26em] text-[var(--portal-muted)]">Links</p>
                   <div className="grid gap-2">
                     {profileLinks.map(([label, url], index) => (
@@ -133,7 +136,7 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl space-y-12 px-6 py-10 lg:py-12">
+      <div className="mx-auto max-w-7xl space-y-12 px-5 py-10 sm:px-6 lg:py-12">
         {bioParagraphs.length > 4 ? (
           <section className="max-w-4xl">
             <div className="space-y-4 text-lg leading-10 text-[var(--text-secondary)]">
@@ -149,7 +152,7 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
         <section className="space-y-8">
           <div className="space-y-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Courses</p>
-            <h2 className="text-5xl leading-none tracking-[-0.05em] text-[var(--hero-text-primary)]">Study with {instructor.name.split(" ")[0]}</h2>
+            <h2 className="text-4xl leading-none tracking-[-0.04em] text-[var(--hero-text-primary)] sm:text-5xl">Study with {instructor.name.split(" ")[0]}</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {instructor.courses.map((course) => (

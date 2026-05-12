@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { CourseStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
@@ -10,6 +9,7 @@ import { buildMetadata } from "@/lib/seo/metadata";
 import { buildBreadcrumbStructuredData, buildItemListStructuredData } from "@/lib/seo/structured-data";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
+import { PublicSmartImage } from "@/components/public/public-smart-image";
 
 export const dynamic = "force-dynamic";
 
@@ -44,21 +44,14 @@ function BundleCatalogCard({
 }) {
   return (
     <HardLink href={resolveBundlePublicPath(bundle)} className="group block h-full">
-      <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-panel)]">
-        <div className="perseus-course-card-media relative aspect-video overflow-hidden bg-[linear-gradient(135deg,#2b1149,#4b247d)]">
-          {bundle.heroImageUrl ? (
-            <>
-              <Image
-                src={bundle.heroImageUrl}
-                alt={`${bundle.title} cover`}
-                fill
-                sizes="(min-width: 1536px) 22vw, (min-width: 1280px) 30vw, (min-width: 640px) 45vw, 90vw"
-                className="object-cover transition duration-500 group-hover:scale-[1.02]"
-              />
-              <span className="absolute inset-0 bg-gradient-to-b from-slate-950/10 to-slate-950/35" />
-            </>
-          ) : null}
-        </div>
+      <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-panel)]">
+        <PublicSmartImage
+          src={bundle.heroImageUrl}
+          alt={`${bundle.title} cover`}
+          sizes="(min-width: 1536px) 22vw, (min-width: 1280px) 30vw, (min-width: 640px) 45vw, 90vw"
+          className="perseus-course-card-media aspect-video"
+          imageClassName="group-hover:scale-[1.02]"
+        />
         <div className="perseus-course-card-body flex flex-1 flex-col p-5">
           <div className="flex items-center justify-between gap-3">
             <p className="truncate text-sm font-medium text-[var(--text-secondary)]">
@@ -346,7 +339,7 @@ export default async function CoursesIndexPage({
   });
 
   return (
-    <div className="mx-auto max-w-[92rem] px-5 py-12 sm:px-6 lg:py-14">
+    <div className="mx-auto max-w-[92rem] overflow-x-hidden px-5 py-10 sm:px-6 lg:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <div className="mx-auto max-w-4xl space-y-4 text-center">
@@ -395,20 +388,13 @@ export default async function CoursesIndexPage({
                     active ? "border-[var(--accent)]" : "border-[var(--border)]"
                   }`}
                 >
-                  <div className="relative min-h-44 overflow-hidden bg-[linear-gradient(135deg,#1c1534,#302555)] sm:min-h-full">
-                    {collection.imageUrl ? (
-                      <>
-                        <Image
-                          src={collection.imageUrl}
-                          alt={`${collection.title} collection`}
-                          fill
-                          sizes="(min-width: 1536px) 168px, (min-width: 640px) 168px, 90vw"
-                          className="object-cover transition duration-500 group-hover:scale-[1.02]"
-                        />
-                        <span className="absolute inset-0 bg-gradient-to-b from-slate-950/20 to-slate-950/60" />
-                      </>
-                    ) : null}
-                  </div>
+                  <PublicSmartImage
+                    src={collection.imageUrl}
+                    alt={`${collection.title} collection`}
+                    sizes="(min-width: 1536px) 168px, (min-width: 640px) 168px, 90vw"
+                    className="min-h-44 sm:min-h-full"
+                    imageClassName="group-hover:scale-[1.02]"
+                  />
                   <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
                     <div>
                       <div className="flex items-start justify-between gap-3">
@@ -427,7 +413,7 @@ export default async function CoursesIndexPage({
         </div>
       </section>
 
-      <form className="mt-8 rounded-[24px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-5 shadow-[var(--shadow-soft)]">
+      <form className="mt-8 rounded-[22px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-4 shadow-[var(--shadow-soft)] sm:p-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_220px]">
           <label className="space-y-2">
             <span className="text-sm font-medium text-[var(--portal-text)]">Search courses</span>
@@ -436,7 +422,7 @@ export default async function CoursesIndexPage({
               name="q"
               defaultValue={query}
               placeholder="Search title or description"
-              className="w-full rounded-[18px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] px-4 py-3 text-sm text-[var(--portal-text)] outline-none transition focus:border-[var(--accent)]"
+              className="min-h-12 w-full rounded-[16px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] px-4 py-3 text-sm text-[var(--portal-text)] outline-none transition focus:border-[var(--accent)]"
             />
           </label>
           <label className="space-y-2">
@@ -444,7 +430,7 @@ export default async function CoursesIndexPage({
             <select
               name="collection"
               defaultValue={selectedCollection?.slug ?? ""}
-              className="w-full rounded-[18px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] px-4 py-3 text-sm text-[var(--portal-text)] outline-none transition focus:border-[var(--accent)]"
+              className="min-h-12 w-full rounded-[16px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] px-4 py-3 text-sm text-[var(--portal-text)] outline-none transition focus:border-[var(--accent)]"
             >
               <option value="">All collections</option>
               {collections.map((collection) => (
@@ -459,7 +445,7 @@ export default async function CoursesIndexPage({
             <select
               name="instructor"
               defaultValue={selectedInstructor?.slug ?? ""}
-              className="w-full rounded-[18px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] px-4 py-3 text-sm text-[var(--portal-text)] outline-none transition focus:border-[var(--accent)]"
+              className="min-h-12 w-full rounded-[16px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] px-4 py-3 text-sm text-[var(--portal-text)] outline-none transition focus:border-[var(--accent)]"
             >
               <option value="">All instructors</option>
               {instructors.map((instructor) => (
@@ -474,7 +460,7 @@ export default async function CoursesIndexPage({
             <select
               name="sort"
               defaultValue={sort}
-              className="w-full rounded-[18px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] px-4 py-3 text-sm text-[var(--portal-text)] outline-none transition focus:border-[var(--accent)]"
+              className="min-h-12 w-full rounded-[16px] border border-[var(--border)] bg-[var(--perseus-collection-elevated)] px-4 py-3 text-sm text-[var(--portal-text)] outline-none transition focus:border-[var(--accent)]"
             >
               <option value="newest">Newest</option>
               <option value="title">Title</option>
@@ -484,10 +470,10 @@ export default async function CoursesIndexPage({
           </label>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button className="rounded-full bg-[var(--button-primary-background)] px-5 py-3 text-sm font-semibold text-white shadow-[var(--button-primary-shadow)] transition hover:bg-[var(--button-primary-hover)]" type="submit">
+          <button className="min-h-12 rounded-full bg-[var(--button-primary-background)] px-5 py-3 text-sm font-semibold text-white shadow-[var(--button-primary-shadow)] transition hover:bg-[var(--button-primary-hover)]" type="submit">
             Update results
           </button>
-          <Link href="/courses" className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold text-[var(--portal-text)]">
+          <Link href="/courses" className="inline-flex min-h-12 items-center rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold text-[var(--portal-text)]">
             Clear filters
           </Link>
           <span className="text-sm text-[var(--foreground-soft)]">

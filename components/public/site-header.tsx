@@ -26,7 +26,13 @@ export async function SiteHeader() {
             <span className="block text-[10px] uppercase tracking-[0.26em] text-[var(--text-secondary)] sm:text-[11px] sm:tracking-[0.34em]">Structured magical training</span>
           </div>
         </HardLink>
-        <nav className="perseus-site-nav flex w-full shrink-0 basis-full flex-wrap items-center justify-between gap-2 text-sm text-[var(--text-primary)] sm:w-auto sm:basis-auto sm:justify-start sm:gap-4">
+        <nav className="perseus-site-nav flex w-full shrink-0 basis-full flex-wrap items-center justify-between gap-2 text-sm text-[var(--text-primary)] sm:w-auto sm:basis-auto sm:justify-start sm:gap-3">
+          <HardLink href="/courses" className="rounded-full px-3 py-2 text-[var(--text-primary)] transition hover:bg-[var(--accent-soft)] hover:text-[var(--text-primary)]">
+            Courses
+          </HardLink>
+          <HardLink href="/instructors" className="rounded-full px-3 py-2 text-[var(--text-primary)] transition hover:bg-[var(--accent-soft)] hover:text-[var(--text-primary)]">
+            Instructors
+          </HardLink>
           <HardLink href="/faq" className="rounded-full px-3 py-2 text-[var(--text-primary)] transition hover:bg-[var(--accent-soft)] hover:text-[var(--text-primary)]">
             FAQ
           </HardLink>

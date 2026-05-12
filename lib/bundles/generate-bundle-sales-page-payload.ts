@@ -163,14 +163,14 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
       headline: config.pricingHeadline || "Get the full training bundle in one purchase.",
       body:
         config.pricingBody ||
-        "Unlock every included course together and move through the material from your learner dashboard at your own pace.",
+        "Join the bundle when you are ready and begin moving through the included courses at your own pace.",
       offers,
     },
     finalCta: {
-      label: config.finalCtaLabel || (offers.length > 0 ? "Unlock the full bundle" : "Bundle coming soon"),
+      label: config.finalCtaLabel || (offers.length > 0 ? "Begin the Complete Bundle" : "Bundle Coming Soon"),
       body:
         config.finalCtaBody ||
-        "Start with one purchase, then move straight into the full bundle from your learner dashboard.",
+        "Enter the full course path and continue through the training in a clear sequence.",
     },
     offers,
   };

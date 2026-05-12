@@ -69,7 +69,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
       title: course.title,
       subtitle: course.subtitle,
       imageUrl: course.heroImageUrl,
-      primaryCtaLabel: config.primaryCtaLabel || (isFreeCourse ? "Start Free Course" : "Enroll Now"),
+      primaryCtaLabel: config.primaryCtaLabel || (isFreeCourse ? "Start Free Course" : "Begin the Course"),
       primaryCtaHref: primaryOffer?.checkoutUrl ?? resolveCoursePublicPath(course),
       secondaryCtaLabel: config.secondaryCtaLabel || "See full curriculum",
       secondaryCtaHref: "#curriculum",
@@ -105,7 +105,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
     curriculumSection: {
       eyebrow: "Curriculum",
       title: "See the full curriculum before you join.",
-      body: "Every module and lesson is listed here so the structure, pacing, and progression are visible before checkout.",
+      body: "Every module and lesson is listed here so the structure, pacing, and progression are clear before you enroll.",
       modules: course.modules.map((module) => ({
         moduleTitle: module.title,
         lessonCount: module.lessons.length,
@@ -163,17 +163,17 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
     pricingSection: {
       eyebrow: "Pricing",
       badge: config.pricingBadge || "Instant access",
-      headline: config.pricingHeadline || (offers.length > 1 ? "Choose your enrollment option." : "Begin when you are ready."),
+      headline: config.pricingHeadline || (offers.length > 1 ? "Choose the enrollment option that suits your path." : "Join the course and begin the work today."),
       body:
         config.pricingBody ||
-        "Review the course details, then enroll securely when this feels like the right next step.",
+        "Enroll when you are ready and begin with the course materials straight away.",
       offers,
     },
     finalCta: {
-      label: config.finalCtaLabel || (offers.length > 0 ? "Start learning today" : "Join the waitlist"),
+      label: config.finalCtaLabel || (offers.length > 0 ? (isFreeCourse ? "Start Free Course" : "Begin the Course") : "Join the Waitlist"),
       body:
         config.finalCtaBody ||
-        "Enrollment gives you access to the course area so you can begin the lessons without unnecessary delay.",
+        "When the course is right for you, join and continue directly into the lessons.",
     },
     offers,
   };

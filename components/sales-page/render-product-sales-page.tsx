@@ -190,7 +190,7 @@ function buildFacts(payload: ProductPayload) {
   }
 
   if (payload.offers.length > 1) {
-    facts.push({ label: "Payment paths", value: String(payload.offers.length), icon: PackageCheck });
+    facts.push({ label: "Enrollment options", value: String(payload.offers.length), icon: PackageCheck });
   }
 
   return facts.slice(0, 5);

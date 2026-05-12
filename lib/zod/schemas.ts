@@ -96,8 +96,7 @@ const csvBoolean = z.preprocess((value) => {
 const csvCourseStatus = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase() : value), z.nativeEnum(CourseStatus));
 const csvLessonStatus = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase() : value), z.nativeEnum(LessonStatus));
 const csvOfferType = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase().replace(/[\s-]+/g, "_") : value), z.nativeEnum(OfferType));
-const csvLessonType = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase().replace(/[\s-]+/g, "_") : value), z.nativeEnum(LessonType));
-const csvPackageLessonType = z.preprocess((value) => {
+function normalizeCsvLessonType(value: unknown) {
   if (typeof value !== "string") {
     return value;
   }
@@ -106,6 +105,25 @@ const csvPackageLessonType = z.preprocess((value) => {
 
   if (!normalized) {
     return undefined;
+  }
+
+  if (["AUDIO", "AUDIO_LESSON", "AUDIO_COURSE"].includes(normalized)) {
+    return LessonType.MIXED;
+  }
+
+  return normalized;
+}
+
+const csvLessonType = z.preprocess(normalizeCsvLessonType, z.nativeEnum(LessonType));
+const csvPackageLessonType = z.preprocess((value) => {
+  const normalized = normalizeCsvLessonType(value);
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (typeof normalized !== "string") {
+    return normalized;
   }
 
   if (["LESSON", "CHALLENGE", "CONTACT", "REVIEW", "COMMUNITY"].includes(normalized)) {

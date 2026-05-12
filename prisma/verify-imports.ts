@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { PrismaClient } from "@prisma/client";
+import { LessonType, PrismaClient } from "@prisma/client";
 import { dryRunImport } from "../lib/imports/dry-run-import";
 import { executeImport } from "../lib/imports/execute-import";
 
@@ -14,6 +14,12 @@ async function main() {
   const packageDryRun = await dryRunImport("COURSE_PACKAGE", packageCsv);
   if (packageDryRun.invalidRows.length > 0 || packageDryRun.conflicts.length > 0 || packageDryRun.validRows.length === 0) {
     throw new Error("Course package dry run failed");
+  }
+
+  const audioLessonTypeCsv = packageCsv.replace(",VIDEO,", ",audio,");
+  const audioLessonTypeDryRun = await dryRunImport("COURSE_PACKAGE", audioLessonTypeCsv);
+  if (audioLessonTypeDryRun.invalidRows.length > 0 || audioLessonTypeDryRun.validRows[0]?.row.lesson_type !== LessonType.MIXED) {
+    throw new Error("Course package dry run did not tolerate Payhip audio lesson types.");
   }
 
   const payhipVerifiedBuyerPositionCsv = packageCsv.replace(",5,1,1,Orientation and practice,", ",5,Verified Buyer,1,Orientation and practice,");

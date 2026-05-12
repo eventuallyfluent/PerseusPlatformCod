@@ -163,17 +163,17 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
     pricingSection: {
       eyebrow: "Pricing",
       badge: config.pricingBadge || "Instant access",
-      headline: config.pricingHeadline || (offers.length > 1 ? "Choose the payment path that fits." : "A single clear offer, then straight into study."),
+      headline: config.pricingHeadline || (offers.length > 1 ? "Choose your enrollment option." : "Begin when you are ready."),
       body:
         config.pricingBody ||
-        "Use the sales page to understand the promise. Use checkout only when you are ready to enter the course.",
+        "Review the course details, then enroll securely when this feels like the right next step.",
       offers,
     },
     finalCta: {
-      label: config.finalCtaLabel || (offers.length > 0 ? "Enroll now - get instant access" : "Join the waitlist"),
+      label: config.finalCtaLabel || (offers.length > 0 ? "Start learning today" : "Join the waitlist"),
       body:
         config.finalCtaBody ||
-        "A clear buying path, immediate course access, and a direct move into the learner portal after enrollment.",
+        "Enrollment gives you access to the course area so you can begin the lessons without unnecessary delay.",
     },
     offers,
   };

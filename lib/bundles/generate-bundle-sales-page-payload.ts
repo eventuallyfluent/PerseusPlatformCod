@@ -160,17 +160,17 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
     pricingSection: {
       eyebrow: "Pricing",
       badge: config.pricingBadge || "Complete bundle access",
-      headline: config.pricingHeadline || "Get the full training bundle in one purchase.",
+      headline: config.pricingHeadline || "Complete bundle access",
       body:
         config.pricingBody ||
-        "Join the bundle when you are ready and begin moving through the included courses at your own pace.",
+        "One enrollment opens the included courses in this bundle.",
       offers,
     },
     finalCta: {
       label: config.finalCtaLabel || (offers.length > 0 ? "Begin the Complete Bundle" : "Bundle Coming Soon"),
       body:
         config.finalCtaBody ||
-        "Enter the full course path and continue through the training in a clear sequence.",
+        "Follow the included courses in a clear sequence at your own pace.",
     },
     offers,
   };

@@ -593,6 +593,8 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
     }
 
     if (section === "pricing") {
+      const singleOffer = payload.pricingSection.offers.length === 1 ? payload.pricingSection.offers[0] : null;
+
       return (
         <section key={section} className="mx-auto max-w-7xl px-6">
           <div className="rounded-[38px] border border-[var(--border)] bg-[var(--surface-panel)] px-8 py-9 text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
@@ -603,7 +605,26 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                 <p className={`mt-3 max-w-xl text-base leading-8 ${panelMutedTextClass}`}>{payload.pricingSection.body}</p>
               </div>
               <div className="grid gap-3">
-                {payload.pricingSection.offers.map((offer) => (
+                {singleOffer ? (
+                  <div className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-5 py-4 text-[var(--text-primary)]">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-semibold">{singleOffer.name}</span>
+                      <span className="text-sm font-semibold">{singleOffer.price}</span>
+                    </div>
+                    {singleOffer.compareAtPrice || singleOffer.savingsLabel ? (
+                      <div className={`mt-2 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.2em] ${panelSubtleTextClass}`}>
+                        <span>{singleOffer.compareAtPrice ?? ""}</span>
+                        <span>{singleOffer.savingsLabel ?? ""}</span>
+                      </div>
+                    ) : null}
+                    <ButtonLink
+                      href={singleOffer.checkoutUrl}
+                      className="mt-4 min-h-12 w-full justify-center whitespace-normal bg-[linear-gradient(135deg,var(--accent),#c16bff)] px-6 text-center shadow-[0_18px_34px_rgba(143,44,255,0.24)]"
+                    >
+                      {primaryCtaLabel}
+                    </ButtonLink>
+                  </div>
+                ) : payload.pricingSection.offers.map((offer) => (
                   <Link
                     key={offer.offerId}
                     href={offer.checkoutUrl}
@@ -623,13 +644,15 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                 ))}
               </div>
             </div>
-            <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--accent-soft),var(--premium-soft))] p-6">
-              <div className="max-w-2xl">
-                <h3 className="text-3xl leading-none tracking-[-0.04em] lg:text-[2.45rem]">{payload.finalCta.label}</h3>
-                <p className={`mt-3 text-base leading-8 ${panelMutedTextClass}`}>{payload.finalCta.body}</p>
+            {!singleOffer ? (
+              <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--accent-soft),var(--premium-soft))] p-6">
+                <div className="max-w-2xl">
+                  <h3 className="text-3xl leading-none tracking-[-0.04em] lg:text-[2.45rem]">{payload.finalCta.label}</h3>
+                  <p className={`mt-3 text-base leading-8 ${panelMutedTextClass}`}>{payload.finalCta.body}</p>
+                </div>
+                <OfferButtons offers={payload.pricingSection.offers} primaryLabel={primaryCtaLabel} />
               </div>
-              <OfferButtons offers={payload.pricingSection.offers} primaryLabel={primaryCtaLabel} />
-            </div>
+            ) : null}
           </div>
         </section>
       );

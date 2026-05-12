@@ -163,17 +163,19 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
     pricingSection: {
       eyebrow: "Pricing",
       badge: config.pricingBadge || "Instant access",
-      headline: config.pricingHeadline || (offers.length > 1 ? "Choose the enrollment option that suits your path." : "Join the course and begin the work today."),
+      headline: config.pricingHeadline || (isFreeCourse ? "Start your study here." : offers.length > 1 ? "Choose the enrollment option that suits your path." : "Ready to begin?"),
       body:
         config.pricingBody ||
-        "Enroll when you are ready and begin with the course materials straight away.",
+        (isFreeCourse
+          ? "This course is available at no cost. Enroll to add it to your course area."
+          : "Choose your course access below. You can start with the lessons as soon as enrollment is complete."),
       offers,
     },
     finalCta: {
       label: config.finalCtaLabel || (offers.length > 0 ? (isFreeCourse ? "Start Free Course" : "Begin the Course") : "Join the Waitlist"),
       body:
         config.finalCtaBody ||
-        "When the course is right for you, join and continue directly into the lessons.",
+        "Your course access is prepared immediately after enrollment.",
     },
     offers,
   };

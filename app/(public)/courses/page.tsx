@@ -519,59 +519,31 @@ export default async function CoursesIndexPage({
       {totalProducts > 0 ? (
         <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {bundles.map((bundle) => (
-            <div key={bundle.id} className="space-y-3">
-              <BundleCatalogCard
-                bundle={{
-                  title: bundle.title,
-                  subtitle: bundle.subtitle,
-                  shortDescription: bundle.shortDescription,
-                  heroImageUrl: bundle.heroImageUrl,
-                  priceLabel: formatPriceLabel(bundle.price.toString(), bundle.currency),
-                  courseCount: bundle.courses.length,
-                  slug: bundle.slug,
-                  publicPath: bundle.publicPath,
-                  legacyUrl: bundle.legacyUrl,
-                }}
-              />
-              <div className="flex flex-wrap gap-2 px-1">
-                {[
-                  ...new Map(
-                    bundle.courses.flatMap((item) => item.course.collectionCourses.map(({ collection }) => [collection.id, collection] as const)),
-                  ).values(),
-                ].map((collection) => (
-                  <Link
-                    key={collection.id}
-                    href={`/courses?collection=${encodeURIComponent(collection.slug)}`}
-                    className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent-lavender)]"
-                  >
-                    {collection.title}
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <BundleCatalogCard
+              key={bundle.id}
+              bundle={{
+                title: bundle.title,
+                subtitle: bundle.subtitle,
+                shortDescription: bundle.shortDescription,
+                heroImageUrl: bundle.heroImageUrl,
+                priceLabel: formatPriceLabel(bundle.price.toString(), bundle.currency),
+                courseCount: bundle.courses.length,
+                slug: bundle.slug,
+                publicPath: bundle.publicPath,
+                legacyUrl: bundle.legacyUrl,
+              }}
+            />
           ))}
           {courses.map((course) => (
-            <div key={course.id} className="space-y-3">
-              <CourseCard
-                variant="catalog"
-                course={{
-                  ...course,
-                  priceLabel: formatPriceLabel(course.price.toString(), course.currency),
-                  instructorName: course.instructor.name,
-                }}
-              />
-              <div className="flex flex-wrap gap-2 px-1">
-                {course.collectionCourses.map(({ collection }) => (
-                  <Link
-                    key={collection.id}
-                    href={`/courses?collection=${encodeURIComponent(collection.slug)}`}
-                    className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent-lavender)]"
-                  >
-                    {collection.title}
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <CourseCard
+              key={course.id}
+              variant="catalog"
+              course={{
+                ...course,
+                priceLabel: formatPriceLabel(course.price.toString(), course.currency),
+                instructorName: course.instructor.name,
+              }}
+            />
           ))}
         </div>
       ) : (

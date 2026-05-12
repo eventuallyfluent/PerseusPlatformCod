@@ -26,7 +26,7 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
   if (isCatalog) {
     return (
       <HardLink href={resolveCoursePublicPath(course)} className="group block h-full">
-        <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-panel)]">
+        <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-panel)]">
           <div className="perseus-course-card-media relative aspect-video overflow-hidden" style={{ background: course.heroImageUrl ? undefined : cardTone }}>
             {course.heroImageUrl ? (
               <>
@@ -80,7 +80,7 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
             </div>
             <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
               <p className="text-xl font-semibold text-[var(--text-primary)]">{course.priceLabel ?? "View"}</p>
-              <span className="inline-flex min-h-10 items-center rounded-full border border-[var(--accent)] bg-[var(--accent-soft)] px-4 py-2 text-sm font-semibold text-[var(--accent)] transition group-hover:bg-[var(--surface-panel-strong)]">
+              <span className="rounded-full border border-[var(--accent)] bg-[var(--accent-soft)] px-4 py-2 text-sm font-semibold text-[var(--accent)] transition group-hover:bg-[var(--surface-panel-strong)]">
                 {course.ctaLabel ?? "View course"}
               </span>
             </div>
@@ -92,7 +92,7 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
 
   return (
     <HardLink href={resolveCoursePublicPath(course)} className="group block">
-      <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[26px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-panel)]">
+      <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-panel)]">
         <div className="perseus-course-card-media relative aspect-video overflow-hidden" style={{ background: course.heroImageUrl ? undefined : cardTone }}>
           {course.heroImageUrl ? (
             <>
@@ -145,7 +145,7 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
               <p className="text-xs uppercase tracking-[0.24em] text-[var(--text-secondary)]">Access path</p>
               <p className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">{course.priceLabel ?? "View offer"}</p>
             </div>
-            <span className="inline-flex min-h-12 items-center rounded-full border border-[var(--accent)] bg-[var(--accent-soft)] px-5 py-3 text-sm font-semibold text-[var(--accent)] transition group-hover:bg-[var(--surface-panel-strong)]">
+            <span className="rounded-full border border-[var(--accent)] bg-[var(--accent-soft)] px-5 py-3 text-sm font-semibold text-[var(--accent)] transition group-hover:bg-[var(--surface-panel-strong)]">
               {course.ctaLabel ?? "Enroll now"}
             </span>
           </div>

@@ -92,7 +92,7 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
 
   return (
     <HardLink href={resolveCoursePublicPath(course)} className="group block">
-      <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-panel)]">
+      <article className="perseus-course-card flex h-full flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-panel)]">
         <div className="perseus-course-card-media relative aspect-video overflow-hidden" style={{ background: course.heroImageUrl ? undefined : cardTone }}>
           {course.heroImageUrl ? (
             <>
@@ -105,16 +105,16 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
               />
               <span className="absolute inset-0 bg-gradient-to-b from-slate-950/10 to-slate-950/35" />
             </>
-          ) : null}
+            ) : null}
         </div>
-        <div className="perseus-course-card-body flex flex-1 flex-col p-7">
+        <div className="perseus-course-card-body flex flex-1 flex-col p-5 sm:p-6">
           <div className="perseus-course-card-badges flex items-center gap-4">
             <Badge variant="portal">{course.statusLabel ?? "Featured"}</Badge>
           </div>
-          <div className="perseus-course-card-copy mt-5 space-y-3">
+          <div className="perseus-course-card-copy mt-4 space-y-2.5">
             {course.instructorName ? <p className="text-sm text-[var(--text-secondary)]">{course.instructorName}</p> : null}
             <h3
-              className="max-w-sm min-h-[7.5rem] text-4xl leading-none tracking-[-0.04em] text-[var(--text-primary)]"
+              className="max-w-sm text-2xl font-semibold leading-tight text-[var(--text-primary)] sm:text-3xl"
               style={{
                 display: "-webkit-box",
                 WebkitLineClamp: 3,
@@ -126,7 +126,7 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
             </h3>
             {course.subtitle ? (
               <p
-                className="max-w-sm min-h-[4rem] text-base leading-8 text-[var(--text-secondary)]"
+                className="max-w-sm text-sm leading-6 text-[var(--text-secondary)]"
                 style={{
                   display: "-webkit-box",
                   WebkitLineClamp: 2,
@@ -136,14 +136,12 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
               >
                 {course.subtitle}
               </p>
-            ) : (
-              <div className="min-h-[4rem]" />
-            )}
+            ) : null}
           </div>
           <div className="perseus-course-card-footer mt-auto flex items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
             <div>
               <p className="text-xs uppercase tracking-[0.24em] text-[var(--text-secondary)]">Access path</p>
-              <p className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">{course.priceLabel ?? "View offer"}</p>
+              <p className="mt-1.5 text-2xl font-semibold text-[var(--text-primary)]">{course.priceLabel ?? "View offer"}</p>
             </div>
             <span className="rounded-full border border-[var(--accent)] bg-[var(--accent-soft)] px-5 py-3 text-sm font-semibold text-[var(--accent)] transition group-hover:bg-[var(--surface-panel-strong)]">
               {course.ctaLabel ?? "Enroll now"}

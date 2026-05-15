@@ -82,6 +82,11 @@ export default async function ImportsPage() {
           </div>
         </div>
         <p className="text-sm text-stone-700">Full rollout notes are in <span className="font-medium text-stone-950">MIGRATION_ROLLOUT.md</span> in the repo.</p>
+        <div>
+          <Link href="/admin/imports/images" className={adminSecondaryButtonClass}>
+            Review imported images
+          </Link>
+        </div>
       </Card>
 
       <div className="grid gap-6 xl:grid-cols-2">
@@ -168,7 +173,7 @@ export default async function ImportsPage() {
       </div>
 
       <AdminDataTable
-        columns={[{ header: "Type" }, { header: "Status" }, { header: "Filename" }, { header: "Dry run" }, { header: "Execution" }, { header: "Created" }, { header: "Actions" }]}
+        columns={[{ header: "Type" }, { header: "Status" }, { header: "Filename" }, { header: "Images" }, { header: "Execution" }, { header: "Created" }, { header: "Actions" }]}
         rows={batches.map((batch) => {
           const stuck = isStuckProcessing(batch);
           const dryRunSummary = batch.dryRunSummary as Record<string, unknown> | null;
@@ -184,7 +189,9 @@ export default async function ImportsPage() {
               </div>,
               <AdminStatusBadge key="status" tone={statusClassName(batch.status, stuck)}>{stuck ? "Resume needed" : batch.status}</AdminStatusBadge>,
               batch.filename,
-              batch.dryRunSummary ? "Ready" : "-",
+              executionSummary
+                ? `${readCount(executionSummary, "imageCopiedCount")} copied / ${readCount(executionSummary, "imageFailedCount")} failed`
+                : "-",
               stuck
                 ? "Stuck at 0 rows"
                 : batch.status === "PROCESSING"

@@ -58,6 +58,10 @@ export type ImportExecutionSummary = {
   testimonialCount?: number;
   offerOptionCount?: number;
   importedTestimonialCount?: number;
+  imageCopiedCount?: number;
+  imageReusedCount?: number;
+  imageSkippedCount?: number;
+  imageFailedCount?: number;
   createdModuleCount?: number;
   updatedModuleCount?: number;
   createdLessonCount?: number;

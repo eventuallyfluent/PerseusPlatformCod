@@ -1,6 +1,8 @@
 import { put } from "@vercel/blob";
+import { ImageAssetStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/db/prisma";
 
 function sanitizeFilename(name: string) {
   const [base = "image", extension = ""] = name.split(/\.(?=[^.]+$)/);
@@ -40,6 +42,29 @@ export async function POST(request: Request) {
       access: "public",
       addRandomSuffix: true,
       token: process.env.BLOB_READ_WRITE_TOKEN,
+    });
+
+    await prisma.imageAsset.upsert({
+      where: { sourceUrl: blob.url },
+      update: {
+        ownedUrl: blob.url,
+        storageKey: blob.pathname,
+        provider: "VERCEL_BLOB",
+        status: ImageAssetStatus.COPIED,
+        contentType: file.type,
+        byteSize: file.size,
+        error: null,
+      },
+      create: {
+        sourceUrl: blob.url,
+        fetchUrl: blob.url,
+        ownedUrl: blob.url,
+        storageKey: blob.pathname,
+        provider: "VERCEL_BLOB",
+        status: ImageAssetStatus.COPIED,
+        contentType: file.type,
+        byteSize: file.size,
+      },
     });
 
     return NextResponse.json({ url: blob.url });

@@ -17,7 +17,9 @@
     "prisma:check:bundle-payment": "node --env-file=.env --import tsx prisma/verify-bundle-payment.ts",
     "prisma:check:bank-transfer": "node --env-file=.env --import tsx prisma/verify-bundle-payment.ts",
     "prisma:check:webhook": "node --env-file=.env --import tsx prisma/verify-bundle-payment.ts",
-    "prisma:check:imports": "node --env-file=.env --import tsx prisma/verify-imports.ts"
+    "prisma:check:imports": "node --env-file=.env --import tsx prisma/verify-imports.ts",
+    "images:backfill": "node --env-file=.env --import tsx scripts/backfill-image-assets.ts",
+    "images:verify": "node --import tsx scripts/verify-image-assets.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

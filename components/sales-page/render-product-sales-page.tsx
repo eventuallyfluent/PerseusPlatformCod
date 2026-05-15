@@ -102,7 +102,7 @@ function parseDescriptionBlocks(value?: string | null): DescriptionBlock[] {
 function splitHighlightItems(items: string[]) {
   return items.flatMap((item) =>
     item
-      .split(/\s+[•*]\s+|\n+/)
+      .split(/\s+[•*]\s+|\n+|;\s+/)
       .map((part) => part.trim().replace(/^[•*-]\s*/, ""))
       .filter(Boolean),
   );
@@ -165,6 +165,10 @@ function getPriceLabel(offer?: SalesPageOfferSummary | null) {
 function getValueLabel(offer?: SalesPageOfferSummary | null) {
   if (!offer?.compareAtPrice) return null;
   return isFreeOffer(offer) ? `${offer.compareAtPrice} value` : offer.compareAtPrice;
+}
+
+function cleanModuleTitle(title: string, index: number) {
+  return title.replace(new RegExp(`^\\s*module\\s+${index + 1}\\s*[:\\-–—]?\\s*`, "i"), "").trim() || title;
 }
 
 function buildFacts(payload: ProductPayload) {
@@ -269,6 +273,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
   const primaryCtaLabel = getPrimaryCtaLabel(payload);
   const priceLabel = getPriceLabel(payload.hero.primaryOffer);
   const valueLabel = getValueLabel(payload.hero.primaryOffer);
+  const hasHeroImage = Boolean(payload.hero.imageUrl);
 
   const renderSection = (section: SalesPageSectionKey) => {
     if (section === "description") {
@@ -281,12 +286,12 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
             title={payload.descriptionSection.title}
             body={payload.descriptionSection.shortDescription}
           />
-          <div className={`mx-auto max-w-4xl space-y-5 p-4 sm:p-6 ${sectionPanelClass}`}>
+          <div className="mx-auto max-w-4xl space-y-5">
             {payload.media.salesVideoUrl ? (
               <StreamableEmbed url={payload.media.salesVideoUrl} title={`${payload.hero.title} sales video`} />
             ) : null}
             {descriptionBlocks.length > 0 ? (
-              <div className="rounded-[22px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] p-5 sm:p-6 lg:p-8">
+              <div className={`p-5 sm:p-6 lg:p-8 ${sectionPanelStrongClass}`}>
                 <div className="mx-auto max-w-3xl">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--accent-lavender)]">
                     {payload.productType === "bundle" ? "About the bundle" : "About the course"}
@@ -430,7 +435,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
                 <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-4 border-b border-[var(--border)] px-6 py-4 marker:content-none">
                   <div className="space-y-3">
                     <Badge variant="portal">Module {index + 1}</Badge>
-                    <h3 className="text-3xl leading-none tracking-[-0.03em]">{module.moduleTitle}</h3>
+                    <h3 className="text-3xl leading-none tracking-[-0.03em]">{cleanModuleTitle(module.moduleTitle, index)}</h3>
                   </div>
                   <div className="flex items-center gap-4">
                     <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>
@@ -666,7 +671,7 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
       <section className="px-4 sm:px-6">
         <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[30px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] p-4 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] sm:p-5 lg:p-6">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,rgba(168,102,255,0.18),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(212,168,70,0.12),transparent_22%)]" />
-          <div className="relative grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.82fr)] lg:items-center">
+          <div className={`relative grid gap-6 lg:items-center ${hasHeroImage ? "lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.82fr)]" : ""}`}>
             <div className="px-2 py-5 sm:px-4 lg:px-5 lg:py-8">
               <div className="perseus-sales-hero-badges flex flex-wrap items-center gap-3">
                 <Badge variant={isFreeOffer(payload.hero.primaryOffer) ? "success" : "accent"}>
@@ -727,13 +732,15 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
               ) : null}
             </div>
 
-            <SalesSmartImage
-              src={payload.hero.imageUrl}
-              alt={`${payload.hero.title} course image`}
-              priority
-              variant="hero"
-              className="mx-auto aspect-[4/3] w-full max-w-[560px] rounded-[24px] sm:aspect-[1/1] lg:aspect-[0.92/1]"
-            />
+            {hasHeroImage ? (
+              <SalesSmartImage
+                src={payload.hero.imageUrl}
+                alt={`${payload.hero.title} course image`}
+                priority
+                variant="hero"
+                className="mx-auto aspect-[4/3] w-full max-w-[560px] rounded-[24px] sm:aspect-[1/1] lg:aspect-[0.92/1]"
+              />
+            ) : null}
           </div>
         </div>
       </section>

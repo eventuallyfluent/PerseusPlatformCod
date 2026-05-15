@@ -141,6 +141,11 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
           <ChecklistItem label="Modules" value={String(readNumber(executionSummary, "moduleCount") || readNumber(dryRunSummary, "moduleCount") || 0)} good={(readNumber(executionSummary, "moduleCount") || readNumber(dryRunSummary, "moduleCount")) > 0} />
           <ChecklistItem label="Lessons" value={String(readNumber(executionSummary, "lessonCount") || readNumber(dryRunSummary, "lessonCount") || totalCount)} good={(readNumber(executionSummary, "lessonCount") || readNumber(dryRunSummary, "lessonCount") || totalCount) > 0} />
           <ChecklistItem label="Hero image" value={heroDetected ? "Detected" : "Missing"} good={heroDetected} />
+          <ChecklistItem
+            label="Image ownership"
+            value={`${readNumber(executionSummary, "imageCopiedCount")} copied / ${readNumber(executionSummary, "imageReusedCount")} reused / ${readNumber(executionSummary, "imageFailedCount")} failed`}
+            good={readNumber(executionSummary, "imageFailedCount") > 0 ? false : readNumber(executionSummary, "imageCopiedCount") + readNumber(executionSummary, "imageReusedCount") > 0 ? true : undefined}
+          />
           <ChecklistItem label="Reviews" value={`${importedTestimonials} imported / ${expectedTestimonials} detected`} good={expectedTestimonials === 0 ? undefined : importedTestimonials >= expectedTestimonials} />
           <ChecklistItem label="Execution progress" value={totalCount > 0 ? `${processedCount} / ${totalCount}` : "Not started"} good={batch.status === "COMPLETED"} />
           <ChecklistItem label="Status" value={isStuck ? "Resume needed" : batch.status.replaceAll("_", " ")} good={batch.status === "COMPLETED" ? true : batch.status === "FAILED" ? false : undefined} />

@@ -76,6 +76,13 @@ enum ImportStatus {
   FAILED
 }
 
+enum ImageAssetStatus {
+  PENDING
+  COPIED
+  FAILED
+  SKIPPED
+}
+
 enum HomepageSectionType {
   HERO
   COLLECTIONS
@@ -279,6 +286,26 @@ model CollectionCourse {
 
   @@unique([collectionId, courseId])
   @@unique([collectionId, position])
+}
+
+model ImageAsset {
+  id          String           @id @default(cuid())
+  sourceUrl   String           @unique
+  fetchUrl    String?
+  ownedUrl    String?
+  storageKey  String?
+  provider    String           @default("VERCEL_BLOB")
+  status      ImageAssetStatus @default(PENDING)
+  contentType String?
+  byteSize    Int?
+  width       Int?
+  height      Int?
+  error       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([status])
+  @@index([provider])
 }
 
 model Module {

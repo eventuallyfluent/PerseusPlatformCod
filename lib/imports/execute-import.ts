@@ -20,6 +20,8 @@ import { ensureEnrollment } from "@/lib/enrollments/ensure-enrollment";
 import { courseInclude } from "@/lib/courses/course-query";
 import { persistGeneratedPage } from "@/lib/sales-pages/persist-generated-page";
 import { parseImportedCourseOfferOptions, type ImportedCourseOfferOption } from "@/lib/imports/course-offer-options";
+import { normalizeImportedImageUrl } from "@/lib/image-assets/url";
+import { ownImageUrl, summarizeOwnedImageResults, type OwnedImageContext, type OwnedImageResult } from "@/lib/image-assets/ownership";
 
 type InstructorCsvRow = z.infer<typeof instructorCsvRowSchema>;
 type CourseCsvRow = z.infer<typeof courseCsvRowSchema>;
@@ -57,8 +59,51 @@ const IMPORT_CHUNK_SIZE = 20;
 function splitUrlList(value: string | null | undefined) {
   return String(value ?? "")
     .split("|")
-    .map((item) => item.trim())
+    .map((item) => normalizeImportedImageUrl(item))
     .filter(Boolean);
+}
+
+function applyImageOwnershipSummary(summary: ImportExecutionSummary, results: OwnedImageResult[]) {
+  const counts = summarizeOwnedImageResults(results);
+  summary.imageCopiedCount = (summary.imageCopiedCount ?? 0) + counts.copied;
+  summary.imageReusedCount = (summary.imageReusedCount ?? 0) + counts.reused;
+  summary.imageSkippedCount = (summary.imageSkippedCount ?? 0) + counts.skipped;
+  summary.imageFailedCount = (summary.imageFailedCount ?? 0) + counts.failed;
+}
+
+async function ownImportImageUrl(
+  value: string | null | undefined,
+  context: OwnedImageContext,
+  summary?: ImportExecutionSummary,
+) {
+  const normalized = normalizeImportedImageUrl(value);
+  if (!normalized) {
+    return normalized;
+  }
+
+  const result = await ownImageUrl(normalized, context);
+  if (summary) {
+    applyImageOwnershipSummary(summary, [result]);
+  }
+  return result.outputUrl || normalized;
+}
+
+async function ownImportImageUrls(
+  values: string[],
+  context: OwnedImageContext,
+  summary?: ImportExecutionSummary,
+) {
+  const results: OwnedImageResult[] = [];
+
+  for (const [index, value] of values.entries()) {
+    results.push(await ownImageUrl(normalizeImportedImageUrl(value), { ...context, role: `${context.role ?? "image"}-${index + 1}` }));
+  }
+
+  if (summary) {
+    applyImageOwnershipSummary(summary, results);
+  }
+
+  return results.map((result) => result.outputUrl).filter(Boolean);
 }
 
 function humanizeSlug(slug: string) {
@@ -159,7 +204,7 @@ async function ensureInstructorForImport(slug: string, name?: string | null) {
   return instructor;
 }
 
-async function executeInstructorRow(row: InstructorCsvRow) {
+async function executeInstructorRow(row: InstructorCsvRow, summary: ImportExecutionSummary) {
   const existing = await prisma.instructor.findUnique({
     where: { slug: row.slug },
     select: { id: true },
@@ -169,7 +214,7 @@ async function executeInstructorRow(row: InstructorCsvRow) {
     {
       slug: row.slug,
       name: row.name,
-      imageUrl: row.image_url,
+      imageUrl: await ownImportImageUrl(row.image_url, { folder: "instructors", slug: row.slug, role: "profile" }, summary),
       shortBio: row.short_bio,
       longBio: row.long_bio,
       websiteUrl: row.website_url,
@@ -186,7 +231,7 @@ async function executeInstructorRow(row: InstructorCsvRow) {
   return existing ? "updated" : "created";
 }
 
-async function executeCourseRow(row: CourseCsvRow) {
+async function executeCourseRow(row: CourseCsvRow, summary: ImportExecutionSummary) {
   const existing =
     (row.legacy_course_id
       ? await prisma.course.findFirst({
@@ -201,7 +246,8 @@ async function executeCourseRow(row: CourseCsvRow) {
         })) ?? null;
 
   const instructor = await ensureInstructorForImport(row.instructor_slug, row.instructor_name);
-  const galleryImageUrls = splitUrlList(row.sales_image_urls);
+  const galleryImageUrls = await ownImportImageUrls(splitUrlList(row.sales_image_urls), { folder: "sales-gallery", slug: row.slug, role: "gallery" }, summary);
+  const heroImageUrl = await ownImportImageUrl(row.hero_image_url, { folder: "courses", slug: row.slug, role: "hero" }, summary);
 
   const payload = {
     slug: row.slug,
@@ -212,7 +258,7 @@ async function executeCourseRow(row: CourseCsvRow) {
     learningOutcomes: splitPipeList(row.learning_outcomes),
     whoItsFor: splitPipeList(row.who_its_for),
     includes: splitPipeList(row.includes),
-    heroImageUrl: row.hero_image_url,
+    heroImageUrl,
     salesVideoUrl: row.sales_video_url,
     ...(galleryImageUrls.length > 0 ? { salesPageConfig: { galleryImageUrls, galleryHidden: false } } : {}),
     instructorId: instructor.id,
@@ -565,7 +611,17 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
 
   const firstRow = rows[0];
   const instructor = await ensureInstructorForImport(firstRow.instructor_slug, firstRow.instructor_name);
-  const galleryImageUrls = splitUrlList(pickFirstNonEmptyPackageValue(rows, (row) => row.sales_image_urls) ?? firstRow.sales_image_urls);
+  const imageSummaryTarget = summary.courseMetadataApplied ? undefined : summary;
+  const galleryImageUrls = await ownImportImageUrls(
+    splitUrlList(pickFirstNonEmptyPackageValue(rows, (row) => row.sales_image_urls) ?? firstRow.sales_image_urls),
+    { folder: "sales-gallery", slug: firstRow.slug, role: "gallery" },
+    imageSummaryTarget,
+  );
+  const heroImageUrl = await ownImportImageUrl(
+    pickFirstNonEmptyPackageValue(rows, (row) => row.hero_image_url) ?? firstRow.hero_image_url,
+    { folder: "courses", slug: firstRow.slug, role: "hero" },
+    imageSummaryTarget,
+  );
 
   const payload = {
     slug: firstRow.slug,
@@ -576,7 +632,7 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
     learningOutcomes: splitPipeList(firstRow.learning_outcomes),
     whoItsFor: splitPipeList(firstRow.who_its_for),
     includes: splitPipeList(firstRow.includes),
-    heroImageUrl: pickFirstNonEmptyPackageValue(rows, (row) => row.hero_image_url) ?? firstRow.hero_image_url,
+    heroImageUrl,
     salesVideoUrl: pickFirstNonEmptyPackageValue(rows, (row) => row.sales_video_url) ?? firstRow.sales_video_url,
     ...(galleryImageUrls.length > 0 ? { salesPageConfig: { galleryImageUrls, galleryHidden: false } } : {}),
     instructorId: instructor.id,
@@ -977,9 +1033,9 @@ async function processLegacyImportBatch(
     try {
       let result: "created" | "updated" | "skipped";
       if (batchType === ImportType.INSTRUCTORS) {
-        result = await executeInstructorRow(entry.row as InstructorCsvRow);
+        result = await executeInstructorRow(entry.row as InstructorCsvRow, summary);
       } else if (batchType === ImportType.COURSES) {
-        result = await executeCourseRow(entry.row as CourseCsvRow);
+        result = await executeCourseRow(entry.row as CourseCsvRow, summary);
       } else if (batchType === ImportType.LESSONS) {
         result = await executeLessonRow(entry.row as LessonCsvRow);
       } else {

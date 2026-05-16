@@ -20,6 +20,7 @@ import { ensureEnrollment } from "@/lib/enrollments/ensure-enrollment";
 import { courseInclude } from "@/lib/courses/course-query";
 import { persistGeneratedPage } from "@/lib/sales-pages/persist-generated-page";
 import { parseImportedCourseOfferOptions, type ImportedCourseOfferOption } from "@/lib/imports/course-offer-options";
+import { fetchLegacySalesPageMedia, isPlaceholderSalesVideoUrl, type LegacySalesPageMedia } from "@/lib/imports/legacy-sales-page-media";
 import { normalizeImportedImageUrl } from "@/lib/image-assets/url";
 import { ownImageUrl, summarizeOwnedImageResults, type OwnedImageContext, type OwnedImageResult } from "@/lib/image-assets/ownership";
 
@@ -94,9 +95,10 @@ async function ownImportImageUrls(
   summary?: ImportExecutionSummary,
 ) {
   const results: OwnedImageResult[] = [];
+  const normalizedValues = [...new Set(values.map((value) => normalizeImportedImageUrl(value)).filter(Boolean))];
 
-  for (const [index, value] of values.entries()) {
-    results.push(await ownImageUrl(normalizeImportedImageUrl(value), { ...context, role: `${context.role ?? "image"}-${index + 1}` }));
+  for (const [index, value] of normalizedValues.entries()) {
+    results.push(await ownImageUrl(value, { ...context, role: `${context.role ?? "image"}-${index + 1}` }));
   }
 
   if (summary) {
@@ -612,13 +614,23 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   const firstRow = rows[0];
   const instructor = await ensureInstructorForImport(firstRow.instructor_slug, firstRow.instructor_name);
   const imageSummaryTarget = summary.courseMetadataApplied ? undefined : summary;
+  const importedHeroImageUrl = pickFirstNonEmptyPackageValue(rows, (row) => row.hero_image_url) ?? firstRow.hero_image_url;
+  const importedSalesVideoUrl = pickFirstNonEmptyPackageValue(rows, (row) => row.sales_video_url) ?? firstRow.sales_video_url;
+  const importedGalleryImageUrls = splitUrlList(pickFirstNonEmptyPackageValue(rows, (row) => row.sales_image_urls) ?? firstRow.sales_image_urls);
+  const needsLegacyMedia = Boolean(firstRow.legacy_url) && (!importedHeroImageUrl || importedGalleryImageUrls.length === 0 || isPlaceholderSalesVideoUrl(importedSalesVideoUrl));
+  const legacyMedia: LegacySalesPageMedia = needsLegacyMedia
+    ? await fetchLegacySalesPageMedia(firstRow.legacy_url)
+    : { heroImageUrl: undefined, salesVideoUrl: undefined, galleryImageUrls: [] };
+  const resolvedHeroImageUrl = importedHeroImageUrl || legacyMedia.heroImageUrl;
+  const resolvedGalleryImageUrls = importedGalleryImageUrls.length > 0 ? importedGalleryImageUrls : legacyMedia.galleryImageUrls;
+  const resolvedSalesVideoUrl = isPlaceholderSalesVideoUrl(importedSalesVideoUrl) ? legacyMedia.salesVideoUrl : importedSalesVideoUrl;
   const galleryImageUrls = await ownImportImageUrls(
-    splitUrlList(pickFirstNonEmptyPackageValue(rows, (row) => row.sales_image_urls) ?? firstRow.sales_image_urls),
+    resolvedGalleryImageUrls,
     { folder: "sales-gallery", slug: firstRow.slug, role: "gallery" },
     imageSummaryTarget,
   );
   const heroImageUrl = await ownImportImageUrl(
-    pickFirstNonEmptyPackageValue(rows, (row) => row.hero_image_url) ?? firstRow.hero_image_url,
+    resolvedHeroImageUrl,
     { folder: "courses", slug: firstRow.slug, role: "hero" },
     imageSummaryTarget,
   );
@@ -633,7 +645,7 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
     whoItsFor: splitPipeList(firstRow.who_its_for),
     includes: splitPipeList(firstRow.includes),
     heroImageUrl,
-    salesVideoUrl: pickFirstNonEmptyPackageValue(rows, (row) => row.sales_video_url) ?? firstRow.sales_video_url,
+    salesVideoUrl: resolvedSalesVideoUrl,
     ...(galleryImageUrls.length > 0 ? { salesPageConfig: { galleryImageUrls, galleryHidden: false } } : {}),
     instructorId: instructor.id,
     seoTitle: firstRow.seo_title,

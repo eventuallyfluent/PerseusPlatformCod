@@ -40,6 +40,28 @@ async function main() {
     throw new Error("Course package dry run did not tolerate Payhip teaser lesson types.");
   }
 
+  const originalFetch = globalThis.fetch;
+  const legacyMediaCsv = packageCsv
+    .replaceAll("ritual-discipline-foundations", "legacy-media-import-check")
+    .replaceAll("/course/legacy-media-import-check", "https://courses.perseusarcaneacademy.com/b/legacy-media-import-check")
+    .replaceAll("https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=1200&q=80", "")
+    .replaceAll("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "https://www.youtube.com/");
+
+  globalThis.fetch = (async () =>
+    new Response(
+      '<html><body><a href="https://www.youtube.com/watch?v=C8IkPvk7sg4">Watch</a><img src="https://payhip.com/cdn-cgi/image/format=auto,width=600/https://pe56d.s3.amazonaws.com/o_legacy.jpg"><img src="https://pe56d.s3.amazonaws.com/o_gallery.jpg"></body></html>',
+      { status: 200 },
+    )) as typeof fetch;
+
+  try {
+    const legacyMediaDryRun = await dryRunImport("COURSE_PACKAGE", legacyMediaCsv);
+    if (legacyMediaDryRun.invalidRows.length > 0 || !legacyMediaDryRun.summary.heroImageUrl?.includes("payhip.com/cdn-cgi/image/")) {
+      throw new Error("Course package dry run did not recover missing media from the legacy sales page.");
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
   const payhipVerifiedBuyerPositionCsv = packageCsv.replace(",5,1,1,Orientation and practice,", ",5,Verified Buyer,1,Orientation and practice,");
   const payhipVerifiedBuyerPositionDryRun = await dryRunImport("COURSE_PACKAGE", payhipVerifiedBuyerPositionCsv);
   if (payhipVerifiedBuyerPositionDryRun.invalidRows.length > 0 || payhipVerifiedBuyerPositionDryRun.validRows[0]?.row.testimonial_position !== undefined) {

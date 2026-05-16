@@ -12,6 +12,7 @@ import { normalizePublicPathInput } from "@/lib/urls/normalize-public-path";
 import { coursePackageCsvRowSchema, courseStudentCsvRowSchema } from "@/lib/zod/schemas";
 import { validateRows } from "@/lib/imports/shared";
 import { parseImportedCourseOfferOptions } from "@/lib/imports/course-offer-options";
+import { fetchLegacySalesPageMedia, isPlaceholderSalesVideoUrl, type LegacySalesPageMedia } from "@/lib/imports/legacy-sales-page-media";
 
 export type ImportContext = {
   targetCourseId?: string;
@@ -295,8 +296,21 @@ function isPlaceholderTestimonialQuote(value: unknown) {
   return /^there are no reviews yet\.?$/i.test(String(value ?? "").trim());
 }
 
-function getPackageHeroImageUrl(rows: PackageRow[]) {
-  return rows.map((row) => String(row.hero_image_url ?? "").trim()).find(Boolean);
+async function getPackageMedia(rows: PackageRow[]) {
+  const firstRow = rows[0];
+  const heroImageUrl = rows.map((row) => String(row.hero_image_url ?? "").trim()).find(Boolean);
+  const salesVideoUrl = rows.map((row) => String(row.sales_video_url ?? "").trim()).find(Boolean);
+  const hasGalleryImageUrls = rows.some((row) => String(row.sales_image_urls ?? "").trim());
+  const shouldFetchLegacyMedia = Boolean(firstRow?.legacy_url) && (!heroImageUrl || !hasGalleryImageUrls || isPlaceholderSalesVideoUrl(salesVideoUrl));
+  const legacyMedia: LegacySalesPageMedia = shouldFetchLegacyMedia
+    ? await fetchLegacySalesPageMedia(String(firstRow?.legacy_url ?? ""))
+    : { heroImageUrl: undefined, salesVideoUrl: undefined, galleryImageUrls: [] };
+
+  return {
+    heroImageUrl: heroImageUrl || legacyMedia.heroImageUrl,
+    salesVideoUrl: isPlaceholderSalesVideoUrl(salesVideoUrl) ? legacyMedia.salesVideoUrl : salesVideoUrl,
+    galleryImageUrls: hasGalleryImageUrls ? [] : legacyMedia.galleryImageUrls,
+  };
 }
 
 function hasPackageLessonFields(row: PackageRow) {
@@ -445,12 +459,12 @@ async function enrichCourseStudentsValidation(
   return validation;
 }
 
-function buildSummary(
+async function buildSummary(
   type: ImportType,
   totalRows: number,
   validation: ImportValidationResult<Record<string, unknown>>,
   context?: ImportContext,
-): ImportDryRunSummary {
+): Promise<ImportDryRunSummary> {
   const summary: ImportDryRunSummary = {
     type,
     totalRows,
@@ -462,6 +476,7 @@ function buildSummary(
   if (type === ImportType.COURSE_PACKAGE && validation.validRows[0]) {
     const firstRow = validation.validRows[0].row as PackageRow;
     const rows = validation.validRows.map((entry) => entry.row as PackageRow);
+    const media = await getPackageMedia(rows);
     summary.targetCourseSlug = String(firstRow.slug);
     summary.targetCourseTitle = String(firstRow.title);
     summary.shortDescription = String(firstRow.short_description ?? "");
@@ -469,7 +484,7 @@ function buildSummary(
     const lessonRows = rows.filter(hasPackageLessonFields);
     summary.moduleCount = new Set(lessonRows.map((row) => String(row.module_position))).size;
     summary.lessonCount = lessonRows.length;
-    summary.heroImageUrl = getPackageHeroImageUrl(rows);
+    summary.heroImageUrl = media.heroImageUrl;
     summary.hasHeroImage = Boolean(summary.heroImageUrl);
     summary.testimonialCount = new Set(
       validation.validRows
@@ -535,7 +550,7 @@ export async function dryRunImport(type: ImportType, csvContent: string, context
   }
 
   return {
-    summary: buildSummary(type, rows.length, validation, context),
+    summary: await buildSummary(type, rows.length, validation, context),
     ...validation,
   };
 }

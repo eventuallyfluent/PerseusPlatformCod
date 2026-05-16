@@ -657,6 +657,8 @@ model WebhookEvent {
   processedAt     DateTime?
   createdAt       DateTime @default(now())
   gateway         Gateway  @relation(fields: [gatewayId], references: [id], onDelete: Cascade)
+
+  @@unique([gatewayId, externalEventId])
 }
 
 model Redirect {

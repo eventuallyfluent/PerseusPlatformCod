@@ -59,7 +59,7 @@ export default async function GatewayDetailPage({
       : null;
 
   return (
-    <AdminShell title={gateway.displayName} description="Configure how this payment method behaves in checkout, what it requires operationally, and what still needs manual handling.">
+    <AdminShell title={gateway.displayName} description="Configure checkout, automated confirmation, tax behavior, and operational readiness for this payment method.">
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <Card className="space-y-4">
           {connectionMessage ? (
@@ -165,13 +165,13 @@ export default async function GatewayDetailPage({
                   <span className="text-xs text-stone-500">Available placeholders include {`{{orderId}}`}, {`{{offerId}}`}, {`{{amount}}`}, {`{{currency}}`}, {`{{successUrl}}`}, {`{{cancelUrl}}`} and encoded variants ending in `Encoded`.</span>
                 </label>
                 <label className="grid gap-2 text-sm text-stone-700">
-                  <span className="font-medium text-stone-950">Manual instructions / operator notes</span>
+                  <span className="font-medium text-stone-950">Provider setup notes</span>
                   <textarea
                     name="instructionsMarkdown"
                     rows={5}
                     defaultValue={gateway.instructionsMarkdown ?? ""}
                     className="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-950"
-                    placeholder="Bank details, transfer instructions, or generic gateway setup notes."
+                    placeholder="Provider setup notes, callback URLs, or bank transfer instructions."
                   />
                 </label>
                 <label className="grid gap-2 text-sm text-stone-700">
@@ -181,9 +181,9 @@ export default async function GatewayDetailPage({
                     rows={6}
                     defaultValue={genericCredentialLines}
                     className="rounded-2xl border border-stone-200 bg-white px-4 py-3 font-mono text-sm text-stone-950"
-                    placeholder={"merchant_id=...\napi_key=...\nterminal_id=..."}
+                    placeholder={"merchant_id=...\napi_key=...\nwebhook_signature_header=x-provider-signature\nwebhook_secret=...\nwebhook_signature_mode=hmac_sha256\nwebhook_event_type_path=type\nwebhook_event_id_path=id\nwebhook_order_id_path=data.metadata.orderId\nwebhook_payment_id_path=data.payment.id\nwebhook_success_events=payment.succeeded,checkout.completed"}
                   />
-                  <span className="text-xs text-stone-500">Use one `key=value` pair per line. This is the operator fallback for API-connected gateways that do not have a dedicated native adapter yet.</span>
+                  <span className="text-xs text-stone-500">Use one `key=value` pair per line. Hosted/API gateways need signed webhook fields so payment confirmation stays automatic.</span>
                 </label>
               </>
             ) : null}
@@ -276,7 +276,7 @@ export default async function GatewayDetailPage({
         <Card className="space-y-4">
           <div className="space-y-1">
             <h2 className="text-lg font-semibold text-stone-950">Capability truth</h2>
-            <p className="text-sm text-stone-600">This is the checkout truth for this gateway: what is automated, what still requires setup, and where manual handling is expected.</p>
+            <p className="text-sm text-stone-600">This is the checkout truth for this gateway: what is automated, what still requires setup, and whether the payment path is safe for online selling.</p>
           </div>
           <p className={`rounded-2xl px-4 py-3 text-sm ${policy.tone === "success" ? "bg-emerald-50 text-emerald-700" : policy.tone === "warning" ? "bg-amber-50 text-amber-800" : "bg-rose-50 text-rose-700"}`}>
             <span className="font-medium">{policy.heading}.</span> {policy.detail}
@@ -328,12 +328,12 @@ export default async function GatewayDetailPage({
             </div>
           ) : null}
           <p className="rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-600">
-            {gateway.webhookInstructions ?? connector?.getWebhookInstructions() ?? "Manual and generic gateways can rely on admin confirmation until webhook automation is wired."}
+            {gateway.webhookInstructions ?? connector?.getWebhookInstructions() ?? "Hosted/API gateways must send signed payment webhooks to /api/webhooks/{provider}. Bank transfer is the only normal manual-confirmation path."}
           </p>
           <div className="rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-600">
             <p className="font-medium text-stone-950">Operator note</p>
             <p className="mt-1">
-              Native connectors are the strongest automation path. Generic API gateways may still depend on external documentation, provider-side setup, and manual verification. Bank transfer always depends on manual payment confirmation.
+              Native connectors and configured hosted/API gateways must confirm payment automatically. Bank transfer is the offline fallback and always depends on manual payment confirmation.
             </p>
           </div>
         </Card>

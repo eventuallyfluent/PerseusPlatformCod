@@ -8,6 +8,9 @@ type EventContext = {
   canonicalEvent?: CanonicalPaymentEvent;
   gatewayId: string;
   externalEventId?: string;
+  orderId?: string;
+  externalPaymentId?: string;
+  externalSubscriptionId?: string;
   payload: unknown;
 };
 
@@ -24,11 +27,13 @@ export async function handleCanonicalEvent(context: EventContext) {
     "metadata" in context.payload.data.object
       ? (context.payload.data.object.metadata as Record<string, string | undefined> | undefined)
       : undefined;
-  const orderId = metadata?.orderId ?? metadata?.order_id;
+  const orderId = context.orderId ?? metadata?.orderId ?? metadata?.order_id;
+  const externalPaymentId = context.externalPaymentId ?? context.externalEventId;
+  const externalSubscriptionId = context.externalSubscriptionId ?? context.externalEventId;
 
   if (!orderId && (context.canonicalEvent === "subscription.canceled" || context.canonicalEvent === "subscription.expired")) {
-    const subscription = context.externalEventId
-      ? await prisma.subscription.findFirst({ where: { externalSubscriptionId: context.externalEventId } })
+    const subscription = externalSubscriptionId
+      ? await prisma.subscription.findFirst({ where: { externalSubscriptionId: externalSubscriptionId } })
       : null;
     await revokeSubscriptionAccess({ subscriptionId: subscription?.id ?? null });
     return;
@@ -63,11 +68,13 @@ export async function handleCanonicalEvent(context: EventContext) {
     return;
   }
 
+  const paymentLookup = [externalPaymentId, order.externalOrderId].filter((value): value is string => Boolean(value));
+
   if (context.canonicalEvent === "payment.authorized") {
     await prisma.payment.updateMany({
       where: {
         orderId: order.id,
-        externalPaymentId: context.externalEventId ?? order.externalOrderId ?? undefined,
+        externalPaymentId: externalPaymentId ?? order.externalOrderId ?? undefined,
       },
       data: {
         status: PaymentStatus.AUTHORIZED,
@@ -85,7 +92,7 @@ export async function handleCanonicalEvent(context: EventContext) {
     await prisma.payment.updateMany({
       where: {
         orderId: order.id,
-        externalPaymentId: context.externalEventId ?? order.externalOrderId ?? undefined,
+        externalPaymentId: externalPaymentId ?? order.externalOrderId ?? undefined,
       },
       data: {
         status: PaymentStatus.UNDER_REVIEW,
@@ -103,12 +110,21 @@ export async function handleCanonicalEvent(context: EventContext) {
     const existingPayment = await prisma.payment.findFirst({
       where: {
         orderId: order.id,
-        externalPaymentId: context.externalEventId,
-        status: PaymentStatus.SUCCEEDED,
+        ...(paymentLookup.length > 0 ? { externalPaymentId: { in: paymentLookup } } : {}),
       },
+      orderBy: { createdAt: "desc" },
     });
 
-    if (!existingPayment) {
+    if (existingPayment) {
+      await prisma.payment.update({
+        where: { id: existingPayment.id },
+        data: {
+          status: PaymentStatus.SUCCEEDED,
+          externalPaymentId: externalPaymentId ?? existingPayment.externalPaymentId,
+          rawEvent: JSON.parse(JSON.stringify(context.payload)),
+        },
+      });
+    } else {
       await prisma.payment.create({
         data: {
           orderId: order.id,
@@ -116,22 +132,20 @@ export async function handleCanonicalEvent(context: EventContext) {
           status: PaymentStatus.SUCCEEDED,
           amount: order.totalAmount,
           currency: order.currency,
-          externalPaymentId: context.externalEventId,
+          externalPaymentId,
           rawEvent: JSON.parse(JSON.stringify(context.payload)),
         },
       });
     }
 
-    if (!existingPayment) {
-      await fulfillPaidOrder(order.id);
-    }
+    await fulfillPaidOrder(order.id);
   }
 
   if (context.canonicalEvent === "payment.failed") {
     await prisma.payment.updateMany({
       where: {
         orderId: order.id,
-        externalPaymentId: context.externalEventId ?? order.externalOrderId ?? undefined,
+        externalPaymentId: externalPaymentId ?? order.externalOrderId ?? undefined,
       },
       data: {
         status: PaymentStatus.FAILED,
@@ -150,14 +164,14 @@ export async function handleCanonicalEvent(context: EventContext) {
       where: { orderId: order.id },
       update: {
         status: SubscriptionStatus.ACTIVE,
-        externalSubscriptionId: context.externalEventId,
+        externalSubscriptionId,
         endedAt: null,
       },
       create: {
         orderId: order.id,
         gatewayId: context.gatewayId,
         status: SubscriptionStatus.ACTIVE,
-        externalSubscriptionId: context.externalEventId,
+        externalSubscriptionId,
       },
     });
     await linkSubscriptionGrants(order.id, subscription.id);

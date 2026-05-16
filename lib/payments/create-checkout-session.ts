@@ -196,7 +196,7 @@ export async function createCheckoutSession(input: {
             gatewayId: gateway.id,
             amount: pricing.totalAmount,
             currency: order.currency,
-            status: gatewayDefinition.capabilities.mayRequireManualReview ? PaymentStatus.UNDER_REVIEW : PaymentStatus.PENDING,
+            status: PaymentStatus.PENDING,
             externalPaymentId: externalSessionId,
             rawEvent: {
               mode: "generic_gateway_redirect",
@@ -206,13 +206,6 @@ export async function createCheckoutSession(input: {
         },
       },
     });
-
-    if (gatewayDefinition.capabilities.mayRequireManualReview) {
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { status: OrderStatus.UNDER_REVIEW },
-      });
-    }
 
     return {
       checkoutUrl,

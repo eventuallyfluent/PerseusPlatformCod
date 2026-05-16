@@ -52,13 +52,13 @@ export default async function GatewaysPage({
     : null;
 
   return (
-    <AdminShell title="Gateways" description="Set up native providers, generic API gateways, and bank transfer in one payment admin surface.">
+    <AdminShell title="Gateways" description="Set up automated hosted/API gateways and keep bank transfer as the offline fallback.">
       <div className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
         <Card className="space-y-4">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">Create gateway</p>
-            <h2 className="text-lg font-semibold text-stone-950">Add a generic API or bank transfer profile</h2>
-            <p className="text-sm text-stone-600">Create a payment profile for a native provider, a custom API-connected gateway, or bank transfer. Some profiles support full automation and some rely on manual operator steps.</p>
+            <h2 className="text-lg font-semibold text-stone-950">Add a hosted/API gateway or bank transfer profile</h2>
+            <p className="text-sm text-stone-600">Online gateways must confirm payment automatically through signed webhooks. Bank transfer is the offline exception.</p>
           </div>
           {connectionMessage ? (
             <p

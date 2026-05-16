@@ -1,4 +1,5 @@
 import { OrderStatus, PaymentStatus, PrismaClient } from "@prisma/client";
+import { createHmac } from "node:crypto";
 import { createOrder } from "../lib/orders/create-order";
 import { handleCanonicalEvent } from "../lib/payments/events/handle-canonical-event";
 import { createCheckoutSession } from "../lib/payments/create-checkout-session";
@@ -72,7 +73,10 @@ async function verifyBundlePayment() {
   }
 
   const offer = await prisma.offer.findFirst({
-    where: { name: "Bundle Access", bundleId: { not: null } },
+    where: {
+      bundleId: { not: null },
+      isPublished: true,
+    },
     include: {
       bundle: {
         include: {
@@ -586,10 +590,220 @@ async function verifyNativeWebhook() {
   };
 }
 
+async function verifyGenericHostedWebhook() {
+  const provider = "generic-hosted-check";
+  const webhookSecret = "generic_hosted_secret";
+  const signatureHeader = "x-generic-signature";
+  const gateway = await prisma.gateway.upsert({
+    where: { provider },
+    update: {
+      displayName: "Generic Hosted Check",
+      kind: "generic_api",
+      isNativeAdapter: false,
+      checkoutModel: "hosted_redirect",
+      taxModel: "external_tax_service",
+      settlementBehavior: "asynchronous",
+      supportsRefunds: true,
+      supportsHostedCheckout: true,
+      taxRequiresExternalConfiguration: true,
+      requiresBillingAddress: true,
+      mayRequireManualReview: false,
+      supportsManualConfirmation: false,
+      suitableForHighRisk: true,
+      checkoutUrlTemplate: "https://payments.example.test/checkout?order={{orderId}}&amount={{amount}}&return={{successUrlEncoded}}",
+      webhookInstructions: "Post signed JSON payment events to /api/webhooks/generic-hosted-check.",
+    },
+    create: {
+      provider,
+      displayName: "Generic Hosted Check",
+      kind: "generic_api",
+      isNativeAdapter: false,
+      isActive: false,
+      checkoutModel: "hosted_redirect",
+      taxModel: "external_tax_service",
+      settlementBehavior: "asynchronous",
+      supportsRefunds: true,
+      supportsHostedCheckout: true,
+      taxRequiresExternalConfiguration: true,
+      requiresBillingAddress: true,
+      mayRequireManualReview: false,
+      supportsManualConfirmation: false,
+      suitableForHighRisk: true,
+      checkoutUrlTemplate: "https://payments.example.test/checkout?order={{orderId}}&amount={{amount}}&return={{successUrlEncoded}}",
+      webhookInstructions: "Post signed JSON payment events to /api/webhooks/generic-hosted-check.",
+    },
+    select: { id: true, provider: true },
+  });
+
+  const credentialEntries = {
+    webhook_signature_header: signatureHeader,
+    webhook_secret: webhookSecret,
+    webhook_signature_mode: "hmac_sha256",
+    webhook_event_type_path: "type",
+    webhook_event_id_path: "id",
+    webhook_order_id_path: "data.metadata.orderId",
+    webhook_payment_id_path: "data.payment.id",
+    webhook_success_events: "payment.succeeded",
+  };
+
+  for (const [key, value] of Object.entries(credentialEntries)) {
+    await prisma.gatewayCredential.upsert({
+      where: {
+        gatewayId_key: {
+          gatewayId: gateway.id,
+          key,
+        },
+      },
+      update: {
+        valueEncrypted: encryptGatewayCredentialValue(value),
+      },
+      create: {
+        gatewayId: gateway.id,
+        key,
+        valueEncrypted: encryptGatewayCredentialValue(value),
+      },
+    });
+  }
+
+  const previouslyActive = await prisma.gateway.findMany({
+    where: { isActive: true },
+    select: { id: true },
+  });
+
+  const user = await prisma.user.upsert({
+    where: { email: "generic-hosted-check@perseus.test" },
+    update: { name: "Generic Hosted Check" },
+    create: {
+      email: "generic-hosted-check@perseus.test",
+      name: "Generic Hosted Check",
+    },
+  });
+
+  const offer = await prisma.offer.findFirst({
+    where: {
+      courseId: { not: null },
+      isPublished: true,
+    },
+  });
+
+  if (!offer) {
+    throw new Error("Generic hosted verification failed: published course offer not found.");
+  }
+
+  try {
+    await prisma.$transaction([
+      prisma.gateway.updateMany({
+        data: { isActive: false },
+      }),
+      prisma.gateway.update({
+        where: { id: gateway.id },
+        data: { isActive: true },
+      }),
+    ]);
+
+    const session = await createCheckoutSession({
+      offerId: offer.id,
+      userId: user.id,
+      customerEmail: user.email,
+    });
+
+    const orderId = session.externalSessionId?.replace("generic:", "");
+
+    if (!orderId || !session.checkoutUrl.includes(orderId)) {
+      throw new Error("Generic hosted verification failed: checkout did not return a hosted order redirect.");
+    }
+
+    const paymentId = `pay_generic_${Date.now()}`;
+    const eventPayload = JSON.stringify({
+      id: `evt_generic_${Date.now()}`,
+      type: "payment.succeeded",
+      data: {
+        metadata: {
+          orderId,
+        },
+        payment: {
+          id: paymentId,
+        },
+      },
+    });
+    const signature = createHmac("sha256", webhookSecret).update(eventPayload).digest("hex");
+    const response = await POST(
+      new Request(`http://localhost/api/webhooks/${provider}`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          [signatureHeader]: signature,
+        },
+        body: eventPayload,
+      }),
+      {
+        params: Promise.resolve({ provider }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Generic hosted verification failed: route returned ${response.status} with ${await response.text()}.`);
+    }
+
+    const [updatedOrder, payment] = await Promise.all([
+      prisma.order.findUnique({
+        where: { id: orderId },
+        select: {
+          id: true,
+          status: true,
+        },
+      }),
+      prisma.payment.findFirst({
+        where: {
+          orderId,
+          externalPaymentId: paymentId,
+        },
+        select: {
+          id: true,
+          status: true,
+          externalPaymentId: true,
+        },
+      }),
+    ]);
+
+    if (!updatedOrder || updatedOrder.status !== OrderStatus.PAID) {
+      throw new Error("Generic hosted verification failed: order was not marked PAID after signed webhook.");
+    }
+
+    if (!payment || payment.status !== PaymentStatus.SUCCEEDED) {
+      throw new Error("Generic hosted verification failed: payment was not marked SUCCEEDED after signed webhook.");
+    }
+
+    return {
+      ok: true,
+      gateway: provider,
+      order: updatedOrder,
+      payment,
+      automatedConfirmation: true,
+    };
+  } finally {
+    await prisma.gateway.updateMany({
+      data: { isActive: false },
+    });
+
+    if (previouslyActive.length > 0) {
+      await prisma.gateway.updateMany({
+        where: {
+          id: {
+            in: previouslyActive.map((item) => item.id),
+          },
+        },
+        data: { isActive: true },
+      });
+    }
+  }
+}
+
 async function main() {
   const bundlePayment = await verifyBundlePayment();
   const bankTransfer = await verifyBankTransfer();
   const nativeWebhook = await verifyNativeWebhook();
+  const genericHostedWebhook = await verifyGenericHostedWebhook();
 
   console.log(
     JSON.stringify(
@@ -598,6 +812,7 @@ async function main() {
         bundlePayment,
         bankTransfer,
         nativeWebhook,
+        genericHostedWebhook,
       },
       null,
       2,

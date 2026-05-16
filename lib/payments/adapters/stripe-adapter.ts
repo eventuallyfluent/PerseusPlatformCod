@@ -161,12 +161,18 @@ export const stripeConnector: PaymentGatewayConnector = {
 
     const stripe = getStripeWebhookClient();
     const event = stripe.webhooks.constructEvent(rawBody, signature, resolvedSecret);
+    const eventObject = event.data.object;
+    const metadata =
+      eventObject && typeof eventObject === "object" && "metadata" in eventObject
+        ? (eventObject.metadata as Record<string, string | undefined> | null)
+        : null;
+    const objectId = eventObject && typeof eventObject === "object" && "id" in eventObject ? String(eventObject.id) : undefined;
 
     return {
-      externalEventId:
-        event.data.object && typeof event.data.object === "object" && "id" in event.data.object
-          ? String(event.data.object.id)
-          : event.id,
+      providerEventId: event.id,
+      externalEventId: event.id,
+      orderId: metadata?.orderId ?? metadata?.order_id,
+      externalPaymentId: objectId,
       eventType: event.type,
       canonicalEvent: mapStripeEvent(event.type),
       payload: event,

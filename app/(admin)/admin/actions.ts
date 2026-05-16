@@ -266,9 +266,9 @@ function getGatewayDefaults(kind: GatewayKind): {
       requiresBillingAddress: true,
       requiresShippingAddress: false,
       requiresBusinessIdentity: false,
-      mayRequireManualReview: true,
+      mayRequireManualReview: false,
       suitableForHighRisk: true,
-      supportsManualConfirmation: true,
+      supportsManualConfirmation: false,
     },
   };
 }

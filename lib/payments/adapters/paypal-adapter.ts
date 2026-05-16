@@ -58,10 +58,30 @@ export const paypalConnector: PaymentGatewayConnector = {
     return Boolean(headers.get("paypal-transmission-id") && rawBody && secret);
   },
   async parseWebhookEvent({ rawBody }) {
-    const event = JSON.parse(rawBody) as { id?: string; event_type?: string };
+    const event = JSON.parse(rawBody) as {
+      id?: string;
+      event_type?: string;
+      resource?: {
+        id?: string;
+        custom_id?: string;
+        invoice_id?: string;
+        supplementary_data?: {
+          related_ids?: {
+            order_id?: string;
+            capture_id?: string;
+            subscription_id?: string;
+          };
+        };
+      };
+    };
+    const resource = event.resource;
 
     return {
+      providerEventId: event.id,
       externalEventId: event.id,
+      orderId: resource?.custom_id ?? resource?.invoice_id,
+      externalPaymentId: resource?.id ?? resource?.supplementary_data?.related_ids?.capture_id,
+      externalSubscriptionId: resource?.supplementary_data?.related_ids?.subscription_id,
       eventType: event.event_type ?? "unknown",
       canonicalEvent: mapPayPalEvent(event.event_type ?? ""),
       payload: event,

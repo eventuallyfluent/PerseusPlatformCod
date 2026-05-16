@@ -1,6 +1,7 @@
 import type { GatewayCompatRecord } from "@/lib/payments/gateway-queries";
 import type { GatewayOperationalIssue, GatewayOperationalReadiness, PaymentGatewayConnector, ResolvedGatewayDefinition } from "@/types";
 import { evaluateGatewayPolicy } from "@/lib/payments/policy";
+import { hasGenericWebhookAutomation } from "@/lib/payments/generic-webhook";
 
 export function evaluateGatewayOperationalReadiness(input: {
   gateway: GatewayCompatRecord;
@@ -74,11 +75,28 @@ export function evaluateGatewayOperationalReadiness(input: {
       });
     }
 
+    if (definition.checkoutModel === "manual_instructions") {
+      issues.push({
+        tone: "danger",
+        label: "Manual checkout is not online checkout",
+        detail: "Generic payment profiles must use automated hosted checkout plus verified webhook confirmation. Manual confirmation is only acceptable for bank transfer.",
+      });
+    }
+
+    if (!hasGenericWebhookAutomation(credentials)) {
+      issues.push({
+        tone: "danger",
+        label: "Automated confirmation missing",
+        detail:
+          "Hosted gateways must define signed webhook settings in credentials: webhook_signature_header, webhook_secret, webhook_event_type_path, webhook_order_id_path, webhook_payment_id_path, and webhook_success_events.",
+      });
+    }
+
     if (gateway.credentials.length === 0) {
       issues.push({
         tone: "warning",
         label: "Credentials not documented",
-        detail: "Store the gateway credential keys or notes here so the operator path is complete.",
+        detail: "Store API and webhook credential keys so checkout can be verified automatically.",
       });
     }
 
@@ -86,7 +104,7 @@ export function evaluateGatewayOperationalReadiness(input: {
       issues.push({
         tone: "warning",
         label: "Webhook steps missing",
-        detail: "Add provider-side webhook instructions or plan to confirm payments manually.",
+        detail: "Add provider-side webhook setup notes so automated payment confirmation can be reproduced.",
       });
     }
   } else if (definition.kind === "bank_transfer" && !gateway.instructionsMarkdown?.trim()) {
@@ -110,10 +128,10 @@ export function evaluateGatewayOperationalReadiness(input: {
     detail: hasBlockingIssue
       ? "One or more blocking setup issues still prevent this gateway from being used safely."
       : hasAttentionIssue
-        ? "This gateway can be used, but it still needs operator setup or manual handling."
+        ? "This gateway can be used, but it still needs operator setup documentation or monitoring."
         : "This gateway has a usable checkout path and no obvious blocking setup gaps.",
     canRunCheckout: gateway.isActive && policy.allowed && !hasBlockingIssue,
-    webhookMode: connector ? "automated" : definition.kind === "bank_transfer" ? "manual" : "unavailable",
+    webhookMode: connector || (definition.kind === "generic_api" && hasGenericWebhookAutomation(credentials)) ? "automated" : definition.kind === "bank_transfer" ? "manual" : "unavailable",
     issues,
   };
 }

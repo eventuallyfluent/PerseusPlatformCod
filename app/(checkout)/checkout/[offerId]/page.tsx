@@ -99,15 +99,11 @@ export default async function CheckoutPage({
   const accessChipLabel =
     activeGatewayDefinition?.kind === "bank_transfer"
       ? "Access after confirmation"
-      : activeGatewayDefinition?.capabilities.mayRequireManualReview
-        ? "Access after approval"
-        : "Immediate access";
+      : "Automatic access";
   const checkoutModeNote =
     activeGatewayDefinition?.kind === "bank_transfer"
       ? "Access begins after payment confirmation."
-      : activeGatewayDefinition?.capabilities.mayRequireManualReview
-        ? "Access may require approval after payment."
-        : "Secure payment handled by the active payment provider.";
+      : "Secure payment is confirmed automatically by the active payment provider.";
   const checkoutAvailable = Boolean(gatewayPolicy?.allowed && gatewayReadiness?.canRunCheckout);
 
   return (

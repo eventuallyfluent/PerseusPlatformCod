@@ -79,7 +79,7 @@ export default async function OrdersPage({
             latestPayment?.gateway.kind === "bank_transfer"
               ? "Manual transfer"
               : latestPayment?.gateway.kind === "generic_api"
-                ? "Generic/manual gateway"
+                ? "Hosted/API automation path"
                 : latestPayment?.gateway.kind === "native"
                   ? "Native automation path"
                   : "Unassigned";

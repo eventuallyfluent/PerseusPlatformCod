@@ -57,10 +57,34 @@ export const creemConnector: PaymentGatewayConnector = {
     return Boolean(headers.get("x-creem-signature") && rawBody && secret);
   },
   async parseWebhookEvent({ rawBody }) {
-    const event = JSON.parse(rawBody) as { id?: string; type?: string };
+    const event = JSON.parse(rawBody) as {
+      id?: string;
+      type?: string;
+      payment_id?: string;
+      subscription_id?: string;
+      data?: {
+        id?: string;
+        payment_id?: string;
+        subscription_id?: string;
+        metadata?: { orderId?: string; order_id?: string };
+        object?: {
+          id?: string;
+          payment_id?: string;
+          subscription_id?: string;
+          metadata?: { orderId?: string; order_id?: string };
+        };
+      };
+      metadata?: { orderId?: string; order_id?: string };
+    };
+    const metadata = event.metadata ?? event.data?.metadata ?? event.data?.object?.metadata;
+    const paymentId = event.payment_id ?? event.data?.payment_id ?? event.data?.object?.payment_id ?? event.data?.id ?? event.data?.object?.id ?? event.id;
 
     return {
+      providerEventId: event.id,
       externalEventId: event.id,
+      orderId: metadata?.orderId ?? metadata?.order_id,
+      externalPaymentId: paymentId,
+      externalSubscriptionId: event.subscription_id ?? event.data?.subscription_id ?? event.data?.object?.subscription_id,
       eventType: event.type ?? "unknown",
       canonicalEvent: mapCreemEvent(event.type ?? ""),
       payload: event,

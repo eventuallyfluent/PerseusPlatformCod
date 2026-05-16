@@ -412,7 +412,11 @@ export interface PaymentGatewayConnector {
     secret?: string;
     credentials?: Record<string, string>;
   }): Promise<{
+    providerEventId?: string;
     externalEventId?: string;
+    orderId?: string;
+    externalPaymentId?: string;
+    externalSubscriptionId?: string;
     eventType: string;
     canonicalEvent?: CanonicalPaymentEvent;
     payload: unknown;

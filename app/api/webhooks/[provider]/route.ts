@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
 import { handleCanonicalEvent } from "@/lib/payments/events/handle-canonical-event";
+import { parseGenericWebhookEvent, verifyGenericWebhookSignature } from "@/lib/payments/generic-webhook";
 
 export async function POST(request: Request, { params }: { params: Promise<{ provider: string }> }) {
   const { provider } = await params;
@@ -19,14 +21,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ pro
   const credentials = getGatewayCredentialMap(gateway.credentials);
   const connector = findPaymentConnector(provider);
 
-  if (!connector) {
-    return NextResponse.json({ error: "This gateway does not expose an automated webhook handler." }, { status: 400 });
-  }
-  const verified = await connector.verifyWebhookSignature({
-    headers: request.headers,
-    rawBody,
-    secret: credentials.webhook_secret ?? credentials.webhook_id ?? "",
-  });
+  const verified = connector
+    ? await connector.verifyWebhookSignature({
+        headers: request.headers,
+        rawBody,
+        secret: credentials.webhook_secret ?? credentials.webhook_id ?? "",
+      })
+    : await verifyGenericWebhookSignature({
+        headers: request.headers,
+        rawBody,
+        credentials,
+      });
 
   if (!verified) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
@@ -35,12 +40,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ pro
   let event;
 
   try {
-    event = await connector.parseWebhookEvent({
-      headers: request.headers,
-      rawBody,
-      secret: credentials.webhook_secret ?? credentials.webhook_id ?? "",
-      credentials,
-    });
+    event = connector
+      ? await connector.parseWebhookEvent({
+          headers: request.headers,
+          rawBody,
+          secret: credentials.webhook_secret ?? credentials.webhook_id ?? "",
+          credentials,
+        })
+      : parseGenericWebhookEvent({
+          rawBody,
+          credentials,
+        });
   } catch (error) {
     return NextResponse.json(
       {
@@ -50,11 +60,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ pro
     );
   }
 
-  if (event.externalEventId) {
+  const idempotencyKey = event.providerEventId ?? event.externalEventId;
+
+  if (idempotencyKey) {
     const existing = await prisma.webhookEvent.findFirst({
       where: {
         gatewayId: gateway.id,
-        externalEventId: event.externalEventId,
+        externalEventId: idempotencyKey,
       },
     });
 
@@ -63,21 +75,34 @@ export async function POST(request: Request, { params }: { params: Promise<{ pro
     }
   }
 
-  const webhookEvent = await prisma.webhookEvent.create({
-    data: {
-      gatewayId: gateway.id,
-      eventType: event.eventType,
-      externalEventId: event.externalEventId,
-      canonicalEvent: event.canonicalEvent,
-      payload: event.payload as object,
-    },
-  });
+  let webhookEvent;
+
+  try {
+    webhookEvent = await prisma.webhookEvent.create({
+      data: {
+        gatewayId: gateway.id,
+        eventType: event.eventType,
+        externalEventId: idempotencyKey,
+        canonicalEvent: event.canonicalEvent,
+        payload: event.payload as object,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ ok: true, duplicate: true });
+    }
+
+    throw error;
+  }
 
   try {
     await handleCanonicalEvent({
       canonicalEvent: event.canonicalEvent,
       gatewayId: gateway.id,
-      externalEventId: event.externalEventId,
+      externalEventId: idempotencyKey,
+      orderId: event.orderId,
+      externalPaymentId: event.externalPaymentId,
+      externalSubscriptionId: event.externalSubscriptionId,
       payload: event.payload,
     });
 

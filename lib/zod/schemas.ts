@@ -134,6 +134,10 @@ const csvPackageLessonType = z.preprocess((value) => {
     return LessonType.VIDEO;
   }
 
+  if (["REQUIREMENTS", "TEASER", "TRAILER", "PREVIEW", "SAMPLE"].includes(normalized)) {
+    return LessonType.MIXED;
+  }
+
   return normalized;
 }, z.nativeEnum(LessonType).optional());
 const optionalCsvLessonStatus = z.preprocess((value) => {

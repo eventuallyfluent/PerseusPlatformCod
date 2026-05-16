@@ -28,6 +28,18 @@ async function main() {
     throw new Error("Course package dry run did not tolerate Payhip external link lesson types.");
   }
 
+  const requirementsLessonTypeCsv = packageCsv.replace(",VIDEO,", ",requirements,");
+  const requirementsLessonTypeDryRun = await dryRunImport("COURSE_PACKAGE", requirementsLessonTypeCsv);
+  if (requirementsLessonTypeDryRun.invalidRows.length > 0 || requirementsLessonTypeDryRun.validRows[0]?.row.lesson_type !== LessonType.MIXED) {
+    throw new Error("Course package dry run did not tolerate Payhip requirements lesson types.");
+  }
+
+  const teaserLessonTypeCsv = packageCsv.replace(",VIDEO,", ",teaser,");
+  const teaserLessonTypeDryRun = await dryRunImport("COURSE_PACKAGE", teaserLessonTypeCsv);
+  if (teaserLessonTypeDryRun.invalidRows.length > 0 || teaserLessonTypeDryRun.validRows[0]?.row.lesson_type !== LessonType.MIXED) {
+    throw new Error("Course package dry run did not tolerate Payhip teaser lesson types.");
+  }
+
   const payhipVerifiedBuyerPositionCsv = packageCsv.replace(",5,1,1,Orientation and practice,", ",5,Verified Buyer,1,Orientation and practice,");
   const payhipVerifiedBuyerPositionDryRun = await dryRunImport("COURSE_PACKAGE", payhipVerifiedBuyerPositionCsv);
   if (payhipVerifiedBuyerPositionDryRun.invalidRows.length > 0 || payhipVerifiedBuyerPositionDryRun.validRows[0]?.row.testimonial_position !== undefined) {

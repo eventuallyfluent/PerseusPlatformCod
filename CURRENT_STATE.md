@@ -31,9 +31,13 @@ Current payment model:
 Current truth:
 
 - the platform is gateway-agnostic in architecture
+- Stripe is not the target gateway; it is only a fallback/reference adapter because the platform may not be able to use Stripe long term
+- non-Stripe providers must be treated as first-class payment paths, not afterthoughts
+- future payment work must not depend on Stripe-specific payloads, metadata shapes, tax assumptions, webhook behavior, or checkout flow
+- priority is provider-agnostic operation across merchant-of-record providers, high-risk-compatible providers, generic hosted gateways, and manual/bank-transfer workflows
 - not every gateway is equally automated
 - native connectors are the strongest automation path
-- generic and bank-transfer flows may require manual operator handling
+- hosted/API gateway flows must confirm payment automatically through signed webhook automation; bank transfer is the offline/manual exception
 
 Verified in the local commerce suite:
 
@@ -105,4 +109,21 @@ Local verification support now includes:
 1. push and deploy the current local SEO/canonical pass
 2. migrate courses in controlled batches through the import center
 3. verify real hosted-checkout providers with live credentials
-4. continue customer-facing copy cleanup only where migration exposes weak spots
+4. plan the optional WordPress Plugin Compatibility Bridge for WooCommerce and broader WP plugin ecosystem compatibility
+5. continue customer-facing copy cleanup only where migration exposes weak spots
+
+## Future Phase: WordPress Plugin Compatibility Bridge
+
+Current intent:
+
+- WordPress compatibility should happen through an optional bridge, not by running WordPress plugins inside Perseus
+- WordPress remains the PHP/plugin runtime when its ecosystem is useful
+- Perseus remains the course, commerce, access, checkout intent, and fulfillment system
+- a Perseus WordPress plugin can relay signed events from supported WordPress plugins back into Perseus
+- WooCommerce is the first practical bridge module because it opens many payment gateway options
+- the bridge should stay general enough for forms, memberships, affiliates, coupons, CRM/email tools, and media/content sync
+- WordPress must never become required for normal Perseus operation
+
+Planning note:
+
+- [docs/wordpress-plugin-bridge.md](C:\Users\stude\OneDrive\Desktop\Perseus Platform\docs\wordpress-plugin-bridge.md)

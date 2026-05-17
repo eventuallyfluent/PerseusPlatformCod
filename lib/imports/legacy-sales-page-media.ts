@@ -1,6 +1,5 @@
 export type LegacySalesPageMedia = {
   heroImageUrl?: string;
-  galleryImageUrls: string[];
   salesVideoUrl?: string;
 };
 
@@ -93,7 +92,6 @@ export function extractLegacySalesPageMedia(html: string): LegacySalesPageMedia 
 
   return {
     heroImageUrl,
-    galleryImageUrls: imageUrls.filter((url) => url !== heroImageUrl),
     salesVideoUrl,
   };
 }
@@ -102,7 +100,7 @@ async function fetchLegacySalesPageMediaNow(legacyUrl: string): Promise<LegacySa
   const url = String(legacyUrl ?? "").trim();
 
   if (!url) {
-    return { galleryImageUrls: [] };
+    return {};
   }
 
   const controller = new AbortController();
@@ -118,12 +116,12 @@ async function fetchLegacySalesPageMediaNow(legacyUrl: string): Promise<LegacySa
     });
 
     if (!response.ok) {
-      return { galleryImageUrls: [] };
+      return {};
     }
 
     return extractLegacySalesPageMedia(await response.text());
   } catch {
-    return { galleryImageUrls: [] };
+    return {};
   } finally {
     clearTimeout(timeout);
   }
@@ -133,7 +131,7 @@ export function fetchLegacySalesPageMedia(legacyUrl: string | null | undefined) 
   const url = String(legacyUrl ?? "").trim();
 
   if (!url) {
-    return Promise.resolve({ galleryImageUrls: [] });
+    return Promise.resolve({});
   }
 
   const cached = legacyMediaCache.get(url);

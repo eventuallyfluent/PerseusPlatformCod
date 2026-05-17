@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { LessonType, PrismaClient } from "@prisma/client";
+import { LessonType, Prisma, PrismaClient } from "@prisma/client";
 import { dryRunImport } from "../lib/imports/dry-run-import";
 import { executeImport } from "../lib/imports/execute-import";
 
@@ -57,6 +57,38 @@ async function main() {
     const legacyMediaDryRun = await dryRunImport("COURSE_PACKAGE", legacyMediaCsv);
     if (legacyMediaDryRun.invalidRows.length > 0 || !legacyMediaDryRun.summary.heroImageUrl?.includes("payhip.com/cdn-cgi/image/")) {
       throw new Error("Course package dry run did not recover missing media from the legacy sales page.");
+    }
+
+    const staleLegacyCourse = await prisma.course.findUnique({
+      where: { slug: "legacy-media-import-check" },
+      select: { id: true },
+    });
+
+    if (staleLegacyCourse) {
+      await prisma.course.update({
+        where: { id: staleLegacyCourse.id },
+        data: { salesPageConfig: Prisma.JsonNull },
+      });
+    }
+
+    await executeImport("COURSE_PACKAGE", "legacy-media-import-check.csv", legacyMediaCsv, false);
+
+    const legacyMediaCourse = await prisma.course.findUnique({
+      where: { slug: "legacy-media-import-check" },
+      include: { pages: true },
+    });
+    const legacyGalleryUrls = ((legacyMediaCourse?.salesPageConfig as { galleryImageUrls?: string[] } | null)?.galleryImageUrls ?? []) as string[];
+    const legacySalesPagePayload = legacyMediaCourse?.pages.find((page) => page.pageType === "sales")?.generatedPayload as {
+      gallerySection?: { images?: string[] };
+    } | null;
+
+    if (
+      !legacyMediaCourse?.heroImageUrl?.includes("payhip.com/cdn-cgi/image/") ||
+      legacyMediaCourse.salesVideoUrl !== "https://www.youtube.com/watch?v=C8IkPvk7sg4" ||
+      legacyGalleryUrls.length > 0 ||
+      (legacySalesPagePayload?.gallerySection?.images?.length ?? 0) > 0
+    ) {
+      throw new Error("Legacy media recovery must save only the hero image and real YouTube URL, not scraped gallery images.");
     }
   } finally {
     globalThis.fetch = originalFetch;

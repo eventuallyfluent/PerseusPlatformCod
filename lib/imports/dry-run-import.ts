@@ -300,16 +300,14 @@ async function getPackageMedia(rows: PackageRow[]) {
   const firstRow = rows[0];
   const heroImageUrl = rows.map((row) => String(row.hero_image_url ?? "").trim()).find(Boolean);
   const salesVideoUrl = rows.map((row) => String(row.sales_video_url ?? "").trim()).find(Boolean);
-  const hasGalleryImageUrls = rows.some((row) => String(row.sales_image_urls ?? "").trim());
-  const shouldFetchLegacyMedia = Boolean(firstRow?.legacy_url) && (!heroImageUrl || !hasGalleryImageUrls || isPlaceholderSalesVideoUrl(salesVideoUrl));
+  const shouldFetchLegacyMedia = Boolean(firstRow?.legacy_url) && (!heroImageUrl || isPlaceholderSalesVideoUrl(salesVideoUrl));
   const legacyMedia: LegacySalesPageMedia = shouldFetchLegacyMedia
     ? await fetchLegacySalesPageMedia(String(firstRow?.legacy_url ?? ""))
-    : { heroImageUrl: undefined, salesVideoUrl: undefined, galleryImageUrls: [] };
+    : { heroImageUrl: undefined, salesVideoUrl: undefined };
 
   return {
     heroImageUrl: heroImageUrl || legacyMedia.heroImageUrl,
     salesVideoUrl: isPlaceholderSalesVideoUrl(salesVideoUrl) ? legacyMedia.salesVideoUrl : salesVideoUrl,
-    galleryImageUrls: hasGalleryImageUrls ? [] : legacyMedia.galleryImageUrls,
   };
 }
 

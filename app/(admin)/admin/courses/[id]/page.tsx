@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { ImageField } from "@/components/admin/image-field";
+import { GalleryImageField } from "@/components/admin/gallery-image-field";
 import { ProductFormSection } from "@/components/admin/product-form-shell";
 import { RelatedOfferPicker } from "@/components/admin/related-offer-picker";
 import { HardLink } from "@/components/ui/hard-link";
@@ -232,7 +233,13 @@ export default async function CourseDetailPage({
                 />
                 <label>Gallery eyebrow<input name="salesPage.galleryEyebrow" defaultValue={salesPageConfig.galleryEyebrow ?? ""} placeholder="Sales gallery" /></label>
                 <label>Gallery title<input name="salesPage.galleryTitle" defaultValue={salesPageConfig.galleryTitle ?? ""} placeholder="A closer look inside the work." /></label>
-                <label className="lg:col-span-2">Gallery image URLs<textarea name="salesPage.galleryImageUrls" rows={5} defaultValue={(salesPageConfig.galleryImageUrls ?? []).join("\n")} placeholder="One image URL per line" /></label>
+                <GalleryImageField
+                  name="salesPage.galleryImageUrls"
+                  label="Manual gallery image URLs"
+                  defaultUrls={salesPageConfig.galleryImageUrls ?? []}
+                  uploadFolder="courses"
+                  uploadEnabled={uploadEnabled}
+                />
                 <label>Thank-you eyebrow<input name="salesPage.thankYouEyebrow" defaultValue={salesPageConfig.thankYouEyebrow ?? ""} /></label>
                 <label>Signed-in CTA label<input name="salesPage.thankYouSignedInLabel" defaultValue={salesPageConfig.thankYouSignedInLabel ?? ""} /></label>
                 <label>Signed-out CTA label<input name="salesPage.thankYouSignedOutLabel" defaultValue={salesPageConfig.thankYouSignedOutLabel ?? ""} /></label>

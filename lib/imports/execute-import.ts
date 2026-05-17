@@ -617,15 +617,14 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   const importedHeroImageUrl = pickFirstNonEmptyPackageValue(rows, (row) => row.hero_image_url) ?? firstRow.hero_image_url;
   const importedSalesVideoUrl = pickFirstNonEmptyPackageValue(rows, (row) => row.sales_video_url) ?? firstRow.sales_video_url;
   const importedGalleryImageUrls = splitUrlList(pickFirstNonEmptyPackageValue(rows, (row) => row.sales_image_urls) ?? firstRow.sales_image_urls);
-  const needsLegacyMedia = Boolean(firstRow.legacy_url) && (!importedHeroImageUrl || importedGalleryImageUrls.length === 0 || isPlaceholderSalesVideoUrl(importedSalesVideoUrl));
+  const needsLegacyMedia = Boolean(firstRow.legacy_url) && (!importedHeroImageUrl || isPlaceholderSalesVideoUrl(importedSalesVideoUrl));
   const legacyMedia: LegacySalesPageMedia = needsLegacyMedia
     ? await fetchLegacySalesPageMedia(firstRow.legacy_url)
-    : { heroImageUrl: undefined, salesVideoUrl: undefined, galleryImageUrls: [] };
+    : { heroImageUrl: undefined, salesVideoUrl: undefined };
   const resolvedHeroImageUrl = importedHeroImageUrl || legacyMedia.heroImageUrl;
-  const resolvedGalleryImageUrls = importedGalleryImageUrls.length > 0 ? importedGalleryImageUrls : legacyMedia.galleryImageUrls;
   const resolvedSalesVideoUrl = isPlaceholderSalesVideoUrl(importedSalesVideoUrl) ? legacyMedia.salesVideoUrl : importedSalesVideoUrl;
   const galleryImageUrls = await ownImportImageUrls(
-    resolvedGalleryImageUrls,
+    importedGalleryImageUrls,
     { folder: "sales-gallery", slug: firstRow.slug, role: "gallery" },
     imageSummaryTarget,
   );

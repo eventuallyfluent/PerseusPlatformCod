@@ -37,8 +37,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   });
 }
 
-export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CoursePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ inquiry?: string }>;
+}) {
   const { slug } = await params;
+  const query = await searchParams;
   const session = await auth();
   const course = await getCourseBySlug(slug);
   const routePath = `/course/${slug}`;
@@ -87,6 +94,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           isLoggedIn={Boolean(session?.user?.email)}
           reviewLoginHref={reviewLoginHref}
           existingReview={existingReview}
+          inquirySent={query.inquiry === "sent"}
+          inquiryError={query.inquiry === "error"}
         />
       );
     }
@@ -131,6 +140,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       isLoggedIn={Boolean(session?.user?.email)}
       reviewLoginHref={reviewLoginHref}
       existingReview={existingReview}
+      inquirySent={query.inquiry === "sent"}
+      inquiryError={query.inquiry === "error"}
     />
   );
 }

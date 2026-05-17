@@ -133,7 +133,7 @@ export default async function PublicPathPage({
   searchParams,
 }: {
   params: Promise<{ slug: string[] }>;
-  searchParams: Promise<{ order?: string }>;
+  searchParams: Promise<{ order?: string; inquiry?: string }>;
 }) {
   const { slug } = await params;
   const query = await searchParams;
@@ -205,6 +205,8 @@ export default async function PublicPathPage({
       isLoggedIn={Boolean(session?.user?.email)}
       reviewLoginHref={reviewLoginHref}
       existingReview={existingReview}
+      inquirySent={query.inquiry === "sent"}
+      inquiryError={query.inquiry === "error"}
     />
   );
 }

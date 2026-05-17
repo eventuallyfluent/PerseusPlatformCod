@@ -90,8 +90,15 @@ export async function generateMetadata({ params }: { params: Promise<{ legacyId:
   });
 }
 
-export default async function LegacyCoursePage({ params }: { params: Promise<{ legacyId: string }> }) {
+export default async function LegacyCoursePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ legacyId: string }>;
+  searchParams: Promise<{ inquiry?: string }>;
+}) {
   const { legacyId } = await params;
+  const query = await searchParams;
   const session = await auth();
   const routePath = `/b/${legacyId}`;
   const reviewLoginHref = `/login?returnTo=${encodeURIComponent(`${routePath}#leave-review-form`)}`;
@@ -151,6 +158,8 @@ export default async function LegacyCoursePage({ params }: { params: Promise<{ l
       isLoggedIn={Boolean(session?.user?.email)}
       reviewLoginHref={reviewLoginHref}
       existingReview={existingReview}
+      inquirySent={query.inquiry === "sent"}
+      inquiryError={query.inquiry === "error"}
     />
   );
 }

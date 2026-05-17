@@ -1,4 +1,4 @@
-import { OrderStatus, PaymentStatus } from "@prisma/client";
+import { ContactInquiryStatus, OrderStatus, PaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 
 export function formatAdminMoney(value: number, currency = "USD") {
@@ -22,8 +22,10 @@ export async function getAdminDashboardData() {
     newEnrollments,
     manualPaymentOrders,
     pendingReviews,
+    unreadInquiries,
     recentOrders,
     reviewsNeedingCheck,
+    recentInquiries,
   ] = await Promise.all([
     prisma.order.aggregate({
       _sum: { totalAmount: true },
@@ -58,6 +60,9 @@ export async function getAdminDashboardData() {
     }),
     prisma.testimonial.count({
       where: { isApproved: false },
+    }),
+    prisma.contactInquiry.count({
+      where: { status: ContactInquiryStatus.UNREAD },
     }),
     prisma.order.findMany({
       take: 6,
@@ -96,6 +101,24 @@ export async function getAdminDashboardData() {
         bundle: { select: { title: true } },
       },
     }),
+    prisma.contactInquiry.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      where: {
+        status: {
+          not: ContactInquiryStatus.ARCHIVED,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        message: true,
+        status: true,
+        createdAt: true,
+        course: { select: { title: true } },
+      },
+    }),
   ]);
 
   return {
@@ -106,7 +129,9 @@ export async function getAdminDashboardData() {
     newEnrollments,
     manualPaymentOrders,
     pendingReviews,
+    unreadInquiries,
     recentOrders,
     reviewsNeedingCheck,
+    recentInquiries,
   };
 }

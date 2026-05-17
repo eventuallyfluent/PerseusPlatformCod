@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises";
 import { LessonType, Prisma, PrismaClient } from "@prisma/client";
 import { dryRunImport } from "../lib/imports/dry-run-import";
 import { executeImport } from "../lib/imports/execute-import";
+import { courseInclude } from "../lib/courses/course-query";
+import { generateSalesPagePayload } from "../lib/sales-pages/generate-sales-page-payload";
 
 const prisma = new PrismaClient();
 
@@ -10,6 +12,12 @@ async function main() {
   const studentCsv = await readFile("samples/imports/perseus-course-students.csv", "utf8");
   const expectedLongDescription =
     "A practical starter course that combines symbolic orientation ritual structure and steady personal practice into one guided path.";
+
+  await prisma.testimonial.deleteMany({
+    where: {
+      email: "dynamic.review.count@example.com",
+    },
+  });
 
   const packageDryRun = await dryRunImport("COURSE_PACKAGE", packageCsv);
   if (packageDryRun.invalidRows.length > 0 || packageDryRun.conflicts.length > 0 || packageDryRun.validRows.length === 0) {
@@ -198,6 +206,46 @@ async function main() {
   if (!generatedPayload.testimonialsSection?.items?.some((item) => item.quote?.includes("clear and possible") && item.rating === 5 && item.recommendsProduct)) {
     throw new Error("Generated sales page payload is missing the imported testimonial.");
   }
+
+  const pendingReview = await prisma.testimonial.create({
+    data: {
+      courseId: course.id,
+      email: "dynamic.review.count@example.com",
+      name: "Dynamic Count Student",
+      quote: "This pending review should not affect the public review count.",
+      rating: 4,
+      position: course.testimonials.length + 1,
+      isApproved: false,
+      recommendsProduct: true,
+    },
+  });
+  const courseWithPendingReview = await prisma.course.findUniqueOrThrow({
+    where: { id: course.id },
+    include: courseInclude,
+  });
+  const pendingReviewPayload = generateSalesPagePayload(courseWithPendingReview);
+
+  if (pendingReviewPayload.testimonialsSection.items.length !== 1) {
+    throw new Error("Pending reviews must not affect the public dynamic review count.");
+  }
+
+  await prisma.testimonial.update({
+    where: { id: pendingReview.id },
+    data: { isApproved: true },
+  });
+  const courseWithApprovedReview = await prisma.course.findUniqueOrThrow({
+    where: { id: course.id },
+    include: courseInclude,
+  });
+  const approvedReviewPayload = generateSalesPagePayload(courseWithApprovedReview);
+
+  if (approvedReviewPayload.testimonialsSection.items.length !== 2) {
+    throw new Error("Approved reviews must increase the public dynamic review count.");
+  }
+
+  await prisma.testimonial.delete({
+    where: { id: pendingReview.id },
+  });
 
   const multiOfferCsv = [
     "legacy_course_id,slug,legacy_slug,legacy_url,title,subtitle,short_description,long_description,learning_outcomes,who_its_for,includes,hero_image_url,sales_video_url,sales_image_urls,instructor_slug,instructor_name,seo_title,seo_description,status,price,currency,compare_at_price,module_position,module_title,lesson_position,lesson_slug,lesson_title,lesson_type,lesson_content,video_url,download_url,is_preview,drip_days,duration_label,lesson_status",

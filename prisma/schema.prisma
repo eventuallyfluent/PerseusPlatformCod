@@ -83,6 +83,12 @@ enum ImageAssetStatus {
   SKIPPED
 }
 
+enum ContactInquiryStatus {
+  UNREAD
+  READ
+  ARCHIVED
+}
+
 enum HomepageSectionType {
   HERO
   COLLECTIONS
@@ -199,6 +205,7 @@ model Course {
   accessProduct    AccessProduct?
   faqs             FAQ[]
   testimonials     Testimonial[]
+  contactInquiries ContactInquiry[]
   enrollments      Enrollment[]
   accessGrants     CourseAccessGrant[]
   accessProductGrants AccessProductGrant[]
@@ -550,6 +557,23 @@ model Testimonial {
   recommendsProduct Boolean @default(true)
   course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
   bundle   Bundle? @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+}
+
+model ContactInquiry {
+  id         String               @id @default(cuid())
+  courseId   String?
+  name       String
+  email      String
+  message    String
+  sourcePath String?
+  status     ContactInquiryStatus @default(UNREAD)
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  course     Course?              @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  @@index([courseId])
+  @@index([status, createdAt])
+  @@index([email])
 }
 
 model GeneratedPage {

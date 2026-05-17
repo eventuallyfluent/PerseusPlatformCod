@@ -190,7 +190,7 @@ function buildFacts(payload: ProductPayload) {
   }
 
   if (payload.testimonialsSection.items.length > 0) {
-    facts.push({ label: "Reviews", value: String(payload.testimonialsSection.items.length), icon: Star });
+    facts.push({ label: "Student reviews", value: String(payload.testimonialsSection.items.length), icon: Star });
   }
 
   if (payload.offers.length > 1) {
@@ -265,7 +265,17 @@ function SectionIntro({ eyebrow, title, body }: { eyebrow: string; title: string
   );
 }
 
-export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }: { payload: ProductPayload; bundleValueSlot?: ReactNode; reviewSlot?: ReactNode }) {
+export function RenderProductSalesPage({
+  payload,
+  bundleValueSlot,
+  questionSlot,
+  reviewSlot,
+}: {
+  payload: ProductPayload;
+  bundleValueSlot?: ReactNode;
+  questionSlot?: ReactNode;
+  reviewSlot?: ReactNode;
+}) {
   const hidden = new Set(payload.sections.hidden);
   const orderedSections = payload.sections.order.filter((section) => !hidden.has(section));
   const rendersReviewsSection = orderedSections.includes("testimonials");
@@ -750,8 +760,10 @@ export function RenderProductSalesPage({ payload, bundleValueSlot, reviewSlot }:
         <Fragment key={section}>
           {section === "pricing" && payload.productType === "course" ? bundleValueSlot : null}
           {renderSection(section)}
+          {section === "pricing" && payload.productType === "course" ? questionSlot : null}
         </Fragment>
       ))}
+      {questionSlot && payload.productType === "course" && !orderedSections.includes("pricing") ? questionSlot : null}
       {reviewSlot && !rendersReviewsSection ? <section className="mx-auto max-w-7xl px-6">{reviewSlot}</section> : null}
     </div>
   );

@@ -9,11 +9,12 @@ export default async function AdminOverviewPage() {
   const data = await getAdminDashboardData();
 
   return (
-    <AdminShell title="Admin overview" description="Month-to-date earnings, recent sales, and reviews needing approval.">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <AdminShell title="Admin overview" description="Month-to-date earnings, recent sales, inquiries, and reviews needing approval.">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <AdminStat label="Month-to-date earnings" value={formatAdminMoney(data.revenueThisMonth)} detail={`${data.monthlyOrders} paid sale${data.monthlyOrders === 1 ? "" : "s"} this month`} />
         <AdminStat label="Students" value={data.totalStudents} detail={`${data.newStudents} new this month`} />
         <AdminStat label="Enrollments" value={data.newEnrollments} detail="New course enrollments this month" />
+        <AdminStat label="Unread inquiries" value={data.unreadInquiries} detail="Course questions from sales pages" href="/admin/inquiries" tone={data.unreadInquiries > 0 ? "warning" : "success"} />
         <AdminStat
           label="Reviews to check"
           value={data.pendingReviews}
@@ -104,6 +105,42 @@ export default async function AdminOverviewPage() {
           </div>
         </section>
       </div>
+
+      <section className="space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Recent inquiries</h2>
+            <p className="text-sm text-[var(--text-secondary)]">Course questions submitted from sales pages.</p>
+          </div>
+          <HardLink href="/admin/inquiries" className={adminSecondaryButtonClass}>
+            View inquiries
+          </HardLink>
+        </div>
+        <AdminDataTable
+          columns={[
+            { header: "Sender" },
+            { header: "Course" },
+            { header: "Status" },
+            { header: "Message" },
+            { header: "Created" },
+          ]}
+          rows={data.recentInquiries.map((inquiry) => ({
+            key: inquiry.id,
+            cells: [
+              <span key="sender" className="font-semibold text-[var(--text-primary)]">
+                {inquiry.name}
+                <br />
+                <span className="font-normal text-[var(--text-secondary)]">{inquiry.email}</span>
+              </span>,
+              inquiry.course?.title ?? "General course question",
+              <AdminStatusBadge key="status" tone={inquiry.status === "UNREAD" ? "warning" : "neutral"}>{inquiry.status.toLowerCase()}</AdminStatusBadge>,
+              <span key="message" className="line-clamp-2">{inquiry.message}</span>,
+              inquiry.createdAt.toLocaleDateString(),
+            ],
+          }))}
+          empty="No course inquiries yet."
+        />
+      </section>
     </AdminShell>
   );
 }

@@ -1,7 +1,7 @@
 import { RenderProductSalesPage } from "@/components/sales-page/render-product-sales-page";
 import { Button, buttonClassName } from "@/components/ui/button";
 import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
-import { submitCourseReviewAction } from "@/app/(public)/actions";
+import { submitCourseInquiryAction, submitCourseReviewAction } from "@/app/(public)/actions";
 import { buildBreadcrumbStructuredData, buildCourseStructuredData, buildFaqStructuredData, buildProductStructuredData } from "@/lib/seo/structured-data";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import type { CourseBundleOption } from "@/lib/courses/get-course-bundle-options";
@@ -25,6 +25,8 @@ export function CourseSalesPage({
   isLoggedIn,
   reviewLoginHref,
   existingReview,
+  inquirySent = false,
+  inquiryError = false,
 }: {
   course: CourseWithRelations;
   payload: GeneratedSalesPagePayload;
@@ -33,6 +35,8 @@ export function CourseSalesPage({
   isLoggedIn: boolean;
   reviewLoginHref: string;
   existingReview?: { quote: string; isApproved: boolean; rating: number; recommendsProduct: boolean } | null;
+  inquirySent?: boolean;
+  inquiryError?: boolean;
 }) {
   const courseJsonLd = buildCourseStructuredData(course, payload);
   const productJsonLd = buildProductStructuredData(course, payload);
@@ -43,6 +47,7 @@ export function CourseSalesPage({
     { name: course.title, path: resolveCoursePublicPath(course) },
   ]);
   const availableBundles = bundleOptions ?? [];
+  const publicPath = resolveCoursePublicPath(course);
 
   const bundleValueSlot =
     availableBundles.length > 0 ? (
@@ -167,13 +172,82 @@ export function CourseSalesPage({
     </div>
   );
 
+  const questionSlot = (
+    <section id="course-questions" className="mx-auto max-w-7xl scroll-mt-28 px-6">
+      <div className="grid gap-6 rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,var(--surface-panel-strong),var(--surface-panel))] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:grid-cols-[0.85fr_1.15fr] lg:p-7">
+        <div className="space-y-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--text-muted)]">Have questions?</p>
+          <h2 className="text-3xl leading-none tracking-[-0.03em]">Send a course question before enrolling.</h2>
+          <p className="text-sm leading-7 text-[var(--text-secondary)]">
+            Ask about course fit, access, curriculum, or checkout before you join. Your message is saved for admin review.
+          </p>
+          {inquirySent ? (
+            <p className="rounded-[20px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+              Message received. We will reply by email.
+            </p>
+          ) : null}
+          {inquiryError ? (
+            <p className="rounded-[20px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+              Please add your name, a valid email, and a short message.
+            </p>
+          ) : null}
+        </div>
+        <form action={submitCourseInquiryAction} className="grid gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] p-5">
+          <input type="hidden" name="courseId" value={course.id} />
+          <input type="hidden" name="courseSlug" value={course.slug} />
+          <input type="hidden" name="returnPath" value={publicPath} />
+          <label className="hidden">
+            Company
+            <input name="company" tabIndex={-1} autoComplete="off" />
+          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="space-y-2">
+              <span className="text-sm font-medium text-[var(--text-primary)]">Name</span>
+              <input
+                name="name"
+                required
+                minLength={2}
+                maxLength={120}
+                className="w-full rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+              />
+            </label>
+            <label className="space-y-2">
+              <span className="text-sm font-medium text-[var(--text-primary)]">Email</span>
+              <input
+                name="email"
+                type="email"
+                required
+                maxLength={180}
+                className="w-full rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+              />
+            </label>
+          </div>
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-[var(--text-primary)]">Message</span>
+            <textarea
+              name="message"
+              required
+              minLength={10}
+              maxLength={2000}
+              rows={5}
+              className="w-full rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm leading-7 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+            />
+          </label>
+          <div>
+            <Button type="submit">Send message</Button>
+          </div>
+        </form>
+      </div>
+    </section>
+  );
+
   return (
     <div className="py-8 sm:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       {faqJsonLd ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} /> : null}
-      <RenderProductSalesPage payload={payload} bundleValueSlot={bundleValueSlot} reviewSlot={reviewSlot} />
+      <RenderProductSalesPage payload={payload} bundleValueSlot={bundleValueSlot} questionSlot={questionSlot} reviewSlot={reviewSlot} />
     </div>
   );
 }

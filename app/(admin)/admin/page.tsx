@@ -130,8 +130,8 @@ export default async function AdminOverviewPage() {
       <section className="space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Recent inquiries</h2>
-            <p className="text-sm text-[var(--text-secondary)]">Course questions submitted from sales pages.</p>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Unread inquiries</h2>
+            <p className="text-sm text-[var(--text-secondary)]">Course questions that still need a response.</p>
           </div>
           <HardLink href="/admin/inquiries" className={adminSecondaryButtonClass}>
             View inquiries
@@ -159,7 +159,7 @@ export default async function AdminOverviewPage() {
               inquiry.createdAt.toLocaleDateString(),
             ],
           }))}
-          empty={data.recentInquiries.status === "available" ? "No course inquiries yet." : "Recent inquiries are temporarily unavailable. The full inbox can still be opened from this page."}
+          empty={data.recentInquiries.status === "available" ? "No unread course inquiries." : "Unread inquiries are temporarily unavailable. The full inbox can still be opened from this page."}
         />
       </section>
     </AdminShell>

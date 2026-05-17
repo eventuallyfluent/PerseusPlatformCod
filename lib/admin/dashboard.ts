@@ -209,9 +209,7 @@ async function getRecentInquiries() {
     take: 5,
     orderBy: { createdAt: "desc" },
     where: {
-      status: {
-        not: ContactInquiryStatus.ARCHIVED,
-      },
+      status: ContactInquiryStatus.UNREAD,
     },
     select: {
       id: true,

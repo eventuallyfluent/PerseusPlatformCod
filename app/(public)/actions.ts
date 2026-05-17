@@ -34,14 +34,9 @@ export async function submitCourseInquiryAction(formData: FormData) {
   const courseId = String(formData.get("courseId") ?? "");
   const courseSlug = String(formData.get("courseSlug") ?? "");
   const returnPath = getSafeReturnPath(formData.get("returnPath"), `/course/${courseSlug}`);
-  const trap = String(formData.get("company") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
   const email = String(formData.get("email") ?? "").trim().toLowerCase().slice(0, 180);
   const message = String(formData.get("message") ?? "").trim().slice(0, 2000);
-
-  if (trap) {
-    redirect(`${returnPath}#course-questions`);
-  }
 
   if (!courseId || !courseSlug || name.length < 2 || !isValidEmail(email) || message.length < 10) {
     redirect(`${returnPath}?inquiry=error#course-questions`);

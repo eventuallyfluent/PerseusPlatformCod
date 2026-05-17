@@ -196,10 +196,6 @@ export function CourseSalesPage({
           <input type="hidden" name="courseId" value={course.id} />
           <input type="hidden" name="courseSlug" value={course.slug} />
           <input type="hidden" name="returnPath" value={publicPath} />
-          <label className="hidden">
-            Company
-            <input name="company" tabIndex={-1} autoComplete="off" />
-          </label>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="space-y-2">
               <span className="text-sm font-medium text-[var(--text-primary)]">Name</span>

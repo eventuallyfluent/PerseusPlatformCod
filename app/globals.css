@@ -47,6 +47,9 @@
   --hero-fallback-background: linear-gradient(135deg, #1b0c34, #2e175f);
   --hero-media-overlay: linear-gradient(180deg, rgba(10, 7, 20, 0.3), rgba(10, 7, 20, 0.7));
   --hero-shell-overlay: linear-gradient(180deg, rgba(11, 7, 23, 0.22), rgba(11, 7, 23, 0.82));
+  --sales-hero-atmosphere: radial-gradient(circle at 18% 16%, rgba(168, 102, 255, 0.18), transparent 24%), radial-gradient(circle at 80% 20%, rgba(212, 168, 70, 0.12), transparent 22%);
+  --sales-primary-cta-background: linear-gradient(135deg, var(--accent), #c16bff);
+  --sales-primary-cta-shadow: 0 18px 34px rgba(143, 44, 255, 0.24);
   --hero-text-primary: #f2eaff;
   --hero-text-secondary: #d0c3ef;
   --hero-text-muted: #b8add7;
@@ -174,6 +177,9 @@
   --hero-fallback-background: linear-gradient(135deg, #f8f8fc, #ffffff);
   --hero-media-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.5));
   --hero-shell-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.36));
+  --sales-hero-atmosphere: radial-gradient(circle at 18% 16%, rgba(104, 38, 163, 0.055), transparent 22%), radial-gradient(circle at 80% 20%, rgba(185, 133, 34, 0.055), transparent 20%);
+  --sales-primary-cta-background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  --sales-primary-cta-shadow: 0 14px 28px rgba(104, 38, 163, 0.14);
   --hero-text-primary: #171020;
   --hero-text-secondary: #4d425f;
   --hero-text-muted: #746984;

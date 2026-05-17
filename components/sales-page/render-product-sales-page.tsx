@@ -244,7 +244,7 @@ function OfferButtons({ offers, primaryLabel }: { offers: SalesPageOfferSummary[
         <ButtonLink
           key={offer.offerId}
           href={offer.checkoutUrl}
-          className="min-h-12 w-full justify-center whitespace-normal bg-[linear-gradient(135deg,var(--accent),#c16bff)] px-6 text-center shadow-[0_18px_34px_rgba(143,44,255,0.24)] sm:w-auto sm:min-w-[240px]"
+          className="min-h-12 w-full justify-center whitespace-normal bg-[var(--sales-primary-cta-background)] px-6 text-center shadow-[var(--sales-primary-cta-shadow)] sm:w-auto sm:min-w-[240px]"
         >
           {primaryLabel}
         </ButtonLink>
@@ -634,7 +634,7 @@ export function RenderProductSalesPage({
                     ) : null}
                     <ButtonLink
                       href={singleOffer.checkoutUrl}
-                      className="mt-4 min-h-12 w-full justify-center whitespace-normal bg-[linear-gradient(135deg,var(--accent),#c16bff)] px-6 text-center shadow-[0_18px_34px_rgba(143,44,255,0.24)]"
+                      className="mt-4 min-h-12 w-full justify-center whitespace-normal bg-[var(--sales-primary-cta-background)] px-6 text-center shadow-[var(--sales-primary-cta-shadow)]"
                     >
                       {primaryCtaLabel}
                     </ButtonLink>
@@ -680,7 +680,7 @@ export function RenderProductSalesPage({
     <div className="perseus-sales-page space-y-14 overflow-x-hidden lg:space-y-16">
       <section className="px-4 sm:px-6">
         <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[30px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] p-4 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] sm:p-5 lg:p-6">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,rgba(168,102,255,0.18),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(212,168,70,0.12),transparent_22%)]" />
+          <div className="absolute inset-0 bg-[var(--sales-hero-atmosphere)]" />
           <div className={`relative grid gap-6 lg:items-center ${hasHeroImage ? "lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.82fr)]" : ""}`}>
             <div className="px-2 py-5 sm:px-4 lg:px-5 lg:py-8">
               <div className="perseus-sales-hero-badges flex flex-wrap items-center gap-3">

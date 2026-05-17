@@ -178,12 +178,29 @@ function TestimoniesSection({
       </div>
       <div className="grid gap-6 xl:grid-cols-3">
         {items.map((testimonial) => (
-          <figure key={testimonial.id} className="perseus-testimonial-card rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-7 shadow-[var(--collection-panel-shadow)]">
-            <blockquote className="text-lg leading-9 text-[var(--portal-text)]">&ldquo;{testimonial.quote}&rdquo;</blockquote>
-            <figcaption className="mt-6 space-y-1">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--accent-lavender)]">{testimonial.name}</p>
-              <p className="text-sm text-[var(--foreground-soft)]">{testimonial.source}</p>
-            </figcaption>
+          <figure
+            key={testimonial.id}
+            className="perseus-testimonial-card relative overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-7 shadow-[var(--collection-panel-shadow)]"
+          >
+            <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,var(--accent),var(--premium))]" aria-hidden="true" />
+            <span className="pointer-events-none absolute right-5 top-5 font-serif text-7xl leading-none text-[var(--accent)] opacity-[0.055]" aria-hidden="true">
+              &ldquo;
+            </span>
+            <div className="relative z-10 flex h-full flex-col">
+              <div className="mb-6 flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-[var(--premium)] bg-[var(--premium-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--premium)]">
+                  Student proof
+                </span>
+                <span className="text-sm leading-none text-[var(--premium)]" aria-label="Five star review">
+                  ★★★★★
+                </span>
+              </div>
+              <blockquote className="text-lg font-medium leading-9 text-[var(--portal-text)]">&ldquo;{testimonial.quote}&rdquo;</blockquote>
+              <figcaption className="mt-7 border-t border-[var(--border)] pt-5">
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--accent-lavender)]">{testimonial.name}</p>
+                <p className="mt-1 text-sm text-[var(--foreground-soft)]">{testimonial.source}</p>
+              </figcaption>
+            </div>
           </figure>
         ))}
       </div>

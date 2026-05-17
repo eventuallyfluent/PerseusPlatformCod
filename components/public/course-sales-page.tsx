@@ -229,12 +229,12 @@ export function CourseSalesPage({
               className="w-full rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm leading-7 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
             />
           </label>
-          <label className="flex gap-3 rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel-strong)] p-4 text-sm leading-6 text-[var(--text-secondary)]">
+          <label className="!flex gap-3 rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel-strong)] p-4 text-sm leading-6 text-[var(--text-secondary)]">
             <input
               name="marketingConsent"
               type="checkbox"
               value="true"
-              className="mt-1 size-4 shrink-0 rounded border-[var(--border)] accent-[var(--accent)]"
+              className="mt-1 !h-4 !w-4 flex-none !rounded !p-0 accent-[var(--accent)]"
             />
             <span>
               Send me course updates and email announcements. You can still send this question without joining the email list.

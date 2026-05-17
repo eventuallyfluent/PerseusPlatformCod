@@ -52,6 +52,7 @@ export default async function AdminInquiriesPage({
           { header: "Sender" },
           { header: "Course" },
           { header: "Message" },
+          { header: "Email consent" },
           { header: "Status" },
           { header: "Created" },
           { header: "Actions" },
@@ -75,6 +76,16 @@ export default async function AdminInquiriesPage({
                 inquiry.course?.title ?? "General course question"
               ),
               <span key="message" className="whitespace-pre-wrap text-sm leading-6">{inquiry.message}</span>,
+              inquiry.marketingConsent ? (
+                <span key="marketing-consent" className="space-y-1">
+                  <AdminStatusBadge tone="success">Opted in</AdminStatusBadge>
+                  <span className="block text-xs text-[var(--text-secondary)]">
+                    {inquiry.marketingConsentAt ? inquiry.marketingConsentAt.toLocaleString() : "Consent time saved"}
+                  </span>
+                </span>
+              ) : (
+                <AdminStatusBadge key="marketing-consent" tone="neutral">No consent</AdminStatusBadge>
+              ),
               <AdminStatusBadge key="status" tone={getStatusTone(inquiry.status)}>{inquiry.status.toLowerCase()}</AdminStatusBadge>,
               inquiry.createdAt.toLocaleString(),
               <AdminActionBar key="actions">

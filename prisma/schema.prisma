@@ -560,20 +560,24 @@ model Testimonial {
 }
 
 model ContactInquiry {
-  id         String               @id @default(cuid())
-  courseId   String?
-  name       String
-  email      String
-  message    String
-  sourcePath String?
-  status     ContactInquiryStatus @default(UNREAD)
-  createdAt  DateTime             @default(now())
-  updatedAt  DateTime             @updatedAt
-  course     Course?              @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  id                       String               @id @default(cuid())
+  courseId                 String?
+  name                     String
+  email                    String
+  message                  String
+  sourcePath               String?
+  marketingConsent         Boolean              @default(false)
+  marketingConsentAt       DateTime?
+  marketingConsentSource   String?
+  status                   ContactInquiryStatus @default(UNREAD)
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  course                   Course?              @relation(fields: [courseId], references: [id], onDelete: SetNull)
 
   @@index([courseId])
   @@index([status, createdAt])
   @@index([email])
+  @@index([marketingConsent, createdAt])
 }
 
 model GeneratedPage {

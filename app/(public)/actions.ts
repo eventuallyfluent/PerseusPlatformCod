@@ -37,6 +37,7 @@ export async function submitCourseInquiryAction(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
   const email = String(formData.get("email") ?? "").trim().toLowerCase().slice(0, 180);
   const message = String(formData.get("message") ?? "").trim().slice(0, 2000);
+  const marketingConsent = formData.get("marketingConsent") === "true";
 
   if (!courseId || !courseSlug || name.length < 2 || !isValidEmail(email) || message.length < 10) {
     redirect(`${returnPath}?inquiry=error#course-questions`);
@@ -58,6 +59,9 @@ export async function submitCourseInquiryAction(formData: FormData) {
       email,
       message,
       sourcePath: returnPath,
+      marketingConsent,
+      marketingConsentAt: marketingConsent ? new Date() : null,
+      marketingConsentSource: marketingConsent ? returnPath : null,
     },
   });
 

@@ -7,19 +7,36 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminOverviewPage() {
   const data = await getAdminDashboardData();
+  const metrics = data.metrics.status === "available" ? data.metrics.data : null;
+  const metricsDetail = data.metrics.status === "available" && data.metrics.stale ? "Showing last available dashboard snapshot" : undefined;
+  const recentOrders = data.recentOrders.status === "available" ? data.recentOrders.data : [];
+  const reviewsNeedingCheck = data.reviewsNeedingCheck.status === "available" ? data.reviewsNeedingCheck.data : [];
+  const recentInquiries = data.recentInquiries.status === "available" ? data.recentInquiries.data : [];
+  const unreadInquiries = metrics?.unreadInquiries ?? null;
 
   return (
     <AdminShell title="Admin overview" description="Month-to-date earnings, recent sales, inquiries, and reviews needing approval.">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <AdminStat label="Month-to-date earnings" value={formatAdminMoney(data.revenueThisMonth)} detail={`${data.monthlyOrders} paid sale${data.monthlyOrders === 1 ? "" : "s"} this month`} />
-        <AdminStat label="Students" value={data.totalStudents} detail={`${data.newStudents} new this month`} />
-        <AdminStat label="Enrollments" value={data.newEnrollments} detail="New course enrollments this month" />
-        <AdminStat label="Unread inquiries" value={data.unreadInquiries} detail="Course questions from sales pages" href="/admin/inquiries" tone={data.unreadInquiries > 0 ? "warning" : "success"} />
+        <AdminStat
+          label="Month-to-date earnings"
+          value={metrics ? formatAdminMoney(metrics.revenueThisMonth) : "Unavailable"}
+          detail={metrics ? `${metrics.monthlyOrders} paid sale${metrics.monthlyOrders === 1 ? "" : "s"} this month${metricsDetail ? ` - ${metricsDetail}` : ""}` : "Dashboard metrics could not be loaded."}
+          tone={metrics ? "neutral" : "warning"}
+        />
+        <AdminStat label="Students" value={metrics?.totalStudents ?? "Unavailable"} detail={metrics ? `${metrics.newStudents} new this month` : "Student count could not be loaded."} tone={metrics ? "neutral" : "warning"} />
+        <AdminStat label="Enrollments" value={metrics?.newEnrollments ?? "Unavailable"} detail={metrics ? "New course enrollments this month" : "Enrollment count could not be loaded."} tone={metrics ? "neutral" : "warning"} />
+        <AdminStat
+          label="Unread inquiries"
+          value={unreadInquiries ?? "Unavailable"}
+          detail={unreadInquiries !== null ? "Course questions from sales pages" : "Inquiry count could not be loaded."}
+          href="/admin/inquiries"
+          tone={unreadInquiries === null ? "warning" : unreadInquiries > 0 ? "warning" : "success"}
+        />
         <AdminStat
           label="Reviews to check"
-          value={data.pendingReviews}
-          detail={data.manualPaymentOrders > 0 ? `${data.manualPaymentOrders} payment order${data.manualPaymentOrders === 1 ? "" : "s"} also waiting` : "New reviews needing approval"}
-          tone={data.manualPaymentOrders + data.pendingReviews > 0 ? "warning" : "success"}
+          value={metrics?.pendingReviews ?? "Unavailable"}
+          detail={metrics ? (metrics.manualPaymentOrders > 0 ? `${metrics.manualPaymentOrders} payment order${metrics.manualPaymentOrders === 1 ? "" : "s"} also waiting` : "New reviews needing approval") : "Review count could not be loaded."}
+          tone={metrics && metrics.manualPaymentOrders + metrics.pendingReviews > 0 ? "warning" : metrics ? "success" : "warning"}
         />
       </div>
 
@@ -48,7 +65,7 @@ export default async function AdminOverviewPage() {
               { header: "Total" },
               { header: "Created" },
             ]}
-            rows={data.recentOrders.map((order) => ({
+            rows={recentOrders.map((order) => ({
               key: order.id,
               cells: [
                 <span key="id" className="font-semibold text-[var(--text-primary)]">{order.id.slice(0, 8)}</span>,
@@ -59,7 +76,7 @@ export default async function AdminOverviewPage() {
                 order.createdAt.toLocaleDateString(),
               ],
             }))}
-            empty="No sales yet."
+            empty={data.recentOrders.status === "available" ? "No sales yet." : "Recent sales are temporarily unavailable. The rest of the admin overview is still usable."}
           />
         </section>
 
@@ -74,8 +91,12 @@ export default async function AdminOverviewPage() {
             </HardLink>
           </div>
           <div className="grid gap-3">
-            {data.reviewsNeedingCheck.length > 0 ? (
-              data.reviewsNeedingCheck.map((review) => (
+            {data.reviewsNeedingCheck.status === "unavailable" ? (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+                Reviews are temporarily unavailable. Use the review queue link to retry that section.
+              </div>
+            ) : reviewsNeedingCheck.length > 0 ? (
+              reviewsNeedingCheck.map((review) => (
               <div key={review.id} className="rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0 space-y-2">
@@ -124,7 +145,7 @@ export default async function AdminOverviewPage() {
             { header: "Message" },
             { header: "Created" },
           ]}
-          rows={data.recentInquiries.map((inquiry) => ({
+          rows={recentInquiries.map((inquiry) => ({
             key: inquiry.id,
             cells: [
               <span key="sender" className="font-semibold text-[var(--text-primary)]">
@@ -138,7 +159,7 @@ export default async function AdminOverviewPage() {
               inquiry.createdAt.toLocaleDateString(),
             ],
           }))}
-          empty="No course inquiries yet."
+          empty={data.recentInquiries.status === "available" ? "No course inquiries yet." : "Recent inquiries are temporarily unavailable. The full inbox can still be opened from this page."}
         />
       </section>
     </AdminShell>

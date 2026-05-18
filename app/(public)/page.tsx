@@ -74,20 +74,24 @@ function CollectionCourseTile({ course, toneVar }: { course: CollectionCoursePre
   return (
     <Link
       href={course.href}
-      className="group/course grid h-[132px] min-w-[220px] grid-rows-[58px_1fr] overflow-hidden border-r border-[var(--border)] bg-[var(--surface-panel)] transition hover:bg-[var(--surface-panel-strong)] lg:min-w-0"
+      className="group/course grid h-[96px] w-[190px] flex-none grid-rows-[34px_1fr] overflow-hidden rounded-[12px] border border-[var(--border)] bg-[var(--surface-panel)] shadow-sm transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel-strong)]"
     >
       <div className="relative min-h-0 overflow-hidden" style={{ backgroundImage: toneVar }}>
         {course.imageUrl ? (
-          <Image src={course.imageUrl} alt="" fill sizes="(min-width: 1024px) 22vw, 220px" className="object-cover opacity-70 transition group-hover/course:scale-105 group-hover/course:opacity-85" />
+          <Image src={course.imageUrl} alt="" fill sizes="190px" className="object-cover opacity-70 transition group-hover/course:scale-105 group-hover/course:opacity-85" />
         ) : (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_12%,var(--accent-soft),transparent_38%)]" />
         )}
         <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(13,13,26,0.18))]" />
       </div>
-      <div className="min-w-0 px-4 py-3">
-        <h3 className="truncate text-sm font-semibold text-[var(--portal-text)]">{course.title}</h3>
-        <p className="mt-1 truncate text-[11px] text-[var(--foreground-soft)]">{course.instructorName || "Perseus Arcane"}</p>
-        {course.priceLabel ? <p className="mt-2 text-[11px] font-semibold text-[var(--portal-text)]">{course.priceLabel}</p> : null}
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-2 px-3 py-2.5">
+        <h3 className="min-w-0 truncate text-xs font-semibold leading-5 text-[var(--portal-text)]">{course.title}</h3>
+        {course.priceLabel ? (
+          <span className="row-span-2 h-fit rounded-full border border-[var(--border)] px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.06em] text-[var(--premium)]">
+            {course.priceLabel}
+          </span>
+        ) : null}
+        <p className="min-w-0 truncate text-[11px] text-[var(--foreground-soft)]">{course.instructorName || "Perseus Arcane"}</p>
       </div>
     </Link>
   );
@@ -126,15 +130,15 @@ function CollectionRail({
         </Link>
       </div>
 
-      <div className="flex min-h-[132px] overflow-x-auto border-t border-[var(--border)] lg:grid lg:grid-cols-[repeat(3,minmax(0,1fr))_minmax(180px,1fr)] lg:overflow-hidden">
+      <div className="flex min-h-[128px] items-stretch gap-3 overflow-x-auto border-t border-[var(--border)] p-4">
         {courses.length > 0 ? (
           courses.map((course) => <CollectionCourseTile key={course.id} course={course} toneVar={toneVar} />)
         ) : (
-          <div className="flex min-h-[132px] min-w-[220px] items-center px-5 text-sm font-medium text-[var(--foreground-soft)] lg:col-span-3 lg:min-w-0">
+          <div className="flex h-[96px] w-[190px] flex-none items-center rounded-[12px] border border-dashed border-[var(--border)] px-4 text-sm font-medium text-[var(--foreground-soft)]">
             Courses coming soon
           </div>
         )}
-        <div className="hidden border-l border-[var(--border)] bg-[var(--accent-soft)] lg:block" style={{ backgroundImage: toneVar }} />
+        <div className="min-w-[120px] flex-1 rounded-[12px] border border-[var(--border)] bg-[var(--accent-soft)]" style={{ backgroundImage: toneVar }} />
       </div>
     </article>
   );

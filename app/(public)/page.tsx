@@ -67,32 +67,70 @@ function formatPriceLabel(amount: unknown, currency?: string | null) {
   const numericAmount = readMoney(amount);
   if (numericAmount === null) return null;
   if (numericAmount <= 0) return "Free";
-  return `${currency ?? "USD"} ${numericAmount.toFixed(2)}`;
+
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency ?? "USD",
+      maximumFractionDigits: Number.isInteger(numericAmount) ? 0 : 2,
+    }).format(numericAmount);
+  } catch {
+    return `${currency ?? "USD"} ${numericAmount.toFixed(2)}`;
+  }
+}
+
+function getCollectionDescription(title: string, description: string) {
+  const trimmed = description.trim();
+  const isPlaceholder = trimmed.length < 12 || /^([a-z])\1+$/i.test(trimmed);
+
+  if (isPlaceholder) {
+    return `A focused Perseus study path for ${title.toLowerCase()}.`;
+  }
+
+  return trimmed;
 }
 
 function CollectionCourseTile({ course, toneVar }: { course: CollectionCoursePreview; toneVar: string }) {
   return (
     <Link
       href={course.href}
-      className="group/course grid h-[96px] w-[190px] flex-none grid-rows-[34px_1fr] overflow-hidden rounded-[12px] border border-[var(--border)] bg-[var(--surface-panel)] shadow-sm transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel-strong)]"
+      className="group/course block w-[220px] flex-none scroll-ml-6 overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface-panel)] text-left shadow-sm transition duration-200 hover:-translate-y-1 hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel-strong)] hover:shadow-[0_18px_42px_rgba(0,0,0,0.22)]"
     >
-      <div className="relative min-h-0 overflow-hidden" style={{ backgroundImage: toneVar }}>
+      <div className="relative h-[128px] overflow-hidden" style={{ backgroundImage: toneVar }}>
         {course.imageUrl ? (
-          <Image src={course.imageUrl} alt="" fill sizes="190px" className="object-cover opacity-70 transition group-hover/course:scale-105 group-hover/course:opacity-85" />
+          <Image src={course.imageUrl} alt="" fill sizes="220px" className="object-cover opacity-82 transition duration-300 group-hover/course:scale-105 group-hover/course:opacity-95" />
         ) : (
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_12%,var(--accent-soft),transparent_38%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_32%_26%,var(--accent-soft),transparent_42%)]" />
         )}
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(13,13,26,0.18))]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(13,13,26,0.26))]" />
       </div>
-      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-2 px-3 py-2.5">
-        <h3 className="min-w-0 truncate text-xs font-semibold leading-5 text-[var(--portal-text)]">{course.title}</h3>
-        {course.priceLabel ? (
-          <span className="row-span-2 h-fit rounded-full border border-[var(--border)] px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.06em] text-[var(--premium)]">
-            {course.priceLabel}
+      <div className="flex min-h-[126px] flex-col px-4 py-3.5">
+        <p className="truncate text-[11px] font-medium tracking-[0.03em] text-[var(--accent-lavender)]">{course.instructorName || "Perseus Arcane"}</p>
+        <h3 className="mt-1 line-clamp-2 min-h-[40px] text-sm font-semibold leading-5 text-[var(--portal-text)]">{course.title}</h3>
+        <div className="mt-auto flex items-center justify-between gap-3 pt-3">
+          {course.priceLabel ? <span className="font-mono text-xs font-semibold text-[var(--portal-text)]">{course.priceLabel}</span> : <span />}
+          <span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--accent-lavender)]">
+            Course
           </span>
-        ) : null}
-        <p className="min-w-0 truncate text-[11px] text-[var(--foreground-soft)]">{course.instructorName || "Perseus Arcane"}</p>
+        </div>
       </div>
+    </Link>
+  );
+}
+
+function CollectionViewAllCard({ href, title, courseCount }: { href: string; title: string; courseCount: number }) {
+  return (
+    <Link
+      href={href}
+      className="group/view-all flex min-h-[254px] w-[170px] flex-none flex-col items-center justify-center gap-3 overflow-hidden rounded-[14px] border border-[var(--border-strong)] bg-[linear-gradient(135deg,var(--brand),var(--brand-hover))] px-5 text-center shadow-sm transition duration-200 hover:-translate-y-1 hover:border-[var(--accent-lavender)] hover:shadow-[0_18px_42px_var(--perseus-hero-glow)]"
+    >
+      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-xl font-semibold text-white transition group-hover/view-all:translate-x-1">
+        -&gt;
+      </span>
+      <span className="text-xs font-bold uppercase tracking-[0.08em] text-white/90">Browse all {title}</span>
+      <span className="font-mono text-[10px] text-white/60">
+        {courseCount} course{courseCount === 1 ? "" : "s"}
+      </span>
     </Link>
   );
 }
@@ -100,6 +138,7 @@ function CollectionCourseTile({ course, toneVar }: { course: CollectionCoursePre
 function CollectionRail({
   eyebrow,
   title,
+  description,
   courseCount,
   courses,
   tone,
@@ -107,6 +146,7 @@ function CollectionRail({
 }: {
   eyebrow: string;
   title: string;
+  description: string;
   courseCount: number;
   courses: CollectionCoursePreview[];
   tone: CollectionTone;
@@ -114,31 +154,38 @@ function CollectionRail({
 }) {
   const toneVar = getToneVar(tone);
   const collectionMeta = `${eyebrow} - ${courseCount} course${courseCount === 1 ? "" : "s"}`;
+  const descriptionText = getCollectionDescription(title, description);
 
   return (
     <article className="perseus-collection-panel overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] shadow-[var(--collection-panel-shadow)]">
-      <div className="flex min-h-[96px] items-start justify-between gap-5 px-6 py-5 lg:px-7">
+      <div className="flex flex-col gap-5 border-b border-[var(--border)] px-6 py-6 md:flex-row md:items-start md:justify-between lg:px-8">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[var(--accent-lavender)]">{collectionMeta}</p>
-          <h2 className="mt-2 truncate font-serif text-3xl leading-none tracking-[-0.04em] text-[var(--portal-text)] sm:text-4xl">{title}</h2>
+          <h2 className="mt-2 font-serif text-3xl leading-none tracking-[-0.04em] text-[var(--portal-text)] sm:text-4xl">{title}</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--foreground-soft)]">{descriptionText}</p>
         </div>
         <Link
           href={href}
-          className="shrink-0 rounded-[10px] border border-[var(--border)] bg-[var(--button-secondary-background)] px-4 py-2 text-xs font-semibold text-[var(--button-secondary-text)] transition hover:border-[var(--border-strong)] hover:bg-[var(--button-secondary-hover)]"
+          className="w-fit shrink-0 rounded-full border border-[var(--border-strong)] bg-[var(--button-secondary-background)] px-5 py-2.5 text-xs font-semibold text-[var(--button-secondary-text)] transition hover:translate-x-0.5 hover:border-[var(--brand)] hover:bg-[var(--button-secondary-hover)]"
         >
           View all -&gt;
         </Link>
       </div>
 
-      <div className="flex min-h-[128px] items-stretch gap-3 overflow-x-auto border-t border-[var(--border)] p-4">
-        {courses.length > 0 ? (
-          courses.map((course) => <CollectionCourseTile key={course.id} course={course} toneVar={toneVar} />)
-        ) : (
-          <div className="flex h-[96px] w-[190px] flex-none items-center rounded-[12px] border border-dashed border-[var(--border)] px-4 text-sm font-medium text-[var(--foreground-soft)]">
-            Courses coming soon
-          </div>
-        )}
-        <div className="min-w-[120px] flex-1 rounded-[12px] border border-[var(--border)] bg-[var(--accent-soft)]" style={{ backgroundImage: toneVar }} />
+      <div className="relative p-5 md:p-6 lg:p-8">
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-[linear-gradient(90deg,transparent,var(--perseus-collection-panel))]" />
+        <div className="flex snap-x gap-4 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {courses.length > 0 ? (
+            <>
+              {courses.map((course) => <CollectionCourseTile key={course.id} course={course} toneVar={toneVar} />)}
+              <CollectionViewAllCard href={href} title={title} courseCount={courseCount} />
+            </>
+          ) : (
+            <div className="flex min-h-[254px] w-[220px] flex-none items-center rounded-[14px] border border-dashed border-[var(--border)] px-5 text-sm font-medium text-[var(--foreground-soft)]">
+              Courses coming soon
+            </div>
+          )}
+        </div>
       </div>
     </article>
   );
@@ -188,6 +235,7 @@ function CollectionsSection({
     slug: string;
     eyebrow: string | null;
     title: string;
+    description: string;
     tone: string;
     courseCount: number;
     courses: CollectionCoursePreview[];
@@ -207,6 +255,7 @@ function CollectionsSection({
             key={`${collection.id}-${index}`}
             eyebrow={collection.eyebrow ?? `Collection ${index + 1}`}
             title={collection.title}
+            description={collection.description}
             courseCount={collection.courseCount}
             courses={collection.courses}
             tone={(collection.tone as CollectionTone) ?? "arcane"}
@@ -314,6 +363,7 @@ export default async function HomePage() {
           slug: true,
           eyebrow: true,
           title: true,
+          description: true,
           tone: true,
           _count: {
             select: {
@@ -322,7 +372,6 @@ export default async function HomePage() {
           },
           courses: {
             orderBy: { position: "asc" },
-            take: 3,
             select: {
               course: {
                 select: {
@@ -430,6 +479,7 @@ export default async function HomePage() {
             slug: collection.slug,
             eyebrow: collection.eyebrow,
             title: collection.title,
+            description: collection.description,
             tone: collection.tone,
             courseCount: collection._count.courses,
             courses: collection.courses.map(({ course }) => {

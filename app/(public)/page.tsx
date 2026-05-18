@@ -40,15 +40,28 @@ function normalizeHeroText(value: string) {
 
 type CollectionTone = "arcane" | "discipline" | "gateway";
 
+function getCollectionDescription(title: string, description: string) {
+  const trimmed = description.trim();
+  const isPlaceholder = trimmed.length < 12 || /^([a-z])\1+$/i.test(trimmed);
+
+  if (isPlaceholder) {
+    return `A focused Perseus study path for ${title.toLowerCase()}.`;
+  }
+
+  return trimmed;
+}
+
 function CollectionPanel({
   eyebrow,
   title,
+  description,
   imageUrl,
   tone,
   href,
 }: {
   eyebrow: string;
   title: string;
+  description: string;
   imageUrl?: string;
   tone: CollectionTone;
   href: string;
@@ -63,22 +76,32 @@ function CollectionPanel({
   return (
     <Link href={href} className="group block h-full">
       <article
-        className="perseus-collection-panel relative flex min-h-[360px] h-full overflow-hidden rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] shadow-[var(--collection-panel-shadow)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)]"
-        style={{
-          backgroundImage: imageUrl
-            ? `linear-gradient(180deg, rgba(13,15,29,0.12), rgba(13,15,29,0.86)), ${toneVar}, url(${imageUrl})`
-            : toneVar,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+        className="perseus-collection-panel grid h-full min-h-[360px] overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] shadow-[var(--collection-panel-shadow)] transition duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)]"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(192,132,252,0.2),transparent_24%)] opacity-90 transition group-hover:opacity-100" />
-        <div className="relative flex h-full w-full flex-col justify-between p-8 lg:p-9">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[rgba(240,234,248,0.76)]">{eyebrow}</p>
+        <div
+          className="relative min-h-[150px] overflow-hidden border-b border-[var(--border)]"
+          style={{
+            backgroundImage: imageUrl
+              ? `linear-gradient(180deg, rgba(13, 13, 26, 0.1), rgba(13, 13, 26, 0.58)), ${toneVar}, url(${imageUrl})`
+              : toneVar,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(192,132,252,0.24),transparent_28%)] transition group-hover:opacity-80" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-[linear-gradient(90deg,transparent,var(--premium),transparent)] opacity-70" />
+          <p className="relative p-6 text-[11px] font-semibold uppercase tracking-[0.34em] text-[rgba(250,250,250,0.78)]">{eyebrow}</p>
+        </div>
+
+        <div className="flex min-h-0 flex-col justify-between p-6 lg:p-7">
           <div>
-            <h2 className="max-w-sm font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)] lg:text-[3.6rem]">{title}</h2>
-            <p className="mt-6 text-sm font-semibold text-[var(--premium)] transition group-hover:text-[var(--accent-lavender)]">View collection</p>
+            <h2 className="font-serif text-4xl leading-none tracking-[-0.04em] text-[var(--portal-text)] lg:text-[2.8rem]">{title}</h2>
+            <p className="mt-4 line-clamp-3 text-sm leading-7 text-[var(--foreground-soft)]">{getCollectionDescription(title, description)}</p>
           </div>
+          <p className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[var(--premium)] transition group-hover:text-[var(--accent-lavender)]">
+            View collection
+            <span aria-hidden="true" className="transition group-hover:translate-x-1">→</span>
+          </p>
         </div>
       </article>
     </Link>
@@ -148,6 +171,7 @@ function CollectionsSection({
             key={`${collection.id}-${index}`}
             eyebrow={collection.eyebrow ?? `Collection ${index + 1}`}
             title={collection.title}
+            description={collection.description}
             imageUrl={collection.imageUrl ?? undefined}
             tone={(collection.tone as CollectionTone) ?? "arcane"}
             href={resolveCollectionPublicPath(collection)}

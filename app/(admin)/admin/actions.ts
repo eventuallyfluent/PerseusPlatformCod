@@ -23,6 +23,7 @@ import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSecti
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
+import { normalizePublicThemeFamily, PUBLIC_THEME_FAMILY_SETTING_KEY } from "@/lib/theme/public-theme";
 import { CourseStatus, type HomepageSectionType } from "@prisma/client";
 import type { GatewayCapabilities, GatewayCheckoutModel, GatewayKind, GatewaySettlementBehavior, GatewayTaxModel } from "@/types";
 import type { BundleFormState, BundleFormValues } from "@/lib/admin/bundle-form-state";
@@ -275,6 +276,27 @@ function getGatewayDefaults(kind: GatewayKind): {
 
 function getDefaultHomepagePayload(type: HomepageSectionType) {
   return defaultHomepageSections().find((section) => section.type === type)!.payload;
+}
+
+export async function savePublicThemeFamilyAction(formData: FormData) {
+  const family = normalizePublicThemeFamily(String(formData.get("family") ?? "perseus"));
+
+  try {
+    await prisma.siteSetting.upsert({
+      where: { key: PUBLIC_THEME_FAMILY_SETTING_KEY },
+      update: { value: { family } },
+      create: {
+        key: PUBLIC_THEME_FAMILY_SETTING_KEY,
+        value: { family },
+      },
+    });
+  } catch {
+    redirect("/admin/settings?error=theme");
+  }
+
+  revalidatePath("/", "layout");
+  revalidatePath("/admin/settings");
+  redirect("/admin/settings?saved=theme");
 }
 
 export async function saveHomepageSectionAction(formData: FormData) {

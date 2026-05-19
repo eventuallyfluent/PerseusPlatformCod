@@ -153,6 +153,160 @@
   --focus-overlay-button-border: rgba(255, 255, 255, 0.15);
 }
 
+.theme-perseus-dynamic-1 {
+  --theme-name: "Perseus Dynamic";
+  --background: #111111;
+  --background-soft: #151515;
+  --background-elevated: rgba(20, 20, 20, 0.92);
+  --background-deep: #0f0f0f;
+  --background-deep-soft: #171717;
+  --foreground: #edeae3;
+  --foreground-soft: rgba(237, 234, 227, 0.82);
+  --muted: rgba(237, 234, 227, 0.58);
+  --card: rgba(255, 255, 255, 0.025);
+  --card-strong: rgba(255, 255, 255, 0.055);
+  --border: rgba(255, 238, 88, 0.17);
+  --border-strong: rgba(167, 139, 250, 0.3);
+  --accent: #7c3aed;
+  --accent-strong: #a78bfa;
+  --brand: var(--accent);
+  --brand-hover: #3a0878;
+  --accent-soft: rgba(124, 58, 237, 0.16);
+  --accent-glow: rgba(124, 58, 237, 0.18);
+  --accent-lavender: #a78bfa;
+  --premium: #ffee58;
+  --premium-soft: rgba(255, 238, 88, 0.12);
+  --success: #22c55e;
+  --success-soft: rgba(34, 197, 94, 0.12);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.14);
+  --danger: #fb7185;
+  --danger-soft: rgba(251, 113, 133, 0.14);
+  --shadow-soft: 0 28px 72px rgba(0, 0, 0, 0.24);
+  --shadow-glow: 0 20px 52px rgba(124, 58, 237, 0.16);
+  --portal-border: rgba(255, 255, 255, 0.07);
+  --portal-panel: rgba(255, 255, 255, 0.025);
+  --portal-panel-strong: rgba(255, 255, 255, 0.055);
+  --portal-text: #edeae3;
+  --portal-muted: rgba(237, 234, 227, 0.58);
+  --perseus-logo-primary: #edeae3;
+  --perseus-logo-accent: #a78bfa;
+  --perseus-logo-gold: #ffee58;
+  --perseus-collection-panel: rgba(255, 255, 255, 0.025);
+  --perseus-collection-elevated: rgba(255, 255, 255, 0.055);
+  --perseus-hero-glow: rgba(124, 58, 237, 0.16);
+  --header-surface: rgba(17, 17, 17, 0.88);
+  --hero-shell-border: rgba(255, 238, 88, 0.16);
+  --hero-shell-background: linear-gradient(180deg, #111111, #161616);
+  --hero-fallback-background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(255, 238, 88, 0.06));
+  --hero-media-overlay: linear-gradient(180deg, rgba(17, 17, 17, 0.18), rgba(17, 17, 17, 0.72));
+  --hero-shell-overlay: linear-gradient(180deg, rgba(17, 17, 17, 0.16), rgba(17, 17, 17, 0.78));
+  --sales-hero-atmosphere: radial-gradient(circle at 18% 16%, rgba(124, 58, 237, 0.14), transparent 24%), radial-gradient(circle at 78% 16%, rgba(255, 238, 88, 0.08), transparent 24%);
+  --sales-primary-cta-background: linear-gradient(135deg, var(--accent), #3a0878);
+  --sales-primary-cta-shadow: 0 18px 38px rgba(124, 58, 237, 0.24);
+  --hero-text-primary: #edeae3;
+  --hero-text-secondary: rgba(237, 234, 227, 0.82);
+  --hero-text-muted: rgba(237, 234, 227, 0.58);
+  --hero-price-muted: rgba(237, 234, 227, 0.58);
+  --collection-arcane: linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(255, 238, 88, 0.08));
+  --collection-discipline: linear-gradient(135deg, rgba(34, 197, 94, 0.16), rgba(124, 58, 237, 0.1));
+  --collection-gateway: linear-gradient(135deg, rgba(255, 238, 88, 0.16), rgba(124, 58, 237, 0.12));
+  --surface-canvas: var(--background);
+  --surface-canvas-soft: var(--background-soft);
+  --surface-panel: var(--card);
+  --surface-panel-strong: var(--card-strong);
+  --text-primary: var(--foreground);
+  --text-secondary: var(--foreground-soft);
+  --text-muted: var(--muted);
+  --status-success: var(--success);
+  --status-warning: var(--warning);
+  --status-danger: var(--danger);
+  --shadow-panel: var(--shadow-soft);
+  --shadow-brand: var(--shadow-glow);
+  --radius-panel: 20px;
+  --radius-card: 14px;
+  --radius-field: 12px;
+  --radius-pill: 999px;
+  --body-background:
+    radial-gradient(circle at 18% 12%, rgba(124, 58, 237, 0.12), transparent 24%),
+    radial-gradient(circle at 82% 18%, rgba(255, 238, 88, 0.07), transparent 22%),
+    linear-gradient(180deg, #111111 0%, #151515 42%, #101010 100%);
+  --body-grid-color: rgba(255, 255, 255, 0.025);
+  --shell-background-public: radial-gradient(circle_at_top,rgba(124,58,237,0.1),transparent_18%),linear-gradient(180deg,#111111,#151515_38%,#101010_100%);
+  --shell-background-checkout: radial-gradient(circle_at_top,rgba(255,238,88,0.07),transparent_18%),linear-gradient(180deg,#111111,#151515_38%,#101010_100%);
+  --shell-background-learner: radial-gradient(circle_at_top,rgba(124,58,237,0.1),transparent_18%),linear-gradient(180deg,#111111,#151515_38%,#101010_100%);
+  --hero-shell-shadow: 0 30px 70px rgba(0, 0, 0, 0.2);
+  --collection-panel-shadow: none;
+  --collection-row-hover: rgba(255, 255, 255, 0.055);
+  --button-primary-background: var(--accent);
+  --button-primary-hover: #8b5cf6;
+  --button-primary-shadow: 0 14px 36px rgba(124, 58, 237, 0.2);
+  --button-secondary-border: rgba(255, 238, 88, 0.24);
+  --button-secondary-background: rgba(255, 238, 88, 0.07);
+  --button-secondary-hover: rgba(124, 58, 237, 0.12);
+  --button-secondary-text: var(--premium);
+  --button-ghost-background: rgba(255, 255, 255, 0.025);
+  --button-ghost-hover-background: rgba(255, 255, 255, 0.055);
+  --button-ghost-text: var(--foreground-soft);
+  --checkout-hero-panel-background: rgba(255, 255, 255, 0.025);
+  --checkout-hero-panel-border: rgba(255, 238, 88, 0.17);
+  --checkout-hero-text: #edeae3;
+  --checkout-hero-muted: rgba(237, 234, 227, 0.76);
+  --checkout-hero-chip: rgba(255, 238, 88, 0.7);
+  --checkout-hero-shadow: none;
+  --checkout-form-panel-background: rgba(255, 255, 255, 0.025);
+  --checkout-form-panel-border: rgba(255, 238, 88, 0.17);
+  --checkout-form-text: #edeae3;
+  --checkout-form-muted: rgba(237, 234, 227, 0.76);
+  --checkout-form-shadow: none;
+  --checkout-card-background: rgba(255, 255, 255, 0.025);
+  --checkout-card-border: rgba(255, 255, 255, 0.08);
+  --checkout-card-text: #edeae3;
+  --checkout-card-muted: rgba(237, 234, 227, 0.68);
+  --checkout-card-subtle: rgba(237, 234, 227, 0.5);
+  --checkout-card-divider: rgba(255, 255, 255, 0.07);
+  --checkout-field-background: rgba(255, 255, 255, 0.035);
+  --checkout-field-border: rgba(255, 255, 255, 0.11);
+  --checkout-field-text: #edeae3;
+  --checkout-field-placeholder: rgba(237, 234, 227, 0.44);
+  --checkout-field-focus: rgba(255, 238, 88, 0.46);
+  --checkout-success-text: #86efac;
+  --checkout-warning-text: #ffee58;
+  --checkout-error-background: rgba(251, 113, 133, 0.13);
+  --checkout-error-text: #fecdd3;
+  --checkout-cta-background: linear-gradient(135deg, var(--accent), #3a0878);
+  --checkout-cta-hover-background: linear-gradient(135deg, #8b5cf6, #4c1d95);
+  --checkout-cta-text: #ffffff;
+  --checkout-cta-shadow: 0 16px 34px rgba(124, 58, 237, 0.22);
+  --checkout-sticky-background: rgba(17, 17, 17, 0.95);
+  --checkout-sticky-border: rgba(255, 238, 88, 0.17);
+  --checkout-sticky-shadow: 0 -14px 34px rgba(0, 0, 0, 0.32);
+  --checkout-summary-background: rgba(255, 255, 255, 0.94);
+  --checkout-summary-text: #171717;
+  --checkout-summary-muted: #5f5b53;
+  --checkout-upsell-border: rgba(255, 238, 88, 0.2);
+  --checkout-upsell-background: linear-gradient(135deg, rgba(255, 238, 88, 0.08), rgba(124, 58, 237, 0.1));
+  --checkout-upsell-label: #ffee58;
+  --checkout-upsell-text: #edeae3;
+  --checkout-upsell-muted: rgba(237, 234, 227, 0.76);
+  --checkout-upsell-chip-background: rgba(255, 255, 255, 0.08);
+  --checkout-upsell-chip-text: #edeae3;
+  --checkout-upsell-button-background: #edeae3;
+  --checkout-upsell-button-hover: rgba(237, 234, 227, 0.9);
+  --checkout-upsell-button-text: var(--accent);
+  --checkout-unavailable-border: rgba(255, 238, 88, 0.17);
+  --checkout-unavailable-background: rgba(255, 255, 255, 0.025);
+  --checkout-unavailable-text: rgba(237, 234, 227, 0.76);
+  --focus-overlay-backdrop: rgba(17, 17, 17, 0.92);
+  --focus-overlay-panel-background: rgba(255, 255, 255, 0.04);
+  --focus-overlay-panel-border: rgba(255, 238, 88, 0.17);
+  --focus-overlay-text: #edeae3;
+  --focus-overlay-muted: rgba(237, 234, 227, 0.82);
+  --focus-overlay-button-background: rgba(255, 255, 255, 0.05);
+  --focus-overlay-button-hover: rgba(255, 255, 255, 0.09);
+  --focus-overlay-button-border: rgba(255, 255, 255, 0.11);
+}
+
 .theme-perseus-light-1 {
   --theme-name: "Perseus Parchment Daylight";
   --background: #fafafa;
@@ -334,6 +488,63 @@
   margin-top: 1.75rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--border);
+}
+
+.theme-perseus-dynamic-1 .perseus-home-hero {
+  border-color: rgba(255, 238, 88, 0.17);
+}
+
+.theme-perseus-dynamic-1 .perseus-theme-toggle {
+  display: none;
+}
+
+.theme-perseus-dynamic-1 .perseus-collection-panel,
+.theme-perseus-dynamic-1 .perseus-email-signup,
+.theme-perseus-dynamic-1 .perseus-testimonial-card {
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.theme-perseus-dynamic-1 .perseus-collection-panel {
+  border-color: rgba(255, 238, 88, 0.17);
+}
+
+.theme-perseus-dynamic-1 .perseus-collection-panel > div:first-child {
+  border-bottom-color: rgba(255, 255, 255, 0.055);
+}
+
+.theme-perseus-dynamic-1 .perseus-home-collections .perseus-collection-panel:nth-child(3n + 2) {
+  border-color: rgba(124, 58, 237, 0.2);
+}
+
+.theme-perseus-dynamic-1 .perseus-home-collections .perseus-collection-panel:nth-child(3n + 3) {
+  border-color: rgba(34, 197, 94, 0.17);
+}
+
+.theme-perseus-dynamic-1 .perseus-home-testimonies .perseus-testimonial-card {
+  border-color: rgba(124, 58, 237, 0.2);
+  background: transparent;
+}
+
+.theme-perseus-dynamic-1 .perseus-home-testimonies .perseus-testimonial-light-accent {
+  display: block;
+  height: 2px;
+}
+
+.theme-perseus-dynamic-1 .perseus-home-testimonies .perseus-testimonial-light-quote {
+  display: inline;
+  color: var(--premium);
+  opacity: 0.08;
+}
+
+.theme-perseus-dynamic-1 .perseus-home-testimonies .perseus-testimonial-light-proof {
+  display: flex;
+}
+
+.theme-perseus-dynamic-1 .perseus-home-testimonies .perseus-testimonial-caption {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
 }
 
 .admin-theme,

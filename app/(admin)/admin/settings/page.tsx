@@ -4,8 +4,9 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { MultiSelectPicker } from "@/components/admin/multi-select-picker";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { saveHomepageSectionAction } from "@/app/(admin)/admin/actions";
+import { saveHomepageSectionAction, savePublicThemeFamilyAction } from "@/app/(admin)/admin/actions";
 import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
+import { normalizePublicThemeFamily, PUBLIC_THEME_FAMILY_SETTING_KEY } from "@/lib/theme/public-theme";
 import {
   stringifyLinkLines,
   type HomepageCollectionsPayload,
@@ -122,7 +123,7 @@ export default async function SettingsPage({
   searchParams?: Promise<{ saved?: string; error?: string }>;
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const [homepageSections, approvedTestimonials, collectionRecords] = await Promise.all([
+  const [homepageSections, approvedTestimonials, collectionRecords, publicThemeSetting] = await Promise.all([
     getHomepageSections(),
     prisma.testimonial.findMany({
       where: { isApproved: true },
@@ -140,7 +141,16 @@ export default async function SettingsPage({
         slug: true,
       },
     }),
+    prisma.siteSetting.findUnique({
+      where: { key: PUBLIC_THEME_FAMILY_SETTING_KEY },
+      select: { value: true },
+    }),
   ]);
+  const publicThemeFamily = normalizePublicThemeFamily(
+    publicThemeSetting?.value && typeof publicThemeSetting.value === "object" && "family" in publicThemeSetting.value
+      ? publicThemeSetting.value.family
+      : "perseus",
+  );
   const hero = homepageSections.find((section) => section.type === "HERO")!;
   const heroPayload = hero.payload as HomepageHeroPayload;
   const collections = homepageSections.find((section) => section.type === "COLLECTIONS")!;
@@ -164,6 +174,32 @@ export default async function SettingsPage({
     <AdminShell title="Homepage Settings" description="Edit, reorder, and toggle the five public homepage sections.">
       <div className="space-y-6">
         {feedbackMessage ? <p className={`rounded-[18px] px-4 py-3 text-sm ${feedbackTone}`}>{feedbackMessage}</p> : null}
+        <Card className="space-y-5 p-6">
+          <form action={savePublicThemeFamilyAction} className="space-y-5">
+            <div className="flex flex-col gap-4 border-b border-stone-200 pb-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold text-stone-950">Public theme</h2>
+                <p className="max-w-2xl text-sm leading-6 text-stone-600">
+                  Choose the active public theme family. Perseus keeps the visitor dark/light toggle. Dynamic applies the new experimental theme site-wide.
+                </p>
+              </div>
+              <label className="space-y-2">
+                <span className="text-sm font-medium text-stone-900">Theme family</span>
+                <select
+                  name="family"
+                  defaultValue={publicThemeFamily}
+                  className="min-w-56 rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-400"
+                >
+                  <option value="perseus">Perseus dark/light</option>
+                  <option value="dynamic">Dynamic experiment</option>
+                </select>
+              </label>
+            </div>
+            <div className="flex justify-end">
+              <Button type="submit">Save public theme</Button>
+            </div>
+          </form>
+        </Card>
         <SectionFrame
           type="HERO"
           title="Hero"

@@ -16,6 +16,15 @@ type CheckoutQuote = {
   couponCode: string | null;
 };
 
+const checkoutCardClass = "rounded-[20px] border border-[var(--checkout-card-border)] bg-[var(--checkout-card-background)]";
+const checkoutLabelClass = "text-[var(--checkout-card-muted)]";
+const checkoutValueClass = "font-semibold text-[var(--checkout-card-text)]";
+const checkoutInputClass =
+  "min-h-12 w-full rounded-[12px] border border-[var(--checkout-field-border)] bg-[var(--checkout-field-background)] px-4 py-3 text-sm text-[var(--checkout-field-text)] outline-none transition placeholder:text-[var(--checkout-field-placeholder)] focus:border-[var(--checkout-field-focus)]";
+const checkoutErrorClass = "rounded-[14px] bg-[var(--checkout-error-background)] px-4 py-3 text-sm text-[var(--checkout-error-text)]";
+const checkoutPrimaryButtonClass =
+  "min-h-14 w-full justify-center whitespace-normal rounded-full px-6 py-4 text-center text-base font-semibold text-[var(--checkout-cta-text)] shadow-[var(--checkout-cta-shadow)] transition [background:var(--checkout-cta-background)] hover:[background:var(--checkout-cta-hover-background)] hover:opacity-95";
+
 export function CheckoutForm({
   offerId,
   productTitle,
@@ -192,95 +201,95 @@ export function CheckoutForm({
 
   return (
     <div className="space-y-4 pb-20 sm:pb-0">
-      <div className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.04)] px-5 py-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[rgba(228,216,255,0.72)]">{productKind}</p>
-        <h1 className="mt-3 text-2xl leading-tight text-white [overflow-wrap:anywhere] sm:text-3xl">{productTitle}</h1>
-        {checkoutModeNote ? <p className="mt-3 text-sm leading-6 text-[rgba(236,229,255,0.74)]">{checkoutModeNote}</p> : null}
+      <div className={cn(checkoutCardClass, "px-5 py-5")}>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--checkout-card-subtle)]">{productKind}</p>
+        <h1 className="mt-3 text-2xl leading-tight text-[var(--checkout-card-text)] [overflow-wrap:anywhere] sm:text-3xl">{productTitle}</h1>
+        {checkoutModeNote ? <p className="mt-3 text-sm leading-6 text-[var(--checkout-card-muted)]">{checkoutModeNote}</p> : null}
       </div>
 
-      <div className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] px-5 py-4 text-sm text-[rgba(236,229,255,0.84)]">
+      <div className={cn(checkoutCardClass, "px-5 py-4 text-sm text-[var(--checkout-card-text)]")}>
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-4">
-            <span className="text-[rgba(236,229,255,0.62)]">Product</span>
-            <span className="max-w-[18rem] text-right font-semibold text-white [overflow-wrap:anywhere]">{productTitle}</span>
+            <span className={checkoutLabelClass}>Product</span>
+            <span className={cn(checkoutValueClass, "max-w-[18rem] text-right [overflow-wrap:anywhere]")}>{productTitle}</span>
           </div>
           {productMeta ? (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-[rgba(236,229,255,0.62)]">{productMeta.label}</span>
-              <span className="max-w-[18rem] text-right font-semibold text-white [overflow-wrap:anywhere]">{productMeta.value}</span>
+              <span className={checkoutLabelClass}>{productMeta.label}</span>
+              <span className={cn(checkoutValueClass, "max-w-[18rem] text-right [overflow-wrap:anywhere]")}>{productMeta.value}</span>
             </div>
           ) : null}
           <div className="flex items-center justify-between gap-4">
-            <span className="text-[rgba(236,229,255,0.62)]">Price</span>
-            <span className="font-semibold text-white">{quote.baseLabel}</span>
+            <span className={checkoutLabelClass}>Price</span>
+            <span className={checkoutValueClass}>{quote.baseLabel}</span>
           </div>
           {quote.upsellDiscountLabel ? (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-[rgba(236,229,255,0.62)]">Offer discount</span>
-              <span className="font-semibold text-emerald-300">{quote.upsellDiscountLabel}</span>
+              <span className={checkoutLabelClass}>Offer discount</span>
+              <span className="font-semibold text-[var(--checkout-success-text)]">{quote.upsellDiscountLabel}</span>
             </div>
           ) : null}
           {quote.couponDiscountLabel ? (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-[rgba(236,229,255,0.62)]">{quote.couponCode ? `Coupon (${quote.couponCode})` : "Coupon"}</span>
-              <span className="font-semibold text-emerald-300">{quote.couponDiscountLabel}</span>
+              <span className={checkoutLabelClass}>{quote.couponCode ? `Coupon (${quote.couponCode})` : "Coupon"}</span>
+              <span className="font-semibold text-[var(--checkout-success-text)]">{quote.couponDiscountLabel}</span>
             </div>
           ) : null}
           {quote.taxLabel ? (
             <div className="flex items-center justify-between gap-4">
-              <span className="text-[rgba(236,229,255,0.62)]">{taxSummaryLabel}</span>
-              <span className="font-semibold text-white">{quote.taxLabel}</span>
+              <span className={checkoutLabelClass}>{taxSummaryLabel}</span>
+              <span className={checkoutValueClass}>{quote.taxLabel}</span>
             </div>
           ) : null}
           {quote.taxLines?.map((line) => (
             <div key={`${line.jurisdiction}-${line.label}`} className="flex items-center justify-between gap-4 text-xs">
-              <span className="text-[rgba(236,229,255,0.52)]">{line.label} ({line.ratePercent}%)</span>
-              <span className="font-semibold text-[rgba(236,229,255,0.78)]">{line.amountLabel}</span>
+              <span className="text-[var(--checkout-card-subtle)]">{line.label} ({line.ratePercent}%)</span>
+              <span className="font-semibold text-[var(--checkout-card-muted)]">{line.amountLabel}</span>
             </div>
           ))}
-          <div className={cn("flex items-center justify-between gap-4 border-t border-white/10 pt-3", (quote.upsellDiscountLabel || quote.couponDiscountLabel) && "text-white")}>
-            <span className="text-[rgba(236,229,255,0.68)]">Total due today</span>
-            <span className="text-2xl font-semibold text-white">{quote.totalLabel}</span>
+          <div className="flex items-center justify-between gap-4 border-t border-[var(--checkout-card-divider)] pt-3">
+            <span className="text-[var(--checkout-card-muted)]">Total due today</span>
+            <span className="text-2xl font-semibold text-[var(--checkout-card-text)]">{quote.totalLabel}</span>
           </div>
         </div>
       </div>
 
       {shouldShowTaxLocation ? (
-        <div className="grid gap-3 rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] px-5 py-4 sm:grid-cols-3">
+        <div className={cn(checkoutCardClass, "grid gap-3 px-5 py-4 sm:grid-cols-3")}>
           <label className="space-y-2" htmlFor="checkout-tax-country">
-            <span className="text-sm font-medium text-white">Country/region</span>
+            <span className="text-sm font-medium text-[var(--checkout-card-text)]">Country code</span>
             <input
               id="checkout-tax-country"
-              className="min-h-12 w-full rounded-[18px] border border-white/10 bg-white/6 px-4 py-3 text-sm uppercase text-white outline-none transition placeholder:text-[rgba(236,229,255,0.5)] focus:border-[rgba(212,168,70,0.45)]"
+              className={cn(checkoutInputClass, "uppercase")}
               value={taxCountry}
               onChange={(event) => setTaxCountry(event.target.value.toUpperCase())}
               name="country"
               autoComplete="country"
               inputMode="text"
               enterKeyHint="next"
-              placeholder="US"
+              placeholder="GB"
               maxLength={2}
             />
           </label>
           <label className="space-y-2" htmlFor="checkout-tax-region">
-            <span className="text-sm font-medium text-white">State/province/region</span>
+            <span className="text-sm font-medium text-[var(--checkout-card-text)]">Region/state/province</span>
             <input
               id="checkout-tax-region"
-              className="min-h-12 w-full rounded-[18px] border border-white/10 bg-white/6 px-4 py-3 text-sm uppercase text-white outline-none transition placeholder:text-[rgba(236,229,255,0.5)] focus:border-[rgba(212,168,70,0.45)]"
+              className={cn(checkoutInputClass, "uppercase")}
               value={taxRegion}
               onChange={(event) => setTaxRegion(event.target.value.toUpperCase())}
               name="address-level1"
               autoComplete="address-level1"
               inputMode="text"
               enterKeyHint="next"
-              placeholder="CA"
+              placeholder="Optional"
             />
           </label>
           <label className="space-y-2" htmlFor="checkout-tax-postal">
-            <span className="text-sm font-medium text-white">Postal code</span>
+            <span className="text-sm font-medium text-[var(--checkout-card-text)]">Postal/postcode</span>
             <input
               id="checkout-tax-postal"
-              className="min-h-12 w-full rounded-[18px] border border-white/10 bg-white/6 px-4 py-3 text-sm uppercase text-white outline-none transition placeholder:text-[rgba(236,229,255,0.5)] focus:border-[rgba(212,168,70,0.45)]"
+              className={cn(checkoutInputClass, "uppercase")}
               value={taxPostalCode}
               onChange={(event) => setTaxPostalCode(event.target.value.toUpperCase())}
               name="postal-code"
@@ -290,22 +299,24 @@ export function CheckoutForm({
               placeholder="Optional"
             />
           </label>
-          <p className="text-sm text-[rgba(236,229,255,0.7)] sm:col-span-3">Use a two-letter country code such as US, CA, GB, or AU. Your final total updates before payment.</p>
-          {quote.requiresTaxLocation ? <p className="text-sm text-amber-200 sm:col-span-3">Enter your tax location to calculate the final checkout total.</p> : null}
-          {taxError ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 sm:col-span-3">{taxError}</p> : null}
+          <p className="text-sm text-[var(--checkout-card-muted)] sm:col-span-3">
+            Use a two-letter country code such as US, GB, CA, AU, or an EU country code such as DE or FR. Your final total updates before payment.
+          </p>
+          {quote.requiresTaxLocation ? <p className="text-sm text-[var(--checkout-warning-text)] sm:col-span-3">Enter your tax location to calculate the final checkout total.</p> : null}
+          {taxError ? <p className={cn(checkoutErrorClass, "sm:col-span-3")}>{taxError}</p> : null}
         </div>
       ) : null}
 
-      <div className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] px-5 py-4">
+      <div className={cn(checkoutCardClass, "px-5 py-4")}>
         <button
           type="button"
-          className="flex min-h-12 w-full items-center justify-between gap-4 text-left text-sm font-semibold text-white"
+          className="flex min-h-12 w-full items-center justify-between gap-4 text-left text-sm font-semibold text-[var(--checkout-card-text)]"
           onClick={() => setCouponOpen((current) => !current)}
           aria-expanded={couponOpen}
           aria-controls="checkout-coupon-panel"
         >
           <span>Have a coupon?</span>
-          <span className="text-[rgba(236,229,255,0.62)]">{couponOpen ? "Hide" : "Add code"}</span>
+          <span className="text-[var(--checkout-card-muted)]">{couponOpen ? "Hide" : "Add code"}</span>
         </button>
         {couponOpen ? (
           <div id="checkout-coupon-panel" className="mt-3 space-y-3">
@@ -313,7 +324,7 @@ export function CheckoutForm({
               <label className="sr-only" htmlFor="checkout-coupon">Coupon code</label>
               <input
                 id="checkout-coupon"
-                className="min-h-12 w-full rounded-[18px] border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none transition placeholder:text-[rgba(236,229,255,0.5)] focus:border-[rgba(212,168,70,0.45)]"
+                className={checkoutInputClass}
                 value={couponCode}
                 onChange={(event) => setCouponCode(event.target.value)}
                 name="coupon"
@@ -324,7 +335,7 @@ export function CheckoutForm({
               <Button
                 type="button"
                 variant="ghost"
-                className="min-h-12 rounded-full border-white/10 bg-white/8 px-5 py-3 text-white hover:bg-white/12 hover:text-white"
+                className="min-h-12 rounded-full border border-[var(--checkout-field-border)] bg-[var(--checkout-field-background)] px-5 py-3 text-[var(--checkout-card-text)] hover:bg-[var(--surface-panel-strong)] hover:text-[var(--checkout-card-text)]"
                 disabled={quoting || pending}
                 onClick={async () => {
                   await refreshQuote(couponCode.trim(), "coupon");
@@ -333,18 +344,18 @@ export function CheckoutForm({
                 {quoting ? "Checking..." : "Apply coupon"}
               </Button>
             </div>
-            {couponError ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{couponError}</p> : null}
+            {couponError ? <p className={checkoutErrorClass}>{couponError}</p> : null}
           </div>
         ) : null}
       </div>
 
       {children}
-      <p className="text-sm leading-6 text-[rgba(236,229,255,0.74)]">{paymentNote}</p>
-      {checkoutError ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{checkoutError}</p> : null}
+      <p className="text-sm leading-6 text-[var(--checkout-card-muted)]">{paymentNote}</p>
+      {checkoutError ? <p className={checkoutErrorClass}>{checkoutError}</p> : null}
       <div ref={primaryButtonRef}>
         <Button
           type="button"
-          className="min-h-14 w-full justify-center whitespace-normal rounded-full bg-[linear-gradient(135deg,#d4a846,#8f2cff)] px-6 py-4 text-center text-base font-semibold text-white shadow-[0_18px_34px_rgba(143,44,255,0.24)] hover:opacity-95"
+          className={checkoutPrimaryButtonClass}
           disabled={pending}
           onClick={startCheckout}
         >
@@ -352,10 +363,10 @@ export function CheckoutForm({
         </Button>
       </div>
       {showStickyCta ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#111326]/95 px-4 py-3 shadow-[0_-14px_34px_rgba(0,0,0,0.32)] backdrop-blur sm:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--checkout-sticky-border)] bg-[var(--checkout-sticky-background)] px-4 py-3 shadow-[var(--checkout-sticky-shadow)] backdrop-blur sm:hidden">
           <Button
             type="button"
-            className="min-h-12 w-full justify-center whitespace-normal rounded-full bg-[linear-gradient(135deg,#d4a846,#8f2cff)] px-5 py-3 text-center text-base font-semibold text-white"
+            className={cn(checkoutPrimaryButtonClass, "min-h-12 px-5 py-3")}
             disabled={pending}
             onClick={startCheckout}
           >

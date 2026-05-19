@@ -109,7 +109,7 @@ export default async function CheckoutPage({
   return (
     <div className="mx-auto w-full max-w-6xl overflow-x-hidden px-4 py-5 sm:px-6 lg:py-8">
       <div className="grid w-full gap-5 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
-        <aside className="perseus-checkout-hero order-2 rounded-[28px] border border-[var(--checkout-hero-panel-border)] bg-[var(--checkout-hero-panel-background)] px-5 py-5 text-[var(--checkout-hero-text)] shadow-[var(--checkout-hero-shadow)] lg:order-1 lg:sticky lg:top-24 lg:px-7 lg:py-6">
+        <aside className="perseus-checkout-hero order-2 rounded-[22px] border border-[var(--checkout-hero-panel-border)] bg-[var(--checkout-hero-panel-background)] px-5 py-5 text-[var(--checkout-hero-text)] shadow-[var(--checkout-hero-shadow)] lg:order-1 lg:sticky lg:top-24 lg:px-7 lg:py-6">
           <p className="text-[11px] uppercase tracking-[0.3em] text-[var(--checkout-hero-chip)]">Checkout details</p>
           <p className="mt-3 text-sm leading-7 text-[var(--checkout-hero-muted)]">{paymentHeadline}</p>
           <div className="mt-5 grid gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--checkout-hero-chip)]">
@@ -119,7 +119,7 @@ export default async function CheckoutPage({
           </div>
         </aside>
 
-        <section className="perseus-checkout-form order-1 rounded-[28px] border border-[var(--checkout-form-panel-border)] bg-[var(--checkout-form-panel-background)] px-4 py-5 text-[var(--checkout-form-text)] shadow-[var(--checkout-form-shadow)] sm:px-6 lg:order-2 lg:px-8 lg:py-7">
+        <section className="perseus-checkout-form order-1 rounded-[22px] border border-[var(--checkout-form-panel-border)] bg-[var(--checkout-form-panel-background)] px-4 py-5 text-[var(--checkout-form-text)] shadow-[var(--checkout-form-shadow)] sm:px-6 lg:order-2 lg:px-8 lg:py-7">
           {query.status === "cancelled" ? (
             <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Checkout was cancelled. You can try again at any time.</p>
           ) : null}
@@ -139,7 +139,7 @@ export default async function CheckoutPage({
               paymentNote={paymentNote}
             >
               {upsell ? (
-                <div className="rounded-[24px] border border-[var(--checkout-upsell-border)] bg-[var(--checkout-upsell-background)] px-5 py-4">
+                <div className="rounded-[20px] border border-[var(--checkout-upsell-border)] bg-[var(--checkout-upsell-background)] px-5 py-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--checkout-upsell-label)]">Optional upsell</p>
@@ -162,7 +162,7 @@ export default async function CheckoutPage({
               ) : null}
             </CheckoutForm>
             ) : (
-              <div className="rounded-[24px] border border-[var(--checkout-unavailable-border)] bg-[var(--checkout-unavailable-background)] px-5 py-5 text-sm leading-7 text-[var(--checkout-unavailable-text)]">
+              <div className="rounded-[20px] border border-[var(--checkout-unavailable-border)] bg-[var(--checkout-unavailable-background)] px-5 py-5 text-sm leading-7 text-[var(--checkout-unavailable-text)]">
                 Checkout is temporarily unavailable. Please return to the course page and try again later.
               </div>
             )}

@@ -9,6 +9,17 @@ import { encryptGatewayCredentialValue } from "../lib/payments/gateway-credentia
 
 const prisma = new PrismaClient();
 
+const BANK_TRANSFER_TEST_INSTRUCTIONS = [
+  "Account name: Perseus Platform Test",
+  "Bank name: Verification Bank",
+  "Account number: 00000000",
+  "Routing/SWIFT: TESTUS00",
+  "Include the order reference exactly as shown.",
+].join("\n");
+
+const BANK_TRANSFER_GENERIC_INSTRUCTIONS =
+  "Send the transfer using the configured bank details. Include the order reference exactly as shown. Enrollment is granted after the payment is confirmed.";
+
 async function verifyBundlePayment() {
   const user = await prisma.user.upsert({
     where: { email: "bundle-check@perseus.test" },
@@ -196,6 +207,11 @@ async function verifyBundlePayment() {
 }
 
 async function verifyBankTransfer() {
+  const previousBankTransferGateway = await prisma.gateway.findUnique({
+    where: { provider: "bank-transfer" },
+    select: { instructionsMarkdown: true },
+  });
+
   const user = await prisma.user.upsert({
     where: { email: "bank-transfer-check@perseus.test" },
     update: { name: "Bank Transfer Check" },
@@ -220,8 +236,7 @@ async function verifyBankTransfer() {
       mayRequireManualReview: true,
       supportsManualConfirmation: true,
       suitableForHighRisk: true,
-      instructionsMarkdown:
-        "Send the transfer using the configured bank details. Include the order reference exactly as shown. Enrollment is granted after the payment is confirmed.",
+      instructionsMarkdown: BANK_TRANSFER_TEST_INSTRUCTIONS,
     },
     create: {
       provider: "bank-transfer",
@@ -238,8 +253,7 @@ async function verifyBankTransfer() {
       mayRequireManualReview: true,
       supportsManualConfirmation: true,
       suitableForHighRisk: true,
-      instructionsMarkdown:
-        "Send the transfer using the configured bank details. Include the order reference exactly as shown. Enrollment is granted after the payment is confirmed.",
+      instructionsMarkdown: BANK_TRANSFER_TEST_INSTRUCTIONS,
     },
     select: { id: true, provider: true },
   });
@@ -398,6 +412,14 @@ async function verifyBankTransfer() {
         data: { isActive: true },
       });
     }
+
+    await prisma.gateway.update({
+      where: { provider: "bank-transfer" },
+      data: {
+        instructionsMarkdown:
+          previousBankTransferGateway?.instructionsMarkdown ?? BANK_TRANSFER_GENERIC_INSTRUCTIONS,
+      },
+    });
   }
 }
 

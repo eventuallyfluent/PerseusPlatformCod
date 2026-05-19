@@ -21,10 +21,17 @@ export default async function TaxSettingsPage() {
     getTaxSettings(),
     prisma.taxRate.findMany({ orderBy: [{ country: "asc" }, { region: "asc" }, { postalCode: "asc" }] }),
   ]);
+  const activeRateCount = rates.filter((rate) => rate.isActive).length;
 
   return (
     <AdminShell title="Tax collection" description="Configure platform tax collection for countries, regions, provinces, and postal overrides.">
       <div className="grid gap-6">
+        {settings.enabled && activeRateCount === 0 ? (
+          <div className="rounded-[18px] border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-900">
+            Tax collection is enabled, but no active tax rates are configured. Checkout can show tax-included pricing or request location, but it will not add or report jurisdiction tax until at least one active rate is added.
+          </div>
+        ) : null}
+
         <Card className="p-5">
           <form action={saveTaxSettingsAction} className="grid gap-4 lg:grid-cols-5">
             <label className="grid gap-2 text-sm font-medium text-stone-900">
@@ -55,10 +62,10 @@ export default async function TaxSettingsPage() {
 
         <Card className="p-5">
           <form action={saveTaxRateAction} className="grid gap-4 lg:grid-cols-6">
-            <label className="grid gap-2 text-sm font-medium text-stone-900">Country<input name="country" placeholder="US" maxLength={2} className="rounded-xl border border-stone-200 px-4 py-3 text-sm uppercase" /></label>
-            <label className="grid gap-2 text-sm font-medium text-stone-900">Region<input name="region" placeholder="CA" className="rounded-xl border border-stone-200 px-4 py-3 text-sm uppercase" /></label>
-            <label className="grid gap-2 text-sm font-medium text-stone-900">Postal override<input name="postalCode" placeholder="Optional" className="rounded-xl border border-stone-200 px-4 py-3 text-sm uppercase" /></label>
-            <label className="grid gap-2 text-sm font-medium text-stone-900">Tax name<input name="label" placeholder="VAT / Sales tax" className="rounded-xl border border-stone-200 px-4 py-3 text-sm" /></label>
+            <label className="grid gap-2 text-sm font-medium text-stone-900">Country code<input name="country" placeholder="GB" maxLength={2} className="rounded-xl border border-stone-200 px-4 py-3 text-sm uppercase" /></label>
+            <label className="grid gap-2 text-sm font-medium text-stone-900">Region/state/province<input name="region" placeholder="Optional" className="rounded-xl border border-stone-200 px-4 py-3 text-sm uppercase" /></label>
+            <label className="grid gap-2 text-sm font-medium text-stone-900">Postal/postcode override<input name="postalCode" placeholder="Optional" className="rounded-xl border border-stone-200 px-4 py-3 text-sm uppercase" /></label>
+            <label className="grid gap-2 text-sm font-medium text-stone-900">Tax name<input name="label" placeholder="GB VAT / AU GST / CA GST-HST / EU VAT" className="rounded-xl border border-stone-200 px-4 py-3 text-sm" /></label>
             <label className="grid gap-2 text-sm font-medium text-stone-900">Rate %<input name="ratePercent" type="number" min="0" step="0.0001" placeholder="20" className="rounded-xl border border-stone-200 px-4 py-3 text-sm" /></label>
             <label className="grid gap-2 text-sm font-medium text-stone-900">Rule<select name="ruleType" defaultValue="REPLACE" className="rounded-xl border border-stone-200 px-4 py-3 text-sm"><option value="REPLACE">Replace</option><option value="ADD">Add</option></select></label>
             <input type="hidden" name="appliesToCourses" value="true" />

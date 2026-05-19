@@ -2,6 +2,7 @@ import type { GatewayCompatRecord } from "@/lib/payments/gateway-queries";
 import type { GatewayOperationalIssue, GatewayOperationalReadiness, PaymentGatewayConnector, ResolvedGatewayDefinition } from "@/types";
 import { evaluateGatewayPolicy } from "@/lib/payments/policy";
 import { hasGenericWebhookAutomation } from "@/lib/payments/generic-webhook";
+import { hasSpecificBankTransferInstructions } from "@/lib/payments/bank-transfer-instructions";
 
 export function evaluateGatewayOperationalReadiness(input: {
   gateway: GatewayCompatRecord;
@@ -107,12 +108,14 @@ export function evaluateGatewayOperationalReadiness(input: {
         detail: "Add provider-side webhook setup notes so automated payment confirmation can be reproduced.",
       });
     }
-  } else if (definition.kind === "bank_transfer" && !gateway.instructionsMarkdown?.trim()) {
-    issues.push({
-      tone: "warning",
-      label: "Transfer instructions still generic",
-      detail: "Replace the fallback wording with the real bank details and matching instructions.",
-    });
+  } else if (definition.kind === "bank_transfer") {
+    if (!hasSpecificBankTransferInstructions(gateway.instructionsMarkdown)) {
+      issues.push({
+        tone: "danger",
+        label: "Real transfer details missing",
+        detail: "Add real bank-transfer details such as account name, bank name, account number/IBAN/SWIFT/routing details, and the required order reference before using this gateway live.",
+      });
+    }
   }
 
   const hasBlockingIssue = issues.some((issue) => issue.tone === "danger");

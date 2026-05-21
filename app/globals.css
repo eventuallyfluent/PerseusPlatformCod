@@ -490,6 +490,19 @@
   border-top: 1px solid var(--border);
 }
 
+.perseus-editorial-section-header {
+  color: var(--portal-text);
+}
+
+.perseus-editorial-title-emphasis {
+  display: inline-block;
+  margin-top: 0.08em;
+  background: linear-gradient(90deg, var(--accent-lavender), var(--premium));
+  background-clip: text;
+  color: transparent;
+  font-style: italic;
+}
+
 .theme-perseus-dynamic-1 .perseus-home-hero {
   border-color: rgba(255, 238, 88, 0.17);
 }

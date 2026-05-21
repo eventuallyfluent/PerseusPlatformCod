@@ -21,6 +21,12 @@ Improve clarity and operation without diluting the original style. A dense catal
 - Learner pages are for progress and focus, so they should prioritize clear navigation and content hierarchy.
 - Admin pages stay separate: light, operational, and low-friction.
 
+## Editorial Section Pattern
+
+Use the Claude-inspired editorial pattern for major public narrative sections only: homepage proof blocks, curriculum/teacher framing, public FAQ introductions, sales-page proof, and instructor story sections. The pattern is a muted mono eyebrow, sharp `Cinzel` section title, optional italic lavender-to-gold emphasis, and restrained `DM Sans` supporting copy.
+
+Do not apply this pattern to dense operational surfaces such as admin, checkout form internals, catalog cards, learner dashboard cards, lesson navigation, tables, forms, or settings.
+
 ## Drift Checks
 
 Before shipping a UI change, check:

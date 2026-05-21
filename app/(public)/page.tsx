@@ -90,6 +90,57 @@ function getCollectionDescription(title: string, description: string) {
   return trimmed;
 }
 
+function getEditorialEmphasis(title: string, emphasis: string) {
+  const normalizedTitle = title.trim();
+  const normalizedEmphasis = emphasis.trim();
+
+  if (!normalizedTitle || !normalizedEmphasis || !normalizedTitle.toLowerCase().endsWith(normalizedEmphasis.toLowerCase())) {
+    return { lead: normalizedTitle, emphasis: null };
+  }
+
+  const lead = normalizedTitle.slice(0, normalizedTitle.length - normalizedEmphasis.length).trim();
+  return {
+    lead: lead || normalizedTitle,
+    emphasis: lead ? normalizedTitle.slice(normalizedTitle.length - normalizedEmphasis.length).trim() : null,
+  };
+}
+
+function EditorialSectionHeader({
+  eyebrow,
+  title,
+  description,
+  emphasis,
+  align = "center",
+  tone = "accent",
+}: {
+  eyebrow: string;
+  title: string;
+  description?: string | null;
+  emphasis?: string;
+  align?: "center" | "left";
+  tone?: "accent" | "premium";
+}) {
+  const titleParts = emphasis ? getEditorialEmphasis(title, emphasis) : { lead: title, emphasis: null };
+  const alignmentClass = align === "center" ? "mx-auto items-center text-center" : "items-start text-left";
+  const eyebrowClass = tone === "premium" ? "text-[var(--premium)]" : "text-[var(--accent-lavender)]";
+
+  return (
+    <div className={`perseus-editorial-section-header flex max-w-4xl flex-col ${alignmentClass}`}>
+      <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.32em] ${eyebrowClass}`}>{eyebrow}</p>
+      <h2 className="mt-5 font-serif text-[clamp(2rem,4vw,3.35rem)] leading-[1.05] text-[var(--portal-text)]">
+        {titleParts.lead}
+        {titleParts.emphasis ? (
+          <>
+            <br />
+            <span className="perseus-editorial-title-emphasis">{titleParts.emphasis}</span>
+          </>
+        ) : null}
+      </h2>
+      {description ? <p className="mt-6 max-w-3xl text-base leading-8 text-[var(--foreground-soft)] sm:text-lg">{description}</p> : null}
+    </div>
+  );
+}
+
 function CollectionCourseTile({ course, toneVar }: { course: CollectionCoursePreview; toneVar: string }) {
   return (
     <Link
@@ -243,10 +294,13 @@ function CollectionsSection({
 }) {
   return (
     <section className="perseus-home-collections mx-auto max-w-7xl px-6 py-16">
-      <div className="mx-auto mb-10 max-w-4xl space-y-4 text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
-        <h2 className="font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">{payload.title}</h2>
-        <p className="text-lg leading-8 text-[var(--foreground-soft)]">{payload.description}</p>
+      <div className="mb-12">
+        <EditorialSectionHeader
+          eyebrow={payload.eyebrow}
+          title={payload.title}
+          description={payload.description}
+          emphasis="study collections"
+        />
       </div>
 
       <div className="grid gap-7">
@@ -280,10 +334,14 @@ function TestimoniesSection({
 
   return (
     <section className="perseus-home-testimonies mx-auto max-w-7xl px-6 py-16">
-      <div className="mx-auto mb-10 max-w-4xl space-y-4 text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--premium)]">{payload.eyebrow}</p>
-        <h2 className="font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">{payload.title}</h2>
-        {payload.description ? <p className="text-lg leading-8 text-[var(--foreground-soft)]">{payload.description}</p> : null}
+      <div className="mb-12">
+        <EditorialSectionHeader
+          eyebrow={payload.eyebrow}
+          title={payload.title}
+          description={payload.description}
+          emphasis="after entering the work"
+          tone="premium"
+        />
       </div>
       <div className="grid gap-6 xl:grid-cols-3">
         {items.map((testimonial) => (
@@ -321,11 +379,12 @@ function EmailSignupSection({ payload }: { payload: HomepageEmailSignupPayload }
   return (
     <section className="perseus-home-email mx-auto max-w-7xl px-6 py-16">
       <div className="perseus-email-signup rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-10 shadow-[var(--collection-panel-shadow)] sm:px-10 lg:px-14">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
-          <h2 className="mt-4 font-serif text-5xl leading-none tracking-[-0.05em] text-[var(--portal-text)]">{payload.title}</h2>
-          <p className="mt-5 text-lg leading-8 text-[var(--foreground-soft)]">{payload.description}</p>
-        </div>
+        <EditorialSectionHeader
+          eyebrow={payload.eyebrow}
+          title={payload.title}
+          description={payload.description}
+          emphasis="to the work."
+        />
         <form action={payload.formActionUrl} className="mx-auto mt-8 max-w-3xl">
           <div className="flex flex-col gap-4 lg:flex-row">
             <input

@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
-import { Cinzel_Decorative, DM_Sans, JetBrains_Mono } from "next/font/google";
+import { Cinzel, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { absoluteUrl } from "@/lib/utils";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE_TEMPLATE } from "@/lib/seo/site";
 import { getPublicThemeFamilyClass, PUBLIC_THEME_CLASSES, PUBLIC_THEME_MODE_STORAGE_KEY } from "@/lib/theme/public-theme";
 import { getActivePublicThemeFamily } from "@/lib/theme/site-theme";
 import "./globals.css";
 
-const displayFont = Cinzel_Decorative({
+const displayFont = Cinzel({
   subsets: ["latin"],
   variable: "--font-display",
   weight: ["400", "700", "900"],

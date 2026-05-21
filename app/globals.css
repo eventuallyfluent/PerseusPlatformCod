@@ -628,6 +628,14 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+.font-mono,
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
 .admin-theme input,
 .admin-theme textarea,
 .admin-theme select {

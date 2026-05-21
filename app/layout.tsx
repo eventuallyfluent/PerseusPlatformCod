@@ -1,21 +1,28 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Cinzel_Decorative, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { absoluteUrl } from "@/lib/utils";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE_TEMPLATE } from "@/lib/seo/site";
 import { getPublicThemeFamilyClass, PUBLIC_THEME_CLASSES, PUBLIC_THEME_MODE_STORAGE_KEY } from "@/lib/theme/public-theme";
 import { getActivePublicThemeFamily } from "@/lib/theme/site-theme";
 import "./globals.css";
 
-const displayFont = Cormorant_Garamond({
+const displayFont = Cinzel_Decorative({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["500", "600", "700"],
+  weight: ["400", "700", "900"],
 });
 
-const bodyFont = Manrope({
+const bodyFont = DM_Sans({
   subsets: ["latin"],
   variable: "--font-body",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const monoFont = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -68,7 +75,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         suppressHydrationWarning
         data-public-theme-family={publicThemeFamily}
         data-public-theme-mode={defaultThemeMode}
-        className={`${defaultThemeClass} ${displayFont.variable} ${bodyFont.variable}`}
+        className={`${defaultThemeClass} ${displayFont.variable} ${bodyFont.variable} ${monoFont.variable}`}
       >
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
         {children}

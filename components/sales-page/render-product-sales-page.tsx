@@ -181,7 +181,7 @@ function buildFacts(payload: ProductPayload) {
 
     if (moduleCount > 0) facts.push({ label: "Modules", value: String(moduleCount), icon: Layers3 });
     if (lessons.length > 0) facts.push({ label: "Lessons", value: String(lessons.length), icon: BookOpen });
-    if (previewCount > 0) facts.push({ label: "Free previews", value: String(previewCount), icon: Sparkles });
+    if (previewCount > 0) facts.push({ label: "Free account previews", value: String(previewCount), icon: Sparkles });
     if (payload.instructorSection.name) facts.push({ label: "Instructor", value: payload.instructorSection.name, icon: ShieldCheck });
   } else {
     const courseCount = payload.includedCoursesSection.courses.length;
@@ -469,7 +469,7 @@ export function RenderProductSalesPage({
                         </div>
                         {lesson.isPreview && lesson.previewHref ? (
                           <Link href={lesson.previewHref} className="inline-flex rounded-full border border-[var(--premium)] bg-[var(--premium-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--premium)]">
-                            Watch preview
+                            Sign up to watch
                           </Link>
                         ) : null}
                       </div>

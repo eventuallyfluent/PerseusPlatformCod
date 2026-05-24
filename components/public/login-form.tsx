@@ -11,6 +11,7 @@ export function LoginForm({
   previewEnabled,
   emailEnabled,
   redirectTo,
+  intent = "student",
   mode = "student",
   errorMessage,
   adminPasswordConfigured = true,
@@ -18,6 +19,7 @@ export function LoginForm({
   previewEnabled: boolean;
   emailEnabled: boolean;
   redirectTo: string;
+  intent?: "student" | "free-preview";
   mode?: "student" | "admin";
   errorMessage?: string | null;
   adminPasswordConfigured?: boolean;
@@ -28,14 +30,17 @@ export function LoginForm({
   const [sent, setSent] = useState(false);
   const [adminError, setAdminError] = useState<string | null>(null);
   const isAdmin = mode === "admin";
+  const isFreePreview = !isAdmin && intent === "free-preview";
 
   return (
     <AuthEntryShell
-      eyebrow={isAdmin ? "Admin access" : "Returning students"}
-      title={isAdmin ? "Open the admin workspace." : "Return to your study space."}
+      eyebrow={isAdmin ? "Admin access" : isFreePreview ? "Free preview access" : "Returning students"}
+      title={isAdmin ? "Open the admin workspace." : isFreePreview ? "Create your free study account." : "Return to your study space."}
       description={
         isAdmin
           ? "Use your approved admin email and password to enter the backend."
+          : isFreePreview
+            ? "Free preview lessons require a student account. Enter your email and we will send a sign-in link, create your account, and add you to the Perseus mailing list for course updates."
           : "Use the email connected to your course access and we will send you a sign-in link."
       }
       successMessage={sent ? "Check your email for the sign-in link." : null}
@@ -101,9 +106,11 @@ export function LoginForm({
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">Sign in</p>
             <p className="text-sm leading-7 text-[var(--foreground-soft)]">
-              {isAdmin
-                ? "Only approved admin accounts can enter the backend from this page."
-                : "Use the email address connected to your student access."}
+              {isFreePreview
+                ? "Your email becomes your free Perseus account login and mailing-list address for preview access."
+                : isAdmin
+                  ? "Only approved admin accounts can enter the backend from this page."
+                  : "Use the email address connected to your student access."}
             </p>
           </div>
           <label>
@@ -118,8 +125,13 @@ export function LoginForm({
               setSent(true);
             }}
           >
-            Send access link
+            {isFreePreview ? "Send free preview link" : "Send access link"}
           </Button>
+          {isFreePreview ? (
+            <p className="text-xs leading-6 text-[var(--foreground-soft)]">
+              By continuing, you agree to receive Perseus course updates connected to free preview access. You can unsubscribe later.
+            </p>
+          ) : null}
         </>
       ) : null}
       {previewEnabled ? (

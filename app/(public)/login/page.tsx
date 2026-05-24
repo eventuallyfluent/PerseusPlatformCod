@@ -13,8 +13,17 @@ export const metadata: Metadata = buildNoIndexMetadata({
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ returnTo?: string; error?: string }> }) {
   const query = await searchParams;
-  const redirectTo = `/auth/complete?audience=learner&returnTo=${encodeURIComponent(normalizeLearnerReturnPath(query.returnTo, "/dashboard"))}`;
+  const returnTo = normalizeLearnerReturnPath(query.returnTo, "/dashboard");
+  const redirectTo = `/auth/complete?audience=learner&returnTo=${encodeURIComponent(returnTo)}`;
   const errorMessage = query.error === "admin-only" ? "That sign-in is reserved for admin accounts. Use student login for course access." : null;
 
-  return <LoginForm previewEnabled={isPreviewLoginEnabled()} emailEnabled={emailEnabled} redirectTo={redirectTo} errorMessage={errorMessage} />;
+  return (
+    <LoginForm
+      previewEnabled={isPreviewLoginEnabled()}
+      emailEnabled={emailEnabled}
+      redirectTo={redirectTo}
+      intent={returnTo.startsWith("/preview/") ? "free-preview" : "student"}
+      errorMessage={errorMessage}
+    />
+  );
 }

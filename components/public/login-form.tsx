@@ -34,13 +34,13 @@ export function LoginForm({
 
   return (
     <AuthEntryShell
-      eyebrow={isAdmin ? "Admin access" : "Student account"}
-      title={isAdmin ? "Open the admin workspace." : "Return to your study space."}
+      eyebrow={isAdmin ? "Admin access" : isFreePreview ? "Course preview" : "Student account"}
+      title={isAdmin ? "Open the admin workspace." : isFreePreview ? "Begin the free preview." : "Return to your study space."}
       description={
         isAdmin
           ? "Use your approved admin email and password to enter the backend."
           : isFreePreview
-            ? "Use one student account for previews, free courses, purchases, and your course library. Enter your email and we will send you a sign-in link."
+            ? "Sign in once to watch preview lessons, save your place, and continue into any courses you join later."
             : "Use the email connected to your course access and we will send you a sign-in link."
       }
       successMessage={sent ? "Check your email for the sign-in link." : null}
@@ -49,9 +49,9 @@ export function LoginForm({
         <p className="rounded-[20px] bg-[rgba(183,28,28,0.08)] px-4 py-3 text-sm font-medium text-[#b42318]">{errorMessage ?? adminError}</p>
       ) : !isAdmin ? (
         <div className="space-y-3 rounded-[20px] border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-4">
-          <p className="text-sm font-medium text-[var(--foreground)]">Student login is not available right now.</p>
+          <p className="text-sm font-medium text-[var(--foreground)]">Student login is temporarily unavailable.</p>
           <p className="text-sm leading-7 text-[var(--foreground-soft)]">
-            Email sign-in is not configured for this environment. Contact support so access can be restored.
+            Please contact support and we will help you access your course or preview.
           </p>
           <HardLink href="/contact" className="inline-flex text-sm font-medium text-[var(--accent)] underline underline-offset-4">
             Contact support
@@ -107,7 +107,7 @@ export function LoginForm({
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">Sign in</p>
             <p className="text-sm leading-7 text-[var(--foreground-soft)]">
               {isFreePreview
-                ? "This is the same account you will use for free courses, paid courses, and your learner dashboard. Preview access also adds you to Perseus course updates."
+                ? "Your student account keeps your previews, courses, and library in one place."
                 : isAdmin
                   ? "Only approved admin accounts can enter the backend from this page."
                   : "Use the email address connected to your student access."}
@@ -129,7 +129,7 @@ export function LoginForm({
           </Button>
           {isFreePreview ? (
             <p className="text-xs leading-6 text-[var(--foreground-soft)]">
-              Free preview access includes Perseus course updates. You can unsubscribe later.
+              Preview access includes Perseus course updates. You can unsubscribe later.
             </p>
           ) : null}
         </>

@@ -34,14 +34,14 @@ export function LoginForm({
 
   return (
     <AuthEntryShell
-      eyebrow={isAdmin ? "Admin access" : isFreePreview ? "Free preview access" : "Returning students"}
-      title={isAdmin ? "Open the admin workspace." : isFreePreview ? "Create your free study account." : "Return to your study space."}
+      eyebrow={isAdmin ? "Admin access" : "Student account"}
+      title={isAdmin ? "Open the admin workspace." : "Return to your study space."}
       description={
         isAdmin
           ? "Use your approved admin email and password to enter the backend."
           : isFreePreview
-            ? "Free preview lessons require a student account. Enter your email and we will send a sign-in link, create your account, and add you to the Perseus mailing list for course updates."
-          : "Use the email connected to your course access and we will send you a sign-in link."
+            ? "Use one student account for previews, free courses, purchases, and your course library. Enter your email and we will send you a sign-in link."
+            : "Use the email connected to your course access and we will send you a sign-in link."
       }
       successMessage={sent ? "Check your email for the sign-in link." : null}
     >
@@ -107,7 +107,7 @@ export function LoginForm({
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">Sign in</p>
             <p className="text-sm leading-7 text-[var(--foreground-soft)]">
               {isFreePreview
-                ? "Your email becomes your free Perseus account login and mailing-list address for preview access."
+                ? "This is the same account you will use for free courses, paid courses, and your learner dashboard. Preview access also adds you to Perseus course updates."
                 : isAdmin
                   ? "Only approved admin accounts can enter the backend from this page."
                   : "Use the email address connected to your student access."}
@@ -125,11 +125,11 @@ export function LoginForm({
               setSent(true);
             }}
           >
-            {isFreePreview ? "Send free preview link" : "Send access link"}
+            Send access link
           </Button>
           {isFreePreview ? (
             <p className="text-xs leading-6 text-[var(--foreground-soft)]">
-              By continuing, you agree to receive Perseus course updates connected to free preview access. You can unsubscribe later.
+              Free preview access includes Perseus course updates. You can unsubscribe later.
             </p>
           ) : null}
         </>

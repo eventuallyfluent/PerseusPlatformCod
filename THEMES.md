@@ -13,13 +13,20 @@
 
 ## Public modes
 - `Perseus Dark`
-  Preserved baseline of the current dark public/student UI.
+  Premium night-sky public/student UI using the v2 public design direction.
 - `Perseus Light`
-  Preserved baseline of the current light public/student UI.
+  White/neutral-first public/student UI with dark purple contrast. It should not drift pink or lavender.
+
+## Public design authority
+- Public, checkout shell, learner, preview, catalog, sales, collection, and instructor surfaces should follow [design-rules/public-design-system-v2.md](C:\Users\stude\OneDrive\Desktop\Perseus Platform\design-rules\public-design-system-v2.md).
+- Admin remains separate and should not inherit the public ceremonial/editorial treatment.
+- Public copy should speak to students and buyers, not describe implementation, configuration, or admin mechanics.
 
 ## Typography
-- Display: `Cormorant Garamond`
-- Body/UI: `Manrope`
+- Display: `Cinzel`
+- Ceremonial accent: `Cinzel Decorative`, rare and not global
+- Body/UI: `DM Sans`
+- Metadata/technical labels: `JetBrains Mono`
 
 ## Shared token contract
 - Surfaces:

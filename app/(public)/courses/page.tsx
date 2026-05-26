@@ -547,7 +547,7 @@ export default async function CoursesIndexPage({
           ))}
         </div>
       ) : (
-        <div className="mx-auto mt-12 max-w-3xl rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-8 text-center text-lg leading-8 text-[var(--foreground-soft)] shadow-[var(--shadow-soft)]">
+        <div className="mx-auto mt-12 max-w-3xl rounded-[20px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-8 text-center text-lg leading-8 text-[var(--foreground-soft)] shadow-[var(--shadow-soft)]">
           No published products matched the current search and filters.
         </div>
       )}

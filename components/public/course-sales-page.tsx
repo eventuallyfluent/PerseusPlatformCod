@@ -1,6 +1,7 @@
 import { RenderProductSalesPage } from "@/components/sales-page/render-product-sales-page";
 import { Button, buttonClassName } from "@/components/ui/button";
 import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
+import { Star } from "lucide-react";
 import { submitCourseInquiryAction, submitCourseReviewAction } from "@/app/(public)/actions";
 import { buildBreadcrumbStructuredData, buildCourseStructuredData, buildFaqStructuredData, buildProductStructuredData } from "@/lib/seo/structured-data";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
@@ -9,9 +10,9 @@ import type { CourseWithRelations, GeneratedSalesPagePayload } from "@/types";
 
 function RatingStars({ rating }: { rating: number }) {
   return (
-    <div aria-label={`${rating} star rating`} className="flex gap-1 text-lg leading-none text-[#ffc247]">
+    <div aria-label={`${rating} star rating`} className="flex gap-1 text-[var(--premium)]">
       {Array.from({ length: 5 }, (_, index) => (
-        <span key={index}>{index < rating ? "★" : "☆"}</span>
+        <Star key={index} className={`size-4 ${index < rating ? "fill-current" : ""}`} aria-hidden="true" />
       ))}
     </div>
   );
@@ -52,11 +53,11 @@ export function CourseSalesPage({
   const bundleValueSlot =
     availableBundles.length > 0 ? (
       <section className="mx-auto max-w-7xl px-6">
-        <div className="rounded-[30px] border border-[var(--premium)] bg-[linear-gradient(135deg,var(--premium-soft),var(--accent-soft))] p-5 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:p-6">
+        <div className="rounded-[20px] border border-[var(--premium)] bg-[linear-gradient(135deg,var(--premium-soft),var(--accent-soft))] p-5 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:p-6">
           <div className="mx-auto flex max-w-4xl flex-col items-center gap-5 text-center">
             <div className="max-w-3xl space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--premium)]">Bundle value option</p>
-              <h2 className="text-3xl leading-none tracking-[-0.03em]">This course is also available inside a bundle.</h2>
+              <h2 className="font-serif text-3xl leading-tight">This course is also available inside a bundle.</h2>
               <p className="text-sm leading-7 text-[var(--text-secondary)]">
                 If you are planning to take more than one course, the bundle may be better value than buying this course on its own.
               </p>
@@ -90,12 +91,12 @@ export function CourseSalesPage({
   const reviewSlot = (
     <div
       id="leave-review"
-      className="mx-auto max-w-5xl rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,var(--surface-panel-strong),var(--surface-panel))] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:p-7"
+      className="mx-auto max-w-5xl rounded-[20px] border border-[var(--border)] bg-[linear-gradient(180deg,var(--surface-panel-strong),var(--surface-panel))] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:p-7"
     >
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div className="max-w-2xl space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--text-muted)]">Student reviews</p>
-          <h3 className="text-3xl leading-none tracking-[-0.03em]">What learners say after joining.</h3>
+          <h3 className="font-serif text-3xl leading-tight">What learners say after joining.</h3>
           <p className="text-sm leading-7 text-[var(--text-secondary)]">Verified student reviews are published after approval.</p>
         </div>
         {isLoggedIn ? (
@@ -174,12 +175,12 @@ export function CourseSalesPage({
 
   const questionSlot = (
     <section id="course-questions" className="mx-auto max-w-7xl scroll-mt-28 px-6">
-      <div className="grid gap-6 rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,var(--surface-panel-strong),var(--surface-panel))] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:grid-cols-[0.85fr_1.15fr] lg:p-7">
+      <div className="grid gap-6 rounded-[20px] border border-[var(--border)] bg-[linear-gradient(180deg,var(--surface-panel-strong),var(--surface-panel))] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:grid-cols-[0.85fr_1.15fr] lg:p-7">
         <div className="space-y-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--text-muted)]">Have questions?</p>
-          <h2 className="text-3xl leading-none tracking-[-0.03em]">Send a course question before enrolling.</h2>
+          <h2 className="font-serif text-3xl leading-tight">Send a course question before enrolling.</h2>
           <p className="text-sm leading-7 text-[var(--text-secondary)]">
-            Ask about course fit, access, curriculum, or checkout before you join. Your message is saved for admin review.
+            Ask about course fit, access, curriculum, or checkout before you join. We will reply by email.
           </p>
           {inquirySent ? (
             <p className="rounded-[20px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">

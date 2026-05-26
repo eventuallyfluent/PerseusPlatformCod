@@ -54,66 +54,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             async authorize(credentials) {
               const previewRole = String(credentials?.previewRole ?? "").trim();
 
-              if (previewRole !== "admin" && previewRole !== "student") {
+              if (previewRole !== "admin") {
                 return null;
               }
 
-              if (previewRole === "admin") {
-                const adminEmail =
-                  process.env.ADMIN_EMAIL_ALLOWLIST?.split(",")
-                    .map((entry) => entry.trim())
-                    .find(Boolean) ?? "admin-preview@perseus.local";
+              const adminEmail =
+                process.env.ADMIN_EMAIL_ALLOWLIST?.split(",")
+                  .map((entry) => entry.trim())
+                  .find(Boolean) ?? "admin-preview@perseus.local";
 
-                return prisma.user.upsert({
-                  where: { email: adminEmail },
-                  update: {
-                    name: "Perseus Admin",
-                    emailVerified: new Date(),
-                  },
-                  create: {
-                    email: adminEmail,
-                    name: "Perseus Admin",
-                    emailVerified: new Date(),
-                  },
-                });
-              }
-
-              const student = await prisma.user.upsert({
-                where: { email: "student-preview@perseus.local" },
+              return prisma.user.upsert({
+                where: { email: adminEmail },
                 update: {
-                  name: "Perseus Student",
+                  name: "Perseus Admin",
                   emailVerified: new Date(),
                 },
                 create: {
-                  email: "student-preview@perseus.local",
-                  name: "Perseus Student",
+                  email: adminEmail,
+                  name: "Perseus Admin",
                   emailVerified: new Date(),
                 },
               });
-
-              const firstPublishedCourse = await prisma.course.findFirst({
-                where: { status: "PUBLISHED" },
-                orderBy: { updatedAt: "desc" },
-                select: { id: true },
-              });
-
-              if (firstPublishedCourse) {
-                await prisma.enrollment.upsert({
-                  where: {
-                    userId_courseId: {
-                      userId: student.id,
-                      courseId: firstPublishedCourse.id,
-                    },
-                  },
-                  update: {},
-                  create: {
-                    userId: student.id,
-                    courseId: firstPublishedCourse.id,
-                  },
-                });
-              }
-
-              return student;
             },
           }),
         ]

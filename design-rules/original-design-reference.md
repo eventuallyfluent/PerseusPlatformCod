@@ -1,6 +1,6 @@
 # Original CreatorOS / Perseus Design Reference
 
-This file captures the durable rules from `CreatorOS_DesignSystem.html`. Use it as the design authority before changing public, sales, checkout, or learner UI.
+This file captures durable rules from the earlier `CreatorOS_DesignSystem.html`. The current public-side authority is `design-rules/public-design-system-v2.md`; use this file as historical context where it does not conflict with v2.
 
 ## Core Direction
 
@@ -31,7 +31,8 @@ Use existing semantic CSS variables in code rather than hardcoded values.
 
 ## Typography
 
-- Display font target: `Cinzel Decorative`.
+- Display font target: `Cinzel` for the current app default.
+- Ceremonial accent target: `Cinzel Decorative`, rare and not global.
 - UI/body font target: `DM Sans`.
 - Mono/metadata target: `JetBrains Mono`.
 - Display typography belongs only in hero, brand, major section, and ceremonial page moments.
@@ -55,7 +56,7 @@ Use existing semantic CSS variables in code rather than hardcoded values.
 - Buttons: strong purple primary, transparent/outlined secondary, quiet ghost, gold only for premium.
 - Badges: uppercase, pill-shaped, semantic color only.
 - Course cards: image/thumb, instructor or source metadata, compact title, short support copy where useful, price/action.
-- Collections: public/homepage collection cards should be image or color-led tiles with large title and one action; do not list the contents of the collection inside the tile.
+- Collections: catalog collection cards should stay compact navigation aids. Homepage collection panels may use richer rail previews when they remain even, compact, and useful.
 - Admin: keep light, utilitarian, and separate from the mystical public UI.
 
 ## Drift Checks

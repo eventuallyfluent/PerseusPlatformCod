@@ -2,15 +2,16 @@ import { buildBreadcrumbStructuredData, buildBundleProductStructuredData, buildF
 import { RenderProductSalesPage } from "@/components/sales-page/render-product-sales-page";
 import { Button, buttonClassName } from "@/components/ui/button";
 import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
+import { Star } from "lucide-react";
 import { submitBundleReviewAction } from "@/app/(public)/actions";
 import { resolveBundlePublicPath } from "@/lib/urls/resolve-bundle-path";
 import type { BundleSalesPagePayload, BundleWithRelations } from "@/types";
 
 function RatingStars({ rating }: { rating: number }) {
   return (
-    <div aria-label={`${rating} star rating`} className="flex gap-1 text-lg leading-none text-[#ffc247]">
+    <div aria-label={`${rating} star rating`} className="flex gap-1 text-[var(--premium)]">
       {Array.from({ length: 5 }, (_, index) => (
-        <span key={index}>{index < rating ? "★" : "☆"}</span>
+        <Star key={index} className={`size-4 ${index < rating ? "fill-current" : ""}`} aria-hidden="true" />
       ))}
     </div>
   );
@@ -41,12 +42,12 @@ export function BundleSalesPage({
   const reviewSlot = (
     <div
       id="leave-review"
-      className="mx-auto max-w-5xl rounded-[32px] border border-[var(--border)] bg-[linear-gradient(180deg,var(--surface-panel-strong),var(--surface-panel))] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:p-7"
+      className="mx-auto max-w-5xl rounded-[20px] border border-[var(--border)] bg-[linear-gradient(180deg,var(--surface-panel-strong),var(--surface-panel))] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:p-7"
     >
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div className="max-w-2xl space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--text-muted)]">Bundle reviews</p>
-          <h3 className="text-3xl leading-none tracking-[-0.03em]">What learners say after joining.</h3>
+          <h3 className="font-serif text-3xl leading-tight">What learners say after joining.</h3>
           <p className="text-sm leading-7 text-[var(--text-secondary)]">Verified bundle reviews are published after approval.</p>
         </div>
         {isLoggedIn ? (

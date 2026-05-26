@@ -83,11 +83,11 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
       <section className="border-b border-[var(--hero-shell-border)] px-6 py-8 lg:py-10">
-        <div className="mx-auto grid max-w-7xl gap-7 rounded-[34px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] p-5 shadow-[var(--shadow-panel)] lg:grid-cols-[minmax(0,1fr)_340px] lg:p-7">
+        <div className="mx-auto grid max-w-7xl gap-7 rounded-[20px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] p-5 shadow-[var(--shadow-panel)] lg:grid-cols-[minmax(0,1fr)_340px] lg:p-7">
           <div className="min-w-0 space-y-6">
             <div className="space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Instructor</p>
-              <h1 className="text-5xl leading-none tracking-[-0.05em] text-[var(--hero-text-primary)] sm:text-6xl lg:text-[4.1rem]">{instructor.name}</h1>
+              <h1 className="font-serif text-5xl leading-tight text-[var(--hero-text-primary)] sm:text-6xl lg:text-[4rem]">{instructor.name}</h1>
               {instructor.shortBio ? <p className="max-w-4xl text-lg leading-8 text-[var(--accent-lavender)]">{instructor.shortBio}</p> : null}
             </div>
             {bioParagraphs.length > 0 ? (
@@ -149,7 +149,7 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
         <section className="space-y-8">
           <div className="space-y-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Courses</p>
-            <h2 className="text-5xl leading-none tracking-[-0.05em] text-[var(--hero-text-primary)]">Study with {instructor.name.split(" ")[0]}</h2>
+            <h2 className="font-serif text-5xl leading-tight text-[var(--hero-text-primary)]">Study with {instructor.name.split(" ")[0]}</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {instructor.courses.map((course) => (

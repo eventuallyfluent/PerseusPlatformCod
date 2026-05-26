@@ -229,9 +229,9 @@ function getHighlightTreatment(cardId: "outcomes" | "audience" | "includes") {
 
 function RatingStars({ rating }: { rating: number }) {
   return (
-    <div aria-label={`${rating} star rating`} className="flex gap-1 text-lg leading-none text-[#ffc247]">
+    <div aria-label={`${rating} star rating`} className="flex gap-1 text-[var(--premium)]">
       {Array.from({ length: 5 }, (_, index) => (
-        <span key={index}>{index < rating ? "★" : "☆"}</span>
+        <Star key={index} className={`size-4 ${index < rating ? "fill-current" : ""}`} aria-hidden="true" />
       ))}
     </div>
   );
@@ -259,9 +259,31 @@ function SectionIntro({ eyebrow, title, body }: { eyebrow: string; title: string
       <div className="flex justify-center">
         <Badge variant="accent">{eyebrow}</Badge>
       </div>
-      <h2 className="text-3xl leading-tight tracking-[-0.04em] text-[var(--foreground)] lg:text-[2.8rem]">{title}</h2>
+      <h2 className="font-serif text-3xl leading-tight text-[var(--foreground)] lg:text-[2.65rem]">{title}</h2>
       {body ? <p className="text-base leading-7 text-[var(--text-secondary)]">{body}</p> : null}
     </div>
+  );
+}
+
+function SalesPageSubnav({ items }: { items: Array<{ href: string; label: string }> }) {
+  if (items.length < 3) {
+    return null;
+  }
+
+  return (
+    <nav className="sticky top-[74px] z-30 border-y border-[var(--border)] bg-[var(--surface-canvas)]/92 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {items.map((item) => (
+          <a
+            key={item.href}
+            href={item.href}
+            className="flex-none border-b-2 border-transparent px-4 py-3 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] transition hover:border-[var(--accent)] hover:text-[var(--text-primary)]"
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
+    </nav>
   );
 }
 
@@ -284,13 +306,23 @@ export function RenderProductSalesPage({
   const priceLabel = getPriceLabel(payload.hero.primaryOffer);
   const valueLabel = getValueLabel(payload.hero.primaryOffer);
   const hasHeroImage = Boolean(payload.hero.imageUrl);
+  const navItems = [
+    orderedSections.includes("description") ? { href: "#overview", label: "Overview" } : null,
+    orderedSections.includes("highlights") ? { href: "#outcomes", label: "Outcomes" } : null,
+    orderedSections.includes("curriculum") && payload.productType === "course" ? { href: "#curriculum", label: "Curriculum" } : null,
+    orderedSections.includes("included-courses") && payload.productType === "bundle" ? { href: "#included-courses", label: "Courses" } : null,
+    orderedSections.includes("instructor") && payload.productType === "course" ? { href: "#instructor", label: "Instructor" } : null,
+    orderedSections.includes("testimonials") ? { href: "#student-reviews", label: "Reviews" } : null,
+    orderedSections.includes("faqs") ? { href: "#faq", label: "FAQ" } : null,
+    orderedSections.includes("pricing") ? { href: "#pricing", label: "Enroll" } : null,
+  ].filter((item): item is { href: string; label: string } => Boolean(item));
 
   const renderSection = (section: SalesPageSectionKey) => {
     if (section === "description") {
       const descriptionBlocks = parseDescriptionBlocks(payload.descriptionSection.longDescription);
 
       return (
-        <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
+        <section key={section} id="overview" className="mx-auto max-w-7xl scroll-mt-28 space-y-8 px-6">
           <SectionIntro
             eyebrow={payload.descriptionSection.eyebrow}
             title={payload.descriptionSection.title}
@@ -347,7 +379,7 @@ export function RenderProductSalesPage({
       }
 
       return (
-        <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
+        <section key={section} id="outcomes" className="mx-auto max-w-7xl scroll-mt-28 space-y-8 px-6">
           <SectionIntro eyebrow={payload.highlightsSection.eyebrow} title="The core promise at a glance." />
           <div className="grid gap-5 lg:grid-cols-3">
             {cards.map((card) => {
@@ -412,7 +444,7 @@ export function RenderProductSalesPage({
 
     if (section === "gallery" && !payload.gallerySection.hidden && payload.gallerySection.images.length > 0) {
       return (
-        <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
+        <section key={section} id="gallery" className="mx-auto max-w-7xl scroll-mt-28 space-y-8 px-6">
           <SectionIntro eyebrow={payload.gallerySection.eyebrow} title={payload.gallerySection.title} />
           <div className={`grid gap-4 ${payload.gallerySection.images.length === 2 ? "md:grid-cols-[1.2fr_0.8fr]" : "md:grid-cols-2 lg:grid-cols-3"}`}>
             {payload.gallerySection.images.map((imageUrl, index) => (
@@ -437,7 +469,7 @@ export function RenderProductSalesPage({
 
     if (section === "curriculum" && payload.productType === "course") {
       return (
-        <section key={section} id="curriculum" className="mx-auto max-w-7xl space-y-7 px-6">
+        <section key={section} id="curriculum" className="mx-auto max-w-7xl scroll-mt-28 space-y-7 px-6">
           <SectionIntro eyebrow={payload.curriculumSection.eyebrow} title={payload.curriculumSection.title} body={payload.curriculumSection.body} />
           <div className="grid gap-5">
             {payload.curriculumSection.modules.map((module, index) => (
@@ -445,7 +477,7 @@ export function RenderProductSalesPage({
                 <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-4 border-b border-[var(--border)] px-6 py-4 marker:content-none">
                   <div className="space-y-3">
                     <Badge variant="portal">Module {index + 1}</Badge>
-                    <h3 className="text-3xl leading-none tracking-[-0.03em]">{cleanModuleTitle(module.moduleTitle, index)}</h3>
+                    <h3 className="font-serif text-3xl leading-tight">{cleanModuleTitle(module.moduleTitle, index)}</h3>
                   </div>
                   <div className="flex items-center gap-4">
                     <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>
@@ -490,7 +522,7 @@ export function RenderProductSalesPage({
 
     if (section === "included-courses" && payload.productType === "bundle") {
       return (
-        <section key={section} id="included-courses" className="mx-auto max-w-7xl space-y-8 px-6">
+        <section key={section} id="included-courses" className="mx-auto max-w-7xl scroll-mt-28 space-y-8 px-6">
           <SectionIntro eyebrow={payload.includedCoursesSection.eyebrow} title={payload.includedCoursesSection.title} body={payload.includedCoursesSection.body} />
           <div className="flex justify-center">
             <Badge variant="premium">{payload.includedCoursesSection.courses.length} individual courses</Badge>
@@ -505,7 +537,7 @@ export function RenderProductSalesPage({
                   className="aspect-video rounded-[20px]"
                 />
                 <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>Included course {index + 1}</p>
-                <h3 className="mt-4 text-2xl leading-tight tracking-[-0.03em] text-[var(--text-primary)]">{course.title}</h3>
+                <h3 className="mt-4 font-serif text-2xl leading-tight text-[var(--text-primary)]">{course.title}</h3>
                 {course.subtitle ? <p className={`mt-3 text-sm leading-7 ${panelMutedTextClass}`}>{course.subtitle}</p> : null}
                 {course.instructorName ? <p className={`mt-4 text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>{course.instructorName}</p> : null}
                 <Link href={course.courseUrl} className="mt-5 inline-flex text-sm font-semibold text-[var(--accent)] underline underline-offset-4">
@@ -520,8 +552,8 @@ export function RenderProductSalesPage({
 
     if (section === "instructor" && payload.productType === "course") {
       return (
-        <section key={section} className="mx-auto max-w-7xl px-6">
-          <div className={`grid gap-6 rounded-[30px] p-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start lg:p-6 ${sectionPanelClass}`}>
+        <section key={section} id="instructor" className="mx-auto max-w-7xl scroll-mt-28 px-6">
+          <div className={`grid gap-6 p-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start lg:p-6 ${sectionPanelClass}`}>
             <div className="space-y-3">
               <SalesSmartImage
                 src={payload.instructorSection.imageUrl}
@@ -537,7 +569,7 @@ export function RenderProductSalesPage({
             <div className="min-w-0">
               <div className="space-y-4">
                 <Badge variant="premium">{payload.instructorSection.eyebrow}</Badge>
-                <h3 className="text-4xl leading-none tracking-[-0.04em] text-[var(--text-primary)] lg:text-[2.75rem]">{payload.instructorSection.name}</h3>
+                <h3 className="font-serif text-4xl leading-tight text-[var(--text-primary)] lg:text-[2.65rem]">{payload.instructorSection.name}</h3>
                 {payload.instructorSection.shortBio ? <p className={`max-w-4xl text-sm leading-7 ${panelMutedTextClass}`}>{payload.instructorSection.shortBio}</p> : null}
                 <div className={`flex flex-wrap gap-3 pt-2 text-sm ${panelMutedTextClass}`}>
                   {payload.instructorSection.socialLinks.map((social) => (
@@ -555,7 +587,7 @@ export function RenderProductSalesPage({
 
     if (section === "testimonials") {
       return (
-        <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
+        <section key={section} id="student-reviews" className="mx-auto max-w-7xl scroll-mt-28 space-y-8 px-6">
           <SectionIntro eyebrow={payload.testimonialsSection.eyebrow} title={payload.testimonialsSection.title} />
           <div className="grid gap-4">
             {payload.testimonialsSection.items.map((testimonial, index) => (
@@ -593,12 +625,12 @@ export function RenderProductSalesPage({
 
     if (section === "faqs") {
       return (
-        <section key={section} className="mx-auto max-w-7xl space-y-8 px-6">
+        <section key={section} id="faq" className="mx-auto max-w-7xl scroll-mt-28 space-y-8 px-6">
           <SectionIntro eyebrow={payload.faqSection.eyebrow} title={payload.faqSection.title} />
           <div className="grid gap-4">
             {payload.faqSection.items.map((faq) => (
-              <div key={faq.question} className={`rounded-[28px] p-6 ${sectionPanelClass}`}>
-                <h3 className="text-xl leading-none tracking-[-0.02em] text-[var(--text-primary)]">{faq.question}</h3>
+              <div key={faq.question} className={`p-6 ${sectionPanelClass}`}>
+                <h3 className="font-serif text-xl leading-tight text-[var(--text-primary)]">{faq.question}</h3>
                 <p className={`mt-3 text-sm leading-8 ${panelMutedTextClass}`}>{faq.answer}</p>
               </div>
             ))}
@@ -611,12 +643,12 @@ export function RenderProductSalesPage({
       const singleOffer = payload.pricingSection.offers.length === 1 ? payload.pricingSection.offers[0] : null;
 
       return (
-        <section key={section} className="mx-auto max-w-7xl px-6">
-          <div className="rounded-[38px] border border-[var(--border)] bg-[var(--surface-panel)] px-8 py-9 text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+        <section key={section} id="pricing" className="mx-auto max-w-7xl scroll-mt-28 px-6">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel)] px-8 py-9 text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
             <div className="grid gap-7 lg:grid-cols-[1fr_0.9fr] lg:items-end">
               <div>
                 <Badge variant="premium">{payload.pricingSection.badge}</Badge>
-                <h2 className="mt-4 max-w-2xl text-4xl leading-none tracking-[-0.045em] lg:text-[3.25rem]">{payload.pricingSection.headline}</h2>
+                <h2 className="mt-4 max-w-2xl font-serif text-4xl leading-tight lg:text-[3rem]">{payload.pricingSection.headline}</h2>
                 <p className={`mt-3 max-w-xl text-base leading-8 ${panelMutedTextClass}`}>{payload.pricingSection.body}</p>
               </div>
               <div className="grid gap-3">
@@ -638,6 +670,9 @@ export function RenderProductSalesPage({
                     >
                       {primaryCtaLabel}
                     </ButtonLink>
+                    <p className={`mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] ${panelSubtleTextClass}`}>
+                      Account access after payment confirmation
+                    </p>
                   </div>
                 ) : payload.pricingSection.offers.map((offer) => (
                   <Link
@@ -660,9 +695,9 @@ export function RenderProductSalesPage({
               </div>
             </div>
             {!singleOffer ? (
-              <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--accent-soft),var(--premium-soft))] p-6">
+              <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-[20px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--accent-soft),var(--premium-soft))] p-6">
                 <div className="max-w-2xl">
-                  <h3 className="text-3xl leading-none tracking-[-0.04em] lg:text-[2.45rem]">{payload.finalCta.label}</h3>
+                  <h3 className="font-serif text-3xl leading-tight lg:text-[2.35rem]">{payload.finalCta.label}</h3>
                   <p className={`mt-3 text-base leading-8 ${panelMutedTextClass}`}>{payload.finalCta.body}</p>
                 </div>
                 <OfferButtons offers={payload.pricingSection.offers} primaryLabel={primaryCtaLabel} />
@@ -679,7 +714,7 @@ export function RenderProductSalesPage({
   return (
     <div className="perseus-sales-page space-y-14 overflow-x-hidden lg:space-y-16">
       <section className="px-4 sm:px-6">
-        <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[30px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] p-4 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] sm:p-5 lg:p-6">
+        <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[24px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] p-4 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] sm:p-5 lg:p-6">
           <div className="absolute inset-0 bg-[var(--sales-hero-atmosphere)]" />
           <div className={`relative grid gap-6 lg:items-center ${hasHeroImage ? "lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.82fr)]" : ""}`}>
             <div className="px-2 py-5 sm:px-4 lg:px-5 lg:py-8">
@@ -694,7 +729,7 @@ export function RenderProductSalesPage({
                 {payload.hero.metadataLine ? (
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--hero-text-muted)]">{payload.hero.metadataLine}</p>
                 ) : null}
-                <h1 className="max-w-3xl text-balance break-words text-3xl leading-[1.02] tracking-[-0.045em] text-[var(--hero-text-primary)] sm:text-5xl lg:text-[4.6rem]">{payload.hero.title}</h1>
+                <h1 className="max-w-3xl text-balance break-words font-serif text-3xl leading-tight text-[var(--hero-text-primary)] sm:text-5xl lg:text-[4.35rem]">{payload.hero.title}</h1>
                 {payload.hero.subtitle ? <p className="max-w-2xl text-base leading-7 text-[var(--hero-text-secondary)] sm:text-lg sm:leading-8">{payload.hero.subtitle}</p> : null}
                 {payload.descriptionSection.shortDescription ? (
                   <p className="line-clamp-3 max-w-2xl text-sm leading-7 text-[var(--hero-text-secondary)] sm:text-base">
@@ -754,6 +789,8 @@ export function RenderProductSalesPage({
           </div>
         </div>
       </section>
+
+      <SalesPageSubnav items={navItems} />
 
       {payload.productType === "course" ? bundleValueSlot : null}
       {orderedSections.map((section) => (

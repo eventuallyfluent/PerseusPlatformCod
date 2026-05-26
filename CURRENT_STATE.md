@@ -59,6 +59,7 @@ Public pages should:
 - show curriculum and included value clearly
 - avoid explaining platform mechanics
 - avoid backend/operator language
+- follow the v2 public design authority in [design-rules/public-design-system-v2.md](C:\Users\stude\OneDrive\Desktop\Perseus Platform\design-rules\public-design-system-v2.md)
 
 Customer-facing copy should focus on:
 
@@ -66,6 +67,15 @@ Customer-facing copy should focus on:
 - why it matters
 - what happens after purchase
 - how to continue learning
+
+Current design decisions:
+
+- regular `Cinzel` is the default public display font
+- `Cinzel Decorative` is reserved for rare ceremonial/hero accents only
+- `DM Sans` is the body/UI font
+- `JetBrains Mono` is for metadata, labels, references, and prices
+- light public mode should be white/neutral-first, not pink/lavender
+- public auth and preview access should use one normal student account flow for previews, free courses, purchases, and the learner library
 
 ## Known Gaps
 

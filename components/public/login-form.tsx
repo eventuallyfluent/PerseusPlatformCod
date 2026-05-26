@@ -35,13 +35,13 @@ export function LoginForm({
   return (
     <AuthEntryShell
       eyebrow={isAdmin ? "Admin access" : isFreePreview ? "Course preview" : "Student account"}
-      title={isAdmin ? "Open the admin workspace." : isFreePreview ? "Begin the free preview." : "Return to your study space."}
+      title={isAdmin ? "Open the admin workspace." : isFreePreview ? "Enter the preview." : "Enter your study space."}
       description={
         isAdmin
           ? "Use your approved admin email and password to enter the backend."
           : isFreePreview
-            ? "Sign in once to watch preview lessons, save your place, and continue into any courses you join later."
-            : "Use the email connected to your course access and we will send you a sign-in link."
+            ? "Watch free preview lessons with the same Perseus account that keeps your courses, purchases, and library in one place."
+            : "One Perseus account gives you access to previews, free courses, purchases, and your course library."
       }
       successMessage={sent ? "Check your email for the sign-in link." : null}
     >
@@ -49,9 +49,9 @@ export function LoginForm({
         <p className="rounded-[20px] bg-[rgba(183,28,28,0.08)] px-4 py-3 text-sm font-medium text-[#b42318]">{errorMessage ?? adminError}</p>
       ) : !isAdmin ? (
         <div className="space-y-3 rounded-[20px] border border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-4">
-          <p className="text-sm font-medium text-[var(--foreground)]">Student login is temporarily unavailable.</p>
+          <p className="text-sm font-medium text-[var(--foreground)]">Access links are temporarily unavailable.</p>
           <p className="text-sm leading-7 text-[var(--foreground-soft)]">
-            Please contact support and we will help you access your course or preview.
+            We cannot send student access links right now. Contact us and we will help you reach your course or preview.
           </p>
           <HardLink href="/contact" className="inline-flex text-sm font-medium text-[var(--accent)] underline underline-offset-4">
             Contact support
@@ -107,10 +107,10 @@ export function LoginForm({
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">Sign in</p>
             <p className="text-sm leading-7 text-[var(--foreground-soft)]">
               {isFreePreview
-                ? "Your student account keeps your previews, courses, and library in one place."
+                ? "Your student account also keeps any free courses or purchases you add later."
                 : isAdmin
                   ? "Only approved admin accounts can enter the backend from this page."
-                  : "Use the email address connected to your student access."}
+                  : "Enter your email and we will send a private access link."}
             </p>
           </div>
           <label>
@@ -129,44 +129,28 @@ export function LoginForm({
           </Button>
           {isFreePreview ? (
             <p className="text-xs leading-6 text-[var(--foreground-soft)]">
-              Preview access includes Perseus course updates. You can unsubscribe later.
+              Preview access includes course updates from Perseus. You can unsubscribe later.
             </p>
           ) : null}
         </>
       ) : null}
-      {previewEnabled ? (
+      {previewEnabled && isAdmin ? (
         <div className="space-y-3 border-t border-[var(--border)] pt-5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">Preview access</p>
           <div className={`grid gap-3 ${isAdmin ? "" : "sm:grid-cols-2"}`}>
-            {isAdmin ? (
-              <Button
-                type="button"
-                variant="secondary"
-                className="w-full justify-center"
-                onClick={async () => {
-                  await signIn("preview-access", {
-                    previewRole: "admin",
-                    redirectTo,
-                  });
-                }}
-              >
-                Enter admin preview
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                variant="secondary"
-                className="w-full justify-center"
-                onClick={async () => {
-                  await signIn("preview-access", {
-                    previewRole: "student",
-                    redirectTo,
-                  });
-                }}
-              >
-                Enter student preview
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full justify-center"
+              onClick={async () => {
+                await signIn("preview-access", {
+                  previewRole: "admin",
+                  redirectTo,
+                });
+              }}
+            >
+              Enter admin preview
+            </Button>
           </div>
         </div>
       ) : null}

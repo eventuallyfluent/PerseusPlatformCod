@@ -20,7 +20,7 @@ export function AuthEntryShell({ eyebrow, title, description, successMessage, as
           <div className="flex flex-wrap gap-3">
             <Badge variant="accent">{eyebrow}</Badge>
           </div>
-          <h1 className="max-w-3xl text-6xl leading-[0.92] tracking-[-0.06em] text-[var(--foreground)] sm:text-7xl lg:text-[5.5rem]">
+          <h1 className="max-w-3xl font-serif text-[clamp(2.65rem,6vw,4.85rem)] leading-[0.98] text-[var(--foreground)]">
             {title}
           </h1>
           <p className="max-w-2xl text-lg leading-9 text-[var(--foreground-soft)]">{description}</p>
@@ -28,7 +28,7 @@ export function AuthEntryShell({ eyebrow, title, description, successMessage, as
         {aside ? <div className="grid gap-4 sm:grid-cols-2">{aside}</div> : null}
       </div>
 
-      <Card className="space-y-6 rounded-[34px] bg-[var(--surface-panel)] p-8">
+      <Card className="space-y-6 rounded-[22px] bg-[var(--surface-panel)] p-7 sm:p-8">
         {successMessage ? (
           <p className="rounded-[20px] bg-[var(--success-soft)] px-4 py-3 text-sm font-medium text-[var(--success)]">{successMessage}</p>
         ) : null}

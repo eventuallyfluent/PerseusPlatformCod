@@ -26,7 +26,14 @@
 
 - Collections on catalog pages are navigation aids.
 - Keep them compact: title, course count, active state, and a short cue.
-- Homepage collection panels may remain richer and more editorial.
+- Homepage collection panels may remain richer and more editorial, including compact horizontal course previews and a clear `View all` action.
+- Keep collection previews even and restrained; avoid oversized empty image tiles or price/action text stranded at the bottom of a large box.
+
+## Public Auth
+
+- Use one normal student account flow for previews, free courses, purchases, and course library access.
+- Do not create a separate visual concept of a "free account" page unless the product decision changes.
+- Copy should be student-facing and benefit-led, not admin/configuration-led.
 
 ## Footer
 

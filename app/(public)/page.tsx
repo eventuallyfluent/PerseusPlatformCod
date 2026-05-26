@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { Star } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
@@ -212,7 +213,7 @@ function CollectionRail({
       <div className="flex flex-col gap-5 border-b border-[var(--border)] px-6 py-6 md:flex-row md:items-start md:justify-between lg:px-8">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[var(--accent-lavender)]">{collectionMeta}</p>
-          <h2 className="mt-2 font-serif text-3xl leading-none tracking-[-0.04em] text-[var(--portal-text)] sm:text-4xl">{title}</h2>
+          <h2 className="mt-2 font-serif text-3xl leading-tight text-[var(--portal-text)] sm:text-4xl">{title}</h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--foreground-soft)]">{descriptionText}</p>
         </div>
         <Link
@@ -256,7 +257,7 @@ function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
             {showEyebrow ? (
               <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.42em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
             ) : null}
-            <h1 className="mt-5 max-w-6xl font-serif text-6xl leading-[0.88] tracking-[-0.06em] text-[var(--portal-text)] sm:text-7xl lg:text-[6.8rem]">
+            <h1 className="mt-5 max-w-6xl font-serif text-[clamp(3.4rem,9vw,5.9rem)] leading-[0.95] text-[var(--portal-text)]">
               {payload.title}
             </h1>
             <p className="mt-8 max-w-3xl text-xl leading-9 text-[var(--foreground-soft)]">{payload.description}</p>
@@ -347,7 +348,7 @@ function TestimoniesSection({
         {items.map((testimonial) => (
           <figure
             key={testimonial.id}
-            className="perseus-testimonial-card relative overflow-hidden rounded-[30px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-7 shadow-[var(--collection-panel-shadow)]"
+            className="perseus-testimonial-card relative overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] p-7 shadow-[var(--collection-panel-shadow)]"
           >
             <div className="perseus-testimonial-light-accent absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,var(--accent),var(--premium))]" aria-hidden="true" />
             <span className="perseus-testimonial-light-quote pointer-events-none absolute right-5 top-5 font-serif text-7xl leading-none text-[var(--accent)] opacity-[0.055]" aria-hidden="true">
@@ -358,8 +359,10 @@ function TestimoniesSection({
                 <span className="rounded-full border border-[var(--premium)] bg-[var(--premium-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--premium)]">
                   Student proof
                 </span>
-                <span className="text-sm leading-none text-[var(--premium)]" aria-label="Five star review">
-                  ★★★★★
+                <span className="flex gap-0.5 text-[var(--premium)]" aria-label="Five star review">
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <Star key={index} className="size-3.5 fill-current" aria-hidden="true" />
+                  ))}
                 </span>
               </div>
               <blockquote className="perseus-testimonial-quote text-lg leading-9 text-[var(--portal-text)]">&ldquo;{testimonial.quote}&rdquo;</blockquote>
@@ -378,7 +381,7 @@ function TestimoniesSection({
 function EmailSignupSection({ payload }: { payload: HomepageEmailSignupPayload }) {
   return (
     <section className="perseus-home-email mx-auto max-w-7xl px-6 py-16">
-      <div className="perseus-email-signup rounded-[34px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-10 shadow-[var(--collection-panel-shadow)] sm:px-10 lg:px-14">
+      <div className="perseus-email-signup rounded-[20px] border border-[var(--border)] bg-[var(--perseus-collection-panel)] px-8 py-10 shadow-[var(--collection-panel-shadow)] sm:px-10 lg:px-14">
         <EditorialSectionHeader
           eyebrow={payload.eyebrow}
           title={payload.title}

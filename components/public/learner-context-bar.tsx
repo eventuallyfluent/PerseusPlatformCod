@@ -27,11 +27,11 @@ export function LearnerContextBar({
   auxiliaryLabel,
 }: LearnerContextBarProps) {
   return (
-    <section className="grid gap-5 rounded-[30px] border border-[var(--border)] bg-[var(--surface-panel)] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:grid-cols-[1fr_auto] lg:items-end">
+    <section className="grid gap-5 rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel)] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:grid-cols-[1fr_auto] lg:items-end">
       <div className="space-y-3">
         <Badge variant="portal">{label}</Badge>
         <div className="space-y-2">
-          <h1 className="text-4xl leading-none tracking-[-0.04em]">{title}</h1>
+          <h1 className="font-serif text-4xl leading-tight">{title}</h1>
           <p className="max-w-2xl text-sm leading-7 text-[var(--text-secondary)]">{description}</p>
         </div>
       </div>

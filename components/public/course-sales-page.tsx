@@ -175,8 +175,8 @@ export function CourseSalesPage({
 
   const questionSlot = (
     <section id="course-questions" className="mx-auto max-w-7xl scroll-mt-28 px-6">
-      <div className="grid gap-6 rounded-[20px] border border-[var(--border)] bg-[linear-gradient(180deg,var(--surface-panel-strong),var(--surface-panel))] p-6 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:grid-cols-[0.85fr_1.15fr] lg:p-7">
-        <div className="space-y-3">
+      <div className="grid overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:grid-cols-[0.85fr_1.15fr]">
+        <div className="space-y-3 p-6 lg:p-7">
           <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--text-muted)]">Have questions?</p>
           <h2 className="font-serif text-3xl leading-tight">Send a course question before enrolling.</h2>
           <p className="text-sm leading-7 text-[var(--text-secondary)]">
@@ -193,7 +193,7 @@ export function CourseSalesPage({
             </p>
           ) : null}
         </div>
-        <form action={submitCourseInquiryAction} className="grid gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] p-5">
+        <form action={submitCourseInquiryAction} className="grid gap-4 border-t border-[var(--border)] bg-[var(--surface-panel-strong)] p-5 lg:border-l lg:border-t-0 lg:p-6">
           <input type="hidden" name="courseId" value={course.id} />
           <input type="hidden" name="courseSlug" value={course.slug} />
           <input type="hidden" name="returnPath" value={publicPath} />
@@ -205,7 +205,7 @@ export function CourseSalesPage({
                 required
                 minLength={2}
                 maxLength={120}
-                className="w-full rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+                className="w-full rounded-[14px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
               />
             </label>
             <label className="space-y-2">
@@ -215,7 +215,7 @@ export function CourseSalesPage({
                 type="email"
                 required
                 maxLength={180}
-                className="w-full rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+                className="w-full rounded-[14px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
               />
             </label>
           </div>
@@ -227,10 +227,10 @@ export function CourseSalesPage({
               minLength={10}
               maxLength={2000}
               rows={5}
-              className="w-full rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3 text-sm leading-7 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+              className="w-full rounded-[14px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm leading-7 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
             />
           </label>
-          <label className="!flex gap-3 rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel-strong)] p-4 text-sm leading-6 text-[var(--text-secondary)]">
+          <label className="!flex gap-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface-panel)] p-4 text-sm leading-6 text-[var(--text-secondary)]">
             <input
               name="marketingConsent"
               type="checkbox"

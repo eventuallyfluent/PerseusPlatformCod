@@ -14,15 +14,15 @@ type SalesSmartImageProps = {
 };
 
 const variantFrameClasses = {
-  hero: "rounded-[26px]",
-  feature: "rounded-[24px]",
-  gallery: "rounded-[22px]",
-  card: "rounded-[18px]",
-  avatar: "rounded-[18px]",
+  hero: "rounded-[20px]",
+  feature: "rounded-[20px]",
+  gallery: "rounded-[18px]",
+  card: "rounded-[14px]",
+  avatar: "rounded-[14px]",
 };
 
 const variantImageShellClasses = {
-  hero: "inset-4 sm:inset-6",
+  hero: "inset-3 sm:inset-4",
   feature: "inset-4 sm:inset-5",
   gallery: "inset-3 sm:inset-4",
   card: "inset-3",
@@ -79,11 +79,11 @@ export function SalesSmartImage({
             fill
             priority={priority}
             sizes={imageSizes(variant, sizes)}
-            className="absolute inset-0 scale-110 object-cover opacity-45 blur-xl saturate-[0.9]"
+            className="absolute inset-0 scale-105 object-cover opacity-25 blur-lg saturate-[0.86]"
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,9,24,0.04),rgba(12,9,24,0.28))]" />
-          <div className={cn("absolute inset-3 border border-white/10", roundedClass, frameClassName)} />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,9,24,0.02),rgba(12,9,24,0.18))]" />
+          <div className={cn("absolute inset-2 border border-[var(--border)]", roundedClass, frameClassName)} />
           <div className={cn("absolute flex items-center justify-center", imageShellClass)}>
             <div className={cn("relative h-full w-full", innerClass, imageClassName)}>
               <Image
@@ -92,7 +92,7 @@ export function SalesSmartImage({
                 fill
                 priority={priority}
                 sizes={imageSizes(variant, sizes)}
-                className={cn("object-center drop-shadow-[0_20px_45px_rgba(0,0,0,0.34)]", foregroundFitClass)}
+                className={cn("object-center drop-shadow-[0_14px_30px_rgba(0,0,0,0.24)]", foregroundFitClass)}
               />
             </div>
           </div>

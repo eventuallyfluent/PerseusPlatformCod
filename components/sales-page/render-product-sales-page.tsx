@@ -10,9 +10,9 @@ import type { BundleSalesPagePayload, GeneratedSalesPagePayload, SalesPageOfferS
 type ProductPayload = GeneratedSalesPagePayload | BundleSalesPagePayload;
 
 const sectionPanelClass =
-  "perseus-sales-panel rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
+  "perseus-sales-panel rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
 const sectionPanelStrongClass =
-  "perseus-sales-panel-strong rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
+  "perseus-sales-panel-strong rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]";
 const panelMutedTextClass = "text-[var(--text-secondary)]";
 const panelSubtleTextClass = "text-[var(--text-muted)]";
 
@@ -380,28 +380,31 @@ export function RenderProductSalesPage({
 
       return (
         <section key={section} id="outcomes" className="mx-auto max-w-7xl scroll-mt-28 space-y-8 px-6">
-          <SectionIntro eyebrow={payload.highlightsSection.eyebrow} title="The core promise at a glance." />
-          <div className="grid gap-5 lg:grid-cols-3">
+          <SectionIntro eyebrow={payload.highlightsSection.eyebrow} title="What you will get from this study." />
+          <div className={`overflow-hidden ${sectionPanelClass}`}>
             {cards.map((card) => {
               const treatment = getHighlightTreatment(card.id);
               const Icon = treatment.icon;
               const parsed = parseHighlightItems(card.items, card.id);
-              const visibleItems = parsed.bullets.slice(0, 6);
-              const hiddenItems = parsed.bullets.slice(6);
+              const visibleItems = parsed.bullets.slice(0, 8);
+              const hiddenItems = parsed.bullets.slice(8);
 
               return (
-              <div key={card.id} className={`relative overflow-hidden p-6 ${sectionPanelClass}`}>
-                <div className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${treatment.accentClass}`} />
-                <div className="relative">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex size-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--accent-lavender)]">
+              <div key={card.id} className="grid gap-5 border-t border-[var(--border)] p-5 first:border-t-0 sm:p-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex size-11 items-center justify-center rounded-[14px] border border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--accent-lavender)]">
                       <Icon className="size-5" aria-hidden="true" />
                     </div>
-                    <Badge variant={treatment.variant}>{card.title}</Badge>
+                    <div className="min-w-0">
+                      <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.22em] ${panelSubtleTextClass}`}>{treatment.eyebrow}</p>
+                      <h3 className="mt-2 font-serif text-2xl leading-tight text-[var(--text-primary)]">{card.title}</h3>
+                    </div>
                   </div>
-                  <p className={`mt-5 text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>{treatment.eyebrow}</p>
+                </div>
+                <div>
                   {parsed.chips.length > 0 ? (
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {parsed.chips.map((chip) => (
                         <span key={chip} className="rounded-full border border-[var(--border)] bg-[var(--surface-panel-strong)] px-3 py-1 text-xs font-semibold text-[var(--text-primary)]">
                           {chip}
@@ -409,14 +412,14 @@ export function RenderProductSalesPage({
                       ))}
                     </div>
                   ) : null}
-                  <ul className={`mt-4 space-y-4 text-sm leading-7 ${panelMutedTextClass}`}>
+                  <ul className={`grid gap-x-5 gap-y-3 text-sm leading-7 ${parsed.chips.length > 0 ? "mt-4" : ""} ${panelMutedTextClass} md:grid-cols-2`}>
                     {visibleItems.map((item) => (
                       <li key={item} className="grid grid-cols-[18px_minmax(0,1fr)] gap-3">
                         <CheckCircle2 className="mt-1 size-4 text-[var(--accent-lavender)]" aria-hidden="true" />
                         <span>{item}</span>
                       </li>
                     ))}
-                </ul>
+                  </ul>
                   {hiddenItems.length > 0 ? (
                     <details className={`mt-4 text-sm ${panelMutedTextClass}`}>
                       <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-[var(--border)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-lavender)] marker:content-none">
@@ -471,27 +474,26 @@ export function RenderProductSalesPage({
       return (
         <section key={section} id="curriculum" className="mx-auto max-w-7xl scroll-mt-28 space-y-7 px-6">
           <SectionIntro eyebrow={payload.curriculumSection.eyebrow} title={payload.curriculumSection.title} body={payload.curriculumSection.body} />
-          <div className="grid gap-5">
+          <div className={`overflow-hidden ${sectionPanelStrongClass}`}>
             {payload.curriculumSection.modules.map((module, index) => (
-              <details key={module.moduleTitle} className={`group overflow-hidden ${sectionPanelStrongClass}`} open={index === 0}>
-                <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-4 border-b border-[var(--border)] px-6 py-4 marker:content-none">
+              <details key={module.moduleTitle} className="group border-t border-[var(--border)] first:border-t-0" open={index === 0}>
+                <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 px-5 py-5 marker:content-none sm:px-6">
                   <div className="space-y-3">
-                    <Badge variant="portal">Module {index + 1}</Badge>
-                    <h3 className="font-serif text-3xl leading-tight">{cleanModuleTitle(module.moduleTitle, index)}</h3>
+                    <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.22em] ${panelSubtleTextClass}`}>Module {index + 1}</p>
+                    <h3 className="font-serif text-2xl leading-tight sm:text-3xl">{cleanModuleTitle(module.moduleTitle, index)}</h3>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${panelSubtleTextClass}`}>
+                  <div className="flex items-center gap-3">
+                    <p className={`rounded-full border border-[var(--border)] bg-[var(--surface-panel)] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] ${panelSubtleTextClass}`}>
                       {module.lessonCount} lesson{module.lessonCount === 1 ? "" : "s"}
                     </p>
-                    <span className={`text-sm font-semibold text-[var(--accent)] group-open:hidden`}>Open</span>
-                    <span className={`hidden text-sm font-semibold text-[var(--accent)] group-open:inline`}>Close</span>
+                    <ChevronDown className="size-4 text-[var(--accent)] transition group-open:rotate-180" aria-hidden="true" />
                   </div>
                 </summary>
-                <ol className="grid">
+                <ol className="grid border-t border-[var(--border)] bg-[var(--surface-panel)]/55">
                   {module.lessons.map((lesson) => (
                     <li
                       key={`${module.moduleTitle}-${lesson.title}`}
-                      className="grid gap-3 border-t border-[var(--border)] px-6 py-4 first:border-t-0 lg:grid-cols-[1fr_auto]"
+                      className="grid gap-3 border-t border-[var(--border)] px-5 py-4 first:border-t-0 sm:px-6 lg:grid-cols-[1fr_auto]"
                     >
                       <div className="space-y-2">
                         <p className="text-base font-medium text-[var(--text-primary)]">{lesson.title}</p>
@@ -500,8 +502,8 @@ export function RenderProductSalesPage({
                           {lesson.dripDays ? <Badge variant="accent">Day {lesson.dripDays}</Badge> : null}
                         </div>
                         {lesson.isPreview && lesson.previewHref ? (
-                          <Link href={lesson.previewHref} className="inline-flex rounded-full border border-[var(--premium)] bg-[var(--premium-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--premium)]">
-                            Sign up to watch
+                          <Link href={lesson.previewHref} className="inline-flex rounded-full border border-[var(--premium)] bg-[var(--premium-soft)] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--premium)]">
+                            Create account to watch
                           </Link>
                         ) : null}
                       </div>
@@ -627,12 +629,17 @@ export function RenderProductSalesPage({
       return (
         <section key={section} id="faq" className="mx-auto max-w-7xl scroll-mt-28 space-y-8 px-6">
           <SectionIntro eyebrow={payload.faqSection.eyebrow} title={payload.faqSection.title} />
-          <div className="grid gap-4">
-            {payload.faqSection.items.map((faq) => (
-              <div key={faq.question} className={`p-6 ${sectionPanelClass}`}>
-                <h3 className="font-serif text-xl leading-tight text-[var(--text-primary)]">{faq.question}</h3>
-                <p className={`mt-3 text-sm leading-8 ${panelMutedTextClass}`}>{faq.answer}</p>
-              </div>
+          <div className={`overflow-hidden ${sectionPanelClass}`}>
+            {payload.faqSection.items.map((faq, index) => (
+              <details key={faq.question} className="group border-t border-[var(--border)] first:border-t-0" open={index === 0}>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-5 px-5 py-5 marker:content-none sm:px-6">
+                  <h3 className="font-serif text-lg leading-tight text-[var(--text-primary)] sm:text-xl">{faq.question}</h3>
+                  <ChevronDown className="size-4 shrink-0 text-[var(--accent)] transition group-open:rotate-180" aria-hidden="true" />
+                </summary>
+                <div className="border-t border-[var(--border)] bg-[var(--surface-panel-strong)]/55 px-5 py-5 sm:px-6">
+                  <p className={`max-w-4xl text-sm leading-8 ${panelMutedTextClass}`}>{faq.answer}</p>
+                </div>
+              </details>
             ))}
           </div>
         </section>
@@ -644,41 +651,54 @@ export function RenderProductSalesPage({
 
       return (
         <section key={section} id="pricing" className="mx-auto max-w-7xl scroll-mt-28 px-6">
-          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel)] px-8 py-9 text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
-            <div className="grid gap-7 lg:grid-cols-[1fr_0.9fr] lg:items-end">
+          <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+            <div className="grid gap-0 lg:grid-cols-[1fr_0.82fr]">
               <div>
-                <Badge variant="premium">{payload.pricingSection.badge}</Badge>
-                <h2 className="mt-4 max-w-2xl font-serif text-4xl leading-tight lg:text-[3rem]">{payload.pricingSection.headline}</h2>
-                <p className={`mt-3 max-w-xl text-base leading-8 ${panelMutedTextClass}`}>{payload.pricingSection.body}</p>
-              </div>
-              <div className="grid gap-3">
-                {singleOffer ? (
-                  <div className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-5 py-4 text-[var(--text-primary)]">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm font-semibold">{singleOffer.name}</span>
-                      <span className="text-sm font-semibold">{singleOffer.price}</span>
+                <div className="px-6 py-7 sm:px-8 lg:px-9 lg:py-10">
+                  <Badge variant="premium">{payload.pricingSection.badge}</Badge>
+                  <h2 className="mt-4 max-w-2xl font-serif text-4xl leading-tight lg:text-[3rem]">{payload.pricingSection.headline}</h2>
+                  <p className={`mt-3 max-w-xl text-base leading-8 ${panelMutedTextClass}`}>{payload.pricingSection.body}</p>
+                </div>
+                <div className="grid border-t border-[var(--border)] sm:grid-cols-3">
+                  {[
+                    payload.productType === "course" ? "Student account access" : "Bundle account access",
+                    "Flexible checkout options",
+                    "Support before enrollment",
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-3 border-t border-[var(--border)] px-6 py-4 first:border-t-0 sm:border-l sm:border-t-0 sm:first:border-l-0 sm:px-8">
+                      <CheckCircle2 className="size-4 shrink-0 text-[var(--accent-lavender)]" aria-hidden="true" />
+                      <span className={`text-sm leading-6 ${panelMutedTextClass}`}>{item}</span>
                     </div>
-                    {singleOffer.compareAtPrice || singleOffer.savingsLabel ? (
-                      <div className={`mt-2 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.2em] ${panelSubtleTextClass}`}>
-                        <span>{singleOffer.compareAtPrice ?? ""}</span>
-                        <span>{singleOffer.savingsLabel ?? ""}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="border-t border-[var(--border)] bg-[var(--surface-panel-strong)] p-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-7">
+                {singleOffer ? (
+                  <div className="space-y-5">
+                    <div>
+                      <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.18em] ${panelSubtleTextClass}`}>{singleOffer.name}</p>
+                      <div className="mt-3 flex flex-wrap items-end gap-x-4 gap-y-2">
+                        <span className="font-serif text-5xl leading-none text-[var(--text-primary)]">{singleOffer.price}</span>
+                        {singleOffer.compareAtPrice ? <span className={`pb-1 text-base line-through ${panelSubtleTextClass}`}>{singleOffer.compareAtPrice}</span> : null}
                       </div>
-                    ) : null}
+                      {singleOffer.savingsLabel ? <Badge variant="premium" className="mt-4">{singleOffer.savingsLabel}</Badge> : null}
+                    </div>
                     <ButtonLink
                       href={singleOffer.checkoutUrl}
-                      className="mt-4 min-h-12 w-full justify-center whitespace-normal bg-[var(--sales-primary-cta-background)] px-6 text-center shadow-[var(--sales-primary-cta-shadow)]"
+                      className="min-h-12 w-full justify-center whitespace-normal bg-[var(--sales-primary-cta-background)] px-6 text-center shadow-[var(--sales-primary-cta-shadow)]"
                     >
                       {primaryCtaLabel}
                     </ButtonLink>
-                    <p className={`mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] ${panelSubtleTextClass}`}>
-                      Account access after payment confirmation
-                    </p>
+                    <div className={`space-y-2 border-t border-[var(--border)] pt-4 text-sm leading-6 ${panelMutedTextClass}`}>
+                      <p className="flex gap-2"><CheckCircle2 className="mt-1 size-4 shrink-0 text-[var(--premium)]" aria-hidden="true" />Access opens after checkout confirmation.</p>
+                      <p className="flex gap-2"><CheckCircle2 className="mt-1 size-4 shrink-0 text-[var(--premium)]" aria-hidden="true" />Use your student account for purchases and course library.</p>
+                    </div>
                   </div>
                 ) : payload.pricingSection.offers.map((offer) => (
                   <Link
                     key={offer.offerId}
                     href={offer.checkoutUrl}
-                    className="rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-5 py-4 text-[var(--text-primary)] transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]"
+                    className="block border-t border-[var(--border)] px-1 py-4 text-[var(--text-primary)] transition first:border-t-0 hover:text-[var(--accent)]"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-sm font-semibold">{offer.name}</span>
@@ -695,7 +715,7 @@ export function RenderProductSalesPage({
               </div>
             </div>
             {!singleOffer ? (
-              <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-[20px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--accent-soft),var(--premium-soft))] p-6">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] bg-[linear-gradient(135deg,var(--accent-soft),var(--premium-soft))] p-6 lg:p-8">
                 <div className="max-w-2xl">
                   <h3 className="font-serif text-3xl leading-tight lg:text-[2.35rem]">{payload.finalCta.label}</h3>
                   <p className={`mt-3 text-base leading-8 ${panelMutedTextClass}`}>{payload.finalCta.body}</p>
@@ -714,7 +734,7 @@ export function RenderProductSalesPage({
   return (
     <div className="perseus-sales-page space-y-14 overflow-x-hidden lg:space-y-16">
       <section className="px-4 sm:px-6">
-        <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[24px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] p-4 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] sm:p-5 lg:p-6">
+        <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[20px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] p-4 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] sm:p-5 lg:p-6">
           <div className="absolute inset-0 bg-[var(--sales-hero-atmosphere)]" />
           <div className={`relative grid gap-6 lg:items-center ${hasHeroImage ? "lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.82fr)]" : ""}`}>
             <div className="px-2 py-5 sm:px-4 lg:px-5 lg:py-8">
@@ -764,7 +784,7 @@ export function RenderProductSalesPage({
                     const Icon = fact.icon;
 
                     return (
-                      <div key={`${fact.label}-${fact.value}`} className="flex min-h-12 items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2">
+                      <div key={`${fact.label}-${fact.value}`} className="flex min-h-12 items-center gap-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface-panel)]/55 px-3 py-2">
                         <Icon className="size-4 shrink-0 text-[var(--accent-lavender)]" aria-hidden="true" />
                         <div className="min-w-0">
                           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--hero-text-muted)]">{fact.label}</p>
@@ -783,7 +803,7 @@ export function RenderProductSalesPage({
                 alt={`${payload.hero.title} course image`}
                 priority
                 variant="hero"
-                className="mx-auto aspect-[4/3] w-full max-w-[560px] rounded-[24px] sm:aspect-[1/1] lg:aspect-[0.92/1]"
+                className="mx-auto aspect-[4/3] w-full max-w-[560px] rounded-[20px] sm:aspect-[1/1] lg:aspect-[0.95/1]"
               />
             ) : null}
           </div>

@@ -6,6 +6,17 @@ import { buildBreadcrumbStructuredData, buildPersonStructuredData, buildProfileP
 
 export const dynamic = "force-dynamic";
 
+function normalizeBioText(value?: string | null) {
+  return (value ?? "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function splitBioParagraphs(value?: string | null) {
+  return value
+    ?.split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean) ?? [];
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const instructor = await getInstructorBySlug(slug);
@@ -54,7 +65,14 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
         .filter((link): link is readonly [string, string] => Boolean(link))
     : [];
   const profileLinks = [...socialLinks, ...customLinks];
-  const bioParagraphs = instructor.longBio?.split(/\n+/).filter(Boolean) ?? [];
+  const longBioParagraphs = splitBioParagraphs(instructor.longBio);
+  const shortBioText = normalizeBioText(instructor.shortBio);
+  const bioParagraphs =
+    shortBioText && longBioParagraphs.length > 0 && normalizeBioText(longBioParagraphs[0]) === shortBioText
+      ? longBioParagraphs.slice(1)
+      : longBioParagraphs;
+  const heroBioParagraphs = bioParagraphs.slice(0, instructor.shortBio ? 2 : 3);
+  const remainingBioParagraphs = bioParagraphs.slice(heroBioParagraphs.length);
 
   const personJsonLd = buildPersonStructuredData({
     name: instructor.name,
@@ -83,16 +101,16 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
       <section className="border-b border-[var(--hero-shell-border)] px-6 py-8 lg:py-10">
-        <div className="mx-auto grid max-w-7xl gap-7 rounded-[20px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] p-5 shadow-[var(--shadow-panel)] lg:grid-cols-[minmax(0,1fr)_340px] lg:p-7">
-          <div className="min-w-0 space-y-6">
+        <div className="mx-auto grid max-w-7xl gap-8 rounded-[20px] border border-[var(--border)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] p-5 shadow-[var(--shadow-panel)] lg:grid-cols-[minmax(0,0.9fr)_340px] lg:items-start lg:p-7 xl:grid-cols-[minmax(0,0.82fr)_360px]">
+          <div className="min-w-0 space-y-7">
             <div className="space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[var(--accent-lavender)]">Instructor</p>
               <h1 className="font-serif text-5xl leading-tight text-[var(--hero-text-primary)] sm:text-6xl lg:text-[4rem]">{instructor.name}</h1>
-              {instructor.shortBio ? <p className="max-w-4xl text-lg leading-8 text-[var(--accent-lavender)]">{instructor.shortBio}</p> : null}
+              {instructor.shortBio ? <p className="max-w-3xl text-lg leading-8 text-[var(--accent-lavender)]">{instructor.shortBio}</p> : null}
             </div>
-            {bioParagraphs.length > 0 ? (
-              <div className="grid gap-4 text-base leading-8 text-[var(--text-secondary)] xl:grid-cols-2">
-                {bioParagraphs.slice(0, 4).map((paragraph, index) => (
+            {heroBioParagraphs.length > 0 ? (
+              <div className="max-w-3xl space-y-4 text-base leading-8 text-[var(--text-secondary)]">
+                {heroBioParagraphs.map((paragraph, index) => (
                   <p key={`${instructor.id}-hero-bio-${index}`}>{paragraph}</p>
                 ))}
               </div>
@@ -134,14 +152,12 @@ export default async function InstructorPage({ params }: { params: Promise<{ slu
       </section>
 
       <div className="mx-auto max-w-7xl space-y-12 px-6 py-10 lg:py-12">
-        {bioParagraphs.length > 4 ? (
+        {remainingBioParagraphs.length > 0 ? (
           <section className="max-w-4xl">
             <div className="space-y-4 text-lg leading-10 text-[var(--text-secondary)]">
-              {bioParagraphs
-                .slice(4)
-                .map((paragraph, index) => (
-                  <p key={`${instructor.id}-bio-${index}`}>{paragraph}</p>
-                ))}
+              {remainingBioParagraphs.map((paragraph, index) => (
+                <p key={`${instructor.id}-bio-${index}`}>{paragraph}</p>
+              ))}
             </div>
           </section>
         ) : null}

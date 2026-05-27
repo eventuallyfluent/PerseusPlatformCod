@@ -109,7 +109,7 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
         </div>
         <div className="perseus-course-card-body flex flex-1 flex-col p-5 sm:p-6">
           <div className="perseus-course-card-badges flex items-center gap-4">
-            <Badge variant="portal">{course.statusLabel ?? "Featured"}</Badge>
+            <Badge variant="portal">{course.statusLabel ?? "Course"}</Badge>
           </div>
           <div className="perseus-course-card-copy mt-4 space-y-2.5">
             {course.instructorName ? <p className="text-sm text-[var(--text-secondary)]">{course.instructorName}</p> : null}
@@ -144,7 +144,7 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
               <p className="mt-1.5 text-2xl font-semibold text-[var(--text-primary)]">{course.priceLabel ?? "View offer"}</p>
             </div>
             <span className="rounded-full border border-[var(--accent)] bg-[var(--accent-soft)] px-5 py-3 text-sm font-semibold text-[var(--accent)] transition group-hover:bg-[var(--surface-panel-strong)]">
-              {course.ctaLabel ?? "Enroll now"}
+              {course.ctaLabel ?? "View course"}
             </span>
           </div>
         </div>

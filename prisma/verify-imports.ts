@@ -48,6 +48,12 @@ async function main() {
     throw new Error("Course package dry run did not tolerate Payhip teaser lesson types.");
   }
 
+  const resourceLessonTypeCsv = packageCsv.replace(",VIDEO,", ",resource,");
+  const resourceLessonTypeDryRun = await dryRunImport("COURSE_PACKAGE", resourceLessonTypeCsv);
+  if (resourceLessonTypeDryRun.invalidRows.length > 0 || resourceLessonTypeDryRun.validRows[0]?.row.lesson_type !== LessonType.MIXED) {
+    throw new Error("Course package dry run did not tolerate Payhip resource lesson types.");
+  }
+
   const originalFetch = globalThis.fetch;
   const legacyMediaCsv = packageCsv
     .replaceAll("ritual-discipline-foundations", "legacy-media-import-check")

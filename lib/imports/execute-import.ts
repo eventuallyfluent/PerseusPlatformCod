@@ -1124,6 +1124,11 @@ async function processChunkedBatch(batchId: string) {
 
   const summary = normalizeExecutionSummary(batch.type, batch.executionSummary, validRows.length);
 
+  if (failures.length > 0 && summary.processedCount === 0) {
+    summary.hasMore = false;
+    return updateBatchProgress(batch.id, ImportStatus.FAILED, summary, failures);
+  }
+
   if (batch.type === ImportType.COURSE_PACKAGE) {
     await processCoursePackageChunk(validRows as ValidatedImportRow<CoursePackageCsvRow>[], summary, failures);
     return updateBatchProgress(batch.id, buildFailureStatus(summary, failures), summary, failures);
@@ -1172,6 +1177,11 @@ export async function startImportBatch(batchId: string) {
 
   if (!batch) {
     throw new Error("Import batch not found");
+  }
+
+  const validationFailures = normalizeErrorReport(batch.errorReport);
+  if (batch.status === ImportStatus.DRY_RUN && validationFailures.length > 0) {
+    throw new Error(`Resolve ${validationFailures.length} import validation error${validationFailures.length === 1 ? "" : "s"} before executing this batch.`);
   }
 
   const totalCount =

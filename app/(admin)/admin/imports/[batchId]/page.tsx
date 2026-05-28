@@ -44,6 +44,9 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
   const processedCount = Number(executionSummary?.processedCount ?? 0);
   const totalCount = Number(executionSummary?.totalCount ?? 0);
   const isProcessing = batch.status === "PROCESSING";
+  const invalidCount = readNumber(dryRunSummary, "invalidCount");
+  const conflictCount = readNumber(dryRunSummary, "conflictCount");
+  const canExecute = batch.status === "DRY_RUN" && invalidCount === 0 && conflictCount === 0;
   const hasMore = readBoolean(executionSummary, "hasMore");
   const isStuck = isProcessing && hasMore && processedCount === 0;
   const targetCourse =
@@ -97,12 +100,17 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
           {targetCourse ? <div>Target course: {targetCourse}</div> : null}
         </div>
         <div className="flex flex-wrap gap-3">
-          {batch.status === "DRY_RUN" ? (
+          {canExecute ? (
             <form action={`/api/imports/batches/${batch.id}/execute`} method="post">
               <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
                 Execute batch
               </button>
             </form>
+          ) : null}
+          {batch.status === "DRY_RUN" && !canExecute ? (
+            <div className="rounded-full bg-rose-50 px-5 py-3 text-sm font-medium text-rose-700">
+              Fix validation errors before executing
+            </div>
           ) : null}
           {batch.status === "PROCESSING" ? (
             <form action={`/api/imports/batches/${batch.id}/execute`} method="post">
@@ -137,7 +145,7 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
         </div>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <ChecklistItem label="Target course" value={(course?.title ?? targetCourse) || "Not resolved yet"} good={Boolean(course || targetCourse)} />
-          <ChecklistItem label="Rows" value={`${readNumber(dryRunSummary, "validCount")} valid / ${readNumber(dryRunSummary, "invalidCount")} invalid`} good={readNumber(dryRunSummary, "invalidCount") === 0} />
+          <ChecklistItem label="Rows" value={`${readNumber(dryRunSummary, "validCount")} valid / ${invalidCount} invalid`} good={invalidCount === 0} />
           <ChecklistItem label="Modules" value={String(readNumber(executionSummary, "moduleCount") || readNumber(dryRunSummary, "moduleCount") || 0)} good={(readNumber(executionSummary, "moduleCount") || readNumber(dryRunSummary, "moduleCount")) > 0} />
           <ChecklistItem label="Lessons" value={String(readNumber(executionSummary, "lessonCount") || readNumber(dryRunSummary, "lessonCount") || totalCount)} good={(readNumber(executionSummary, "lessonCount") || readNumber(dryRunSummary, "lessonCount") || totalCount) > 0} />
           <ChecklistItem label="Hero image" value={heroDetected ? "Detected" : "Missing"} good={heroDetected} />
@@ -150,8 +158,11 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
           <ChecklistItem label="Execution progress" value={totalCount > 0 ? `${processedCount} / ${totalCount}` : "Not started"} good={batch.status === "COMPLETED"} />
           <ChecklistItem label="Status" value={isStuck ? "Resume needed" : batch.status.replaceAll("_", " ")} good={batch.status === "COMPLETED" ? true : batch.status === "FAILED" ? false : undefined} />
         </div>
-        {readNumber(dryRunSummary, "conflictCount") > 0 ? (
-          <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Resolve {readNumber(dryRunSummary, "conflictCount")} conflict(s) before migration.</p>
+        {invalidCount > 0 ? (
+          <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Resolve {invalidCount} invalid row(s) before migration. Executing a partial course import is blocked so modules and lessons are not silently missed.</p>
+        ) : null}
+        {conflictCount > 0 ? (
+          <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Resolve {conflictCount} conflict(s) before migration.</p>
         ) : null}
         {expectedTestimonials > 0 && importedTestimonials < expectedTestimonials && batch.status === "COMPLETED" ? (
           <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Reviews were detected in the CSV but not all were imported.</p>

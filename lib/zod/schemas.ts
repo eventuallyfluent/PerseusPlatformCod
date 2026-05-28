@@ -115,6 +115,10 @@ function normalizeCsvLessonType(value: unknown) {
     return LessonType.MIXED;
   }
 
+  if (["RESOURCE", "RESOURCES", "MATERIAL", "MATERIALS", "HANDOUT", "HANDOUTS", "WORKSHEET", "WORKSHEETS"].includes(normalized)) {
+    return LessonType.MIXED;
+  }
+
   return normalized;
 }
 

@@ -80,5 +80,13 @@ export const courseInclude = {
       },
     },
   },
+  collectionCourses: {
+    include: {
+      collection: true,
+    },
+    orderBy: {
+      position: "asc" as const,
+    },
+  },
   pages: true,
 };

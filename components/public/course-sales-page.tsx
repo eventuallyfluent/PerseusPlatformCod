@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { RenderProductSalesPage } from "@/components/sales-page/render-product-sales-page";
 import { Button, buttonClassName } from "@/components/ui/button";
 import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
@@ -238,7 +239,11 @@ export function CourseSalesPage({
               className="mt-1 !h-4 !w-4 flex-none !rounded !p-0 accent-[var(--accent)]"
             />
             <span>
-              Send me course updates and email announcements. You can still send this question without joining the email list.
+              Send me course updates and email announcements. You can still send this question without joining the email list. See our{" "}
+              <Link href="/privacy" className="font-semibold text-[var(--accent)] underline underline-offset-4">
+                Privacy Policy
+              </Link>
+              .
             </span>
           </label>
           <div>

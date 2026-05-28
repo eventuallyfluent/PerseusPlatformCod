@@ -231,6 +231,12 @@ type SalesPageBasePayload = {
     body: string;
     offers: SalesPageOfferSummary[];
   };
+  context?: {
+    collection?: {
+      title: string;
+      href: string;
+    } | null;
+  };
   finalCta: {
     label: string;
     body: string;

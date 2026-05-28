@@ -4,6 +4,15 @@ import { normalizeSectionOrder, parseSalesPageConfig } from "@/lib/sales-pages/s
 import type { CourseWithRelations, GeneratedSalesPagePayload, SalesPageOfferSummary } from "@/types";
 import { getPublicReviewName } from "@/lib/testimonials/public-review-name";
 
+type CourseWithOptionalCollectionContext = CourseWithRelations & {
+  collectionCourses?: Array<{
+    collection: {
+      title: string;
+      slug: string;
+    };
+  }>;
+};
+
 function readStringArray(value: unknown) {
   if (Array.isArray(value)) {
     return value.map((item) => String(item));
@@ -39,19 +48,19 @@ function buildOffers(course: CourseWithRelations): SalesPageOfferSummary[] {
     });
 }
 
-export function generateSalesPagePayload(course: CourseWithRelations): GeneratedSalesPagePayload {
+export function generateSalesPagePayload(course: CourseWithOptionalCollectionContext): GeneratedSalesPagePayload {
   const config = parseSalesPageConfig(course.salesPageConfig);
   const offers = buildOffers(course);
   const approvedTestimonials = course.testimonials.filter((testimonial) => testimonial.isApproved);
   const sectionOrder = normalizeSectionOrder(config.sectionOrder, [
     "description",
-    "gallery",
     "highlights",
     "curriculum",
     "testimonials",
     "instructor",
-    "faqs",
     "pricing",
+    "faqs",
+    "gallery",
   ]);
   const outcomes = readStringArray(course.learningOutcomes);
   const audience = readStringArray(course.whoItsFor);
@@ -59,6 +68,7 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
   const lessonCount = course.modules.reduce((count, module) => count + module.lessons.length, 0);
   const primaryOffer = offers[0] ?? null;
   const isFreeCourse = primaryOffer ? /(^|\s)(free|\$0|£0|€0|0\.00)/i.test(primaryOffer.price) : false;
+  const primaryCollection = course.collectionCourses?.[0]?.collection ?? null;
 
   return {
     version: "v2",
@@ -170,6 +180,14 @@ export function generateSalesPagePayload(course: CourseWithRelations): Generated
           ? "This course is available at no cost. Enroll to add it to your course area."
           : "Choose your course access below. You can start with the lessons as soon as enrollment is complete."),
       offers,
+    },
+    context: {
+      collection: primaryCollection
+        ? {
+            title: primaryCollection.title,
+            href: `/collections/${primaryCollection.slug}`,
+          }
+        : null,
     },
     finalCta: {
       label: config.finalCtaLabel || (offers.length > 0 ? (isFreeCourse ? "Start Free Course" : "Begin the Course") : "Join the Waitlist"),

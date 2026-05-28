@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, CheckCircle2, ChevronDown, Layers3, PackageCheck, ShieldCheck, Sparkles, Star, Target, ThumbsUp } from "lucide-react";
+import { BookOpen, CheckCircle2, ChevronDown, Layers3, PackageCheck, ShieldCheck, Sparkles, Star, Target } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -18,7 +18,7 @@ const panelSubtleTextClass = "text-[var(--text-muted)]";
 
 type DescriptionBlock =
   | { kind: "heading"; text: string }
-  | { kind: "paragraph"; text: string; isCallout?: boolean };
+  | { kind: "paragraph"; text: string };
 
 type ParsedHighlight = {
   bullets: string[];
@@ -65,10 +65,6 @@ function looksLikeHeading(value: string) {
   return /[:：]$/.test(text) || /^[A-Z0-9][A-Za-z0-9\s,'&/()-]+$/.test(text);
 }
 
-function isCalloutParagraph(value: string) {
-  return /\b(continue|master course|advanced|next step|requirements?|included|bonus|enrol|enroll|access)\b/i.test(value);
-}
-
 function parseDescriptionBlocks(value?: string | null): DescriptionBlock[] {
   if (!value) return [];
 
@@ -87,7 +83,6 @@ function parseDescriptionBlocks(value?: string | null): DescriptionBlock[] {
         : splitIntoParagraphs(line).map((paragraph) => ({
             kind: "paragraph",
             text: paragraph,
-            isCallout: isCalloutParagraph(paragraph),
           })),
     );
   }
@@ -95,7 +90,6 @@ function parseDescriptionBlocks(value?: string | null): DescriptionBlock[] {
   return splitIntoParagraphs(normalized).map((paragraph) => ({
     kind: "paragraph",
     text: paragraph,
-    isCallout: isCalloutParagraph(paragraph),
   }));
 }
 
@@ -265,6 +259,15 @@ function SectionIntro({ eyebrow, title, body }: { eyebrow: string; title: string
   );
 }
 
+function CompactSectionIntro({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div className="max-w-3xl space-y-2">
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--accent-lavender)]">{eyebrow}</p>
+      <h2 className="font-serif text-3xl leading-tight text-[var(--foreground)] lg:text-[2.35rem]">{title}</h2>
+    </div>
+  );
+}
+
 function SalesPageSubnav({ items }: { items: Array<{ href: string; label: string }> }) {
   if (items.length < 3) {
     return null;
@@ -348,9 +351,7 @@ export function RenderProductSalesPage({
                         <p
                           key={`${block.text.slice(0, 28)}-${index}`}
                           className={
-                            block.isCallout
-                              ? "rounded-[18px] border border-[var(--premium)]/35 bg-[var(--premium-soft)] px-4 py-3 text-base leading-8 text-[var(--text-primary)]"
-                              : index === 0
+                            index === 0
                                 ? "text-lg leading-9 text-[var(--text-primary)]"
                                 : `text-base leading-8 ${panelMutedTextClass}`
                           }
@@ -380,7 +381,7 @@ export function RenderProductSalesPage({
 
       return (
         <section key={section} id="outcomes" className="mx-auto max-w-7xl scroll-mt-28 space-y-8 px-6">
-          <SectionIntro eyebrow={payload.highlightsSection.eyebrow} title="What you will get from this study." />
+          <CompactSectionIntro eyebrow={payload.highlightsSection.eyebrow} title="What you will get from this study." />
           <div className={`overflow-hidden ${sectionPanelClass}`}>
             {cards.map((card) => {
               const treatment = getHighlightTreatment(card.id);
@@ -602,15 +603,9 @@ export function RenderProductSalesPage({
                   {testimonial.source ? <p className={`text-sm ${panelSubtleTextClass}`}>{testimonial.source}</p> : null}
                   <div className="space-y-2 pt-2 text-sm font-medium text-[var(--text-primary)]">
                     <p className="flex items-center gap-2">
-                      <ShieldCheck className="size-4" aria-hidden="true" />
-                      Verified Buyer
+                      <span className="text-[var(--premium)]" aria-hidden="true">✦</span>
+                      Verified Student
                     </p>
-                    {testimonial.recommendsProduct ? (
-                      <p className="flex items-center gap-2">
-                        <ThumbsUp className="size-4" aria-hidden="true" />
-                        I recommend this product
-                      </p>
-                    ) : null}
                   </div>
                 </div>
                 <div className="space-y-4">
@@ -626,9 +621,13 @@ export function RenderProductSalesPage({
     }
 
     if (section === "faqs") {
+      if (payload.faqSection.items.length === 0) {
+        return null;
+      }
+
       return (
         <section key={section} id="faq" className="mx-auto max-w-7xl scroll-mt-28 space-y-8 px-6">
-          <SectionIntro eyebrow={payload.faqSection.eyebrow} title={payload.faqSection.title} />
+          <CompactSectionIntro eyebrow={payload.faqSection.eyebrow} title={payload.faqSection.title} />
           <div className={`overflow-hidden ${sectionPanelClass}`}>
             {payload.faqSection.items.map((faq, index) => (
               <details key={faq.question} className="group border-t border-[var(--border)] first:border-t-0" open={index === 0}>
@@ -660,16 +659,20 @@ export function RenderProductSalesPage({
                   <p className={`mt-3 max-w-xl text-base leading-8 ${panelMutedTextClass}`}>{payload.pricingSection.body}</p>
                 </div>
                 <div className="grid border-t border-[var(--border)] sm:grid-cols-3">
-                  {[
-                    payload.productType === "course" ? "Student account access" : "Bundle account access",
-                    "Flexible checkout options",
-                    "Support before enrollment",
-                  ].map((item) => (
-                    <div key={item} className="flex items-center gap-3 border-t border-[var(--border)] px-6 py-4 first:border-t-0 sm:border-l sm:border-t-0 sm:first:border-l-0 sm:px-8">
-                      <CheckCircle2 className="size-4 shrink-0 text-[var(--accent-lavender)]" aria-hidden="true" />
-                      <span className={`text-sm leading-6 ${panelMutedTextClass}`}>{item}</span>
-                    </div>
-                  ))}
+                  <div className="flex items-center gap-3 border-t border-[var(--border)] px-6 py-4 first:border-t-0 sm:border-l sm:border-t-0 sm:first:border-l-0 sm:px-8">
+                    <CheckCircle2 className="size-4 shrink-0 text-[var(--accent-lavender)]" aria-hidden="true" />
+                    <span className={`text-sm leading-6 ${panelMutedTextClass}`}>Lifetime access</span>
+                  </div>
+                  <div className="flex items-center gap-3 border-t border-[var(--border)] px-6 py-4 sm:border-l sm:border-t-0 sm:px-8">
+                    <CheckCircle2 className="size-4 shrink-0 text-[var(--accent-lavender)]" aria-hidden="true" />
+                    <span className={`text-sm leading-6 ${panelMutedTextClass}`}>All future updates included</span>
+                  </div>
+                  <div className="flex items-center gap-3 border-t border-[var(--border)] px-6 py-4 sm:border-l sm:border-t-0 sm:px-8">
+                    <CheckCircle2 className="size-4 shrink-0 text-[var(--accent-lavender)]" aria-hidden="true" />
+                    <Link href="/refund-policy" className={`text-sm leading-6 underline underline-offset-4 ${panelMutedTextClass} transition hover:text-[var(--text-primary)]`}>
+                      Refund policy
+                    </Link>
+                  </div>
                 </div>
               </div>
               <div className="border-t border-[var(--border)] bg-[var(--surface-panel-strong)] p-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-7">
@@ -690,8 +693,12 @@ export function RenderProductSalesPage({
                       {primaryCtaLabel}
                     </ButtonLink>
                     <div className={`space-y-2 border-t border-[var(--border)] pt-4 text-sm leading-6 ${panelMutedTextClass}`}>
-                      <p className="flex gap-2"><CheckCircle2 className="mt-1 size-4 shrink-0 text-[var(--premium)]" aria-hidden="true" />Access opens after checkout confirmation.</p>
-                      <p className="flex gap-2"><CheckCircle2 className="mt-1 size-4 shrink-0 text-[var(--premium)]" aria-hidden="true" />Use your student account for purchases and course library.</p>
+                      <p className="flex gap-2"><CheckCircle2 className="mt-1 size-4 shrink-0 text-[var(--premium)]" aria-hidden="true" />Access is saved in your student library.</p>
+                      <p className="flex gap-2"><CheckCircle2 className="mt-1 size-4 shrink-0 text-[var(--premium)]" aria-hidden="true" />Future course updates are included.</p>
+                      <p className="flex gap-2">
+                        <CheckCircle2 className="mt-1 size-4 shrink-0 text-[var(--premium)]" aria-hidden="true" />
+                        <Link href="/refund-policy" className="underline underline-offset-4 transition hover:text-[var(--text-primary)]">Read the refund policy</Link>
+                      </p>
                     </div>
                   </div>
                 ) : payload.pricingSection.offers.map((offer) => (
@@ -733,7 +740,18 @@ export function RenderProductSalesPage({
 
   return (
     <div className="perseus-sales-page space-y-14 overflow-x-hidden lg:space-y-16">
-      <section className="px-4 sm:px-6">
+      <section className="space-y-3 px-4 sm:px-6">
+        {payload.context?.collection ? (
+          <div className="mx-auto max-w-7xl">
+            <Link
+              href={payload.context.collection.href}
+              className="inline-flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] transition hover:text-[var(--accent)]"
+            >
+              <span aria-hidden="true">←</span>
+              <span>Part of: {payload.context.collection.title}</span>
+            </Link>
+          </div>
+        ) : null}
         <div className="perseus-sales-hero-shell relative mx-auto max-w-7xl overflow-hidden rounded-[20px] border border-[var(--hero-shell-border)] bg-[var(--hero-shell-background)] p-4 text-[var(--hero-text-primary)] shadow-[var(--hero-shell-shadow)] sm:p-5 lg:p-6">
           <div className="absolute inset-0 bg-[var(--sales-hero-atmosphere)]" />
           <div className={`relative grid gap-6 lg:items-center ${hasHeroImage ? "lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.82fr)]" : ""}`}>
@@ -779,7 +797,7 @@ export function RenderProductSalesPage({
               </div>
 
               {facts.length > 0 ? (
-                <div className="mt-7 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-7 grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2">
                   {facts.map((fact) => {
                     const Icon = fact.icon;
 

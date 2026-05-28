@@ -81,10 +81,10 @@ export function generateBundleSalesPagePayload(bundle: BundleWithRelations): Bun
     "included-courses",
     "highlights",
     "description",
-    "gallery",
     "testimonials",
-    "faqs",
     "pricing",
+    "faqs",
+    "gallery",
   ]).filter((section) => section !== "highlights" || highlightCards.length > 0);
   const primaryOffer = offers[0] ?? null;
 

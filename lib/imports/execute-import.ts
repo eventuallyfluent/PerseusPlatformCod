@@ -169,6 +169,20 @@ function normalizeExecutionSummary(type: ImportType, raw: unknown, totalCount = 
   };
 }
 
+function applyDryRunMediaFallbacks(summary: ImportExecutionSummary, dryRunSummary: unknown) {
+  if (!dryRunSummary || typeof dryRunSummary !== "object") {
+    return;
+  }
+
+  const dryRun = dryRunSummary as Record<string, unknown>;
+  if (!summary.heroImageUrl && typeof dryRun.heroImageUrl === "string") {
+    summary.heroImageUrl = dryRun.heroImageUrl;
+  }
+  if (!summary.salesVideoUrl && typeof dryRun.salesVideoUrl === "string") {
+    summary.salesVideoUrl = dryRun.salesVideoUrl;
+  }
+}
+
 function normalizeErrorReport(raw: unknown): ImportRowError[] {
   if (!Array.isArray(raw)) {
     return [];
@@ -621,8 +635,12 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   const legacyMedia: LegacySalesPageMedia = needsLegacyMedia
     ? await fetchLegacySalesPageMedia(firstRow.legacy_url)
     : { heroImageUrl: undefined, salesVideoUrl: undefined };
-  const resolvedHeroImageUrl = importedHeroImageUrl || legacyMedia.heroImageUrl;
-  const resolvedSalesVideoUrl = isPlaceholderSalesVideoUrl(importedSalesVideoUrl) ? legacyMedia.salesVideoUrl : importedSalesVideoUrl;
+  const recoveredHeroImageUrl = summary.heroImageUrl;
+  const recoveredSalesVideoUrl = summary.salesVideoUrl;
+  const resolvedHeroImageUrl = importedHeroImageUrl || legacyMedia.heroImageUrl || recoveredHeroImageUrl;
+  const resolvedSalesVideoUrl = isPlaceholderSalesVideoUrl(importedSalesVideoUrl)
+    ? legacyMedia.salesVideoUrl || recoveredSalesVideoUrl
+    : importedSalesVideoUrl;
   const galleryImageUrls = await ownImportImageUrls(
     importedGalleryImageUrls,
     { folder: "sales-gallery", slug: firstRow.slug, role: "gallery" },
@@ -677,6 +695,7 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   summary.moduleCount = new Set(lessonRows.map((row) => row.module_position)).size;
   summary.lessonCount = lessonRows.length;
   summary.heroImageUrl = payload.heroImageUrl || undefined;
+  summary.salesVideoUrl = payload.salesVideoUrl || undefined;
   summary.hasHeroImage = Boolean(payload.heroImageUrl);
   summary.testimonialCount = collectImportedTestimonials(rows).length;
   summary.offerOptionCount = parseImportedCourseOfferOptions({
@@ -1148,6 +1167,7 @@ async function processChunkedBatch(batchId: string) {
   }
 
   const summary = normalizeExecutionSummary(batch.type, batch.executionSummary, validRows.length);
+  applyDryRunMediaFallbacks(summary, batch.dryRunSummary);
 
   if (failures.length > 0 && summary.processedCount === 0) {
     summary.hasMore = false;

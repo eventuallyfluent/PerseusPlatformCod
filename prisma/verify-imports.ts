@@ -116,6 +116,30 @@ async function main() {
     ) {
       throw new Error("Legacy media recovery must save only the hero image and real YouTube URL, not scraped gallery images.");
     }
+
+    let flakyFetchCount = 0;
+    const flakyLegacyMediaCsv = legacyMediaCsv.replaceAll("legacy-media-import-check", "legacy-media-fallback-check");
+    globalThis.fetch = (async () => {
+      flakyFetchCount += 1;
+      return new Response(
+        flakyFetchCount === 1
+          ? '<html><body><img src="https://payhip.com/cdn-cgi/image/format=auto,width=600/https://pe56d.s3.amazonaws.com/o_fallback.jpg"></body></html>'
+          : "<html><body>No image this time</body></html>",
+        { status: 200 },
+      );
+    }) as typeof fetch;
+
+    const flakyBatch = await createImportBatch("COURSE_PACKAGE", "legacy-media-fallback-check.csv", flakyLegacyMediaCsv, false);
+    const flakyResult = await executeImportBatch(flakyBatch.id);
+    const flakySummary = flakyResult.executionSummary as { heroImageUrl?: string } | null;
+    const flakyCourse = await prisma.course.findUnique({
+      where: { slug: "legacy-media-fallback-check" },
+      select: { heroImageUrl: true },
+    });
+
+    if (!flakySummary?.heroImageUrl?.includes("o_fallback.jpg") || !flakyCourse?.heroImageUrl?.includes("o_fallback.jpg")) {
+      throw new Error("Course package execution did not preserve the dry-run recovered hero image when the legacy page changed.");
+    }
   } finally {
     globalThis.fetch = originalFetch;
   }

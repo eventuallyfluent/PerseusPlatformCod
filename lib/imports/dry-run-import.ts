@@ -483,6 +483,7 @@ async function buildSummary(
     summary.moduleCount = new Set(lessonRows.map((row) => String(row.module_position))).size;
     summary.lessonCount = lessonRows.length;
     summary.heroImageUrl = media.heroImageUrl;
+    summary.salesVideoUrl = media.salesVideoUrl;
     summary.hasHeroImage = Boolean(summary.heroImageUrl);
     summary.testimonialCount = new Set(
       validation.validRows

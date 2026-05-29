@@ -55,7 +55,7 @@ type PersistedImportContext<Row = Record<string, unknown>> = ImportContext & {
   preparedRows?: ValidatedImportRow<Row>[];
 };
 
-const IMPORT_CHUNK_SIZE = 20;
+const IMPORT_CHUNK_SIZE = 100;
 
 function splitUrlList(value: string | null | undefined) {
   return String(value ?? "")
@@ -1110,6 +1110,10 @@ async function processChunkedBatch(batchId: string) {
     throw new Error("Import batch source content is missing");
   }
 
+  if (batch.status !== ImportStatus.PROCESSING) {
+    return batch;
+  }
+
   const persistedContext = (batch.context as PersistedImportContext<CoursePackageCsvRow | CourseStudentCsvRow> | null) ?? undefined;
   const context = persistedContext ? { targetCourseId: persistedContext.targetCourseId } : undefined;
   const validation = !persistedContext?.preparedRows ? await dryRunImport(batch.type, batch.sourceContent, context) : null;
@@ -1156,7 +1160,7 @@ export async function createImportBatch(type: ImportType, filename: string, csvC
     preparedRows: validation.validRows as ValidatedImportRow<Record<string, unknown>>[],
   };
 
-  return prisma.importBatch.create({
+  const batch = await prisma.importBatch.create({
     data: {
       type,
       filename,
@@ -1168,6 +1172,22 @@ export async function createImportBatch(type: ImportType, filename: string, csvC
       executionSummary: serializeJson(buildProcessingSummary(type, totalCount)),
     },
   });
+
+  if (type === ImportType.COURSE_PACKAGE) {
+    await prisma.importBatch.updateMany({
+      where: {
+        id: { not: batch.id },
+        type: ImportType.COURSE_PACKAGE,
+        filename,
+        status: { in: [ImportStatus.DRY_RUN, ImportStatus.PROCESSING] },
+      },
+      data: {
+        status: ImportStatus.FAILED,
+      },
+    });
+  }
+
+  return batch;
 }
 
 export async function startImportBatch(batchId: string) {

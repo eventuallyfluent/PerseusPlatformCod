@@ -914,6 +914,27 @@ async function processCoursePackageChunk(
 
     if (refreshedCourse) {
       await persistGeneratedPage(refreshedCourse, true);
+
+      const expectedModuleCount = new Set(lessonEntries.map((entry) => entry.row.module_position)).size;
+      const expectedLessonCount = lessonEntries.length;
+      const actualModuleCount = refreshedCourse.modules.length;
+      const actualLessonCount = refreshedCourse.modules.reduce((count, module) => count + module.lessons.length, 0);
+
+      summary.moduleCount = expectedModuleCount;
+      summary.lessonCount = expectedLessonCount;
+      summary.actualModuleCount = actualModuleCount;
+      summary.actualLessonCount = actualLessonCount;
+
+      if (actualModuleCount !== expectedModuleCount || actualLessonCount !== expectedLessonCount) {
+        failures.push({
+          rowNumber: 1,
+          idempotencyKey: `course-package:${course.slug}:reconcile`,
+          row: {},
+          errors: [
+            `Course package import incomplete after execution. Expected ${expectedModuleCount} module(s) and ${expectedLessonCount} lesson(s), but database has ${actualModuleCount} module(s) and ${actualLessonCount} lesson(s). Re-run after resolving this failed batch; do not treat this course as migrated.`,
+          ],
+        });
+      }
     }
 
     summary.hasMore = false;
@@ -1079,7 +1100,7 @@ async function processLegacyImportBatch(
 }
 
 function buildFailureStatus(summary: ImportExecutionSummary, failures: ImportRowError[]) {
-  if (failures.length > 0 && summary.processedCount === 0) {
+  if (failures.length > 0) {
     return ImportStatus.FAILED;
   }
 
@@ -1174,17 +1195,36 @@ export async function createImportBatch(type: ImportType, filename: string, csvC
   });
 
   if (type === ImportType.COURSE_PACKAGE) {
-    await prisma.importBatch.updateMany({
+    const targetCourseSlug = validation.summary.targetCourseSlug;
+    const openCoursePackageBatches = await prisma.importBatch.findMany({
       where: {
         id: { not: batch.id },
         type: ImportType.COURSE_PACKAGE,
-        filename,
         status: { in: [ImportStatus.DRY_RUN, ImportStatus.PROCESSING] },
       },
-      data: {
-        status: ImportStatus.FAILED,
+      select: {
+        id: true,
+        filename: true,
+        dryRunSummary: true,
       },
     });
+    const staleBatchIds = openCoursePackageBatches
+      .filter((openBatch) => {
+        const summary = openBatch.dryRunSummary as Record<string, unknown> | null;
+        return openBatch.filename === filename || (targetCourseSlug && summary?.targetCourseSlug === targetCourseSlug);
+      })
+      .map((openBatch) => openBatch.id);
+
+    if (staleBatchIds.length > 0) {
+      await prisma.importBatch.updateMany({
+        where: {
+          id: { in: staleBatchIds },
+        },
+        data: {
+          status: ImportStatus.FAILED,
+        },
+      });
+    }
   }
 
   return batch;

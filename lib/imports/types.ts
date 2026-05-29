@@ -53,6 +53,8 @@ export type ImportExecutionSummary = {
   longDescription?: string;
   moduleCount?: number;
   lessonCount?: number;
+  actualModuleCount?: number;
+  actualLessonCount?: number;
   heroImageUrl?: string;
   hasHeroImage?: boolean;
   testimonialCount?: number;

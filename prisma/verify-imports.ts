@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { LessonType, Prisma, PrismaClient } from "@prisma/client";
 import { dryRunImport } from "../lib/imports/dry-run-import";
-import { executeImport } from "../lib/imports/execute-import";
+import { createImportBatch, executeImport, executeImportBatch } from "../lib/imports/execute-import";
 import { courseInclude } from "../lib/courses/course-query";
 import { generateSalesPagePayload } from "../lib/sales-pages/generate-sales-page-payload";
 
@@ -52,6 +52,18 @@ async function main() {
   const resourceLessonTypeDryRun = await dryRunImport("COURSE_PACKAGE", resourceLessonTypeCsv);
   if (resourceLessonTypeDryRun.invalidRows.length > 0 || resourceLessonTypeDryRun.validRows[0]?.row.lesson_type !== LessonType.MIXED) {
     throw new Error("Course package dry run did not tolerate Payhip resource lesson types.");
+  }
+
+  const directExecuteCsv = packageCsv.replaceAll("ritual-discipline-foundations", "direct-execute-import-check");
+  const directExecuteBatch = await createImportBatch("COURSE_PACKAGE", "direct-execute-import-check.csv", directExecuteCsv, false);
+  const directExecuteResult = await executeImportBatch(directExecuteBatch.id);
+  const directExecuteSummary = directExecuteResult.executionSummary as { processedCount?: number; totalCount?: number; hasMore?: boolean } | null;
+  if (
+    directExecuteResult.status !== "COMPLETED" ||
+    directExecuteSummary?.processedCount !== directExecuteSummary?.totalCount ||
+    directExecuteSummary?.hasMore
+  ) {
+    throw new Error("Direct course package execute did not complete server-side.");
   }
 
   const originalFetch = globalThis.fetch;

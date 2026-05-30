@@ -1,4 +1,4 @@
-import { ImportStatus, ImportType, LessonType } from "@prisma/client";
+import { CourseStatus, ImportStatus, ImportType, LessonType } from "@prisma/client";
 import type { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
 import { splitPipeList } from "@/lib/utils";
@@ -667,7 +667,7 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
     instructorId: instructor.id,
     seoTitle: firstRow.seo_title,
     seoDescription: firstRow.seo_description,
-    status: firstRow.status,
+    status: CourseStatus.DRAFT,
     price: firstRow.price,
     currency: firstRow.currency,
     compareAtPrice: firstRow.compare_at_price,
@@ -952,6 +952,11 @@ async function processCoursePackageChunk(
           errors: [
             `Course package import incomplete after execution. Expected ${expectedModuleCount} module(s) and ${expectedLessonCount} lesson(s), but database has ${actualModuleCount} module(s) and ${actualLessonCount} lesson(s). Re-run after resolving this failed batch; do not treat this course as migrated.`,
           ],
+        });
+      } else if (failures.length === 0) {
+        await prisma.course.update({
+          where: { id: course.id },
+          data: { status: rows[0]?.status ?? CourseStatus.DRAFT },
         });
       }
     }

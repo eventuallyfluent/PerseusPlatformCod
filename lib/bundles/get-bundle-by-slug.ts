@@ -3,7 +3,7 @@ import { bundleInclude } from "@/lib/bundles/bundle-query";
 
 export async function getBundleBySlug(slug: string) {
   return prisma.bundle.findUnique({
-    where: { slug },
+    where: { slug, status: "PUBLISHED" },
     include: bundleInclude,
   });
 }

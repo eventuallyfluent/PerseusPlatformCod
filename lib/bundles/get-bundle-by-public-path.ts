@@ -6,6 +6,7 @@ export async function getBundleByPublicPath(path: string) {
   const normalizedPath = normalizePublicPathInput(path) ?? path;
   return prisma.bundle.findFirst({
     where: {
+      status: "PUBLISHED",
       OR: [
         { publicPath: path },
         { legacyUrl: path },

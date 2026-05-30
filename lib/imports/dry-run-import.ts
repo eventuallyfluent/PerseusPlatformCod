@@ -265,11 +265,19 @@ function getGeneratedCopyWarnings(row: PackageRow) {
     /\bdescribed on the public page\b/i,
     /\baccording to the public page\b/i,
     /\bthe source page\b/i,
+    /\bvisible public course information\b/i,
+    /\bcourse image\b/i,
+    /\byoutube\/sales video url\b/i,
+    /\bvisible curriculum modules and lessons\b/i,
+    /\bpublic reviews where exposed\b/i,
   ];
   const fields = [
     ["short_description", row.short_description],
     ["long_description", row.long_description],
     ["seo_description", row.seo_description],
+    ["learning_outcomes", row.learning_outcomes],
+    ["who_its_for", row.who_its_for],
+    ["includes", row.includes],
   ] as const;
 
   for (const [field, value] of fields) {

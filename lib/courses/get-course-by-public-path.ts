@@ -6,6 +6,7 @@ export async function getCourseByPublicPath(path: string) {
   const normalizedPath = normalizePublicPathInput(path) ?? path;
   return prisma.course.findFirst({
     where: {
+      status: "PUBLISHED",
       OR: [
         { publicPath: path },
         { legacyUrl: path },

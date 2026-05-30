@@ -3,7 +3,7 @@ import { courseInclude } from "@/lib/courses/course-query";
 
 export async function getCourseBySlug(slug: string) {
   return prisma.course.findUnique({
-    where: { slug },
+    where: { slug, status: "PUBLISHED" },
     include: courseInclude,
   });
 }

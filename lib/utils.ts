@@ -18,8 +18,8 @@ export function splitPipeList(value?: string | null) {
   }
 
   return value
-    .split("|")
-    .map((item) => item.trim())
+    .split(/\||\r?\n|;/)
+    .map((item) => item.replace(/^[\s•*\-–—]+/, "").trim())
     .filter(Boolean);
 }
 

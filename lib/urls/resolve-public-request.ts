@@ -17,6 +17,10 @@ export async function resolvePublicRequest(path: string) {
   const course = await getCourseByPublicPath(path);
 
   if (course) {
+    if (course.status !== "PUBLISHED") {
+      return null;
+    }
+
     return {
       type: "course" as const,
       course,
@@ -26,6 +30,10 @@ export async function resolvePublicRequest(path: string) {
   const bundle = await getBundleByPublicPath(path);
 
   if (bundle) {
+    if (bundle.status !== "PUBLISHED") {
+      return null;
+    }
+
     return {
       type: "bundle" as const,
       bundle,

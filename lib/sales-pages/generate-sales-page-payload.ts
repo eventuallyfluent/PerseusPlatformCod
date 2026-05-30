@@ -1,4 +1,5 @@
 import { currencyFormatter } from "@/lib/utils";
+import { splitPipeList } from "@/lib/utils";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
 import { normalizeSectionOrder, parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
 import type { CourseWithRelations, GeneratedSalesPagePayload, SalesPageOfferSummary } from "@/types";
@@ -15,7 +16,11 @@ type CourseWithOptionalCollectionContext = CourseWithRelations & {
 
 function readStringArray(value: unknown) {
   if (Array.isArray(value)) {
-    return value.map((item) => String(item));
+    return value.flatMap((item) => splitPipeList(String(item)));
+  }
+
+  if (typeof value === "string") {
+    return splitPipeList(value);
   }
 
   return [];

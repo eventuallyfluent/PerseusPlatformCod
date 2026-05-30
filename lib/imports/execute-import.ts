@@ -677,7 +677,9 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   };
 
   const existingCourse = summary.targetCourseId ? { id: summary.targetCourseId } : await resolveExistingCourse(firstRow);
-  const course = existingCourse ? await updateCourse(existingCourse.id, payload) : await createCourse(payload);
+  const course = existingCourse
+    ? await updateCourse(existingCourse.id, payload, { persistPages: false })
+    : await createCourse(payload, { persistPages: false });
 
   if (!summary.courseOffersApplied) {
     await applyCoursePackageOffers(course.id, firstRow, summary, true);
@@ -932,8 +934,6 @@ async function processCoursePackageChunk(
     });
 
     if (refreshedCourse) {
-      await persistGeneratedPage(refreshedCourse, true);
-
       const expectedModuleCount = new Set(lessonEntries.map((entry) => entry.row.module_position)).size;
       const expectedLessonCount = lessonEntries.length;
       const actualModuleCount = refreshedCourse.modules.length;
@@ -954,10 +954,17 @@ async function processCoursePackageChunk(
           ],
         });
       } else if (failures.length === 0) {
-        await prisma.course.update({
-          where: { id: course.id },
-          data: { status: rows[0]?.status ?? CourseStatus.DRAFT },
+        const finalStatus = rows[0]?.status ?? CourseStatus.DRAFT;
+        await prisma.accessProduct.updateMany({
+          where: { courseId: course.id },
+          data: { status: finalStatus },
         });
+        const publishedCourse = await prisma.course.update({
+          where: { id: course.id },
+          data: { status: finalStatus },
+          include: courseInclude,
+        });
+        await persistGeneratedPage(publishedCourse, true);
       }
     }
 

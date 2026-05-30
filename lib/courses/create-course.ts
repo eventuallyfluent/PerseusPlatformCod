@@ -8,7 +8,7 @@ import { courseInclude } from "@/lib/courses/course-query";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 
-export async function createCourse(input: unknown) {
+export async function createCourse(input: unknown, options: { persistPages?: boolean } = {}) {
   const data = courseInputSchema.parse(input);
   const normalizedLegacyUrl = normalizePublicPathInput(data.legacyUrl);
   const desiredPath = normalizedLegacyUrl ?? `/course/${data.slug}`;
@@ -52,6 +52,9 @@ export async function createCourse(input: unknown) {
     grantedCourseIds: [course.id],
   });
 
-  await persistGeneratedPage(course);
+  if (options.persistPages ?? true) {
+    await persistGeneratedPage(course);
+  }
+
   return { ...course, publicPath: resolveCoursePublicPath(course) };
 }

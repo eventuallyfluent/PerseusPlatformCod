@@ -7,7 +7,7 @@ import { normalizePublicPathInput } from "@/lib/urls/normalize-public-path";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 
-export async function updateCourse(courseId: string, input: unknown) {
+export async function updateCourse(courseId: string, input: unknown, options: { persistPages?: boolean } = {}) {
   const data = courseInputSchema.partial().parse(input);
   const existing = await prisma.course.findUnique({
     where: { id: courseId },
@@ -86,6 +86,9 @@ export async function updateCourse(courseId: string, input: unknown) {
     grantedCourseIds: [course.id],
   });
 
-  await persistGeneratedPage(course);
+  if (options.persistPages ?? true) {
+    await persistGeneratedPage(course);
+  }
+
   return course;
 }

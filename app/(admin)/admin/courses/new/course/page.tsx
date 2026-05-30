@@ -68,7 +68,7 @@ export default async function NewCoursePage({
                     Dry run
                   </button>
                   <button className="rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit" name="mode" value="execute">
-                    Execute import
+                    Start import
                   </button>
                 </div>
               </form>

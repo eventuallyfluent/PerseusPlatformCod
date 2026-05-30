@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { executeImportBatch, markImportBatchFailed } from "@/lib/imports/execute-import";
+import { ImportStatus } from "@prisma/client";
+import { prisma } from "@/lib/db/prisma";
+import { markImportBatchFailed, startImportBatch } from "@/lib/imports/execute-import";
 
 export const maxDuration = 60;
 
@@ -8,7 +10,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ bat
   let batch;
 
   try {
-    batch = await executeImportBatch(batchId);
+    batch = await prisma.importBatch.findUnique({
+      where: { id: batchId },
+      select: { id: true, status: true },
+    });
+
+    if (!batch) {
+      return NextResponse.json({ error: "Import batch not found" }, { status: 404 });
+    }
+
+    if (batch.status === ImportStatus.DRY_RUN) {
+      batch = await startImportBatch(batchId);
+    }
   } catch (error) {
     const failedBatch = await markImportBatchFailed(batchId, error);
     return NextResponse.redirect(new URL(`/admin/imports/${failedBatch.id}`, request.url), { status: 303 });

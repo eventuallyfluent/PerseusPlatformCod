@@ -88,14 +88,14 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
   const importedLongDescription = readString(executionSummary, "longDescription") || readString(dryRunSummary, "longDescription");
 
   return (
-    <AdminShell title={`Import ${batch.filename}`} description="Dry-run and execution reports remain attached to the batch.">
+    <AdminShell title={`Import ${batch.filename}`} description="Imports run in resumable chunks. Keep this page open while processing, or reopen it later to resume.">
       <Card className="space-y-4">
         <ImportBatchRunner batchId={batch.id} isProcessing={isProcessing} initialProcessedCount={processedCount} initialTotalCount={totalCount} />
         <div className="grid gap-3 text-sm text-stone-600">
           <div>Type: {batch.type}</div>
           <div>Status: {batch.status}</div>
           {isStuck ? <div className="font-medium text-amber-700">This batch is resumable and has not processed any rows yet.</div> : null}
-          {isProcessing && !isStuck ? <div className="font-medium text-amber-700">If this batch stopped mid-run, use resume processing.</div> : null}
+          {isProcessing && !isStuck ? <div className="font-medium text-amber-700">If this batch stopped mid-run, use resume import.</div> : null}
           {totalCount > 0 ? <div>Progress: {processedCount} / {totalCount}</div> : null}
           {targetCourse ? <div>Target course: {targetCourse}</div> : null}
         </div>
@@ -103,7 +103,7 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
           {canExecute ? (
             <form action={`/api/imports/batches/${batch.id}/execute`} method="post">
               <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
-                Execute batch
+                Start import
               </button>
             </form>
           ) : null}
@@ -115,7 +115,7 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
           {batch.status === "PROCESSING" ? (
             <form action={`/api/imports/batches/${batch.id}/execute`} method="post">
               <button className="rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800" type="submit">
-                Resume processing
+                Resume import
               </button>
             </form>
           ) : null}

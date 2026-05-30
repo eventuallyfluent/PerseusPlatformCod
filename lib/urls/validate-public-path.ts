@@ -22,5 +22,22 @@ export async function validatePublicPathAvailability(path: string, courseId?: st
     select: { id: true },
   });
 
-  return !existingCourse && !existingBundle && !redirect;
+  const generatedPage = await prisma.generatedPage.findFirst({
+    where: {
+      path: { in: [path, `${path}/purchased`] },
+      ...(courseId || bundleId
+        ? {
+            NOT: {
+              OR: [
+                ...(courseId ? [{ courseId }] : []),
+                ...(bundleId ? [{ bundleId }] : []),
+              ],
+            },
+          }
+        : {}),
+    },
+    select: { id: true },
+  });
+
+  return !existingCourse && !existingBundle && !redirect && !generatedPage;
 }

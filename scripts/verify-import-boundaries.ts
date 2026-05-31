@@ -67,6 +67,8 @@ if (/\bownImportImageUrl\b|\bownImportImageUrls\b/.test(coursePackageTargetSourc
 const extractedMedia = extractLegacySalesPageMedia(`
   <html>
     <meta property="og:image" content="https://i.ytimg.com/vi/default-video/maxresdefault.jpg">
+    <img src="https://example.com/random-marketing-image.jpg">
+    <img src="https://pe56d.s3.amazonaws.com/profile_avatar.jpg">
     <a href="https://www.youtube.com/watch?v=C8IkPvk7sg4">Watch</a>
     <img src="https://payhip.com/cdn-cgi/image/format=auto,width=1600/https://pe56d.s3.amazonaws.com/o_course_hero.jpg">
   </html>
@@ -77,7 +79,7 @@ if (extractedMedia.heroImageUrl?.includes("ytimg.com")) {
 }
 
 if (!extractedMedia.heroImageUrl?.includes("o_course_hero.jpg")) {
-  fail("Legacy media extraction should prefer the course image when YouTube thumbnails are present.");
+  fail("Legacy media extraction should prefer a confident Payhip course image over YouTube thumbnails, avatars, or unrelated images.");
 }
 
 if (process.exitCode) {

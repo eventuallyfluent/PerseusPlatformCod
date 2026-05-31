@@ -21,10 +21,18 @@ function isImageUrl(value: string) {
   try {
     const url = new URL(value);
     const text = `${url.hostname}${url.pathname}`.toLowerCase();
+    const isPayhipImageProxy = url.hostname === "payhip.com" && url.pathname.includes("/cdn-cgi/image/");
+    const isPayhipS3Image = url.hostname.endsWith("amazonaws.com") && /\/o_[^/]+\.(png|jpe?g|webp|gif)$/i.test(url.pathname);
 
     if (
       text.includes("logo") ||
       text.includes("loading") ||
+      text.includes("avatar") ||
+      text.includes("profile") ||
+      text.includes("favicon") ||
+      text.includes("icon") ||
+      text.includes("badge") ||
+      text.includes("button") ||
       text.includes("ytimg.com") ||
       text.includes("youtube.com") ||
       text.includes("youtube-nocookie.com") ||
@@ -33,11 +41,7 @@ function isImageUrl(value: string) {
       return false;
     }
 
-    return (
-      /\.(png|jpe?g|webp|gif)$/i.test(url.pathname) ||
-      value.includes("/cdn-cgi/image/") ||
-      url.hostname.includes("amazonaws.com")
-    );
+    return isPayhipImageProxy || isPayhipS3Image;
   } catch {
     return false;
   }

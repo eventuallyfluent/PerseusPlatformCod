@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { extractLegacySalesPageMedia } from "../lib/imports/legacy-sales-page-media";
 
 const root = process.cwd();
 
@@ -61,6 +62,22 @@ const coursePackageTargetMatch = executeImportSource.match(/async function ensur
 const coursePackageTargetSource = coursePackageTargetMatch?.[0] ?? "";
 if (/\bownImportImageUrl\b|\bownImportImageUrls\b/.test(coursePackageTargetSource)) {
   fail("Course-package imports must not copy images to Blob inline. Use image backfill/audit after structure import succeeds.");
+}
+
+const extractedMedia = extractLegacySalesPageMedia(`
+  <html>
+    <meta property="og:image" content="https://i.ytimg.com/vi/default-video/maxresdefault.jpg">
+    <a href="https://www.youtube.com/watch?v=C8IkPvk7sg4">Watch</a>
+    <img src="https://payhip.com/cdn-cgi/image/format=auto,width=1600/https://pe56d.s3.amazonaws.com/o_course_hero.jpg">
+  </html>
+`);
+
+if (extractedMedia.heroImageUrl?.includes("ytimg.com")) {
+  fail("Legacy media extraction must not use YouTube thumbnails as course hero images.");
+}
+
+if (!extractedMedia.heroImageUrl?.includes("o_course_hero.jpg")) {
+  fail("Legacy media extraction should prefer the course image when YouTube thumbnails are present.");
 }
 
 if (process.exitCode) {

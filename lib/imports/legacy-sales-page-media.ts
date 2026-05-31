@@ -22,7 +22,14 @@ function isImageUrl(value: string) {
     const url = new URL(value);
     const text = `${url.hostname}${url.pathname}`.toLowerCase();
 
-    if (text.includes("logo") || text.includes("loading")) {
+    if (
+      text.includes("logo") ||
+      text.includes("loading") ||
+      text.includes("ytimg.com") ||
+      text.includes("youtube.com") ||
+      text.includes("youtube-nocookie.com") ||
+      /\/vi(?:_webp)?\/[^/]+\//i.test(url.pathname)
+    ) {
       return false;
     }
 

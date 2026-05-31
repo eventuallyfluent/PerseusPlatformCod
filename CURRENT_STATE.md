@@ -108,11 +108,16 @@ Current truth:
 - the import center already supports course-package and course-student dry runs and execution
 - import execution is intended to be course-by-course with verification, not bulk blind loading
 - preserved Payhip-backed public URLs must remain exact during migration
+- import upload/start routes must never process rows, copy images, or perform heavy network work inside the same Vercel request
+- only `/api/imports/batches/[batchId]/process` may process import chunks
+- course-package imports must prioritize stable course structure first; image ownership and Blob backfill are separate follow-up/audit work
 
 Local verification support now includes:
 
 - `npm run prisma:check:imports`
+- `npm run imports:check:boundaries`
 - [MIGRATION_ROLLOUT.md](C:\Users\stude\OneDrive\Desktop\Perseus Platform\MIGRATION_ROLLOUT.md)
+- [docs/import-safety-principles.md](C:\Users\stude\OneDrive\Desktop\Perseus Platform\docs\import-safety-principles.md)
 
 ## Next Priority Areas
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createFailedImportBatch, createImportBatch } from "@/lib/imports/execute-import";
+import { createFailedImportBatch, createImportBatch, processImportBatchChunk } from "@/lib/imports/execute-import";
 
 export const maxDuration = 60;
 
@@ -18,6 +18,9 @@ export async function POST(request: Request) {
   let batch;
   try {
     batch = await createImportBatch("COURSE_PACKAGE", file.name, csvContent, dryRun);
+    if (!dryRun) {
+      batch = await processImportBatchChunk(batch.id);
+    }
   } catch (error) {
     const failedBatch = await createFailedImportBatch("COURSE_PACKAGE", file.name, csvContent, error);
     return NextResponse.redirect(new URL(`/admin/imports/${failedBatch.id}`, request.url), { status: 303 });

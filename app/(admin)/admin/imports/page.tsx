@@ -119,7 +119,7 @@ export default async function ImportsPage() {
                 Dry run
               </button>
               <button className={adminSecondaryButtonClass} type="submit" name="mode" value="execute">
-                Execute import
+                Start import
               </button>
             </div>
           </form>
@@ -187,13 +187,13 @@ export default async function ImportsPage() {
                 <p className="font-semibold text-[var(--text-primary)]">{batch.type.replaceAll("_", " ")}</p>
                 {target ? <p className="text-xs text-[var(--text-secondary)]">{target}</p> : null}
               </div>,
-              <AdminStatusBadge key="status" tone={statusClassName(batch.status, stuck)}>{stuck ? "Resume needed" : batch.status}</AdminStatusBadge>,
+              <AdminStatusBadge key="status" tone={statusClassName(batch.status, stuck)}>{stuck ? "Needs attention" : batch.status}</AdminStatusBadge>,
               batch.filename,
               executionSummary
                 ? `${readCount(executionSummary, "imageCopiedCount")} copied / ${readCount(executionSummary, "imageFailedCount")} failed`
                 : "-",
               stuck
-                ? "Stuck at 0 rows"
+                ? "No rows processed"
                 : batch.status === "PROCESSING"
                   ? `Processing ${readCount(batch.executionSummary, "processedCount")} / ${readCount(batch.executionSummary, "totalCount")}`
                   : batch.status === "COMPLETED" || batch.status === "FAILED"
@@ -202,7 +202,7 @@ export default async function ImportsPage() {
               batch.createdAt.toLocaleString(),
               <AdminActionBar key="actions">
                 <Link href={`/admin/imports/${batch.id}`} className={adminSecondaryButtonClass}>
-                  {batch.status === "PROCESSING" ? "Resume" : "View"}
+                  View
                 </Link>
                 <a href={`/api/imports/batches/${batch.id}/errors`} className={adminSecondaryButtonClass}>
                   Errors

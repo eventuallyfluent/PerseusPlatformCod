@@ -47,8 +47,6 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
   const invalidCount = readNumber(dryRunSummary, "invalidCount");
   const conflictCount = readNumber(dryRunSummary, "conflictCount");
   const canExecute = batch.status === "DRY_RUN" && invalidCount === 0 && conflictCount === 0;
-  const hasMore = readBoolean(executionSummary, "hasMore");
-  const isStuck = isProcessing && hasMore && processedCount === 0;
   const targetCourse =
     String(executionSummary?.targetCourseTitle ?? dryRunSummary?.targetCourseTitle ?? "") ||
     String(executionSummary?.targetCourseSlug ?? dryRunSummary?.targetCourseSlug ?? "") ||
@@ -88,14 +86,13 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
   const importedLongDescription = readString(executionSummary, "longDescription") || readString(dryRunSummary, "longDescription");
 
   return (
-    <AdminShell title={`Import ${batch.filename}`} description="Imports run in resumable chunks. Keep this page open while processing, or reopen it later to resume.">
+    <AdminShell title={`Import ${batch.filename}`} description="Imports start immediately and process automatically. If an import cannot continue, it is marked failed with an error report.">
       <Card className="space-y-4">
         <ImportBatchRunner batchId={batch.id} isProcessing={isProcessing} initialProcessedCount={processedCount} initialTotalCount={totalCount} />
         <div className="grid gap-3 text-sm text-stone-600">
           <div>Type: {batch.type}</div>
           <div>Status: {batch.status}</div>
-          {isStuck ? <div className="font-medium text-amber-700">This batch is resumable and has not processed any rows yet.</div> : null}
-          {isProcessing && !isStuck ? <div className="font-medium text-amber-700">If this batch stopped mid-run, use resume import.</div> : null}
+          {isProcessing ? <div className="font-medium text-amber-700">Import is processing automatically. Keep this page open until it completes or fails.</div> : null}
           {totalCount > 0 ? <div>Progress: {processedCount} / {totalCount}</div> : null}
           {targetCourse ? <div>Target course: {targetCourse}</div> : null}
         </div>
@@ -111,13 +108,6 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
             <div className="rounded-full bg-rose-50 px-5 py-3 text-sm font-medium text-rose-700">
               Fix validation errors before executing
             </div>
-          ) : null}
-          {batch.status === "PROCESSING" ? (
-            <form action={`/api/imports/batches/${batch.id}/execute`} method="post">
-              <button className="rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-800" type="submit">
-                Resume import
-              </button>
-            </form>
           ) : null}
           {publicPath ? (
             <Link href={publicPath} className="rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700">
@@ -156,7 +146,7 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
           />
           <ChecklistItem label="Reviews" value={`${importedTestimonials} imported / ${expectedTestimonials} detected`} good={expectedTestimonials === 0 ? undefined : importedTestimonials >= expectedTestimonials} />
           <ChecklistItem label="Execution progress" value={totalCount > 0 ? `${processedCount} / ${totalCount}` : "Not started"} good={batch.status === "COMPLETED"} />
-          <ChecklistItem label="Status" value={isStuck ? "Resume needed" : batch.status.replaceAll("_", " ")} good={batch.status === "COMPLETED" ? true : batch.status === "FAILED" ? false : undefined} />
+          <ChecklistItem label="Status" value={batch.status.replaceAll("_", " ")} good={batch.status === "COMPLETED" ? true : batch.status === "FAILED" ? false : undefined} />
         </div>
         {invalidCount > 0 ? (
           <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Resolve {invalidCount} invalid row(s) before migration. Executing a partial course import is blocked so modules and lessons are not silently missed.</p>

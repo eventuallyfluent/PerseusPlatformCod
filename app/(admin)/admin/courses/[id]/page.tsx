@@ -284,7 +284,7 @@ export default async function CourseDetailPage({
                 <label>Upload completed course migration CSV<input type="file" name="file" accept=".csv" required /></label>
                 <div className="flex flex-wrap gap-3">
                   <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit" name="mode" value="dry-run">Dry run</button>
-                  <button className="rounded-full border border-stone-300 px-4 py-3 text-sm font-medium text-stone-800" type="submit" name="mode" value="execute">Execute import</button>
+                  <button className="rounded-full border border-stone-300 px-4 py-3 text-sm font-medium text-stone-800" type="submit" name="mode" value="execute">Start import</button>
                 </div>
               </form>
               <form action="/api/imports/course-students" method="post" encType="multipart/form-data" className="grid gap-3 rounded-[20px] border border-dashed border-stone-300 p-4">

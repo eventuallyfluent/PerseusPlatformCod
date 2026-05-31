@@ -25,39 +25,46 @@ export function ImportBatchRunner({ batchId, isProcessing, initialProcessedCount
       let nextProcessed = initialProcessedCount;
       let nextTotal = initialTotalCount;
 
-      while (!cancelled) {
-        setMessage(nextTotal > 0 ? `Processed ${nextProcessed} of ${nextTotal} rows...` : "Processing import...");
+      try {
+        while (!cancelled) {
+          setMessage(nextTotal > 0 ? `Processed ${nextProcessed} of ${nextTotal} rows...` : "Processing import...");
 
-        const response = await fetch(`/api/imports/batches/${batchId}/process`, {
-          method: "POST",
-          cache: "no-store",
-        });
+          const response = await fetch(`/api/imports/batches/${batchId}/process`, {
+            method: "POST",
+            cache: "no-store",
+          });
 
-        if (!response.ok) {
-          setMessage("Processing stopped. Reloading the batch report...");
-          window.location.reload();
-          return;
-        }
+          if (!response.ok) {
+            setMessage("Import stopped. Reloading the batch report...");
+            window.location.reload();
+            return;
+          }
 
-        const data = (await response.json()) as {
-          status: string;
-          hasMore: boolean;
-          error?: string;
-          executionSummary?: {
-            processedCount?: number;
-            totalCount?: number;
+          const data = (await response.json()) as {
+            status: string;
+            hasMore: boolean;
+            error?: string;
+            executionSummary?: {
+              processedCount?: number;
+              totalCount?: number;
+            };
           };
-        };
 
-        nextProcessed = Number(data.executionSummary?.processedCount ?? nextProcessed);
-        nextTotal = Number(data.executionSummary?.totalCount ?? nextTotal);
-        setProcessedCount(nextProcessed);
-        setTotalCount(nextTotal);
+          nextProcessed = Number(data.executionSummary?.processedCount ?? nextProcessed);
+          nextTotal = Number(data.executionSummary?.totalCount ?? nextTotal);
+          setProcessedCount(nextProcessed);
+          setTotalCount(nextTotal);
 
-        if (!data.hasMore || data.status !== "PROCESSING") {
-          setMessage(data.error ? `Processing stopped: ${data.error}` : null);
+          if (!data.hasMore || data.status !== "PROCESSING") {
+            setMessage(data.error ? `Import failed: ${data.error}` : null);
+            window.location.reload();
+            return;
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setMessage("Import stopped unexpectedly. Reloading the batch report...");
           window.location.reload();
-          return;
         }
       }
     }

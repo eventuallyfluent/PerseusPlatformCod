@@ -104,7 +104,7 @@ async function fetchLegacySalesPageMediaNow(legacyUrl: string): Promise<LegacySa
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
+  const timeout = setTimeout(() => controller.abort(), 3000);
 
   try {
     const response = await fetch(url, {

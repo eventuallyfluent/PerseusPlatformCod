@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ImportStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
-import { markImportBatchFailed, processImportBatchChunk, startImportBatch } from "@/lib/imports/execute-import";
+import { markImportBatchFailed, startImportBatch } from "@/lib/imports/execute-import";
 
 export const maxDuration = 60;
 
@@ -21,10 +21,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ bat
 
     if (batch.status === ImportStatus.DRY_RUN) {
       batch = await startImportBatch(batchId);
-    }
-
-    if (batch.status === ImportStatus.PROCESSING) {
-      batch = await processImportBatchChunk(batchId);
     }
   } catch (error) {
     const failedBatch = await markImportBatchFailed(batchId, error);

@@ -55,7 +55,7 @@ type PersistedImportContext<Row = Record<string, unknown>> = ImportContext & {
   preparedRows?: ValidatedImportRow<Row>[];
 };
 
-const IMPORT_CHUNK_SIZE = 100;
+const IMPORT_CHUNK_SIZE = 10;
 
 function splitUrlList(value: string | null | undefined) {
   return String(value ?? "")
@@ -627,7 +627,6 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
 
   const firstRow = rows[0];
   const instructor = await ensureInstructorForImport(firstRow.instructor_slug, firstRow.instructor_name);
-  const imageSummaryTarget = summary.courseMetadataApplied ? undefined : summary;
   const importedHeroImageUrl = pickFirstNonEmptyPackageValue(rows, (row) => row.hero_image_url) ?? firstRow.hero_image_url;
   const importedSalesVideoUrl = pickFirstNonEmptyPackageValue(rows, (row) => row.sales_video_url) ?? firstRow.sales_video_url;
   const importedGalleryImageUrls = splitUrlList(pickFirstNonEmptyPackageValue(rows, (row) => row.sales_image_urls) ?? firstRow.sales_image_urls);
@@ -641,16 +640,8 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
   const resolvedSalesVideoUrl = isPlaceholderSalesVideoUrl(importedSalesVideoUrl)
     ? legacyMedia.salesVideoUrl || recoveredSalesVideoUrl
     : importedSalesVideoUrl;
-  const galleryImageUrls = await ownImportImageUrls(
-    importedGalleryImageUrls,
-    { folder: "sales-gallery", slug: firstRow.slug, role: "gallery" },
-    imageSummaryTarget,
-  );
-  const heroImageUrl = await ownImportImageUrl(
-    resolvedHeroImageUrl,
-    { folder: "courses", slug: firstRow.slug, role: "hero" },
-    imageSummaryTarget,
-  );
+  const galleryImageUrls = importedGalleryImageUrls;
+  const heroImageUrl = resolvedHeroImageUrl;
 
   const payload = {
     slug: firstRow.slug,

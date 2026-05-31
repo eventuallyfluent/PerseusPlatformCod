@@ -12,7 +12,7 @@ import { normalizePublicPathInput } from "@/lib/urls/normalize-public-path";
 import { coursePackageCsvRowSchema, courseStudentCsvRowSchema } from "@/lib/zod/schemas";
 import { validateRows } from "@/lib/imports/shared";
 import { parseImportedCourseOfferOptions } from "@/lib/imports/course-offer-options";
-import { fetchLegacySalesPageMedia, isPlaceholderSalesVideoUrl, type LegacySalesPageMedia } from "@/lib/imports/legacy-sales-page-media";
+import { isPlaceholderSalesVideoUrl } from "@/lib/imports/legacy-sales-page-media";
 
 export type ImportContext = {
   targetCourseId?: string;
@@ -305,17 +305,12 @@ function isPlaceholderTestimonialQuote(value: unknown) {
 }
 
 async function getPackageMedia(rows: PackageRow[]) {
-  const firstRow = rows[0];
   const heroImageUrl = rows.map((row) => String(row.hero_image_url ?? "").trim()).find(Boolean);
   const salesVideoUrl = rows.map((row) => String(row.sales_video_url ?? "").trim()).find(Boolean);
-  const shouldFetchLegacyMedia = Boolean(firstRow?.legacy_url) && (!heroImageUrl || isPlaceholderSalesVideoUrl(salesVideoUrl));
-  const legacyMedia: LegacySalesPageMedia = shouldFetchLegacyMedia
-    ? await fetchLegacySalesPageMedia(String(firstRow?.legacy_url ?? ""))
-    : { heroImageUrl: undefined, salesVideoUrl: undefined };
 
   return {
-    heroImageUrl: heroImageUrl || legacyMedia.heroImageUrl,
-    salesVideoUrl: isPlaceholderSalesVideoUrl(salesVideoUrl) ? legacyMedia.salesVideoUrl : salesVideoUrl,
+    heroImageUrl,
+    salesVideoUrl: isPlaceholderSalesVideoUrl(salesVideoUrl) ? "" : salesVideoUrl,
   };
 }
 

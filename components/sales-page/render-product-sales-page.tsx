@@ -102,6 +102,29 @@ function splitHighlightItems(items: string[]) {
   );
 }
 
+function isCustomerFacingHighlightItem(value: string) {
+  const text = value.trim();
+
+  if (!text) return false;
+
+  const internalPatterns = [
+    /\bvisible\b/i,
+    /\bexposed\b/i,
+    /\bsource page\b/i,
+    /\bpublic page\b/i,
+    /\bpublic reviews?\b/i,
+    /\bno public reviews?\b/i,
+    /\blesson rows?\b/i,
+    /\byoutube\/sales video\b/i,
+    /\bvideo url\b/i,
+    /\bimage url\b/i,
+    /^course image\.?$/i,
+    /^public course information\.?$/i,
+  ];
+
+  return !internalPatterns.some((pattern) => pattern.test(text));
+}
+
 function parseHighlightItems(items: string[], cardId?: "outcomes" | "audience" | "includes"): ParsedHighlight {
   const rawItems = splitHighlightItems(items).flatMap((item) =>
     item
@@ -113,12 +136,16 @@ function parseHighlightItems(items: string[], cardId?: "outcomes" | "audience" |
   const bullets: string[] = [];
 
   rawItems.forEach((item) => {
+    if (!isCustomerFacingHighlightItem(item)) {
+      return;
+    }
+
     const parts =
       cardId === "includes"
         ? item
             .split(";")
             .map((part) => part.trim())
-            .filter(Boolean)
+            .filter(isCustomerFacingHighlightItem)
         : [item];
 
     parts.forEach((part) => {

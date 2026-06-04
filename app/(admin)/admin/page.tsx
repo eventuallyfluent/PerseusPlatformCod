@@ -40,11 +40,11 @@ export default async function AdminOverviewPage() {
         />
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.48fr)]">
-        <section className="space-y-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.44fr)]">
+        <section className="space-y-3 rounded-[10px] border border-[var(--border)] bg-[var(--surface-panel)] p-4 shadow-[0_1px_2px_rgba(17,24,39,0.04)]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-[var(--text-primary)]">Recent sales</h2>
+              <h2 className="text-base font-semibold text-[var(--text-primary)]">Recent sales</h2>
               <p className="text-sm text-[var(--text-secondary)]">Latest checkout activity across all products.</p>
             </div>
             <AdminActionBar>
@@ -80,10 +80,10 @@ export default async function AdminOverviewPage() {
           />
         </section>
 
-        <section className="space-y-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <section className="space-y-3 rounded-[10px] border border-[var(--border)] bg-[var(--surface-panel)] p-4 shadow-[0_1px_2px_rgba(17,24,39,0.04)]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-[var(--text-primary)]">Reviews needing check</h2>
+              <h2 className="text-base font-semibold text-[var(--text-primary)]">Reviews needing check</h2>
               <p className="text-sm text-[var(--text-secondary)]">New student reviews waiting for approval.</p>
             </div>
             <HardLink href="/admin/reviews" className={adminSecondaryButtonClass}>
@@ -97,7 +97,7 @@ export default async function AdminOverviewPage() {
               </div>
             ) : reviewsNeedingCheck.length > 0 ? (
               reviewsNeedingCheck.map((review) => (
-              <div key={review.id} className="rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] p-4">
+              <div key={review.id} className="rounded-lg border border-[var(--border)] bg-[var(--surface-panel-strong)] p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0 space-y-2">
                     <div className="flex flex-wrap gap-2">
@@ -119,7 +119,7 @@ export default async function AdminOverviewPage() {
               </div>
               ))
             ) : (
-              <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] p-4 text-sm text-[var(--text-secondary)]">
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-panel-strong)] p-4 text-sm text-[var(--text-secondary)]">
                 No reviews waiting for approval.
               </div>
             )}
@@ -127,10 +127,10 @@ export default async function AdminOverviewPage() {
         </section>
       </div>
 
-      <section className="space-y-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <section className="space-y-3 rounded-[10px] border border-[var(--border)] bg-[var(--surface-panel)] p-4 shadow-[0_1px_2px_rgba(17,24,39,0.04)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Unread inquiries</h2>
+            <h2 className="text-base font-semibold text-[var(--text-primary)]">Unread inquiries</h2>
             <p className="text-sm text-[var(--text-secondary)]">Course questions that still need a response.</p>
           </div>
           <HardLink href="/admin/inquiries" className={adminSecondaryButtonClass}>

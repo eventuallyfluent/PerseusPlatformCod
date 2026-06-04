@@ -82,7 +82,10 @@ export default async function ImportsPage() {
           </div>
         </div>
         <p className="text-sm text-stone-700">Full rollout notes are in <span className="font-medium text-stone-950">MIGRATION_ROLLOUT.md</span> in the repo.</p>
-        <div>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/admin/imports/readiness" className={adminButtonClass}>
+            Check migration readiness
+          </Link>
           <Link href="/admin/imports/images" className={adminSecondaryButtonClass}>
             Review imported images
           </Link>

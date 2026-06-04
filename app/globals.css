@@ -564,30 +564,30 @@
 .theme-admin-clean {
   min-height: 100vh;
   --theme-name: "Admin Clean";
-  --background: #f4f1eb;
-  --background-soft: #eee7dc;
-  --background-elevated: rgba(255, 255, 255, 0.96);
-  --background-deep: #fbf8f2;
-  --background-deep-soft: #f3ede4;
-  --foreground: #1f1b17;
-  --foreground-soft: #665c53;
-  --muted: #847469;
-  --card: rgba(255, 255, 255, 0.96);
-  --card-strong: #f8f4ee;
-  --border: rgba(62, 47, 33, 0.12);
-  --border-strong: rgba(62, 47, 33, 0.2);
+  --background: #f9fafb;
+  --background-soft: #f3f4f6;
+  --background-elevated: #ffffff;
+  --background-deep: #ffffff;
+  --background-deep-soft: #f9fafb;
+  --foreground: #111827;
+  --foreground-soft: #374151;
+  --muted: #6b7280;
+  --card: #ffffff;
+  --card-strong: #f3f4f6;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
   --accent: #7b2fbe;
-  --accent-strong: #8f3ad7;
+  --accent-strong: #6d28a8;
   --accent-soft: rgba(123, 47, 190, 0.08);
-  --accent-glow: rgba(123, 47, 190, 0.12);
-  --premium: #b98930;
-  --premium-soft: rgba(185, 137, 48, 0.14);
-  --success: #158f6b;
-  --success-soft: rgba(21, 143, 107, 0.12);
-  --warning: #d08a08;
-  --warning-soft: rgba(208, 138, 8, 0.12);
-  --danger: #d44848;
-  --danger-soft: rgba(212, 72, 72, 0.12);
+  --accent-glow: rgba(123, 47, 190, 0.1);
+  --premium: #b45309;
+  --premium-soft: rgba(180, 83, 9, 0.1);
+  --success: #059669;
+  --success-soft: rgba(5, 150, 105, 0.1);
+  --warning: #d97706;
+  --warning-soft: rgba(217, 119, 6, 0.1);
+  --danger: #dc2626;
+  --danger-soft: rgba(220, 38, 38, 0.1);
   --surface-canvas: var(--background);
   --surface-canvas-soft: var(--background-soft);
   --surface-panel: var(--card);
@@ -598,8 +598,8 @@
   --status-success: var(--success);
   --status-warning: var(--warning);
   --status-danger: var(--danger);
-  --shadow-soft: 0 18px 42px rgba(44, 32, 24, 0.06);
-  --shadow-glow: 0 16px 30px rgba(123, 47, 190, 0.08);
+  --shadow-soft: 0 8px 24px rgba(17, 24, 39, 0.06);
+  --shadow-glow: 0 8px 20px rgba(123, 47, 190, 0.08);
   --shadow-panel: var(--shadow-soft);
   --shadow-brand: var(--shadow-glow);
   --radius-panel: 12px;
@@ -616,7 +616,7 @@
   --button-ghost-background: var(--surface-panel);
   --button-ghost-hover-background: var(--surface-panel-strong);
   --button-ghost-text: var(--text-secondary);
-  background: linear-gradient(180deg, var(--background-deep) 0%, var(--background) 100%);
+  background: var(--background);
   color: var(--text-primary);
 }
 
@@ -681,7 +681,37 @@ pre {
 
 .admin-theme th,
 .admin-theme td {
+  padding: 0.78rem 1rem;
   border-bottom-color: var(--border);
+  font-size: 0.875rem;
+}
+
+.admin-theme th {
+  color: var(--text-muted);
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-theme .admin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(107, 114, 128, 0.35) transparent;
+}
+
+.admin-theme .admin-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.admin-theme .admin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-theme .admin-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.28);
+  border-radius: 999px;
 }
 
 .admin-theme .bg-white,

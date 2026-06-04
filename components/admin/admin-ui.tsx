@@ -11,12 +11,12 @@ type AdminPageHeaderProps = {
 
 export function AdminPageHeader({ title, description, actions }: AdminPageHeaderProps) {
   return (
-    <header className="flex flex-col gap-4 border-b border-[var(--border)] pb-5 sm:flex-row sm:items-start sm:justify-between">
+    <header className="flex flex-col gap-4 border-b border-[var(--border)] pb-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0 space-y-1">
-        <h1 className="text-2xl font-semibold tracking-[-0.025em] text-[var(--text-primary)] sm:text-[1.7rem]">{title}</h1>
+        <h1 className="text-[1.65rem] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-primary)]">{title}</h1>
         {description ? <p className="max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">{description}</p> : null}
       </div>
-      {actions ? <div className="flex shrink-0 flex-wrap gap-2">{actions}</div> : null}
+      {actions ? <div className="flex shrink-0 flex-wrap gap-2.5">{actions}</div> : null}
     </header>
   );
 }
@@ -39,15 +39,15 @@ const statToneClass = {
 
 export function AdminStat({ label, value, detail, href, tone = "neutral" }: AdminStatProps) {
   const content = (
-    <div className={cn("rounded-lg border bg-[var(--surface-panel)] p-4 shadow-sm", statToneClass[tone])}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">{label}</p>
-      <p className="mt-2 text-2xl font-semibold leading-none text-[var(--text-primary)]">{value}</p>
-      {detail ? <p className="mt-2 text-sm leading-5 text-[var(--text-secondary)]">{detail}</p> : null}
+    <div className={cn("min-h-[116px] rounded-[10px] border bg-[var(--surface-panel)] p-4 shadow-[0_1px_2px_rgba(17,24,39,0.04)]", statToneClass[tone])}>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">{label}</p>
+      <p className="mt-2 text-[1.7rem] font-semibold leading-none tracking-[-0.025em] text-[var(--text-primary)]">{value}</p>
+      {detail ? <p className="mt-2 line-clamp-2 text-[13px] leading-5 text-[var(--text-secondary)]">{detail}</p> : null}
     </div>
   );
 
   return href ? (
-    <HardLink href={href} className="block transition hover:-translate-y-0.5">
+    <HardLink href={href} className="block transition hover:border-[var(--border-strong)]">
       {content}
     </HardLink>
   ) : content;
@@ -59,13 +59,13 @@ const statusToneClass: Record<StatusTone, string> = {
   neutral: "border-[var(--border)] bg-[var(--surface-panel-strong)] text-[var(--text-secondary)]",
   success: "border-emerald-200 bg-emerald-50 text-emerald-700",
   warning: "border-amber-200 bg-amber-50 text-amber-800",
-  danger: "border-rose-200 bg-rose-50 text-rose-700",
+  danger: "border-red-200 bg-red-50 text-red-700",
   accent: "border-[var(--accent)]/20 bg-[var(--accent-soft)] text-[var(--accent)]",
 };
 
 export function AdminStatusBadge({ children, tone = "neutral" }: { children: ReactNode; tone?: StatusTone }) {
   return (
-    <span className={cn("inline-flex items-center rounded-md border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]", statusToneClass[tone])}>
+    <span className={cn("inline-flex items-center rounded-md border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]", statusToneClass[tone])}>
       {children}
     </span>
   );
@@ -98,8 +98,8 @@ export function AdminDataTable({ columns, rows, empty }: AdminDataTableProps) {
   }
 
   return (
-    <Card className="overflow-hidden rounded-lg p-0">
-      <div className="hidden overflow-x-auto md:block">
+    <Card className="overflow-hidden rounded-[10px] p-0 shadow-none">
+      <div className="admin-scrollbar hidden overflow-x-auto md:block">
         <table className="min-w-full">
           <thead className="bg-[var(--surface-panel-strong)] text-[var(--text-muted)]">
             <tr>
@@ -112,7 +112,7 @@ export function AdminDataTable({ columns, rows, empty }: AdminDataTableProps) {
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.key} className="align-top transition hover:bg-[var(--surface-panel-strong)]/70">
+              <tr key={row.key} className="align-top transition hover:bg-[var(--surface-panel-strong)]">
                 {row.cells.map((cell, index) => (
                   <td key={index} className={columns[index]?.className}>
                     {cell}
@@ -148,7 +148,7 @@ export function AdminActionBar({ children, className }: { children: ReactNode; c
 }
 
 export const adminButtonClass =
-  "inline-flex min-h-11 items-center justify-center rounded-lg bg-stone-950 px-4 py-2.5 text-sm font-semibold text-stone-50 transition hover:bg-stone-800";
+  "inline-flex min-h-10 items-center justify-center rounded-lg bg-stone-950 px-4 py-2 text-sm font-semibold text-stone-50 shadow-sm transition hover:bg-stone-800";
 
 export const adminSecondaryButtonClass =
-  "inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-panel-strong)]";
+  "inline-flex min-h-10 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] shadow-sm transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel-strong)]";

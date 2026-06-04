@@ -35,7 +35,7 @@ export function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-2 overflow-x-auto pb-1 lg:grid lg:overflow-visible lg:pb-0">
+    <nav className="admin-scrollbar flex gap-2 overflow-x-auto pb-1 lg:grid lg:gap-1 lg:overflow-visible lg:pb-0">
       {links.map((link) => {
         const active = isActive(pathname, link.href);
 
@@ -44,8 +44,8 @@ export function AdminNav() {
             key={link.href}
             href={link.href}
             className={cn(
-              "inline-flex min-h-11 shrink-0 items-center rounded-lg px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-panel-strong)] hover:text-[var(--text-primary)]",
-              active && "bg-[var(--accent-soft)] text-[var(--accent)] shadow-sm",
+              "inline-flex min-h-10 shrink-0 items-center rounded-lg px-3.5 py-2 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-panel-strong)] hover:text-[var(--text-primary)]",
+              active && "bg-[var(--accent-soft)] text-[var(--text-primary)] shadow-sm ring-1 ring-[var(--accent)]/10",
             )}
           >
             <span>{link.label}</span>

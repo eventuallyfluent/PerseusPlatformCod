@@ -18,7 +18,7 @@ export default async function CheckoutPage({
   searchParams,
 }: {
   params: Promise<{ offerId: string }>;
-  searchParams: Promise<{ status?: string; upsellFrom?: string }>;
+  searchParams: Promise<{ status?: string; upsellFrom?: string; coupon?: string }>;
 }) {
   const { offerId } = await params;
   const query = await searchParams;
@@ -131,6 +131,7 @@ export default async function CheckoutPage({
               productKind={productKind}
               productMeta={productMeta}
               checkoutModeNote={checkoutModeNote}
+              initialCouponCode={query.coupon ?? ""}
               initialUpsellFromOfferId={query.upsellFrom ?? ""}
               initialQuote={initialQuote}
               showTaxLocationInitially={showTaxLocationInitially}

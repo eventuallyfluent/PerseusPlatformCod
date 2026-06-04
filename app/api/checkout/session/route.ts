@@ -9,10 +9,24 @@ export async function POST(request: Request) {
     const json = await request.json();
     const input = checkoutSessionSchema.parse(json);
 
+    if (!session?.user?.id || !session.user.email) {
+      const returnToParams = new URLSearchParams();
+      if (input.couponCode) returnToParams.set("coupon", input.couponCode);
+      if (input.upsellFromOfferId) returnToParams.set("upsellFrom", input.upsellFromOfferId);
+
+      const returnTo = `/checkout/${input.offerId}${returnToParams.size ? `?${returnToParams.toString()}` : ""}`;
+      const loginParams = new URLSearchParams({ returnTo });
+
+      return NextResponse.json({
+        checkoutUrl: `/login?${loginParams.toString()}`,
+        requiresLogin: true,
+      });
+    }
+
     const checkout = await createCheckoutSession({
       offerId: input.offerId,
-      userId: session?.user?.id,
-      customerEmail: session?.user?.email ?? undefined,
+      userId: session.user.id,
+      customerEmail: session.user.email,
       couponCode: input.couponCode,
       upsellFromOfferId: input.upsellFromOfferId,
       taxLocation: {

@@ -249,6 +249,18 @@ async function main() {
     throw new Error("Generated sales page payload is missing the imported testimonial.");
   }
 
+  const requirementsPayload = generateSalesPagePayload({
+    ...course,
+    includes: ["REQUIREMENTS: The Three Releases and Establishment of Equilibrium Using the Elements."],
+  });
+  const requirementsCard = requirementsPayload.highlightsSection.cards.find((card) => card.id === "includes");
+  if (
+    requirementsCard?.title !== "Requirements" ||
+    requirementsCard.items.some((item) => /^requirements?\s*[:：-]/i.test(item))
+  ) {
+    throw new Error("Requirement-only imported include data must render as requirements, not included benefits.");
+  }
+
   const pendingReview = await prisma.testimonial.create({
     data: {
       courseId: course.id,

@@ -125,6 +125,22 @@ function isCustomerFacingHighlightItem(value: string) {
   return !internalPatterns.some((pattern) => pattern.test(text));
 }
 
+function stripRequirementPrefix(value: string) {
+  return value.replace(/^requirements?\s*[:：-]\s*/i, "").trim();
+}
+
+function isRequirementHighlightItem(value: string) {
+  return /^requirements?\s*[:：-]/i.test(value.trim());
+}
+
+function isRequirementsOnlyIncludesCard(card: { id: "outcomes" | "audience" | "includes"; items: string[] }) {
+  return card.id === "includes" && card.items.length > 0 && card.items.every(isRequirementHighlightItem);
+}
+
+function isRequirementsIncludesCard(card: { id: "outcomes" | "audience" | "includes"; title: string; items: string[] }) {
+  return card.id === "includes" && (/^requirements$/i.test(card.title.trim()) || isRequirementsOnlyIncludesCard(card));
+}
+
 function parseHighlightItems(items: string[], cardId?: "outcomes" | "audience" | "includes"): ParsedHighlight {
   const rawItems = splitHighlightItems(items).flatMap((item) =>
     item
@@ -149,15 +165,19 @@ function parseHighlightItems(items: string[], cardId?: "outcomes" | "audience" |
         : [item];
 
     parts.forEach((part) => {
-      const normalized = part.replace(/^requirements?:\s*/i, "").trim();
+      const isRequirement = isRequirementHighlightItem(part);
+      const normalized = stripRequirementPrefix(part);
       const shouldChip =
         cardId === "includes" &&
-        (/\b(module|lesson|course|preview|requirement|access)\b/i.test(part) || normalized.length <= 32);
+        !isRequirement &&
+        (/\b(module|lesson|course|preview|requirements?|access)\b/i.test(part) || normalized.length <= 32);
 
       if (shouldChip) {
-        chips.push(/^requirements?:/i.test(part) && /^none$/i.test(normalized) ? "No requirements" : normalized);
+        chips.push(normalized);
+      } else if (isRequirement && /^none$/i.test(normalized)) {
+        chips.push("No requirements");
       } else {
-        bullets.push(part);
+        bullets.push(isRequirement ? normalized : part);
       }
     });
   });
@@ -245,6 +265,23 @@ function getHighlightTreatment(cardId: "outcomes" | "audience" | "includes") {
     variant: "accent" as const,
     eyebrow: "Transformation",
     accentClass: "from-[rgba(123,47,190,0.2)] to-transparent",
+  };
+}
+
+function getResolvedHighlightCard(card: { id: "outcomes" | "audience" | "includes"; title: string; items: string[] }) {
+  const isRequirementsCard = isRequirementsIncludesCard(card);
+
+  return {
+    ...card,
+    title: isRequirementsCard ? "Requirements" : card.title,
+    treatment: isRequirementsCard
+      ? {
+          icon: ShieldCheck,
+          variant: "success" as const,
+          eyebrow: "Before you join",
+          accentClass: "from-[rgba(52,211,153,0.16)] to-transparent",
+        }
+      : getHighlightTreatment(card.id),
   };
 }
 
@@ -411,7 +448,8 @@ export function RenderProductSalesPage({
           <CompactSectionIntro eyebrow={payload.highlightsSection.eyebrow} title="What you will get from this study." />
           <div className={`overflow-hidden ${sectionPanelClass}`}>
             {cards.map((card) => {
-              const treatment = getHighlightTreatment(card.id);
+              const resolvedCard = getResolvedHighlightCard(card);
+              const treatment = resolvedCard.treatment;
               const Icon = treatment.icon;
               const parsed = parseHighlightItems(card.items, card.id);
               const visibleItems = parsed.bullets.slice(0, 8);
@@ -426,7 +464,7 @@ export function RenderProductSalesPage({
                     </div>
                     <div className="min-w-0">
                       <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.22em] ${panelSubtleTextClass}`}>{treatment.eyebrow}</p>
-                      <h3 className="mt-2 font-serif text-2xl leading-tight text-[var(--text-primary)]">{card.title}</h3>
+                      <h3 className="mt-2 font-serif text-2xl leading-tight text-[var(--text-primary)]">{resolvedCard.title}</h3>
                     </div>
                   </div>
                 </div>

@@ -26,6 +26,18 @@ function readStringArray(value: unknown) {
   return [];
 }
 
+function isRequirementsItem(value: string) {
+  return /^requirements?\s*[:：-]/i.test(value.trim());
+}
+
+function stripRequirementPrefix(value: string) {
+  return value.replace(/^requirements?\s*[:：-]\s*/i, "").trim();
+}
+
+function getIncludesCardTitle(items: string[]) {
+  return items.length > 0 && items.every(isRequirementsItem) ? "Requirements" : "Included";
+}
+
 function buildOffers(course: CourseWithRelations): SalesPageOfferSummary[] {
   return [...course.offers]
     .filter((offer) => offer.isPublished)
@@ -69,7 +81,8 @@ export function generateSalesPagePayload(course: CourseWithOptionalCollectionCon
   ]);
   const outcomes = readStringArray(course.learningOutcomes);
   const audience = readStringArray(course.whoItsFor);
-  const includes = readStringArray(course.includes);
+  const rawIncludes = readStringArray(course.includes);
+  const includes = rawIncludes.map((item) => stripRequirementPrefix(item) || item);
   const lessonCount = course.modules.reduce((count, module) => count + module.lessons.length, 0);
   const primaryOffer = offers[0] ?? null;
   const isFreeCourse = primaryOffer ? /(^|\s)(free|\$0|£0|€0|0\.00)/i.test(primaryOffer.price) : false;
@@ -114,7 +127,7 @@ export function generateSalesPagePayload(course: CourseWithOptionalCollectionCon
       cards: [
         { id: "outcomes", title: "Outcomes", items: outcomes },
         { id: "audience", title: "Who it is for", items: audience },
-        { id: "includes", title: "Included", items: includes },
+        { id: "includes", title: getIncludesCardTitle(rawIncludes), items: includes },
       ],
     },
     curriculumSection: {

@@ -163,25 +163,7 @@ async function main() {
 
   const course = await prisma.course.findUnique({
     where: { slug: "ritual-discipline-foundations" },
-    include: {
-      modules: {
-        include: {
-          lessons: {
-            orderBy: { position: "asc" },
-          },
-        },
-        orderBy: { position: "asc" },
-      },
-      testimonials: {
-        orderBy: { position: "asc" },
-      },
-      offers: {
-        include: {
-          prices: true,
-        },
-      },
-      pages: true,
-    },
+    include: courseInclude,
   });
 
   if (!course) {

@@ -167,10 +167,7 @@ function parseHighlightItems(items: string[], cardId?: "outcomes" | "audience" |
     parts.forEach((part) => {
       const isRequirement = isRequirementHighlightItem(part);
       const normalized = stripRequirementPrefix(part);
-      const shouldChip =
-        cardId === "includes" &&
-        !isRequirement &&
-        (/\b(module|lesson|course|preview|requirements?|access)\b/i.test(part) || normalized.length <= 32);
+      const shouldChip = cardId === "includes" && !isRequirement;
 
       if (shouldChip) {
         chips.push(normalized);
@@ -492,7 +489,7 @@ export function RenderProductSalesPage({
                         Show {hiddenItems.length} more
                         <ChevronDown className="size-3" aria-hidden="true" />
                       </summary>
-                      <ul className="mt-4 space-y-4 leading-7">
+                      <ul className="mt-4 grid gap-x-5 gap-y-3 leading-7 md:grid-cols-2">
                         {hiddenItems.map((item) => (
                           <li key={item} className="grid grid-cols-[18px_minmax(0,1fr)] gap-3">
                             <CheckCircle2 className="mt-1 size-4 text-[var(--accent-lavender)]" aria-hidden="true" />

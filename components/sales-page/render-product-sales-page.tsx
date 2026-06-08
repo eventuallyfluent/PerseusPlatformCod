@@ -364,7 +364,6 @@ export function RenderProductSalesPage({
 }) {
   const hidden = new Set(payload.sections.hidden);
   const orderedSections = payload.sections.order.filter((section) => !hidden.has(section));
-  const rendersReviewsSection = orderedSections.includes("testimonials");
   const facts = buildFacts(payload);
   const primaryCtaLabel = getPrimaryCtaLabel(payload);
   const priceLabel = getPriceLabel(payload.hero.primaryOffer);
@@ -461,7 +460,7 @@ export function RenderProductSalesPage({
                     </div>
                     <div className="min-w-0">
                       <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.22em] ${panelSubtleTextClass}`}>{treatment.eyebrow}</p>
-                      <h3 className="mt-2 font-serif text-2xl leading-tight text-[var(--text-primary)]">{resolvedCard.title}</h3>
+                      <h3 className="mt-2 text-xl font-semibold leading-tight text-[var(--text-primary)]">{resolvedCard.title}</h3>
                     </div>
                   </div>
                 </div>
@@ -677,7 +676,6 @@ export function RenderProductSalesPage({
               </blockquote>
             ))}
           </div>
-          {reviewSlot ? <div className="pt-2">{reviewSlot}</div> : null}
         </section>
       );
     }
@@ -694,7 +692,7 @@ export function RenderProductSalesPage({
             {payload.faqSection.items.map((faq, index) => (
               <details key={faq.question} className="group border-t border-[var(--border)] first:border-t-0" open={index === 0}>
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-5 px-5 py-5 marker:content-none sm:px-6">
-                  <h3 className="font-serif text-lg leading-tight text-[var(--text-primary)] sm:text-xl">{faq.question}</h3>
+                  <h3 className="text-base font-semibold leading-tight text-[var(--text-primary)] sm:text-lg">{faq.question}</h3>
                   <ChevronDown className="size-4 shrink-0 text-[var(--accent)] transition group-open:rotate-180" aria-hidden="true" />
                 </summary>
                 <div className="border-t border-[var(--border)] bg-[var(--surface-panel-strong)]/55 px-5 py-5 sm:px-6">
@@ -709,38 +707,34 @@ export function RenderProductSalesPage({
 
     if (section === "pricing") {
       const singleOffer = payload.pricingSection.offers.length === 1 ? payload.pricingSection.offers[0] : null;
+      const confidenceItems = [
+        "Access is saved in your student library",
+        "Future course updates are included",
+        "Use one account for purchases and course access",
+        "Refund policy is available before checkout",
+      ];
 
       return (
         <section key={section} id="pricing" className="mx-auto max-w-7xl scroll-mt-28 px-6">
           <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
-            <div className="grid gap-0 lg:grid-cols-[1fr_0.82fr]">
-              <div>
-                <div className="px-6 py-7 sm:px-8 lg:px-9 lg:py-10">
-                  <Badge variant="premium">{payload.pricingSection.badge}</Badge>
-                  <h2 className="mt-4 max-w-2xl font-serif text-4xl leading-tight lg:text-[3rem]">{payload.pricingSection.headline}</h2>
-                  <p className={`mt-3 max-w-xl text-base leading-8 ${panelMutedTextClass}`}>{payload.pricingSection.body}</p>
-                </div>
-                <div className="grid border-t border-[var(--border)] sm:grid-cols-3">
-                  <div className="flex items-center gap-3 border-t border-[var(--border)] px-6 py-4 first:border-t-0 sm:border-l sm:border-t-0 sm:first:border-l-0 sm:px-8">
-                    <CheckCircle2 className="size-4 shrink-0 text-[var(--accent-lavender)]" aria-hidden="true" />
-                    <span className={`text-sm leading-6 ${panelMutedTextClass}`}>Lifetime access</span>
-                  </div>
-                  <div className="flex items-center gap-3 border-t border-[var(--border)] px-6 py-4 sm:border-l sm:border-t-0 sm:px-8">
-                    <CheckCircle2 className="size-4 shrink-0 text-[var(--accent-lavender)]" aria-hidden="true" />
-                    <span className={`text-sm leading-6 ${panelMutedTextClass}`}>All future updates included</span>
-                  </div>
-                  <div className="flex items-center gap-3 border-t border-[var(--border)] px-6 py-4 sm:border-l sm:border-t-0 sm:px-8">
-                    <CheckCircle2 className="size-4 shrink-0 text-[var(--accent-lavender)]" aria-hidden="true" />
-                    <Link href="/refund-policy" className={`text-sm leading-6 underline underline-offset-4 ${panelMutedTextClass} transition hover:text-[var(--text-primary)]`}>
-                      Refund policy
-                    </Link>
-                  </div>
+            <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.62fr)]">
+              <div className="px-6 py-7 sm:px-8 lg:px-9 lg:py-10">
+                <Badge variant="premium">{payload.pricingSection.badge}</Badge>
+                <h2 className="mt-4 max-w-2xl font-serif text-4xl leading-tight lg:text-[3rem]">{payload.pricingSection.headline}</h2>
+                <p className={`mt-3 max-w-2xl text-base leading-8 ${panelMutedTextClass}`}>{payload.pricingSection.body}</p>
+                <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                  {confidenceItems.map((item) => (
+                    <div key={item} className="flex min-h-14 items-start gap-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-3">
+                      <CheckCircle2 className="mt-1 size-4 shrink-0 text-[var(--premium)]" aria-hidden="true" />
+                      <span className={`text-sm leading-6 ${panelMutedTextClass}`}>{item}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="border-t border-[var(--border)] bg-[var(--surface-panel-strong)] p-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-7">
+              <div className="border-t border-[var(--border)] bg-[linear-gradient(180deg,var(--surface-panel-strong),var(--surface-panel))] p-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-7">
                 {singleOffer ? (
-                  <div className="space-y-5">
-                    <div>
+                  <div className="flex h-full flex-col justify-between gap-6">
+                    <div className="rounded-[18px] border border-[var(--border-strong)] bg-[var(--surface-panel)] p-5">
                       <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.18em] ${panelSubtleTextClass}`}>{singleOffer.name}</p>
                       <div className="mt-3 flex flex-wrap items-end gap-x-4 gap-y-2">
                         <span className="font-serif text-5xl leading-none text-[var(--text-primary)]">{singleOffer.price}</span>
@@ -748,50 +742,46 @@ export function RenderProductSalesPage({
                       </div>
                       {singleOffer.savingsLabel ? <Badge variant="premium" className="mt-4">{singleOffer.savingsLabel}</Badge> : null}
                     </div>
-                    <ButtonLink
-                      href={singleOffer.checkoutUrl}
-                      className="min-h-12 w-full justify-center whitespace-normal bg-[var(--sales-primary-cta-background)] px-6 text-center shadow-[var(--sales-primary-cta-shadow)]"
-                    >
-                      {primaryCtaLabel}
-                    </ButtonLink>
-                    <div className={`space-y-2 border-t border-[var(--border)] pt-4 text-sm leading-6 ${panelMutedTextClass}`}>
-                      <p className="flex gap-2"><CheckCircle2 className="mt-1 size-4 shrink-0 text-[var(--premium)]" aria-hidden="true" />Access is saved in your student library.</p>
-                      <p className="flex gap-2"><CheckCircle2 className="mt-1 size-4 shrink-0 text-[var(--premium)]" aria-hidden="true" />Future course updates are included.</p>
-                      <p className="flex gap-2">
-                        <CheckCircle2 className="mt-1 size-4 shrink-0 text-[var(--premium)]" aria-hidden="true" />
-                        <Link href="/refund-policy" className="underline underline-offset-4 transition hover:text-[var(--text-primary)]">Read the refund policy</Link>
-                      </p>
+                    <div className="space-y-4">
+                      <ButtonLink
+                        href={singleOffer.checkoutUrl}
+                        className="min-h-12 w-full justify-center whitespace-normal bg-[var(--sales-primary-cta-background)] px-6 text-center shadow-[var(--sales-primary-cta-shadow)]"
+                      >
+                        {primaryCtaLabel}
+                      </ButtonLink>
+                      <Link href="/refund-policy" className={`block text-center text-sm font-semibold underline underline-offset-4 ${panelMutedTextClass} transition hover:text-[var(--text-primary)]`}>
+                        Read the refund policy
+                      </Link>
                     </div>
                   </div>
-                ) : payload.pricingSection.offers.map((offer) => (
-                  <Link
-                    key={offer.offerId}
-                    href={offer.checkoutUrl}
-                    className="block border-t border-[var(--border)] px-1 py-4 text-[var(--text-primary)] transition first:border-t-0 hover:text-[var(--accent)]"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm font-semibold">{offer.name}</span>
-                      <span className="text-sm font-semibold">{offer.price}</span>
+                ) : (
+                  <div className="space-y-4">
+                    <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.18em] ${panelSubtleTextClass}`}>Enrollment options</p>
+                    <div className="overflow-hidden rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel)]">
+                      {payload.pricingSection.offers.map((offer) => (
+                        <Link
+                          key={offer.offerId}
+                          href={offer.checkoutUrl}
+                          className="block border-t border-[var(--border)] px-4 py-4 text-[var(--text-primary)] transition first:border-t-0 hover:bg-[var(--surface-panel-strong)] hover:text-[var(--accent)]"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-sm font-semibold">{offer.name}</span>
+                            <span className="text-base font-semibold">{offer.price}</span>
+                          </div>
+                          {offer.compareAtPrice || offer.savingsLabel ? (
+                            <div className={`mt-2 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.2em] ${panelSubtleTextClass}`}>
+                              <span>{offer.compareAtPrice ?? ""}</span>
+                              <span>{offer.savingsLabel ?? ""}</span>
+                            </div>
+                          ) : null}
+                        </Link>
+                      ))}
                     </div>
-                    {offer.compareAtPrice || offer.savingsLabel ? (
-                      <div className={`mt-2 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.2em] ${panelSubtleTextClass}`}>
-                        <span>{offer.compareAtPrice ?? ""}</span>
-                        <span>{offer.savingsLabel ?? ""}</span>
-                      </div>
-                    ) : null}
-                  </Link>
-                ))}
+                    <OfferButtons offers={payload.pricingSection.offers} primaryLabel={primaryCtaLabel} />
+                  </div>
+                )}
               </div>
             </div>
-            {!singleOffer ? (
-              <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] bg-[linear-gradient(135deg,var(--accent-soft),var(--premium-soft))] p-6 lg:p-8">
-                <div className="max-w-2xl">
-                  <h3 className="font-serif text-3xl leading-tight lg:text-[2.35rem]">{payload.finalCta.label}</h3>
-                  <p className={`mt-3 text-base leading-8 ${panelMutedTextClass}`}>{payload.finalCta.body}</p>
-                </div>
-                <OfferButtons offers={payload.pricingSection.offers} primaryLabel={primaryCtaLabel} />
-              </div>
-            ) : null}
           </div>
         </section>
       );
@@ -892,7 +882,6 @@ export function RenderProductSalesPage({
 
       <SalesPageSubnav items={navItems} />
 
-      {payload.productType === "course" ? bundleValueSlot : null}
       {orderedSections.map((section) => (
         <Fragment key={section}>
           {section === "pricing" && payload.productType === "course" ? bundleValueSlot : null}
@@ -901,7 +890,7 @@ export function RenderProductSalesPage({
         </Fragment>
       ))}
       {questionSlot && payload.productType === "course" && !orderedSections.includes("pricing") ? questionSlot : null}
-      {reviewSlot && !rendersReviewsSection ? <section className="mx-auto max-w-7xl px-6">{reviewSlot}</section> : null}
+      {reviewSlot ? <section className="mx-auto max-w-7xl px-6">{reviewSlot}</section> : null}
     </div>
   );
 }

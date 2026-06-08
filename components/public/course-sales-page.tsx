@@ -54,21 +54,21 @@ export function CourseSalesPage({
   const bundleValueSlot =
     availableBundles.length > 0 ? (
       <section className="mx-auto max-w-7xl px-6">
-        <div className="rounded-[20px] border border-[var(--premium)] bg-[linear-gradient(135deg,var(--premium-soft),var(--accent-soft))] p-5 text-[var(--text-primary)] shadow-[var(--shadow-panel)] lg:p-6">
-          <div className="mx-auto flex max-w-4xl flex-col items-center gap-5 text-center">
-            <div className="max-w-3xl space-y-3">
+        <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-primary)] shadow-[var(--shadow-panel)]">
+          <div className="grid gap-0 lg:grid-cols-[0.72fr_1fr]">
+            <div className="border-b border-[var(--border)] bg-[var(--surface-panel-strong)] p-5 lg:border-b-0 lg:border-r lg:p-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--premium)]">Bundle value option</p>
-              <h2 className="font-serif text-3xl leading-tight">This course is also available inside a bundle.</h2>
+              <h2 className="mt-3 font-serif text-3xl leading-tight">This course is also available inside a bundle.</h2>
               <p className="text-sm leading-7 text-[var(--text-secondary)]">
                 If you are planning to take more than one course, the bundle may be better value than buying this course on its own.
               </p>
             </div>
-            <div className="grid w-full max-w-3xl gap-3">
+            <div className="grid gap-3 p-5 lg:p-6">
               {availableBundles.map((bundle) => (
                 <a
                   key={bundle.id}
                   href={bundle.bundleUrl}
-                  className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-5 py-4 text-left transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel-strong)]"
+                  className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-5 py-4 text-left transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-panel)]"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
@@ -97,8 +97,8 @@ export function CourseSalesPage({
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div className="max-w-2xl space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--text-muted)]">Student reviews</p>
-          <h3 className="font-serif text-3xl leading-tight">What learners say after joining.</h3>
-          <p className="text-sm leading-7 text-[var(--text-secondary)]">Verified student reviews are published after approval.</p>
+          <h3 className="text-2xl font-semibold leading-tight">Leave a verified review.</h3>
+          <p className="text-sm leading-7 text-[var(--text-secondary)]">Enrolled students can add a review from the same account used for course access.</p>
         </div>
         {isLoggedIn ? (
           <a href="#leave-review-form" className={buttonClassName()}>
@@ -166,9 +166,12 @@ export function CourseSalesPage({
             </div>
           </form>
         ) : (
-          <p className="mt-6 rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm leading-7 text-[var(--text-secondary)]">
-            Reviews are available to enrolled students after purchase.
-          </p>
+          <div className="mt-6 rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel)] px-5 py-4">
+            <p className="text-sm font-semibold text-[var(--text-primary)]">Review access unlocks after enrollment.</p>
+            <p className="mt-1 text-sm leading-7 text-[var(--text-secondary)]">
+              After purchase, return with your learner email to leave a verified review for this course.
+            </p>
+          </div>
         )}
       </div>
     </div>

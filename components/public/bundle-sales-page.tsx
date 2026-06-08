@@ -47,8 +47,8 @@ export function BundleSalesPage({
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div className="max-w-2xl space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--text-muted)]">Bundle reviews</p>
-          <h3 className="font-serif text-3xl leading-tight">What learners say after joining.</h3>
-          <p className="text-sm leading-7 text-[var(--text-secondary)]">Verified bundle reviews are published after approval.</p>
+          <h3 className="text-2xl font-semibold leading-tight">Leave a verified review.</h3>
+          <p className="text-sm leading-7 text-[var(--text-secondary)]">Bundle buyers can add a review from the same account used for course access.</p>
         </div>
         {isLoggedIn ? (
           <a href="#leave-review-form" className={buttonClassName()}>
@@ -111,9 +111,12 @@ export function BundleSalesPage({
             </div>
           </form>
         ) : (
-          <p className="mt-6 rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm leading-7 text-[var(--text-secondary)]">
-            Reviews are available to bundle buyers after purchase.
-          </p>
+          <div className="mt-6 rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel)] px-5 py-4">
+            <p className="text-sm font-semibold text-[var(--text-primary)]">Review access unlocks after purchase.</p>
+            <p className="mt-1 text-sm leading-7 text-[var(--text-secondary)]">
+              After purchase, return with your learner email to leave a verified review for this bundle.
+            </p>
+          </div>
         )}
       </div>
     </div>

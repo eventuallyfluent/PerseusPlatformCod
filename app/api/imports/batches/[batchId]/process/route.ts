@@ -4,6 +4,8 @@ import { markImportBatchFailed, processImportBatchChunk } from "@/lib/imports/ex
 
 export const maxDuration = 60;
 
+const MAX_CHUNKS_PER_REQUEST = 8;
+
 export async function POST(_request: Request, { params }: { params: Promise<{ batchId: string }> }) {
   const unauthorized = await requireAdminRoute();
   if (unauthorized) return unauthorized;
@@ -11,8 +13,19 @@ export async function POST(_request: Request, { params }: { params: Promise<{ ba
   const { batchId } = await params;
 
   try {
-    const batch = await processImportBatchChunk(batchId);
-    const executionSummary = batch.executionSummary as Record<string, unknown> | null;
+    let batch = await processImportBatchChunk(batchId);
+    let executionSummary = batch.executionSummary as Record<string, unknown> | null;
+    let processedChunks = 1;
+
+    while (
+      processedChunks < MAX_CHUNKS_PER_REQUEST &&
+      batch.status === "PROCESSING" &&
+      Boolean(executionSummary?.hasMore)
+    ) {
+      batch = await processImportBatchChunk(batchId);
+      executionSummary = batch.executionSummary as Record<string, unknown> | null;
+      processedChunks += 1;
+    }
 
     return NextResponse.json({
       id: batch.id,
@@ -20,6 +33,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ ba
       type: batch.type,
       executionSummary,
       hasMore: Boolean(executionSummary?.hasMore),
+      processedChunks,
     });
   } catch (error) {
     const batch = await markImportBatchFailed(batchId, error);

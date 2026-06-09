@@ -19,6 +19,7 @@
     "prisma:check:webhook": "node --env-file=.env --import tsx prisma/verify-bundle-payment.ts",
     "prisma:check:imports": "node --env-file=.env --import tsx prisma/verify-imports.ts",
     "imports:check:boundaries": "node --import tsx scripts/verify-import-boundaries.ts",
+    "admin:check:auth": "node --import tsx scripts/verify-admin-auth-boundaries.ts",
     "images:backfill": "node --env-file=.env --import tsx scripts/backfill-image-assets.ts",
     "images:verify": "node --import tsx scripts/verify-image-assets.ts"
   },

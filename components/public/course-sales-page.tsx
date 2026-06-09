@@ -24,7 +24,6 @@ export function CourseSalesPage({
   payload,
   bundleOptions,
   canLeaveReview,
-  isLoggedIn,
   reviewLoginHref,
   existingReview,
   inquirySent = false,
@@ -100,15 +99,9 @@ export function CourseSalesPage({
           <h3 className="text-2xl font-semibold leading-tight">Leave a verified review.</h3>
           <p className="text-sm leading-7 text-[var(--text-secondary)]">Enrolled students can add a review from the same account used for course access.</p>
         </div>
-        {canLeaveReview ? (
-          <a href="#leave-review-form" className={buttonClassName()}>
-            Leave a Review
-          </a>
-        ) : !isLoggedIn ? (
-          <a href={reviewLoginHref} className={buttonClassName()}>
-            Leave a Review
-          </a>
-        ) : null}
+        <a href={canLeaveReview ? "#leave-review-form" : reviewLoginHref} className={buttonClassName()}>
+          Leave a Review
+        </a>
       </div>
       {canLeaveReview ? (
         <div id="leave-review-form" className="scroll-mt-28">

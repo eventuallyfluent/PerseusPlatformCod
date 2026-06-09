@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
+import { isStaleImportProcessing } from "@/lib/imports/import-batch-status";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { ImportBatchRunner } from "@/components/admin/import-batch-runner";
@@ -44,6 +45,8 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
   const processedCount = Number(executionSummary?.processedCount ?? 0);
   const totalCount = Number(executionSummary?.totalCount ?? 0);
   const isProcessing = batch.status === "PROCESSING";
+  const hasMore = readBoolean(executionSummary, "hasMore");
+  const staleProcessing = isProcessing && hasMore && isStaleImportProcessing(batch.updatedAt);
   const invalidCount = readNumber(dryRunSummary, "invalidCount");
   const conflictCount = readNumber(dryRunSummary, "conflictCount");
   const canExecute = batch.status === "DRY_RUN" && invalidCount === 0 && conflictCount === 0;
@@ -92,7 +95,7 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
         <div className="grid gap-3 text-sm text-stone-600">
           <div>Type: {batch.type}</div>
           <div>Status: {batch.status}</div>
-          {isProcessing ? <div className="font-medium text-amber-700">Import is processing automatically. Keep this page open until it completes or fails.</div> : null}
+          {isProcessing ? <div className="font-medium text-amber-700">{staleProcessing ? "This import was stale. Processing has resumed automatically." : "Import is processing automatically. Keep this page open until it completes or fails."}</div> : null}
           {totalCount > 0 ? <div>Progress: {processedCount} / {totalCount}</div> : null}
           {targetCourse ? <div>Target course: {targetCourse}</div> : null}
         </div>

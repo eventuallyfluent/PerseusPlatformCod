@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
+import { isStaleImportProcessing } from "@/lib/imports/import-batch-status";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { AdminActionBar, AdminDataTable, AdminStatusBadge, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
@@ -10,7 +11,7 @@ function readCount(summary: unknown, key: string) {
   return summary && typeof summary === "object" && key in summary ? Number((summary as Record<string, unknown>)[key] ?? 0) : 0;
 }
 
-function isStuckProcessing(batch: { status: string; executionSummary: unknown }) {
+function isStuckProcessing(batch: { status: string; executionSummary: unknown; updatedAt: Date }) {
   if (batch.status !== "PROCESSING") {
     return false;
   }
@@ -19,7 +20,11 @@ function isStuckProcessing(batch: { status: string; executionSummary: unknown })
     ? Boolean((batch.executionSummary as Record<string, unknown>).hasMore)
     : false;
 
-  return hasMore && readCount(batch.executionSummary, "processedCount") === 0;
+  if (!hasMore) {
+    return false;
+  }
+
+  return readCount(batch.executionSummary, "processedCount") === 0 || isStaleImportProcessing(batch.updatedAt);
 }
 
 function statusClassName(status: string, stuck: boolean) {
@@ -182,6 +187,8 @@ export default async function ImportsPage() {
           const dryRunSummary = batch.dryRunSummary as Record<string, unknown> | null;
           const executionSummary = batch.executionSummary as Record<string, unknown> | null;
           const target = String(executionSummary?.targetCourseTitle ?? dryRunSummary?.targetCourseTitle ?? dryRunSummary?.targetCourseSlug ?? "");
+          const processedCount = readCount(batch.executionSummary, "processedCount");
+          const totalCount = readCount(batch.executionSummary, "totalCount");
 
           return {
             key: batch.id,
@@ -196,16 +203,18 @@ export default async function ImportsPage() {
                 ? `${readCount(executionSummary, "imageCopiedCount")} copied / ${readCount(executionSummary, "imageFailedCount")} failed`
                 : "-",
               stuck
-                ? "No rows processed"
+                ? processedCount === 0
+                  ? "No rows processed"
+                  : `Stale at ${processedCount} / ${totalCount}`
                 : batch.status === "PROCESSING"
-                  ? `Processing ${readCount(batch.executionSummary, "processedCount")} / ${readCount(batch.executionSummary, "totalCount")}`
+                  ? `Processing ${processedCount} / ${totalCount}`
                   : batch.status === "COMPLETED" || batch.status === "FAILED"
                     ? "Recorded"
                     : "Pending",
               batch.createdAt.toLocaleString(),
               <AdminActionBar key="actions">
                 <Link href={`/admin/imports/${batch.id}`} className={adminSecondaryButtonClass}>
-                  View
+                  {stuck ? "Resume" : "View"}
                 </Link>
                 <a href={`/api/imports/batches/${batch.id}/errors`} className={adminSecondaryButtonClass}>
                   Errors

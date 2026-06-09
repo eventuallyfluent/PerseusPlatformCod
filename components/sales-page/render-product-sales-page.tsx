@@ -448,8 +448,6 @@ export function RenderProductSalesPage({
               const treatment = resolvedCard.treatment;
               const Icon = treatment.icon;
               const parsed = parseHighlightItems(card.items, card.id);
-              const visibleItems = parsed.bullets.slice(0, 8);
-              const hiddenItems = parsed.bullets.slice(8);
 
               return (
               <div key={card.id} className="grid gap-5 border-t border-[var(--border)] p-5 first:border-t-0 sm:p-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
@@ -475,29 +473,13 @@ export function RenderProductSalesPage({
                     </div>
                   ) : null}
                   <ul className={`grid gap-x-5 gap-y-3 text-sm leading-7 ${parsed.chips.length > 0 ? "mt-4" : ""} ${panelMutedTextClass} md:grid-cols-2`}>
-                    {visibleItems.map((item) => (
+                    {parsed.bullets.map((item) => (
                       <li key={item} className="grid grid-cols-[18px_minmax(0,1fr)] gap-3">
                         <CheckCircle2 className="mt-1 size-4 text-[var(--accent-lavender)]" aria-hidden="true" />
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
-                  {hiddenItems.length > 0 ? (
-                    <details className={`mt-4 text-sm ${panelMutedTextClass}`}>
-                      <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-[var(--border)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-lavender)] marker:content-none">
-                        Show {hiddenItems.length} more
-                        <ChevronDown className="size-3" aria-hidden="true" />
-                      </summary>
-                      <ul className="mt-4 grid gap-x-5 gap-y-3 leading-7 md:grid-cols-2">
-                        {hiddenItems.map((item) => (
-                          <li key={item} className="grid grid-cols-[18px_minmax(0,1fr)] gap-3">
-                            <CheckCircle2 className="mt-1 size-4 text-[var(--accent-lavender)]" aria-hidden="true" />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                  ) : null}
                 </div>
               </div>
               );

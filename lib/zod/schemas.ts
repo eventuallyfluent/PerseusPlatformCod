@@ -93,7 +93,14 @@ const csvBoolean = z.preprocess((value) => {
 
   return value;
 }, z.boolean());
-const csvCourseStatus = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase() : value), z.nativeEnum(CourseStatus));
+const csvCourseStatus = z.preprocess((value) => {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const normalized = value.trim().toUpperCase();
+  return normalized || undefined;
+}, z.nativeEnum(CourseStatus).optional());
 const csvLessonStatus = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase() : value), z.nativeEnum(LessonStatus));
 const csvOfferType = z.preprocess((value) => (typeof value === "string" ? value.trim().toUpperCase().replace(/[\s-]+/g, "_") : value), z.nativeEnum(OfferType));
 function normalizeCsvLessonType(value: unknown) {
@@ -328,7 +335,7 @@ export const courseCsvRowSchema = z.object({
   instructor_name: z.string().optional(),
   seo_title: z.string().optional(),
   seo_description: z.string().optional(),
-  status: csvCourseStatus.default(CourseStatus.DRAFT),
+  status: csvCourseStatus.transform((status) => status ?? CourseStatus.DRAFT),
   price: csvMoney,
   price_text: z.string().optional(),
   offer_options: z.string().optional(),
@@ -395,7 +402,7 @@ export const coursePackageCsvRowSchema = z.object({
   instructor_name: z.string().optional(),
   seo_title: z.string().optional(),
   seo_description: z.string().optional(),
-  status: csvCourseStatus.default(CourseStatus.DRAFT),
+  status: csvCourseStatus.transform((status) => status ?? CourseStatus.PUBLISHED),
   price: csvMoney,
   price_text: z.string().optional(),
   offer_options: z.string().optional(),

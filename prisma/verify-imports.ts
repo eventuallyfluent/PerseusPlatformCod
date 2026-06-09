@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { LessonType, Prisma, PrismaClient } from "@prisma/client";
+import { CourseStatus, LessonType, Prisma, PrismaClient } from "@prisma/client";
 import { dryRunImport } from "../lib/imports/dry-run-import";
 import { createImportBatch, executeImport, executeImportBatch } from "../lib/imports/execute-import";
 import { courseInclude } from "../lib/courses/course-query";
@@ -64,6 +64,33 @@ async function main() {
     directExecuteSummary?.hasMore
   ) {
     throw new Error("Direct course package execute did not complete server-side.");
+  }
+
+  const blankStatusCsv = packageCsv
+    .replaceAll("ritual-foundations-001", "blank-status-001")
+    .replaceAll("ritual-discipline-foundations", "blank-status-import-check")
+    .replaceAll("Structured ritual training for serious Perseus students.,PUBLISHED", "Structured ritual training for serious Perseus students.,");
+  await executeImport("COURSE_PACKAGE", "blank-status-import-check.csv", blankStatusCsv, false);
+  const blankStatusCourse = await prisma.course.findUnique({
+    where: { slug: "blank-status-import-check" },
+    select: {
+      status: true,
+      accessProduct: {
+        select: { status: true },
+      },
+      pages: {
+        where: { pageType: "sales" },
+        select: { id: true },
+      },
+    },
+  });
+
+  if (
+    blankStatusCourse?.status !== CourseStatus.PUBLISHED ||
+    blankStatusCourse.accessProduct?.status !== CourseStatus.PUBLISHED ||
+    blankStatusCourse.pages.length === 0
+  ) {
+    throw new Error("Course package imports with a blank status must publish the migrated sales page by default.");
   }
 
   const originalFetch = globalThis.fetch;

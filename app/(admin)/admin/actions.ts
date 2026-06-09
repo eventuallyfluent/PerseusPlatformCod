@@ -1579,6 +1579,8 @@ export async function setGatewayActiveStateAction(formData: FormData) {
 export async function setCourseStatusAction(formData: FormData) {
   const courseId = String(formData.get("courseId") ?? formData.get("id") ?? "");
   const status = String(formData.get("status") ?? CourseStatus.DRAFT) as CourseStatus;
+  let publicPath = "";
+  let courseSlug = "";
 
   try {
     const course = await prisma.course.update({
@@ -1590,10 +1592,24 @@ export async function setCourseStatusAction(formData: FormData) {
         title: true,
         shortDescription: true,
         status: true,
+        publicPath: true,
+        legacyUrl: true,
         price: true,
         currency: true,
         compareAtPrice: true,
       },
+    });
+
+    courseSlug = course.slug;
+    publicPath = resolveCoursePublicPath(course);
+
+    await syncAccessProduct({
+      courseId: course.id,
+      slug: course.slug,
+      title: `${course.title} access`,
+      status: course.status,
+      description: course.shortDescription,
+      grantedCourseIds: [course.id],
     });
 
     await syncProductOffer({
@@ -1604,15 +1620,6 @@ export async function setCourseStatusAction(formData: FormData) {
       compareAtPrice: course.compareAtPrice?.toString() ?? null,
       status: course.status,
     });
-
-    await syncAccessProduct({
-      courseId: course.id,
-      slug: course.slug,
-      title: `${course.title} access`,
-      status: course.status,
-      description: course.shortDescription,
-      grantedCourseIds: [course.id],
-    });
   } catch {
     redirect(`/admin/courses/${courseId}?error=status`);
   }
@@ -1620,5 +1627,11 @@ export async function setCourseStatusAction(formData: FormData) {
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath("/admin/products");
+  if (courseSlug) {
+    revalidatePath(`/course/${courseSlug}`);
+  }
+  if (publicPath) {
+    revalidatePath(publicPath);
+  }
   redirect(`/admin/courses/${courseId}?saved=status`);
 }

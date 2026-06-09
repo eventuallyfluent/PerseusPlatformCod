@@ -100,22 +100,18 @@ export function CourseSalesPage({
           <h3 className="text-2xl font-semibold leading-tight">Leave a verified review.</h3>
           <p className="text-sm leading-7 text-[var(--text-secondary)]">Enrolled students can add a review from the same account used for course access.</p>
         </div>
-        {isLoggedIn ? (
+        {canLeaveReview ? (
           <a href="#leave-review-form" className={buttonClassName()}>
             Leave a Review
           </a>
-        ) : (
+        ) : !isLoggedIn ? (
           <a href={reviewLoginHref} className={buttonClassName()}>
-            Sign in to Leave a Review
+            Leave a Review
           </a>
-        )}
+        ) : null}
       </div>
-      <div id="leave-review-form" className="scroll-mt-28">
-        {!isLoggedIn ? (
-          <p className="mt-6 rounded-[22px] border border-[var(--border)] bg-[var(--surface-panel)] px-4 py-3 text-sm leading-7 text-[var(--text-secondary)]">
-            Sign in with your learner email and you will land directly in the review form.
-          </p>
-        ) : canLeaveReview ? (
+      {canLeaveReview ? (
+        <div id="leave-review-form" className="scroll-mt-28">
           <form action={submitCourseReviewAction} className="mt-6 grid gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface-panel)] p-5">
             <input type="hidden" name="courseId" value={course.id} />
             <input type="hidden" name="courseSlug" value={course.slug} />
@@ -165,15 +161,8 @@ export function CourseSalesPage({
               <Button type="submit">{existingReview ? "Update review" : "Submit review"}</Button>
             </div>
           </form>
-        ) : (
-          <div className="mt-6 rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel)] px-5 py-4">
-            <p className="text-sm font-semibold text-[var(--text-primary)]">Review access unlocks after enrollment.</p>
-            <p className="mt-1 text-sm leading-7 text-[var(--text-secondary)]">
-              After purchase, return with your learner email to leave a verified review for this course.
-            </p>
-          </div>
-        )}
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 

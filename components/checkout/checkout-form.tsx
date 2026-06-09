@@ -25,6 +25,49 @@ const checkoutErrorClass = "rounded-[14px] bg-[var(--checkout-error-background)]
 const checkoutPrimaryButtonClass =
   "min-h-14 w-full justify-center whitespace-normal rounded-full px-6 py-4 text-center text-base font-semibold text-[var(--checkout-cta-text)] shadow-[var(--checkout-cta-shadow)] transition [background:var(--checkout-cta-background)] hover:[background:var(--checkout-cta-hover-background)] hover:opacity-95";
 
+const taxCountryOptions = [
+  ["", "Select country"],
+  ["US", "United States"],
+  ["GB", "United Kingdom"],
+  ["CA", "Canada"],
+  ["AU", "Australia"],
+  ["NZ", "New Zealand"],
+  ["IE", "Ireland"],
+  ["DE", "Germany"],
+  ["FR", "France"],
+  ["ES", "Spain"],
+  ["IT", "Italy"],
+  ["NL", "Netherlands"],
+  ["BE", "Belgium"],
+  ["AT", "Austria"],
+  ["CH", "Switzerland"],
+  ["SE", "Sweden"],
+  ["NO", "Norway"],
+  ["DK", "Denmark"],
+  ["FI", "Finland"],
+  ["PT", "Portugal"],
+  ["PL", "Poland"],
+  ["CZ", "Czechia"],
+  ["GR", "Greece"],
+  ["HU", "Hungary"],
+  ["RO", "Romania"],
+  ["JP", "Japan"],
+  ["KR", "South Korea"],
+  ["SG", "Singapore"],
+  ["HK", "Hong Kong"],
+  ["TW", "Taiwan"],
+  ["MY", "Malaysia"],
+  ["TH", "Thailand"],
+  ["PH", "Philippines"],
+  ["IN", "India"],
+  ["ZA", "South Africa"],
+  ["BR", "Brazil"],
+  ["MX", "Mexico"],
+  ["AR", "Argentina"],
+  ["CL", "Chile"],
+  ["OTHER", "Other country code"],
+] as const;
+
 export function CheckoutForm({
   offerId,
   productTitle,
@@ -59,6 +102,7 @@ export function CheckoutForm({
   const [couponCode, setCouponCode] = useState(initialCouponCode);
   const [couponOpen, setCouponOpen] = useState(Boolean(initialCouponCode));
   const [taxCountry, setTaxCountry] = useState("");
+  const [customTaxCountry, setCustomTaxCountry] = useState("");
   const [taxRegion, setTaxRegion] = useState("");
   const [taxPostalCode, setTaxPostalCode] = useState("");
   const [couponError, setCouponError] = useState<string | null>(null);
@@ -73,6 +117,7 @@ export function CheckoutForm({
   }, [initialQuote]);
 
   const shouldShowTaxLocation = showTaxLocationInitially || Boolean(quote.requiresTaxLocation);
+  const resolvedTaxCountry = taxCountry === "OTHER" ? customTaxCountry : taxCountry;
   const taxSummaryLabel =
     quote.taxMode === "platform_included"
       ? "Tax included"
@@ -96,7 +141,7 @@ export function CheckoutForm({
           offerId,
           couponCode: nextCouponCode || undefined,
           upsellFromOfferId: initialUpsellFromOfferId || undefined,
-          taxCountry: taxCountry || undefined,
+          taxCountry: resolvedTaxCountry || undefined,
           taxRegion: taxRegion || undefined,
           taxPostalCode: taxPostalCode || undefined,
         }),
@@ -120,7 +165,7 @@ export function CheckoutForm({
     } finally {
       setQuoting(false);
     }
-  }, [initialUpsellFromOfferId, offerId, taxCountry, taxPostalCode, taxRegion]);
+  }, [initialUpsellFromOfferId, offerId, resolvedTaxCountry, taxPostalCode, taxRegion]);
 
   const startCheckout = useCallback(async () => {
     setPending(true);
@@ -144,7 +189,7 @@ export function CheckoutForm({
           offerId,
           couponCode: couponCode.trim() || undefined,
           upsellFromOfferId: initialUpsellFromOfferId || undefined,
-          taxCountry: taxCountry || undefined,
+          taxCountry: resolvedTaxCountry || undefined,
           taxRegion: taxRegion || undefined,
           taxPostalCode: taxPostalCode || undefined,
         }),
@@ -167,7 +212,7 @@ export function CheckoutForm({
     } finally {
       setPending(false);
     }
-  }, [couponCode, initialUpsellFromOfferId, offerId, refreshQuote, taxCountry, taxPostalCode, taxRegion]);
+  }, [couponCode, initialUpsellFromOfferId, offerId, refreshQuote, resolvedTaxCountry, taxPostalCode, taxRegion]);
 
   useEffect(() => {
     if (!shouldShowTaxLocation) {
@@ -257,19 +302,26 @@ export function CheckoutForm({
       {shouldShowTaxLocation ? (
         <div className={cn(checkoutCardClass, "grid gap-3 px-5 py-4 sm:grid-cols-3")}>
           <label className="space-y-2" htmlFor="checkout-tax-country">
-            <span className="text-sm font-medium text-[var(--checkout-card-text)]">Country code</span>
-            <input
+            <span className="text-sm font-medium text-[var(--checkout-card-text)]">Country</span>
+            <select
               id="checkout-tax-country"
-              className={cn(checkoutInputClass, "uppercase")}
+              className={checkoutInputClass}
               value={taxCountry}
-              onChange={(event) => setTaxCountry(event.target.value.toUpperCase())}
+              onChange={(event) => {
+                setTaxCountry(event.target.value);
+                if (event.target.value !== "OTHER") {
+                  setCustomTaxCountry("");
+                }
+              }}
               name="country"
               autoComplete="country"
-              inputMode="text"
-              enterKeyHint="next"
-              placeholder="GB"
-              maxLength={2}
-            />
+            >
+              {taxCountryOptions.map(([code, label]) => (
+                <option key={code || "placeholder"} value={code}>
+                  {code && code !== "OTHER" ? `${label} (${code})` : label}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="space-y-2" htmlFor="checkout-tax-region">
             <span className="text-sm font-medium text-[var(--checkout-card-text)]">Region/state/province</span>
@@ -299,8 +351,24 @@ export function CheckoutForm({
               placeholder="Optional"
             />
           </label>
+          {taxCountry === "OTHER" ? (
+            <label className="space-y-2 sm:col-span-3" htmlFor="checkout-tax-country-other">
+              <span className="text-sm font-medium text-[var(--checkout-card-text)]">Other country code</span>
+              <input
+                id="checkout-tax-country-other"
+                className={cn(checkoutInputClass, "uppercase")}
+                value={customTaxCountry}
+                onChange={(event) => setCustomTaxCountry(event.target.value.toUpperCase().slice(0, 2))}
+                autoComplete="country"
+                inputMode="text"
+                enterKeyHint="next"
+                placeholder="Two-letter code"
+                maxLength={2}
+              />
+            </label>
+          ) : null}
           <p className="text-sm text-[var(--checkout-card-muted)] sm:col-span-3">
-            Use a two-letter country code such as US, GB, CA, AU, or an EU country code such as DE or FR. Your final total updates before payment.
+            Your final total updates before payment. Use the fallback only when your country is not in the list.
           </p>
           {quote.requiresTaxLocation ? <p className="text-sm text-[var(--checkout-warning-text)] sm:col-span-3">Enter your tax location to calculate the final checkout total.</p> : null}
           {taxError ? <p className={cn(checkoutErrorClass, "sm:col-span-3")}>{taxError}</p> : null}

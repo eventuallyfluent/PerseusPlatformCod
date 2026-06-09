@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
+import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { CouponForm } from "@/components/admin/coupon-form";
 import { deleteCouponAction, saveCouponAction } from "@/app/(admin)/admin/actions";
 
@@ -134,9 +135,9 @@ export default async function CouponsPage({
                   </button>
                   <form action={deleteCouponAction}>
                     <input type="hidden" name="couponId" value={coupon.id} />
-                    <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit">
+                    <ConfirmSubmitButton confirmMessage="Delete this coupon?" className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700">
                       Delete
-                    </button>
+                    </ConfirmSubmitButton>
                   </form>
                 </div>
               </Card>

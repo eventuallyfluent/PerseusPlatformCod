@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
+import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 import { getActiveGatewayRecord } from "@/lib/payments/gateway-queries";
@@ -353,9 +354,9 @@ export default async function ProductDetailPage({
                       <input type="hidden" name="productId" value={product.id} />
                       {product.course ? <input type="hidden" name="courseId" value={sourceOwnerId} /> : null}
                       {product.bundle ? <input type="hidden" name="bundleId" value={sourceOwnerId} /> : null}
-                      <button className="text-sm font-medium text-rose-700 underline underline-offset-4" type="submit">
+                      <ConfirmSubmitButton confirmMessage="Delete this buying option?" className="text-sm font-medium text-rose-700 underline underline-offset-4">
                         Delete buying option
-                      </button>
+                      </ConfirmSubmitButton>
                     </form>
                   </div>
                 );

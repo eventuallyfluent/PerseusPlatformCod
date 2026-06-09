@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { MultiSelectPicker } from "@/components/admin/multi-select-picker";
 import { ImageField } from "@/components/admin/image-field";
+import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
 import { deleteCollectionAction, saveCollectionAction, saveCollectionCoursesAction } from "@/app/(admin)/admin/actions";
@@ -124,9 +125,9 @@ export default async function CollectionDetailPage({
               </HardLink>
               <form action={deleteCollectionAction}>
                 <input type="hidden" name="collectionId" value={collection.id} />
-                <button className="w-full rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" type="submit">
+                <ConfirmSubmitButton confirmMessage="Delete this collection?" className="w-full rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700">
                   Delete collection
-                </button>
+                </ConfirmSubmitButton>
               </form>
             </div>
           </Card>

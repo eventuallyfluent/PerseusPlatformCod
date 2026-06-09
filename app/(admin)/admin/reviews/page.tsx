@@ -1,4 +1,5 @@
 import { AdminShell } from "@/components/admin/admin-shell";
+import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
 import { deleteTestimonialAction, saveTestimonialAction } from "@/app/(admin)/admin/actions";
@@ -153,9 +154,9 @@ export default async function AdminReviewsPage({
                       <input type="hidden" name="reviewReturnPath" value="/admin/reviews" />
                       <input type="hidden" name="testimonialId" value={review.id} />
                       {productIdField}
-                      <button className="rounded-full border border-rose-200 bg-white px-5 py-3 text-sm font-medium text-rose-700 transition hover:bg-rose-50" type="submit">
+                      <ConfirmSubmitButton confirmMessage="Delete this review?" className="rounded-full border border-rose-200 bg-white px-5 py-3 text-sm font-medium text-rose-700 transition hover:bg-rose-50">
                         Delete review
-                      </button>
+                      </ConfirmSubmitButton>
                     </form>
                   </div>
                 </article>

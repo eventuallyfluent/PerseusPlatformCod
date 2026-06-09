@@ -7,6 +7,7 @@ import { GalleryImageField } from "@/components/admin/gallery-image-field";
 import { ProductFormSection } from "@/components/admin/product-form-shell";
 import { BundleCoursePicker } from "@/components/admin/bundle-course-picker";
 import { RelatedOfferPicker } from "@/components/admin/related-offer-picker";
+import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { HardLink } from "@/components/ui/hard-link";
 import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
@@ -298,7 +299,7 @@ export default async function BundleDetailPage({
               <HardLink href={publicPagePath} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">View sales page</HardLink>
               {previewOffer ? <HardLink href={`/checkout/${previewOffer.id}`} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">Preview checkout</HardLink> : null}
               <HardLink href={thankYouPagePath} className="rounded-full border border-stone-200 px-5 py-3 text-center text-sm font-medium text-stone-700">View thank-you page</HardLink>
-              <button className="rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteBundleAction} form="bundle-editor-actions" name="bundleId" value={bundle.id}>Delete bundle</button>
+              <ConfirmSubmitButton confirmMessage="Delete this bundle? This cannot be undone." className="rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" formAction={deleteBundleAction} form="bundle-editor-actions" name="bundleId" value={bundle.id}>Delete bundle</ConfirmSubmitButton>
             </div>
           </Card>
           </div>
@@ -352,7 +353,7 @@ export default async function BundleDetailPage({
                 <label>Position<input name="position" type="number" min="1" defaultValue={faq.position} /></label>
                 <div className="flex flex-wrap gap-3">
                   <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save FAQ</button>
-                  <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteFaqAction} name="faqId" value={faq.id}>Delete FAQ</button>
+                  <ConfirmSubmitButton confirmMessage="Delete this FAQ?" className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" formAction={deleteFaqAction} name="faqId" value={faq.id}>Delete FAQ</ConfirmSubmitButton>
                 </div>
               </form>
             ))}
@@ -385,7 +386,7 @@ export default async function BundleDetailPage({
                 <BooleanChoiceField label="Recommendation" name="recommendsProduct" defaultValue={testimonial.recommendsProduct} trueLabel="Recommends" falseLabel="Does not recommend" />
                 <div className="flex flex-wrap gap-3">
                   <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save testimonial</button>
-                  <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteTestimonialAction} name="testimonialId" value={testimonial.id}>Delete testimonial</button>
+                  <ConfirmSubmitButton confirmMessage="Delete this testimonial?" className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" formAction={deleteTestimonialAction} name="testimonialId" value={testimonial.id}>Delete testimonial</ConfirmSubmitButton>
                 </div>
               </form>
             ))}

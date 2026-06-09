@@ -7,6 +7,7 @@ import { ImageField } from "@/components/admin/image-field";
 import { GalleryImageField } from "@/components/admin/gallery-image-field";
 import { ProductFormSection } from "@/components/admin/product-form-shell";
 import { RelatedOfferPicker } from "@/components/admin/related-offer-picker";
+import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { HardLink } from "@/components/ui/hard-link";
 import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
@@ -382,7 +383,7 @@ export default async function CourseDetailPage({
                 ) : null}
                 <form action={setCourseStatusAction}><input type="hidden" name="courseId" value={course.id} /><input type="hidden" name="status" value="PUBLISHED" /><button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">Publish</button></form>
                 <form action={setCourseStatusAction}><input type="hidden" name="courseId" value={course.id} /><input type="hidden" name="status" value="DRAFT" /><button className="w-full rounded-full border border-stone-200 px-5 py-3 text-sm font-medium text-stone-700" type="submit">Unpublish</button></form>
-                <form action={deleteCourseAction}><input type="hidden" name="courseId" value={course.id} /><button className="w-full rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700" type="submit">Delete course</button></form>
+                <form action={deleteCourseAction}><input type="hidden" name="courseId" value={course.id} /><ConfirmSubmitButton confirmMessage="Delete this course? This cannot be undone." className="w-full rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700">Delete course</ConfirmSubmitButton></form>
               </div>
             </Card>
           </div>
@@ -436,7 +437,7 @@ export default async function CourseDetailPage({
                   <label>Position<input name="position" type="number" min="1" defaultValue={module.position} /></label>
                   <div className="flex flex-wrap items-end gap-3">
                     <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Save module</button>
-                    <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteModuleAction} name="moduleId" value={module.id}>Delete</button>
+                    <ConfirmSubmitButton confirmMessage="Delete this module and its lessons?" className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" formAction={deleteModuleAction} name="moduleId" value={module.id}>Delete</ConfirmSubmitButton>
                   </div>
                 </form>
                 <div className="space-y-3">
@@ -523,7 +524,7 @@ export default async function CourseDetailPage({
                           </details>
                           <div className="flex flex-wrap gap-3">
                             <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50" type="submit">Save lesson</button>
-                            <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteLessonAction} name="lessonId" value={lesson.id}>Delete</button>
+                            <ConfirmSubmitButton confirmMessage="Delete this lesson?" className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" formAction={deleteLessonAction} name="lessonId" value={lesson.id}>Delete</ConfirmSubmitButton>
                           </div>
                         </form>
                       </details>
@@ -604,7 +605,7 @@ export default async function CourseDetailPage({
                 <label>Position<input name="position" type="number" min="1" defaultValue={faq.position} /></label>
                 <div className="flex flex-wrap gap-3">
                   <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save FAQ</button>
-                  <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteFaqAction} name="faqId" value={faq.id}>Delete FAQ</button>
+                  <ConfirmSubmitButton confirmMessage="Delete this FAQ?" className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" formAction={deleteFaqAction} name="faqId" value={faq.id}>Delete FAQ</ConfirmSubmitButton>
                 </div>
               </form>
             ))}
@@ -637,7 +638,7 @@ export default async function CourseDetailPage({
                 <BooleanChoiceField label="Recommendation" name="recommendsProduct" defaultValue={testimonial.recommendsProduct} trueLabel="Recommends" falseLabel="Does not recommend" />
                 <div className="flex flex-wrap gap-3">
                   <button className="rounded-full bg-stone-950 px-4 py-3 text-sm font-medium text-stone-50">Save testimonial</button>
-                  <button className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" type="submit" formAction={deleteTestimonialAction} name="testimonialId" value={testimonial.id}>Delete testimonial</button>
+                  <ConfirmSubmitButton confirmMessage="Delete this testimonial?" className="rounded-full border border-rose-200 px-4 py-3 text-sm font-medium text-rose-700" formAction={deleteTestimonialAction} name="testimonialId" value={testimonial.id}>Delete testimonial</ConfirmSubmitButton>
                 </div>
               </form>
             ))}

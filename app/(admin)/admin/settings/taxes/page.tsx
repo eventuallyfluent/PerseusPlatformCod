@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminActionBar, AdminDataTable, AdminStatusBadge, adminButtonClass } from "@/components/admin/admin-ui";
+import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { Card } from "@/components/ui/card";
 import { deleteTaxRateAction, saveTaxRateAction, saveTaxSettingsAction } from "@/app/(admin)/admin/actions";
 import { getTaxSettings } from "@/lib/taxes/tax-calculation";
@@ -97,7 +98,7 @@ export default async function TaxSettingsPage() {
               <AdminActionBar key="actions">
                 <form action={deleteTaxRateAction}>
                   <input type="hidden" name="id" value={rate.id} />
-                  <button className="rounded-lg border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700" type="submit">Delete</button>
+                  <ConfirmSubmitButton confirmMessage="Delete this tax rate?" className="rounded-lg border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700">Delete</ConfirmSubmitButton>
                 </form>
               </AdminActionBar>,
             ],

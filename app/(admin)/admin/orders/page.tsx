@@ -1,5 +1,6 @@
 import { confirmManualPaymentAction, failManualPaymentAction } from "@/app/(admin)/admin/actions";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { AdminActionBar, AdminDataTable, AdminStatusBadge, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
 import { prisma } from "@/lib/db/prisma";
 
@@ -107,7 +108,7 @@ export default async function OrdersPage({
                   </form>
                   <form action={failManualPaymentAction}>
                     <input type="hidden" name="paymentId" value={latestPayment.id} />
-                    <button className={adminSecondaryButtonClass}>Fail</button>
+                    <ConfirmSubmitButton confirmMessage="Mark this payment as failed?" className={adminSecondaryButtonClass}>Fail</ConfirmSubmitButton>
                   </form>
                 </AdminActionBar>
               ) : (

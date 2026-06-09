@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { ImageField } from "@/components/admin/image-field";
+import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { Card } from "@/components/ui/card";
 import { deleteInstructorAction, saveInstructorAction } from "@/app/(admin)/admin/actions";
 
@@ -119,15 +120,15 @@ export default async function InstructorDetailPage({
           <div className="md:col-span-2">
             <div className="flex flex-wrap gap-3">
               <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">Save instructor</button>
-              <button
+              <ConfirmSubmitButton
+                confirmMessage="Delete this instructor?"
                 className="rounded-full border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700"
-                type="submit"
                 formAction={deleteInstructorAction}
                 name="instructorId"
                 value={instructor.id}
               >
                 Delete instructor
-              </button>
+              </ConfirmSubmitButton>
             </div>
           </div>
         </form>

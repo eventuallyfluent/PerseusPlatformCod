@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
+import { requireAdminRoute } from "@/lib/auth/admin-boundary";
 import { executeImport } from "@/lib/imports/execute-import";
 
 export async function POST(request: Request) {
+  const unauthorized = await requireAdminRoute();
+  if (unauthorized) return unauthorized;
+
   const formData = await request.formData();
   const file = formData.get("file");
   const mode = String(formData.get("mode") ?? "dry-run");

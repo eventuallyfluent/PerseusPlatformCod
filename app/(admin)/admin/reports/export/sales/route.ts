@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth/guards";
 import { getAdminReportData } from "@/lib/admin/reports";
 
 export const dynamic = "force-dynamic";
@@ -8,6 +9,8 @@ function csvEscape(value: unknown) {
 }
 
 export async function GET(request: Request) {
+  await requireAdmin();
+
   const url = new URL(request.url);
   const data = await getAdminReportData({
     preset: url.searchParams.get("preset") ?? undefined,

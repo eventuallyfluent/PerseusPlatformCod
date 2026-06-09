@@ -3,6 +3,7 @@
 import { ContactInquiryStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 
 function getReturnPath(formData: FormData) {
@@ -15,6 +16,7 @@ function withStatusParam(path: string, key: "saved" | "error") {
 }
 
 export async function updateInquiryStatusAction(formData: FormData) {
+  await requireAdmin();
   const inquiryId = String(formData.get("inquiryId") ?? "");
   const status = String(formData.get("status") ?? "");
   const returnPath = getReturnPath(formData);

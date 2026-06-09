@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
+import { requireAdminRoute } from "@/lib/auth/admin-boundary";
 import { markImportBatchFailed, processImportBatchChunk } from "@/lib/imports/execute-import";
 
 export const maxDuration = 60;
 
 export async function POST(_request: Request, { params }: { params: Promise<{ batchId: string }> }) {
+  const unauthorized = await requireAdminRoute();
+  if (unauthorized) return unauthorized;
+
   const { batchId } = await params;
 
   try {

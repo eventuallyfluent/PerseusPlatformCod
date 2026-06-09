@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdminRoute } from "@/lib/auth/admin-boundary";
 
 const templates: Record<string, string> = {
   instructors: "slug,name,image_url,short_bio,long_bio,website_url,youtube_url,instagram_url,x_url,facebook_url,discord_url,telegram_url\n",
@@ -13,6 +14,9 @@ const templates: Record<string, string> = {
 };
 
 export async function GET(_request: Request, { params }: { params: Promise<{ type: string }> }) {
+  const unauthorized = await requireAdminRoute();
+  if (unauthorized) return unauthorized;
+
   const { type } = await params;
   const template = templates[type];
 

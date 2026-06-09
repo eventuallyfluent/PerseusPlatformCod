@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 import { createCourse } from "@/lib/courses/create-course";
 import { updateCourse } from "@/lib/courses/update-course";
@@ -279,6 +280,7 @@ function getDefaultHomepagePayload(type: HomepageSectionType) {
 }
 
 export async function savePublicThemeFamilyAction(formData: FormData) {
+  await requireAdmin();
   const family = normalizePublicThemeFamily(String(formData.get("family") ?? "perseus"));
 
   try {
@@ -300,6 +302,7 @@ export async function savePublicThemeFamilyAction(formData: FormData) {
 }
 
 export async function saveHomepageSectionAction(formData: FormData) {
+  await requireAdmin();
   const type = String(formData.get("type") ?? "") as HomepageSectionType;
   const enabled = String(formData.get("enabled") ?? "") === "true";
   const position = Number(formData.get("position") ?? 1);
@@ -389,6 +392,7 @@ export async function saveHomepageSectionAction(formData: FormData) {
 }
 
 export async function saveCollectionAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const payload = {
     slug: String(formData.get("slug") ?? "").trim(),
@@ -429,6 +433,7 @@ export async function saveCollectionAction(formData: FormData) {
 }
 
 export async function saveCollectionCoursesAction(formData: FormData) {
+  await requireAdmin();
   const collectionId = String(formData.get("collectionId") ?? "");
   const courseIds = formData
     .getAll("courseIds")
@@ -471,6 +476,7 @@ export async function saveCollectionCoursesAction(formData: FormData) {
 }
 
 export async function deleteCollectionAction(formData: FormData) {
+  await requireAdmin();
   const collectionId = String(formData.get("collectionId") ?? "");
 
   try {
@@ -489,6 +495,7 @@ export async function deleteCollectionAction(formData: FormData) {
 }
 
 export async function saveCourseAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const upsell = parseUpsellSelection(formData.get("upsellTarget"));
   const payload = {
@@ -547,6 +554,7 @@ export async function saveCourseAction(formData: FormData) {
 }
 
 export async function saveBundleAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const courseIds = formData
     .getAll("courseIds")
@@ -607,6 +615,7 @@ export async function saveBundleAction(formData: FormData) {
 }
 
 export async function createBundleFormAction(_previousState: BundleFormState, formData: FormData): Promise<BundleFormState> {
+  await requireAdmin();
   const values = getBundleFormValues(formData);
   const parsed = parseBundleFormData(formData);
 
@@ -687,6 +696,7 @@ export async function createBundleFormAction(_previousState: BundleFormState, fo
 }
 
 export async function addModuleAction(formData: FormData) {
+  await requireAdmin();
   const courseId = String(formData.get("courseId"));
   const moduleId = String(formData.get("moduleId") ?? "");
   const parsed = moduleInputSchema.safeParse({
@@ -727,6 +737,7 @@ export async function addModuleAction(formData: FormData) {
 }
 
 export async function addLessonAction(formData: FormData) {
+  await requireAdmin();
   const courseId = String(formData.get("courseId"));
   const moduleId = String(formData.get("moduleId"));
   const lessonId = String(formData.get("lessonId") ?? "");
@@ -779,6 +790,7 @@ export async function addLessonAction(formData: FormData) {
 }
 
 export async function updateLessonDripAction(formData: FormData) {
+  await requireAdmin();
   const courseId = String(formData.get("courseId"));
   const lessonId = String(formData.get("lessonId") ?? "");
   const dripDays = Number(formData.get("dripDays") ?? 0);
@@ -801,6 +813,7 @@ export async function updateLessonDripAction(formData: FormData) {
 }
 
 export async function saveTaxSettingsAction(formData: FormData) {
+  await requireAdmin();
   await prisma.taxSetting.upsert({
     where: { id: "global" },
     create: {
@@ -825,6 +838,7 @@ export async function saveTaxSettingsAction(formData: FormData) {
 }
 
 export async function saveTaxRateAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const country = String(formData.get("country") ?? "").trim().toUpperCase();
   const label = String(formData.get("label") ?? "").trim() || "Tax";
@@ -859,6 +873,7 @@ export async function saveTaxRateAction(formData: FormData) {
 }
 
 export async function deleteTaxRateAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   if (id) {
     await prisma.taxRate.delete({ where: { id } });
@@ -869,6 +884,7 @@ export async function deleteTaxRateAction(formData: FormData) {
 }
 
 export async function saveInstructorAction(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   let instructor;
 
@@ -908,6 +924,7 @@ export async function saveInstructorAction(formData: FormData) {
 }
 
 export async function saveOfferAction(formData: FormData) {
+  await requireAdmin();
   const offerId = String(formData.get("id") ?? "");
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
@@ -959,6 +976,7 @@ export async function saveOfferAction(formData: FormData) {
 }
 
 export async function deleteOfferAction(formData: FormData) {
+  await requireAdmin();
   const offerId = String(formData.get("offerId") ?? "");
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
@@ -998,14 +1016,17 @@ export async function deleteOfferAction(formData: FormData) {
 }
 
 export async function saveCouponAction(formData: FormData) {
+  await requireAdmin();
   return saveCouponActionImpl(formData);
 }
 
 export async function deleteCouponAction(formData: FormData) {
+  await requireAdmin();
   return deleteCouponActionImpl(formData);
 }
 
 export async function saveFaqAction(formData: FormData) {
+  await requireAdmin();
   const faqId = String(formData.get("faqId") ?? "");
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
@@ -1048,6 +1069,7 @@ export async function saveFaqAction(formData: FormData) {
 }
 
 export async function deleteFaqAction(formData: FormData) {
+  await requireAdmin();
   const faqId = String(formData.get("faqId") ?? "");
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
@@ -1076,14 +1098,17 @@ export async function deleteFaqAction(formData: FormData) {
 }
 
 export async function saveTestimonialAction(formData: FormData) {
+  await requireAdmin();
   return saveTestimonialActionImpl(formData);
 }
 
 export async function deleteTestimonialAction(formData: FormData) {
+  await requireAdmin();
   return deleteTestimonialActionImpl(formData);
 }
 
 export async function regeneratePageAction(formData: FormData) {
+  await requireAdmin();
   const courseId = String(formData.get("courseId"));
   try {
     await regenerateCoursePage(courseId, true);
@@ -1095,6 +1120,7 @@ export async function regeneratePageAction(formData: FormData) {
 }
 
 export async function deleteCourseAction(formData: FormData) {
+  await requireAdmin();
   const courseId = String(formData.get("courseId"));
 
   try {
@@ -1110,6 +1136,7 @@ export async function deleteCourseAction(formData: FormData) {
 }
 
 export async function saveBundleCoursesAction(formData: FormData) {
+  await requireAdmin();
   const bundleId = String(formData.get("bundleId") ?? "");
   const courseIds = formData
     .getAll("courseIds")
@@ -1172,6 +1199,7 @@ export async function saveBundleCoursesAction(formData: FormData) {
 }
 
 export async function deleteBundleAction(formData: FormData) {
+  await requireAdmin();
   const bundleId = String(formData.get("bundleId") ?? "");
 
   try {
@@ -1187,6 +1215,7 @@ export async function deleteBundleAction(formData: FormData) {
 }
 
 export async function deleteInstructorAction(formData: FormData) {
+  await requireAdmin();
   const instructorId = String(formData.get("instructorId"));
   const courseCount = await prisma.course.count({
     where: { instructorId },
@@ -1209,6 +1238,7 @@ export async function deleteInstructorAction(formData: FormData) {
 }
 
 export async function deleteModuleAction(formData: FormData) {
+  await requireAdmin();
   const courseId = String(formData.get("courseId"));
   const moduleId = String(formData.get("moduleId"));
 
@@ -1225,6 +1255,7 @@ export async function deleteModuleAction(formData: FormData) {
 }
 
 export async function deleteLessonAction(formData: FormData) {
+  await requireAdmin();
   const courseId = String(formData.get("courseId"));
   const lessonId = String(formData.get("lessonId"));
 
@@ -1241,6 +1272,7 @@ export async function deleteLessonAction(formData: FormData) {
 }
 
 export async function createGatewayProfileAction(formData: FormData) {
+  await requireAdmin();
   const displayName = String(formData.get("displayName") ?? "").trim();
   const kind = (String(formData.get("kind") ?? "generic_api").trim() || "generic_api") as GatewayKind;
   const provider = slugifyProvider(String(formData.get("provider") ?? displayName));
@@ -1311,6 +1343,7 @@ export async function createGatewayProfileAction(formData: FormData) {
 }
 
 export async function saveGatewayConfigurationAction(formData: FormData) {
+  await requireAdmin();
   const gatewayId = String(formData.get("gatewayId") ?? "").trim();
 
   if (!gatewayId) {
@@ -1433,10 +1466,12 @@ export async function saveGatewayConfigurationAction(formData: FormData) {
 }
 
 export async function saveGatewayCredentialsAction(formData: FormData) {
+  await requireAdmin();
   return saveGatewayConfigurationAction(formData);
 }
 
 export async function testGatewayConnectionAction(formData: FormData) {
+  await requireAdmin();
   const gatewayId = String(formData.get("gatewayId") ?? "");
   const gateway = await prisma.gateway.findUnique({
     where: { id: gatewayId },
@@ -1479,6 +1514,7 @@ export async function testGatewayConnectionAction(formData: FormData) {
 }
 
 export async function confirmManualPaymentAction(formData: FormData) {
+  await requireAdmin();
   const paymentId = String(formData.get("paymentId") ?? "").trim();
 
   if (!paymentId) {
@@ -1496,6 +1532,7 @@ export async function confirmManualPaymentAction(formData: FormData) {
 }
 
 export async function failManualPaymentAction(formData: FormData) {
+  await requireAdmin();
   const paymentId = String(formData.get("paymentId") ?? "").trim();
 
   if (!paymentId) {
@@ -1513,6 +1550,7 @@ export async function failManualPaymentAction(formData: FormData) {
 }
 
 export async function setGatewayActiveStateAction(formData: FormData) {
+  await requireAdmin();
   const gatewayId = String(formData.get("gatewayId") ?? "").trim();
   const makeActive = String(formData.get("makeActive") ?? "false") === "true";
 
@@ -1577,6 +1615,7 @@ export async function setGatewayActiveStateAction(formData: FormData) {
 }
 
 export async function setCourseStatusAction(formData: FormData) {
+  await requireAdmin();
   const courseId = String(formData.get("courseId") ?? formData.get("id") ?? "");
   const status = String(formData.get("status") ?? CourseStatus.DRAFT) as CourseStatus;
   let publicPath = "";

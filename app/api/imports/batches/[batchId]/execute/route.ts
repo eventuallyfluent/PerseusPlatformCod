@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { ImportStatus } from "@prisma/client";
+import { requireAdminRoute } from "@/lib/auth/admin-boundary";
 import { prisma } from "@/lib/db/prisma";
 import { markImportBatchFailed, startImportBatch } from "@/lib/imports/execute-import";
 
 export const maxDuration = 60;
 
 export async function POST(request: Request, { params }: { params: Promise<{ batchId: string }> }) {
+  const unauthorized = await requireAdminRoute();
+  if (unauthorized) return unauthorized;
+
   const { batchId } = await params;
   let batch;
 

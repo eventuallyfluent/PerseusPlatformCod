@@ -1,7 +1,11 @@
 import { notFound } from "next/navigation";
+import { requireAdminRoute } from "@/lib/auth/admin-boundary";
 import { prisma } from "@/lib/db/prisma";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ batchId: string }> }) {
+  const unauthorized = await requireAdminRoute();
+  if (unauthorized) return unauthorized;
+
   const { batchId } = await params;
   const batch = await prisma.importBatch.findUnique({
     where: { id: batchId },

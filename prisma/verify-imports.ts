@@ -108,8 +108,12 @@ async function main() {
 
   try {
     const legacyMediaDryRun = await dryRunImport("COURSE_PACKAGE", legacyMediaCsv);
-    if (legacyMediaDryRun.invalidRows.length > 0 || !legacyMediaDryRun.summary.heroImageUrl?.includes("payhip.com/cdn-cgi/image/")) {
-      throw new Error("Course package dry run did not recover missing media from the legacy sales page.");
+    if (legacyMediaDryRun.invalidRows.length > 0) {
+      throw new Error("Course package dry run rejected a valid legacy media import.");
+    }
+
+    if (legacyMediaDryRun.summary.heroImageUrl?.includes("payhip.com/cdn-cgi/image/")) {
+      throw new Error("Course package dry run must not fetch missing media from the legacy sales page.");
     }
 
     const staleLegacyCourse = await prisma.course.findUnique({
@@ -165,7 +169,7 @@ async function main() {
     });
 
     if (!flakySummary?.heroImageUrl?.includes("o_fallback.jpg") || !flakyCourse?.heroImageUrl?.includes("o_fallback.jpg")) {
-      throw new Error("Course package execution did not preserve the dry-run recovered hero image when the legacy page changed.");
+      throw new Error("Course package execution did not persist the recovered legacy hero image.");
     }
   } finally {
     globalThis.fetch = originalFetch;

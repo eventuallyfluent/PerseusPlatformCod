@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { CouponScope } from "@prisma/client";
+import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 
 function parseBooleanField(formData: FormData, name: string, defaultValue = false) {
@@ -17,6 +18,7 @@ function parseBooleanField(formData: FormData, name: string, defaultValue = fals
 }
 
 export async function saveCouponAction(formData: FormData) {
+  await requireAdmin();
   const couponId = String(formData.get("couponId") ?? "");
   const code = String(formData.get("code") ?? "").trim().toUpperCase();
   const scope = String(formData.get("scope") ?? "TOTAL_ORDER").trim();
@@ -79,6 +81,7 @@ export async function saveCouponAction(formData: FormData) {
 }
 
 export async function deleteCouponAction(formData: FormData) {
+  await requireAdmin();
   const couponId = String(formData.get("couponId") ?? "");
 
   try {

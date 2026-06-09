@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
 
 function parseBooleanField(formData: FormData, name: string, defaultValue = false) {
@@ -30,6 +31,7 @@ function redirectReviewSuccess(courseId: string, bundleId: string, reviewReturnP
 }
 
 export async function saveTestimonialAction(formData: FormData) {
+  await requireAdmin();
   const testimonialId = String(formData.get("testimonialId") ?? "");
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");
@@ -65,6 +67,7 @@ export async function saveTestimonialAction(formData: FormData) {
 }
 
 export async function deleteTestimonialAction(formData: FormData) {
+  await requireAdmin();
   const testimonialId = String(formData.get("testimonialId") ?? "");
   const courseId = String(formData.get("courseId") ?? "");
   const bundleId = String(formData.get("bundleId") ?? "");

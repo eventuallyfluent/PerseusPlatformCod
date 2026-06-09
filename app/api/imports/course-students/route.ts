@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
+import { requireAdminRoute } from "@/lib/auth/admin-boundary";
 import { createFailedImportBatch, createImportBatch } from "@/lib/imports/execute-import";
 
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
+  const unauthorized = await requireAdminRoute();
+  if (unauthorized) return unauthorized;
+
   const formData = await request.formData();
   const file = formData.get("file");
   const courseId = String(formData.get("courseId") ?? "");

@@ -658,6 +658,7 @@ export function RenderProductSalesPage({
               </blockquote>
             ))}
           </div>
+          {reviewSlot ? <div>{reviewSlot}</div> : null}
         </section>
       );
     }
@@ -869,10 +870,15 @@ export function RenderProductSalesPage({
           {section === "pricing" && payload.productType === "course" ? bundleValueSlot : null}
           {renderSection(section)}
           {section === "pricing" && payload.productType === "course" ? questionSlot : null}
+          {section === "pricing" && reviewSlot && !orderedSections.includes("testimonials") ? (
+            <section className="mx-auto max-w-7xl px-6">{reviewSlot}</section>
+          ) : null}
         </Fragment>
       ))}
       {questionSlot && payload.productType === "course" && !orderedSections.includes("pricing") ? questionSlot : null}
-      {reviewSlot ? <section className="mx-auto max-w-7xl px-6">{reviewSlot}</section> : null}
+      {reviewSlot && !orderedSections.includes("testimonials") && !orderedSections.includes("pricing") ? (
+        <section className="mx-auto max-w-7xl px-6">{reviewSlot}</section>
+      ) : null}
     </div>
   );
 }

@@ -253,19 +253,19 @@ function HeroConstellation() {
 
 function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
   return (
-    <section className="perseus-home-hero relative -mt-px flex min-h-[90svh] flex-col items-center justify-center overflow-hidden border-b border-[var(--border)] px-6 py-20 text-center">
+    <section className="perseus-home-hero relative -mt-px flex min-h-[calc(100svh-128px)] flex-col items-center justify-center overflow-hidden border-b border-[var(--border)] px-8 pb-[60px] pt-20 text-center md:min-h-[calc(100svh-76px)]">
       <div className="absolute left-1/2 top-[-10%] h-[700px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(123,47,190,0.18)_0%,transparent_65%)]" />
       <HeroConstellation />
       <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center">
         <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--accent-lavender)]">
           Perseus Arcane Academy
         </p>
-        <h1 className="mt-6 text-balance bg-[linear-gradient(160deg,var(--foreground)_20%,var(--accent-lavender)_60%,var(--premium)_100%)] bg-clip-text font-serif text-[clamp(3rem,7.5vw,7.4rem)] uppercase leading-[0.96] text-transparent">
+        <h1 className="mt-6 text-balance bg-[linear-gradient(160deg,var(--foreground)_20%,var(--accent-lavender)_60%,var(--premium)_100%)] bg-clip-text font-serif text-[clamp(36px,6vw,76px)] uppercase leading-[1.05] text-transparent">
           Ancient Wisdom.
           <br />
           Rigorous Training.
         </h1>
-        <p className="mx-auto mt-8 max-w-[580px] text-base font-light leading-[1.75] text-[var(--foreground-soft)] sm:text-lg">
+        <p className="mx-auto mt-7 max-w-[580px] text-base font-light leading-[1.75] text-[var(--foreground-soft)] sm:text-lg">
           Real teachers. Structured training. Serious courses in Hermetics, internal power, Kabbalah, evocation, HGA work, Meta Magick, and foundational magical practice.
         </p>
         <div className="mt-11 flex flex-wrap justify-center gap-4">
@@ -276,17 +276,17 @@ function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
             Browse All Courses
           </ButtonLink>
         </div>
-        <div className="mt-16 flex flex-wrap justify-center gap-y-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+        <div className="mt-[52px] flex flex-wrap justify-center gap-y-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
           {["Free Entry Courses", "Structured Training Paths", "Teacher-Led Courses", "Lifetime Access"].map((item, index) => (
             <span key={item} className={`px-5 ${index < 3 ? "border-r border-[var(--border)]" : ""}`}>
               {item}
             </span>
           ))}
         </div>
-        <div className="absolute bottom-[-88px] left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--text-muted)] md:flex">
-          <div className="h-9 w-px bg-[linear-gradient(180deg,var(--accent-lavender),transparent)]" />
-          <span>Explore</span>
-        </div>
+      </div>
+      <div className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--text-muted)] md:flex">
+        <div className="h-9 w-px bg-[linear-gradient(180deg,var(--accent-lavender),transparent)]" />
+        <span>Explore</span>
       </div>
     </section>
   );

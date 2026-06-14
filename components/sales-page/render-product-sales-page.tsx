@@ -205,12 +205,17 @@ function getValueLabel(offer?: SalesPageOfferSummary | null) {
   return isFreeOffer(offer) ? `${offer.compareAtPrice} value` : offer.compareAtPrice;
 }
 
+function getVisibleTestimonials(payload: ProductPayload) {
+  return payload.testimonialsSection.items.filter((testimonial) => testimonial.quote.trim().length > 0);
+}
+
 function cleanModuleTitle(title: string, index: number) {
-  return title.replace(new RegExp(`^\\s*module\\s+${index + 1}\\s*[:\\-–—]?\\s*`, "i"), "").trim() || title;
+  return title.replace(new RegExp(`^\\s*module\\s+${index + 1}\\s*[:\\-\\u2013\\u2014]?\\s*`, "i"), "").trim() || title;
 }
 
 function buildFacts(payload: ProductPayload) {
   const facts: Array<{ label: string; value: string; icon: typeof BookOpen }> = [];
+  const visibleTestimonials = getVisibleTestimonials(payload);
 
   if (payload.productType === "course") {
     const moduleCount = payload.curriculumSection.modules.length;
@@ -227,8 +232,8 @@ function buildFacts(payload: ProductPayload) {
     if (payload.hero.metadataLine) facts.push({ label: "Bundle", value: payload.hero.metadataLine, icon: PackageCheck });
   }
 
-  if (payload.testimonialsSection.items.length > 0) {
-    facts.push({ label: "Student reviews", value: String(payload.testimonialsSection.items.length), icon: Star });
+  if (visibleTestimonials.length > 0) {
+    facts.push({ label: "Student reviews", value: String(visibleTestimonials.length), icon: Star });
   }
 
   if (payload.offers.length > 1) {
@@ -351,6 +356,76 @@ function SalesPageSubnav({ items }: { items: Array<{ href: string; label: string
   );
 }
 
+function FinalSalesCta({ payload, primaryLabel }: { payload: ProductPayload; primaryLabel: string }) {
+  if (!payload.hero.primaryOffer) {
+    return null;
+  }
+
+  return (
+    <section className="mx-auto max-w-7xl px-6">
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border-bright)] bg-[linear-gradient(135deg,var(--surface-panel-strong),var(--surface-panel))] shadow-[var(--shadow-panel)]">
+        <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.42fr)]">
+          <div className="px-6 py-7 sm:px-8 lg:px-9">
+            <Badge variant="premium">Student account required</Badge>
+            <h2 className="mt-4 max-w-2xl font-serif text-3xl leading-tight text-[var(--text-primary)] lg:text-[2.65rem]">
+              {payload.finalCta.label}
+            </h2>
+            <p className={`mt-3 max-w-3xl text-base leading-8 ${panelMutedTextClass}`}>
+              {payload.finalCta.body}
+            </p>
+          </div>
+          <div className="border-t border-[var(--border)] bg-[var(--surface-panel)] p-5 sm:p-6 lg:border-l lg:border-t-0 lg:p-7">
+            <div className="flex h-full flex-col justify-between gap-5">
+              <div>
+                <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.18em] ${panelSubtleTextClass}`}>
+                  {payload.hero.primaryOffer.name}
+                </p>
+                <p className="mt-3 font-serif text-4xl leading-none text-[var(--text-primary)]">
+                  {getPriceLabel(payload.hero.primaryOffer)}
+                </p>
+                <p className={`mt-3 text-sm leading-6 ${panelMutedTextClass}`}>
+                  Your account keeps checkout, previews, and course access tied to one library.
+                </p>
+              </div>
+              <ButtonLink
+                href={payload.hero.primaryOffer.checkoutUrl}
+                className="min-h-12 w-full justify-center whitespace-normal bg-[var(--sales-primary-cta-background)] px-6 text-center shadow-[var(--sales-primary-cta-shadow)]"
+              >
+                {primaryLabel}
+              </ButtonLink>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MobileSalesStickyCta({ offer, label }: { offer?: SalesPageOfferSummary | null; label: string }) {
+  if (!offer) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-bright)] bg-[var(--surface-canvas)]/95 px-4 py-3 shadow-[0_-18px_45px_rgba(8,5,18,0.28)] backdrop-blur-xl lg:hidden">
+      <div className="mx-auto flex max-w-lg items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{offer.name}</p>
+          <p className={`text-xs leading-5 ${panelMutedTextClass}`}>
+            {getPriceLabel(offer)} - account-bound access
+          </p>
+        </div>
+        <ButtonLink
+          href={offer.checkoutUrl}
+          className="min-h-11 shrink-0 justify-center whitespace-nowrap bg-[var(--sales-primary-cta-background)] px-4 text-sm shadow-[var(--sales-primary-cta-shadow)]"
+        >
+          {label}
+        </ButtonLink>
+      </div>
+    </div>
+  );
+}
+
 export function RenderProductSalesPage({
   payload,
   bundleValueSlot,
@@ -364,6 +439,7 @@ export function RenderProductSalesPage({
 }) {
   const hidden = new Set(payload.sections.hidden);
   const orderedSections = payload.sections.order.filter((section) => !hidden.has(section));
+  const visibleTestimonials = getVisibleTestimonials(payload);
   const facts = buildFacts(payload);
   const primaryCtaLabel = getPrimaryCtaLabel(payload);
   const priceLabel = getPriceLabel(payload.hero.primaryOffer);
@@ -632,11 +708,19 @@ export function RenderProductSalesPage({
     }
 
     if (section === "testimonials") {
+      if (visibleTestimonials.length === 0) {
+        return reviewSlot ? (
+          <section key={section} id="student-reviews" className="mx-auto max-w-7xl scroll-mt-28 px-6">
+            {reviewSlot}
+          </section>
+        ) : null;
+      }
+
       return (
         <section key={section} id="student-reviews" className="mx-auto max-w-7xl scroll-mt-28 space-y-8 px-6">
           <SectionIntro eyebrow={payload.testimonialsSection.eyebrow} title={payload.testimonialsSection.title} />
           <div className="grid gap-4">
-            {payload.testimonialsSection.items.map((testimonial, index) => (
+            {visibleTestimonials.map((testimonial, index) => (
               <blockquote
                 key={`${testimonial.quote}-${index}`}
                 className={`grid gap-6 p-6 lg:grid-cols-[220px_1fr] ${sectionPanelClass}`}
@@ -774,7 +858,7 @@ export function RenderProductSalesPage({
   };
 
   return (
-    <div className="perseus-sales-page space-y-14 overflow-x-hidden lg:space-y-16">
+    <div className="perseus-sales-page space-y-14 overflow-x-hidden pb-24 lg:space-y-16 lg:pb-0">
       <section className="space-y-3 px-4 sm:px-6">
         {payload.context?.collection ? (
           <div className="mx-auto max-w-7xl">
@@ -879,6 +963,8 @@ export function RenderProductSalesPage({
       {reviewSlot && !orderedSections.includes("testimonials") && !orderedSections.includes("pricing") ? (
         <section className="mx-auto max-w-7xl px-6">{reviewSlot}</section>
       ) : null}
+      <FinalSalesCta payload={payload} primaryLabel={primaryCtaLabel} />
+      <MobileSalesStickyCta offer={payload.hero.primaryOffer} label={primaryCtaLabel} />
     </div>
   );
 }

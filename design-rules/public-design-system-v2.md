@@ -10,8 +10,10 @@ Do not paste the HTML reference directly into the app. Treat it as a governance 
 
 - Structure before decoration: layout should route the student or buyer clearly before adding atmosphere.
 - Mystical, not theatrical: violet depth, gold restraint, and subtle texture; no exaggerated fantasy treatment.
+- Sharper Claude direction is the public visual target: stronger contrast, clearer editorial rhythm, flatter resting cards, denser proof rows, and more decisive CTAs.
 - Direction, not explanation: public pages should guide the next action instead of over-instructing the user.
 - No invented claims: never add curriculum, teacher, outcome, access, review, guarantee, or payment claims unless verified.
+- Account-required public model: previews, free courses, purchases, and the learner library use one student account. Never say "no account required."
 - Strict font roles: each font has a job and should not drift into unrelated surfaces.
 - Tokens only: components should use semantic theme variables instead of one-off colors.
 
@@ -58,8 +60,9 @@ Admin remains a separate clean operational theme and should not inherit public c
 Homepage:
 
 - Get the right person to the right door quickly.
-- Show paths, proof, teachers, free starting points, selected advanced paths, FAQ, and a final CTA.
+- Show the academy brand first, then paths, account-gated free entry, proof, teachers, selected advanced paths, FAQ, and a final CTA.
 - Do not carry detailed curriculum-stage explanations on the homepage.
+- Homepage copy may say students can start free, but must make clear that free access is tied to a student account.
 
 Collection and instructor pages:
 
@@ -78,6 +81,7 @@ Checkout:
 - Be a clean payment surface.
 - Use public theme tokens for the shell, but keep form internals practical and readable.
 - Do not introduce provider-specific assumptions into the UI copy.
+- Treat agnostic gateway support as the target: any safe provider API, signed webhook flow, trusted status API, or bank/manual confirmation path should fit behind the checkout boundary without changing buyer-facing fundamentals.
 
 Learner:
 

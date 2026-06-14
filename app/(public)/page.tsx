@@ -1,9 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { Fragment } from "react";
-import { BookOpen, Compass, KeyRound, ShieldCheck, Star } from "lucide-react";
-import { CourseStatus } from "@prisma/client";
+import { Star } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 import { getHomepageSections } from "@/lib/homepage/get-homepage-sections";
 import { resolveCoursePublicPath } from "@/lib/urls/resolve-course-path";
@@ -27,22 +25,6 @@ export const metadata: Metadata = buildMetadata({
   path: "/",
 });
 
-function PerseusHeroMark() {
-  return (
-    <div className="mx-auto flex w-fit flex-col items-center gap-4">
-      <svg viewBox="0 0 84 84" aria-hidden="true" className="h-12 w-12 sm:h-16 sm:w-16">
-        <path d="M42 4 L64 40 H20 Z" fill="var(--perseus-logo-primary)" />
-        <path d="M42 20 L74 78 H10 Z" fill="var(--perseus-logo-accent)" opacity="0.9" />
-        <path d="M42 10 L56 34 H28 Z" fill="var(--perseus-logo-gold)" opacity="0.85" />
-      </svg>
-    </div>
-  );
-}
-
-function normalizeHeroText(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-}
-
 type CollectionTone = "arcane" | "discipline" | "gateway";
 
 type CollectionCoursePreview = {
@@ -52,16 +34,6 @@ type CollectionCoursePreview = {
   instructorName?: string | null;
   imageUrl?: string | null;
   priceLabel?: string | null;
-};
-
-type AcademyStats = {
-  courseCount: number;
-  collectionCount: number;
-  instructorCount: number;
-};
-
-type FreeCoursePreview = CollectionCoursePreview & {
-  collectionTitle?: string | null;
 };
 
 function getToneVar(tone: CollectionTone) {
@@ -255,223 +227,65 @@ function CollectionRail({
   );
 }
 
-function HeroSection({ payload, stats }: { payload: HomepageHeroPayload; stats: AcademyStats }) {
-  const normalizedBrand = normalizeHeroText("Perseus Arcane Academy");
-  const showEyebrow = normalizeHeroText(payload.eyebrow) !== normalizedBrand && normalizeHeroText(payload.eyebrow) !== normalizeHeroText(payload.title);
-  const statItems = [
-    `${stats.courseCount} course${stats.courseCount === 1 ? "" : "s"}`,
-    `${stats.collectionCount} training path${stats.collectionCount === 1 ? "" : "s"}`,
-    `${stats.instructorCount} instructor${stats.instructorCount === 1 ? "" : "s"}`,
-    "Student account required",
-  ];
-
+function HeroConstellation() {
   return (
-    <section className="perseus-home-hero relative -mt-px min-h-[calc(100svh-132px)] overflow-hidden border-b border-[var(--border)] lg:min-h-[calc(100svh-160px)]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_18%,rgba(192,132,252,0.22),transparent_25%),radial-gradient(circle_at_82%_24%,rgba(212,168,85,0.14),transparent_24%),linear-gradient(180deg,rgba(13,13,26,0.98),rgba(26,26,46,0.82)_52%,rgba(13,13,26,0.98))]" />
-      <div className="absolute inset-0 opacity-[0.16] [background-image:linear-gradient(var(--body-grid-color)_1px,transparent_1px),linear-gradient(90deg,var(--body-grid-color)_1px,transparent_1px)] [background-size:72px_72px]" />
-      <div className="absolute left-[9%] top-[20%] hidden h-px w-[34vw] rotate-[-18deg] bg-[linear-gradient(90deg,transparent,var(--border-bright),transparent)] opacity-70 lg:block" />
-      <div className="absolute bottom-[24%] right-[7%] hidden h-px w-[28vw] rotate-[22deg] bg-[linear-gradient(90deg,transparent,var(--premium),transparent)] opacity-50 lg:block" />
-      <div className="perseus-home-hero-inner relative mx-auto flex min-h-[calc(100svh-132px)] max-w-7xl flex-col justify-center px-6 py-8 lg:min-h-[calc(100svh-160px)] lg:py-8 xl:py-12">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-end">
-          <div className="max-w-5xl">
-            <PerseusHeroMark />
-            {showEyebrow ? (
-              <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.42em] text-[var(--accent-lavender)]">{payload.eyebrow}</p>
-            ) : null}
-            <h1 className="mt-5 max-w-6xl text-balance font-serif text-[clamp(2.75rem,5vw,5.8rem)] leading-[0.88] text-[var(--portal-text)]">
-              Perseus Arcane Academy
-            </h1>
-            <p className="mt-5 max-w-3xl font-serif text-[clamp(1.55rem,2.5vw,3rem)] leading-[1.02] text-[var(--premium)] sm:mt-7">Ancient wisdom. Rigorous training.</p>
-            <p className="mt-5 line-clamp-4 max-w-3xl text-base leading-7 text-[var(--foreground-soft)] sm:mt-7 sm:text-xl sm:leading-9">{payload.description}</p>
-            <div className="perseus-home-hero-actions mt-7 flex flex-wrap gap-4 sm:mt-10">
-              <ButtonLink href={payload.primaryCtaHref} className="min-w-[220px]">
-                {payload.primaryCtaLabel}
-              </ButtonLink>
-              <ButtonLink href="/login" variant="secondary" className="min-w-[220px]">
-                Student login
-              </ButtonLink>
-            </div>
-            <p className="mt-4 max-w-2xl font-mono text-[10px] uppercase leading-5 tracking-[0.16em] text-[var(--text-muted)] sm:mt-5 sm:text-[11px] sm:tracking-[0.18em]">
-              One account for previews, free courses, purchases, and your course library.
-            </p>
-          </div>
-
-          <div className="hidden gap-0 overflow-hidden rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel)]/72 shadow-[var(--shadow-panel)] backdrop-blur-xl lg:grid">
-            {statItems.map((item) => (
-              <div key={item} className="border-b border-[var(--border)] px-5 py-4 last:border-b-0">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">{item}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
+    <svg className="absolute inset-0 h-full w-full opacity-[0.14]" viewBox="0 0 1200 700" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <circle cx="180" cy="140" r="2" fill="#C084FC" />
+      <circle cx="420" cy="75" r="1.5" fill="#D4A855" />
+      <circle cx="720" cy="190" r="2" fill="#C084FC" />
+      <circle cx="980" cy="110" r="1.5" fill="#D4A855" />
+      <circle cx="330" cy="270" r="1.5" fill="#C084FC" />
+      <circle cx="580" cy="170" r="2.5" fill="#D4A855" />
+      <circle cx="860" cy="300" r="1.5" fill="#C084FC" />
+      <circle cx="140" cy="360" r="1" fill="#D4A855" />
+      <circle cx="1040" cy="380" r="1.5" fill="#C084FC" />
+      <line x1="180" y1="140" x2="420" y2="75" stroke="#C084FC" strokeWidth="0.5" />
+      <line x1="420" y1="75" x2="580" y2="170" stroke="#D4A855" strokeWidth="0.5" />
+      <line x1="580" y1="170" x2="720" y2="190" stroke="#C084FC" strokeWidth="0.5" />
+      <line x1="720" y1="190" x2="980" y2="110" stroke="#D4A855" strokeWidth="0.5" />
+      <line x1="330" y1="270" x2="580" y2="170" stroke="#C084FC" strokeWidth="0.5" />
+      <line x1="580" y1="170" x2="860" y2="300" stroke="#D4A855" strokeWidth="0.5" />
+      <line x1="140" y1="360" x2="330" y2="270" stroke="#C084FC" strokeWidth="0.5" />
+      <line x1="860" y1="300" x2="1040" y2="380" stroke="#D4A855" strokeWidth="0.5" />
+    </svg>
   );
 }
 
-function PathwayOverview({
-  collections,
-}: {
-  collections: Array<{
-    id: string;
-    slug: string;
-    eyebrow: string | null;
-    title: string;
-    description: string;
-    tone: string;
-    courseCount: number;
-  }>;
-}) {
-  if (collections.length === 0) return null;
-
+function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-18">
-      <div className="grid gap-10 lg:grid-cols-[0.82fr_minmax(0,1fr)] lg:items-start">
-        <EditorialSectionHeader
-          eyebrow="Training paths"
-          title={`${Math.min(collections.length, 6)} doors. One academy.`}
-          description="Choose the line of study closest to your current practice, then enter through the course library with a student account."
-          align="left"
-          emphasis="One academy."
-        />
-        <div className="grid gap-4 sm:grid-cols-2">
-          {collections.slice(0, 6).map((collection) => (
-            <Link
-              key={collection.id}
-              href={resolveCollectionPublicPath(collection)}
-              className="group/path relative min-h-[220px] overflow-hidden rounded-[18px] border border-[var(--border)] bg-[var(--surface-panel)] p-5 transition duration-200 hover:-translate-y-1 hover:border-[var(--border-bright)] hover:bg-[var(--surface-panel-strong)]"
-            >
-              <div className="absolute inset-x-0 top-0 h-1" style={{ backgroundImage: getToneVar((collection.tone as CollectionTone) ?? "arcane") }} />
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--accent-lavender)]">
-                {collection.eyebrow ?? "Path"} / {collection.courseCount} course{collection.courseCount === 1 ? "" : "s"}
-              </p>
-              <h3 className="mt-5 font-serif text-2xl leading-tight text-[var(--portal-text)]">{collection.title}</h3>
-              <p className="mt-4 line-clamp-3 text-sm leading-7 text-[var(--foreground-soft)]">{getCollectionDescription(collection.title, collection.description)}</p>
-              <span className="mt-6 inline-flex font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--premium)] transition group-hover/path:translate-x-1">
-                Enter path -&gt;
-              </span>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function AccountEntryStrip({ courses }: { courses: FreeCoursePreview[] }) {
-  return (
-    <section className="mx-auto max-w-7xl px-6 py-10">
-      <div className="grid gap-8 overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-panel)] lg:grid-cols-[0.72fr_minmax(0,1fr)] lg:p-8">
-        <div className="space-y-5">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--premium)]">Student account entry</p>
-          <h2 className="font-serif text-[clamp(2rem,4vw,3.25rem)] leading-[1.04] text-[var(--portal-text)]">Start free. Keep everything in one library.</h2>
-          <p className="text-base leading-8 text-[var(--foreground-soft)]">
-            Free previews and free courses use the same account as paid purchases, so progress, access, and future course updates stay tied to one student library.
-          </p>
-          <ButtonLink href="/login" className="w-fit">
-            Create student account
+    <section className="perseus-home-hero relative -mt-px flex min-h-[90svh] flex-col items-center justify-center overflow-hidden border-b border-[var(--border)] px-6 py-20 text-center">
+      <div className="absolute left-1/2 top-[-10%] h-[700px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(123,47,190,0.18)_0%,transparent_65%)]" />
+      <HeroConstellation />
+      <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--accent-lavender)]">
+          Perseus Arcane Academy
+        </p>
+        <h1 className="mt-6 text-balance bg-[linear-gradient(160deg,var(--foreground)_20%,var(--accent-lavender)_60%,var(--premium)_100%)] bg-clip-text font-serif text-[clamp(3rem,7.5vw,7.4rem)] uppercase leading-[0.96] text-transparent">
+          Ancient Wisdom.
+          <br />
+          Rigorous Training.
+        </h1>
+        <p className="mx-auto mt-8 max-w-[580px] text-base font-light leading-[1.75] text-[var(--foreground-soft)] sm:text-lg">
+          Real teachers. Structured training. Serious courses in Hermetics, internal power, Kabbalah, evocation, HGA work, Meta Magick, and foundational magical practice.
+        </p>
+        <div className="mt-11 flex flex-wrap justify-center gap-4">
+          <ButtonLink href="/courses?collection=Free" className="min-h-14 min-w-[172px] justify-center rounded-[14px] px-8 text-base">
+            Start Free
+          </ButtonLink>
+          <ButtonLink href={payload.secondaryCtaHref || "/courses"} variant="secondary" className="min-h-14 min-w-[258px] justify-center rounded-[14px] px-8 text-base">
+            Browse All Courses
           </ButtonLink>
         </div>
-        <div className="grid gap-3">
-          {courses.length > 0 ? (
-            courses.map((course) => (
-              <Link
-                key={course.id}
-                href={course.href}
-                className="grid gap-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface-panel-strong)] px-4 py-4 transition hover:border-[var(--border-bright)] sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
-              >
-                <div>
-                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--accent-lavender)]">{course.collectionTitle ?? course.instructorName ?? "Free entry"}</p>
-                  <h3 className="mt-1 text-base font-semibold leading-6 text-[var(--portal-text)]">{course.title}</h3>
-                </div>
-                <span className="w-fit rounded-full border border-[var(--success)] bg-[var(--success-soft)] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--success)]">
-                  Free
-                </span>
-              </Link>
-            ))
-          ) : (
-            <div className="rounded-[14px] border border-dashed border-[var(--border)] px-5 py-8 text-sm leading-7 text-[var(--foreground-soft)]">
-              Free entry courses will appear here once they are published.
-            </div>
-          )}
+        <div className="mt-16 flex flex-wrap justify-center gap-y-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+          {["Free Entry Courses", "Structured Training Paths", "Teacher-Led Courses", "Lifetime Access"].map((item, index) => (
+            <span key={item} className={`px-5 ${index < 3 ? "border-r border-[var(--border)]" : ""}`}>
+              {item}
+            </span>
+          ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-function AcademyDifferenceSection() {
-  const rows = [
-    {
-      icon: Compass,
-      title: "Direction before detail",
-      body: "The homepage routes students into the right path. Collection and sales pages carry the deeper curriculum explanation.",
-    },
-    {
-      icon: ShieldCheck,
-      title: "Verified proof only",
-      body: "Course counts, reviews, instructors, prices, and access claims come from platform data or approved source material.",
-    },
-    {
-      icon: KeyRound,
-      title: "One student account",
-      body: "Preview access, free courses, purchases, and the learner library share the same account-bound access model.",
-    },
-    {
-      icon: BookOpen,
-      title: "Checkout stays agnostic",
-      body: "The buyer UI stays clear while the platform handles any safe provider API behind the gateway boundary.",
-    },
-  ];
-
-  return (
-    <section className="mx-auto max-w-7xl px-6 py-18">
-      <div className="mb-12">
-        <EditorialSectionHeader
-          eyebrow="Why Perseus"
-          title="Not a content pile. A training academy."
-          description="The public surface should feel sharp because the underlying system is disciplined: paths, accounts, payments, and access all have a job."
-          align="left"
-          emphasis="A training academy."
-        />
-      </div>
-      <div className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
-        {rows.map((row) => {
-          const Icon = row.icon;
-          return (
-            <div key={row.title} className="grid gap-5 py-7 md:grid-cols-[56px_minmax(0,0.55fr)_minmax(0,1fr)] md:items-start">
-              <div className="flex size-12 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--accent-lavender)]">
-                <Icon className="size-5" aria-hidden="true" />
-              </div>
-              <h3 className="font-serif text-2xl leading-tight text-[var(--portal-text)]">{row.title}</h3>
-              <p className="text-base leading-8 text-[var(--foreground-soft)]">{row.body}</p>
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-function FinalCtaSection() {
-  return (
-    <section className="mx-auto max-w-7xl px-6 py-18">
-      <div className="relative overflow-hidden rounded-[20px] border border-[var(--border-bright)] bg-[linear-gradient(135deg,rgba(123,47,190,0.28),rgba(212,168,85,0.12))] px-6 py-14 text-center shadow-[var(--shadow-brand)]">
-        <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(circle_at_50%_20%,rgba(240,234,248,0.18),transparent_32%)]" />
-        <div className="relative mx-auto max-w-3xl">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.32em] text-[var(--premium)]">Enter the academy</p>
-          <h2 className="mt-5 font-serif text-[clamp(2.4rem,5vw,4.4rem)] leading-[0.98] text-[var(--portal-text)]">Create the account. Choose the path. Begin the work.</h2>
-          <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-[var(--foreground-soft)]">
-            Your library is account-bound from the first preview through every course purchase.
-          </p>
-          <div className="mt-9 flex flex-wrap justify-center gap-4">
-            <ButtonLink href="/login" className="min-w-[220px]">
-              Create student account
-            </ButtonLink>
-            <ButtonLink href="/courses" variant="secondary" className="min-w-[220px]">
-              Browse courses
-            </ButtonLink>
-          </div>
+        <div className="absolute bottom-[-88px] left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--text-muted)] md:flex">
+          <div className="h-9 w-px bg-[linear-gradient(180deg,var(--accent-lavender),transparent)]" />
+          <span>Explore</span>
         </div>
       </div>
     </section>
@@ -618,54 +432,52 @@ export default async function HomePage() {
     testimoniesSection?.type === "TESTIMONIES" ? (testimoniesSection.payload as HomepageTestimoniesPayload) : null;
 
   const featuredCollectionIds = collectionsPayload?.featuredCollectionIds ?? [];
-  const [collectionRecords, stats, freeCourseRecords] = await Promise.all([
-    collectionsPayload
-      ? prisma.collection.findMany({
-        where: featuredCollectionIds.length > 0 ? { id: { in: featuredCollectionIds } } : undefined,
-        select: {
-          id: true,
-          slug: true,
-          eyebrow: true,
-          title: true,
-          description: true,
-          tone: true,
-          _count: {
-            select: {
-              courses: true,
-            },
+  const collectionRecords = await (collectionsPayload
+    ? prisma.collection.findMany({
+      where: featuredCollectionIds.length > 0 ? { id: { in: featuredCollectionIds } } : undefined,
+      select: {
+        id: true,
+        slug: true,
+        eyebrow: true,
+        title: true,
+        description: true,
+        tone: true,
+        _count: {
+          select: {
+            courses: true,
           },
-          courses: {
-            orderBy: { position: "asc" },
-            select: {
-              course: {
-                select: {
-                  id: true,
-                  slug: true,
-                  title: true,
-                  heroImageUrl: true,
-                  publicPath: true,
-                  legacyUrl: true,
-                  price: true,
-                  currency: true,
-                  instructor: {
-                    select: {
-                      name: true,
-                    },
+        },
+        courses: {
+          orderBy: { position: "asc" },
+          select: {
+            course: {
+              select: {
+                id: true,
+                slug: true,
+                title: true,
+                heroImageUrl: true,
+                publicPath: true,
+                legacyUrl: true,
+                price: true,
+                currency: true,
+                instructor: {
+                  select: {
+                    name: true,
                   },
-                  offers: {
-                    where: { isPublished: true },
-                    orderBy: [{ isDefault: "desc" }, { name: "asc" }],
-                    take: 1,
-                    select: {
-                      price: true,
-                      currency: true,
-                      prices: {
-                        orderBy: [{ isDefault: "desc" }],
-                        take: 1,
-                        select: {
-                          amount: true,
-                          currency: true,
-                        },
+                },
+                offers: {
+                  where: { isPublished: true },
+                  orderBy: [{ isDefault: "desc" }, { name: "asc" }],
+                  take: 1,
+                  select: {
+                    price: true,
+                    currency: true,
+                    prices: {
+                      orderBy: [{ isDefault: "desc" }],
+                      take: 1,
+                      select: {
+                        amount: true,
+                        currency: true,
                       },
                     },
                   },
@@ -674,69 +486,11 @@ export default async function HomePage() {
             },
           },
         },
-        orderBy: [{ position: "asc" }, { title: "asc" }],
-        take: featuredCollectionIds.length > 0 ? undefined : 3,
-      })
-      : Promise.resolve([]),
-    Promise.all([
-      prisma.course.count({ where: { status: CourseStatus.PUBLISHED } }),
-      prisma.collection.count(),
-      prisma.instructor.count(),
-    ]).then(([courseCount, collectionCount, instructorCount]) => ({
-      courseCount,
-      collectionCount,
-      instructorCount,
-    })),
-    prisma.course.findMany({
-      where: {
-        status: CourseStatus.PUBLISHED,
-        OR: [
-          { price: { lte: 0 } },
-          { offers: { some: { isPublished: true, price: { lte: 0 } } } },
-          { offers: { some: { isPublished: true, prices: { some: { amount: { lte: 0 } } } } } },
-        ],
       },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        heroImageUrl: true,
-        publicPath: true,
-        legacyUrl: true,
-        price: true,
-        currency: true,
-        instructor: { select: { name: true } },
-        collectionCourses: {
-          orderBy: { position: "asc" },
-          take: 1,
-          select: {
-            collection: {
-              select: { title: true },
-            },
-          },
-        },
-        offers: {
-          where: { isPublished: true },
-          orderBy: [{ isDefault: "desc" }, { name: "asc" }],
-          take: 1,
-          select: {
-            price: true,
-            currency: true,
-            prices: {
-              orderBy: [{ isDefault: "desc" }],
-              take: 1,
-              select: {
-                amount: true,
-                currency: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: [{ title: "asc" }],
-      take: 4,
-    }),
-  ]);
+      orderBy: [{ position: "asc" }, { title: "asc" }],
+      take: featuredCollectionIds.length > 0 ? undefined : 3,
+    })
+    : Promise.resolve([]));
 
   const useSelectedTestimonials = testimoniesPayload?.sourceMode === "selected";
   const selectedTestimonialIds = useSelectedTestimonials ? (testimoniesPayload?.selectedTestimonialIds ?? []) : [];
@@ -811,33 +565,9 @@ export default async function HomePage() {
     }),
   }));
 
-  const freeCourses = freeCourseRecords.map((course) => {
-    const primaryOffer = course.offers[0] ?? null;
-    const offerPrice = primaryOffer?.prices[0] ?? null;
-    const priceAmount = offerPrice?.amount ?? primaryOffer?.price ?? course.price;
-    const priceCurrency = offerPrice?.currency ?? primaryOffer?.currency ?? course.currency;
-
-    return {
-      id: course.id,
-      title: course.title,
-      href: resolveCoursePublicPath(course),
-      instructorName: course.instructor?.name,
-      imageUrl: course.heroImageUrl,
-      priceLabel: formatPriceLabel(priceAmount, priceCurrency),
-      collectionTitle: course.collectionCourses[0]?.collection.title,
-    };
-  });
-
   const sectionRenderers = sections.map((section) => {
     if (section.type === "HERO") {
-      return (
-        <Fragment key={section.type}>
-          <HeroSection payload={section.payload as HomepageHeroPayload} stats={stats} />
-          <PathwayOverview collections={homepageCollections} />
-          <AccountEntryStrip courses={freeCourses} />
-          <AcademyDifferenceSection />
-        </Fragment>
-      );
+      return <HeroSection key={section.type} payload={section.payload as HomepageHeroPayload} />;
     }
 
     if (section.type === "COLLECTIONS") {
@@ -873,7 +603,6 @@ export default async function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       {sectionRenderers}
-      <FinalCtaSection />
     </div>
   );
 }

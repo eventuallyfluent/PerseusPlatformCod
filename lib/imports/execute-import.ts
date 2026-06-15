@@ -21,6 +21,7 @@ import { courseInclude } from "@/lib/courses/course-query";
 import { persistGeneratedPage } from "@/lib/sales-pages/persist-generated-page";
 import { parseImportedCourseOfferOptions, type ImportedCourseOfferOption } from "@/lib/imports/course-offer-options";
 import { fetchLegacySalesPageMedia, isPlaceholderSalesVideoUrl, type LegacySalesPageMedia } from "@/lib/imports/legacy-sales-page-media";
+import { pickCourseHeroImageUrl } from "@/lib/imports/import-image-url";
 import { normalizeImportedImageUrl } from "@/lib/image-assets/url";
 import { ownImageUrl, summarizeOwnedImageResults, type OwnedImageContext, type OwnedImageResult } from "@/lib/image-assets/ownership";
 
@@ -627,7 +628,7 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
 
   const firstRow = rows[0];
   const instructor = await ensureInstructorForImport(firstRow.instructor_slug, firstRow.instructor_name);
-  const importedHeroImageUrl = pickFirstNonEmptyPackageValue(rows, (row) => row.hero_image_url) ?? firstRow.hero_image_url;
+  const importedHeroImageUrl = pickCourseHeroImageUrl(rows.map((row) => row.hero_image_url));
   const importedSalesVideoUrl = pickFirstNonEmptyPackageValue(rows, (row) => row.sales_video_url) ?? firstRow.sales_video_url;
   const importedGalleryImageUrls = splitUrlList(pickFirstNonEmptyPackageValue(rows, (row) => row.sales_image_urls) ?? firstRow.sales_image_urls);
   const needsLegacyMedia = Boolean(firstRow.legacy_url) && (!importedHeroImageUrl || isPlaceholderSalesVideoUrl(importedSalesVideoUrl));
@@ -636,7 +637,7 @@ async function ensureCoursePackageTarget(rows: CoursePackageCsvRow[], summary: I
     : { heroImageUrl: undefined, salesVideoUrl: undefined };
   const recoveredHeroImageUrl = summary.heroImageUrl;
   const recoveredSalesVideoUrl = summary.salesVideoUrl;
-  const resolvedHeroImageUrl = importedHeroImageUrl || legacyMedia.heroImageUrl || recoveredHeroImageUrl;
+  const resolvedHeroImageUrl = pickCourseHeroImageUrl([importedHeroImageUrl, legacyMedia.heroImageUrl, recoveredHeroImageUrl]);
   const resolvedSalesVideoUrl = isPlaceholderSalesVideoUrl(importedSalesVideoUrl)
     ? legacyMedia.salesVideoUrl || recoveredSalesVideoUrl
     : importedSalesVideoUrl;

@@ -66,6 +66,33 @@ async function main() {
     throw new Error("Direct course package execute did not complete server-side.");
   }
 
+  const originalHeroImageUrl = "https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=1200&q=80";
+  const youtubeThumbnailUrl = "https://i.ytimg.com/vi/C8IkPvk7sg4/maxresdefault.jpg";
+  const thumbnailHeroCsv = packageCsv
+    .replaceAll("ritual-foundations-001", "thumbnail-hero-001")
+    .replaceAll("ritual-discipline-foundations", "thumbnail-hero-import-check")
+    .replace("hero_image_url,sales_video_url", "hero_image_url,product_image_url,sales_video_url")
+    .replaceAll(`${originalHeroImageUrl},https://www.youtube.com/watch?v=dQw4w9WgXcQ`, `${youtubeThumbnailUrl},${originalHeroImageUrl},https://www.youtube.com/watch?v=dQw4w9WgXcQ`);
+  const thumbnailHeroDryRun = await dryRunImport("COURSE_PACKAGE", thumbnailHeroCsv);
+
+  if (
+    thumbnailHeroDryRun.invalidRows.length > 0 ||
+    thumbnailHeroDryRun.summary.heroImageUrl?.includes("ytimg.com") ||
+    !thumbnailHeroDryRun.summary.heroImageUrl?.includes("images.unsplash.com")
+  ) {
+    throw new Error("Course package dry run must prefer the real course image over a YouTube thumbnail.");
+  }
+
+  await executeImport("COURSE_PACKAGE", "thumbnail-hero-import-check.csv", thumbnailHeroCsv, false);
+  const thumbnailHeroCourse = await prisma.course.findUnique({
+    where: { slug: "thumbnail-hero-import-check" },
+    select: { heroImageUrl: true },
+  });
+
+  if (thumbnailHeroCourse?.heroImageUrl?.includes("ytimg.com") || !thumbnailHeroCourse?.heroImageUrl?.includes("images.unsplash.com")) {
+    throw new Error("Course package execution must not persist a YouTube thumbnail as the course hero image.");
+  }
+
   const blankStatusCsv = packageCsv
     .replaceAll("ritual-foundations-001", "blank-status-001")
     .replaceAll("ritual-discipline-foundations", "blank-status-import-check")

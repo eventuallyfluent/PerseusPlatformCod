@@ -13,6 +13,7 @@ import { coursePackageCsvRowSchema, courseStudentCsvRowSchema } from "@/lib/zod/
 import { validateRows } from "@/lib/imports/shared";
 import { parseImportedCourseOfferOptions } from "@/lib/imports/course-offer-options";
 import { isPlaceholderSalesVideoUrl } from "@/lib/imports/legacy-sales-page-media";
+import { pickCourseHeroImageUrl } from "@/lib/imports/import-image-url";
 
 export type ImportContext = {
   targetCourseId?: string;
@@ -122,12 +123,8 @@ function normalizeCoursePackageRows(rows: Record<string, string>[]) {
 
 function normalizeCourseImageAliases(rows: Record<string, string>[]) {
   return rows.map((row) => {
-    if (String(row.hero_image_url ?? "").trim()) {
-      return row;
-    }
-
-    const aliasImageUrl = COURSE_IMAGE_ALIAS_FIELDS.map((field) => String(row[field] ?? "").trim()).find(Boolean);
-    return aliasImageUrl ? { ...row, hero_image_url: aliasImageUrl } : row;
+    const heroImageUrl = pickCourseHeroImageUrl(COURSE_IMAGE_ALIAS_FIELDS.map((field) => row[field]));
+    return heroImageUrl ? { ...row, hero_image_url: heroImageUrl } : row;
   });
 }
 

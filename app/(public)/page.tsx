@@ -14,7 +14,6 @@ import { ButtonLink } from "@/components/ui/button-link";
 import type {
   HomepageCollectionsPayload,
   HomepageEmailSignupPayload,
-  HomepageHeroPayload,
   HomepageTestimoniesPayload,
 } from "@/lib/homepage/sections";
 
@@ -251,7 +250,7 @@ function HeroConstellation() {
   );
 }
 
-function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
+function HeroSection() {
   return (
     <section className="perseus-home-hero relative -mt-px flex min-h-[calc(100svh-128px)] flex-col items-center justify-center overflow-hidden border-b border-[var(--border)] px-8 pb-[60px] pt-20 text-center md:min-h-[calc(100svh-76px)]">
       <div className="absolute left-1/2 top-[-10%] h-[700px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(123,47,190,0.18)_0%,transparent_65%)]" />
@@ -272,7 +271,7 @@ function HeroSection({ payload }: { payload: HomepageHeroPayload }) {
           <ButtonLink href="/courses?collection=Free" className="min-h-14 min-w-[172px] justify-center rounded-[14px] px-8 text-base">
             Start Free
           </ButtonLink>
-          <ButtonLink href={payload.secondaryCtaHref || "/courses"} variant="secondary" className="min-h-14 min-w-[258px] justify-center rounded-[14px] px-8 text-base">
+          <ButtonLink href="/courses" variant="secondary" className="min-h-14 min-w-[258px] justify-center rounded-[14px] px-8 text-base">
             Browse All Courses
           </ButtonLink>
         </div>
@@ -567,7 +566,7 @@ export default async function HomePage() {
 
   const sectionRenderers = sections.map((section) => {
     if (section.type === "HERO") {
-      return <HeroSection key={section.type} payload={section.payload as HomepageHeroPayload} />;
+      return <HeroSection key={section.type} />;
     }
 
     if (section.type === "COLLECTIONS") {

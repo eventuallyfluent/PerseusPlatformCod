@@ -29,8 +29,9 @@ export async function getHomepageSections(): Promise<HomepageSectionRecord[]> {
       const usesLegacyCurriculumCta =
         payload.secondaryCtaLabel === "View Curriculum" && payload.secondaryCtaHref === "/bundle/ritual-library-bundle";
       const usesSingleCoursePrimaryCta = payload.primaryCtaLabel === "Explore Courses" && payload.primaryCtaHref === "/course/meta-magick-tarot";
+      const usesInstructorSecondaryCta = payload.secondaryCtaHref === "/instructors";
 
-      if (usesLegacyCurriculumCta || usesSingleCoursePrimaryCta) {
+      if (usesLegacyCurriculumCta || usesSingleCoursePrimaryCta || usesInstructorSecondaryCta) {
         return {
           type,
           enabled: existing.enabled,
@@ -39,8 +40,8 @@ export async function getHomepageSections(): Promise<HomepageSectionRecord[]> {
             ...payload,
             primaryCtaLabel: "Explore Courses",
             primaryCtaHref: "/courses",
-            secondaryCtaLabel: "See Instructors",
-            secondaryCtaHref: "/instructors",
+            secondaryCtaLabel: "Browse All Courses",
+            secondaryCtaHref: "/courses",
           },
         };
       }

@@ -1,13 +1,20 @@
 export default function AdminLoading() {
   return (
-    <div className="admin-theme min-h-screen bg-stone-100 px-6 py-12">
-      <div className="mx-auto max-w-3xl rounded-[32px] border border-stone-200 bg-white p-8 shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-500">Loading admin</p>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-stone-950">Opening the operator workspace.</h1>
-        <div className="mt-6 h-2 overflow-hidden rounded-full bg-stone-200">
-          <div className="h-full w-1/2 animate-pulse rounded-full bg-stone-900" />
+    <div className="min-w-0 space-y-5" aria-busy="true" aria-label="Loading admin page">
+      <div className="flex min-h-20 items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
+        <div className="space-y-3">
+          <div className="h-7 w-48 animate-pulse rounded-md bg-[var(--surface-panel-strong)]" />
+          <div className="h-4 w-72 max-w-[70vw] animate-pulse rounded-md bg-[var(--surface-panel-strong)]" />
         </div>
+        <div className="hidden h-9 w-36 animate-pulse rounded-lg bg-[var(--surface-panel-strong)] sm:block" />
       </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div key={index} className="h-28 animate-pulse rounded-[10px] border border-[var(--border)] bg-[var(--surface-panel)]" />
+        ))}
+      </div>
+      <div className="h-72 animate-pulse rounded-[10px] border border-[var(--border)] bg-[var(--surface-panel)]" />
+      <p className="sr-only">Loading the requested admin page.</p>
     </div>
   );
 }

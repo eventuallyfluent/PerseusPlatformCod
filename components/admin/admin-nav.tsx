@@ -1,26 +1,71 @@
 "use client";
 
+import {
+  BarChart3,
+  Boxes,
+  FolderKanban,
+  GraduationCap,
+  LayoutDashboard,
+  MessageSquare,
+  Package,
+  Plug,
+  ReceiptText,
+  Settings,
+  ShoppingCart,
+  Star,
+  TicketPercent,
+  Upload,
+  UserRound,
+  Users,
+} from "lucide-react";
+import { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { HardLink } from "@/components/ui/hard-link";
 
-const links = [
-  { href: "/admin", label: "Overview" },
-  { href: "/admin/products", label: "Products" },
-  { href: "/admin/courses", label: "Courses" },
-  { href: "/admin/bundles", label: "Bundles" },
-  { href: "/admin/orders", label: "Orders" },
-  { href: "/admin/reports", label: "Reports" },
-  { href: "/admin/coupons", label: "Coupons" },
-  { href: "/admin/students", label: "Students" },
-  { href: "/admin/inquiries", label: "Inquiries" },
-  { href: "/admin/collections", label: "Collections" },
-  { href: "/admin/instructors", label: "Instructors" },
-  { href: "/admin/reviews", label: "Reviews" },
-  { href: "/admin/imports", label: "Imports" },
-  { href: "/admin/gateways", label: "Gateways" },
-  { href: "/admin/settings/taxes", label: "Taxes" },
-  { href: "/admin/settings", label: "Settings" },
+const navGroups = [
+  {
+    label: "Workspace",
+    links: [{ href: "/admin", label: "Overview", icon: LayoutDashboard }],
+  },
+  {
+    label: "Catalog",
+    links: [
+      { href: "/admin/products", label: "Products", icon: Package },
+      { href: "/admin/courses", label: "Courses", icon: GraduationCap },
+      { href: "/admin/bundles", label: "Bundles", icon: Boxes },
+      { href: "/admin/collections", label: "Collections", icon: FolderKanban },
+      { href: "/admin/instructors", label: "Instructors", icon: UserRound },
+    ],
+  },
+  {
+    label: "Commerce",
+    links: [
+      { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+      { href: "/admin/reports", label: "Reports", icon: BarChart3 },
+      { href: "/admin/coupons", label: "Coupons", icon: TicketPercent },
+    ],
+  },
+  {
+    label: "Customers",
+    links: [
+      { href: "/admin/students", label: "Students", icon: Users },
+      { href: "/admin/inquiries", label: "Inquiries", icon: MessageSquare },
+      { href: "/admin/reviews", label: "Reviews", icon: Star },
+    ],
+  },
+  {
+    label: "Operations",
+    links: [
+      { href: "/admin/imports", label: "Imports", icon: Upload },
+      { href: "/admin/gateways", label: "Gateways", icon: Plug },
+      { href: "/admin/settings/taxes", label: "Taxes", icon: ReceiptText },
+    ],
+  },
+  {
+    label: "System",
+    links: [{ href: "/admin/settings", label: "Settings", icon: Settings }],
+  },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -31,27 +76,54 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function PendingMark() {
+  const { pending } = useLinkStatus();
+
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "ml-auto size-1.5 shrink-0 rounded-full bg-current opacity-0 transition-opacity delay-100",
+        pending && "animate-pulse opacity-40",
+      )}
+    />
+  );
+}
+
 export function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="admin-scrollbar flex gap-2 overflow-x-auto pb-1 lg:grid lg:gap-1 lg:overflow-visible lg:pb-0">
-      {links.map((link) => {
-        const active = isActive(pathname, link.href);
+    <nav aria-label="Admin navigation" className="admin-scrollbar flex gap-2 overflow-x-auto pb-1 lg:block lg:space-y-4 lg:overflow-visible lg:pb-0">
+      {navGroups.map((group) => (
+        <div key={group.label} className="contents lg:block">
+          <p className="mb-1.5 hidden px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] lg:block">
+            {group.label}
+          </p>
+          <div className="contents lg:grid lg:gap-1">
+            {group.links.map((link) => {
+              const active = isActive(pathname, link.href);
+              const Icon = link.icon;
 
-        return (
-          <HardLink
-            key={link.href}
-            href={link.href}
-            className={cn(
-              "inline-flex min-h-10 shrink-0 items-center rounded-lg px-3.5 py-2 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-panel-strong)] hover:text-[var(--text-primary)]",
-              active && "bg-[var(--accent-soft)] text-[var(--text-primary)] shadow-sm ring-1 ring-[var(--accent)]/10",
-            )}
-          >
-            <span>{link.label}</span>
-          </HardLink>
-        );
-      })}
+              return (
+                <HardLink
+                  key={link.href}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "inline-flex min-h-10 shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-panel-strong)] hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30",
+                    active && "bg-[var(--accent-soft)] text-[var(--text-primary)] shadow-sm ring-1 ring-[var(--accent)]/10",
+                  )}
+                >
+                  <Icon aria-hidden="true" className="size-4 shrink-0" strokeWidth={1.8} />
+                  <span>{link.label}</span>
+                  <PendingMark />
+                </HardLink>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </nav>
   );
 }

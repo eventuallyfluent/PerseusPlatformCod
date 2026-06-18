@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type ImportBatchRunnerProps = {
   batchId: string;
@@ -10,6 +11,7 @@ type ImportBatchRunnerProps = {
 };
 
 export function ImportBatchRunner({ batchId, isProcessing, initialProcessedCount, initialTotalCount }: ImportBatchRunnerProps) {
+  const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [processedCount, setProcessedCount] = useState(initialProcessedCount);
   const [totalCount, setTotalCount] = useState(initialTotalCount);
@@ -35,8 +37,8 @@ export function ImportBatchRunner({ batchId, isProcessing, initialProcessedCount
           });
 
           if (!response.ok) {
-            setMessage("Import stopped. Reloading the batch report...");
-            window.location.reload();
+            setMessage("Import stopped. Refreshing the batch report...");
+            router.refresh();
             return;
           }
 
@@ -57,14 +59,14 @@ export function ImportBatchRunner({ batchId, isProcessing, initialProcessedCount
 
           if (!data.hasMore || data.status !== "PROCESSING") {
             setMessage(data.error ? `Import failed: ${data.error}` : null);
-            window.location.reload();
+            router.refresh();
             return;
           }
         }
       } catch {
         if (!cancelled) {
-          setMessage("Import stopped unexpectedly. Reloading the batch report...");
-          window.location.reload();
+          setMessage("Import stopped unexpectedly. Refreshing the batch report...");
+          router.refresh();
         }
       }
     }
@@ -74,7 +76,7 @@ export function ImportBatchRunner({ batchId, isProcessing, initialProcessedCount
     return () => {
       cancelled = true;
     };
-  }, [batchId, initialProcessedCount, initialTotalCount, isProcessing]);
+  }, [batchId, initialProcessedCount, initialTotalCount, isProcessing, router]);
 
   if (!isProcessing) {
     return null;

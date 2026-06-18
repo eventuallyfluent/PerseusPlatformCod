@@ -224,10 +224,17 @@ async function getRecentInquiries() {
 }
 
 export async function getAdminDashboardData() {
+  const [metrics, recentOrders, reviewsNeedingCheck, recentInquiries] = await Promise.all([
+    getDashboardMetrics(),
+    safeDashboardSection("recent orders", getRecentOrders),
+    safeDashboardSection("reviews needing check", getReviewsNeedingCheck),
+    safeDashboardSection("recent inquiries", getRecentInquiries),
+  ]);
+
   return {
-    metrics: await getDashboardMetrics(),
-    recentOrders: await safeDashboardSection("recent orders", getRecentOrders),
-    reviewsNeedingCheck: await safeDashboardSection("reviews needing check", getReviewsNeedingCheck),
-    recentInquiries: await safeDashboardSection("recent inquiries", getRecentInquiries),
+    metrics,
+    recentOrders,
+    reviewsNeedingCheck,
+    recentInquiries,
   } satisfies AdminDashboardData;
 }

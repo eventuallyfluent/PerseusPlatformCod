@@ -44,6 +44,17 @@ export default async function ImportsPage() {
         },
       },
       orderBy: { createdAt: "desc" },
+      take: 50,
+      select: {
+        id: true,
+        type: true,
+        status: true,
+        filename: true,
+        dryRunSummary: true,
+        executionSummary: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     }),
     prisma.course.findMany({
       orderBy: { title: "asc" },
@@ -55,7 +66,7 @@ export default async function ImportsPage() {
   ]);
 
   return (
-    <AdminShell title="Imports" description="Download the migration template, fill it with Payhip details, then upload it here.">
+    <AdminShell title="Imports" description="Download the migration template, fill it with Payhip details, then upload it here. The activity table shows the latest 50 batches.">
       <Card className="space-y-5 bg-white">
         <div className="space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-stone-700">Migration workflow</p>

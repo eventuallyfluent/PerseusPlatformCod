@@ -33,6 +33,17 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ ba
   const { batchId } = await params;
   const batch = await prisma.importBatch.findUnique({
     where: { id: batchId },
+    select: {
+      id: true,
+      type: true,
+      status: true,
+      filename: true,
+      context: true,
+      dryRunSummary: true,
+      executionSummary: true,
+      errorReport: true,
+      updatedAt: true,
+    },
   });
 
   if (!batch) {

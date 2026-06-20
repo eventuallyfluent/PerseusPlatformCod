@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from "react";
 import { HardLink } from "@/components/ui/hard-link";
+import { AdminCommandMenu } from "@/components/admin/admin-command-menu";
 import { AdminNav } from "@/components/admin/admin-nav";
 import { AdminPageHeader, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
 
@@ -10,6 +11,12 @@ export function AdminFrame({ children }: PropsWithChildren) {
         <div className="mb-4 hidden border-b border-[var(--border)] px-2 pb-4 lg:block">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">Perseus Platform</p>
           <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">Operator workspace</p>
+          <div className="mt-4">
+            <AdminCommandMenu />
+          </div>
+        </div>
+        <div className="mb-3 lg:hidden">
+          <AdminCommandMenu />
         </div>
         <AdminNav />
       </aside>

@@ -2,9 +2,7 @@
 
 import {
   BarChart3,
-  Boxes,
   FolderKanban,
-  GraduationCap,
   LayoutDashboard,
   MessageSquare,
   Package,
@@ -32,8 +30,6 @@ const navGroups = [
     label: "Catalog",
     links: [
       { href: "/admin/products", label: "Products", icon: Package },
-      { href: "/admin/courses", label: "Courses", icon: GraduationCap },
-      { href: "/admin/bundles", label: "Bundles", icon: Boxes },
       { href: "/admin/collections", label: "Collections", icon: FolderKanban },
       { href: "/admin/instructors", label: "Instructors", icon: UserRound },
     ],
@@ -71,6 +67,10 @@ const navGroups = [
 function isActive(pathname: string, href: string) {
   if (href === "/admin") {
     return pathname === href;
+  }
+
+  if (href === "/admin/products") {
+    return ["/admin/products", "/admin/courses", "/admin/bundles"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -116,7 +116,7 @@ export function AdminNav() {
                   )}
                 >
                   <Icon aria-hidden="true" className="size-4 shrink-0" strokeWidth={1.8} />
-                  <span>{link.label}</span>
+                  <span>{link.href === "/admin/products" ? "Catalog" : link.label}</span>
                   <PendingMark />
                 </HardLink>
               );

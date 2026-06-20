@@ -1,3 +1,4 @@
+import { CheckCircle2, CreditCard, MessageSquare, Star } from "lucide-react";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminActionBar, AdminDataTable, AdminStat, AdminStatusBadge, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
 import { HardLink } from "@/components/ui/hard-link";
@@ -13,9 +14,35 @@ export default async function AdminOverviewPage() {
   const reviewsNeedingCheck = data.reviewsNeedingCheck.status === "available" ? data.reviewsNeedingCheck.data : [];
   const recentInquiries = data.recentInquiries.status === "available" ? data.recentInquiries.data : [];
   const unreadInquiries = metrics?.unreadInquiries ?? null;
+  const attentionItems = metrics
+    ? [
+        {
+          href: "/admin/orders",
+          label: "Payments to review",
+          detail: "Manual, authorized, or bank-transfer payments awaiting an operator decision.",
+          count: metrics.manualPaymentOrders,
+          icon: CreditCard,
+        },
+        {
+          href: "/admin/inquiries",
+          label: "Unread inquiries",
+          detail: "Course questions from prospective students that still need a response.",
+          count: metrics.unreadInquiries ?? 0,
+          icon: MessageSquare,
+        },
+        {
+          href: "/admin/reviews",
+          label: "Reviews to check",
+          detail: "Student reviews waiting for approval before they can appear publicly.",
+          count: metrics.pendingReviews,
+          icon: Star,
+        },
+      ]
+    : [];
+  const attentionCount = attentionItems.reduce((total, item) => total + item.count, 0);
 
   return (
-    <AdminShell title="Admin overview" description="Month-to-date earnings, recent sales, inquiries, and reviews needing approval.">
+    <AdminShell title="Overview" description="Revenue, learner activity, and the operator work that needs attention now.">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <AdminStat
           label="Month-to-date earnings"
@@ -39,6 +66,52 @@ export default async function AdminOverviewPage() {
           tone={metrics && metrics.manualPaymentOrders + metrics.pendingReviews > 0 ? "warning" : metrics ? "success" : "warning"}
         />
       </div>
+
+      <section className="rounded-[10px] border border-[var(--border)] bg-[var(--surface-panel)] p-4 shadow-[0_1px_2px_rgba(17,24,39,0.04)]">
+        <div className="flex flex-col gap-2 border-b border-[var(--border)] pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-[var(--text-primary)]">Needs attention</h2>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">One queue for payments, customer questions, and public review approvals.</p>
+          </div>
+          <AdminStatusBadge tone={attentionCount > 0 ? "warning" : metrics ? "success" : "neutral"}>
+            {metrics ? `${attentionCount} open` : "Unavailable"}
+          </AdminStatusBadge>
+        </div>
+
+        {metrics ? (
+          attentionCount > 0 ? (
+            <div className="grid gap-3 pt-4 lg:grid-cols-3">
+              {attentionItems.filter((item) => item.count > 0).map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <HardLink key={item.href} href={item.href} className="group rounded-lg border border-[var(--border)] bg-[var(--surface-panel-strong)] p-4 transition hover:border-[var(--border-strong)] hover:bg-[var(--accent-soft)]">
+                    <div className="flex items-start gap-3">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] text-[var(--text-secondary)] group-hover:text-[var(--accent)]">
+                        <Icon aria-hidden="true" className="size-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-semibold text-[var(--text-primary)]">{item.label}</h3>
+                          <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">{item.count}</span>
+                        </div>
+                        <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">{item.detail}</p>
+                      </div>
+                    </div>
+                  </HardLink>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 pt-4 text-sm text-[var(--text-secondary)]">
+              <CheckCircle2 aria-hidden="true" className="size-5 text-emerald-600" />
+              No payments, inquiries, or reviews need operator attention.
+            </div>
+          )
+        ) : (
+          <p className="pt-4 text-sm text-amber-800">The action queue could not be loaded. The detailed order, inquiry, and review pages remain available.</p>
+        )}
+      </section>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.44fr)]">
         <section className="space-y-3 rounded-[10px] border border-[var(--border)] bg-[var(--surface-panel)] p-4 shadow-[0_1px_2px_rgba(17,24,39,0.04)]">

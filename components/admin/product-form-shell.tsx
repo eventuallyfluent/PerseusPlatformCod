@@ -1,6 +1,7 @@
 import type { PropsWithChildren, ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { adminButtonClass } from "@/components/admin/admin-ui";
+import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
 
 type ProductFormShellProps = PropsWithChildren<{
   eyebrow: string;
@@ -34,9 +35,9 @@ export function ProductFormShell({
         <form action={action} className="space-y-6">
           {children}
           <div className="sticky bottom-0 -mx-5 border-t border-[var(--border)] bg-[var(--surface-panel)] px-5 py-4 sm:-mx-6 sm:px-6">
-            <button className={adminButtonClass} type="submit">
+            <AdminSubmitButton className={adminButtonClass}>
               {submitLabel}
-            </button>
+            </AdminSubmitButton>
           </div>
         </form>
       </Card>

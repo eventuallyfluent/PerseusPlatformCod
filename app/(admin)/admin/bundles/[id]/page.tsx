@@ -8,6 +8,7 @@ import { ProductFormSection } from "@/components/admin/product-form-shell";
 import { BundleCoursePicker } from "@/components/admin/bundle-course-picker";
 import { RelatedOfferPicker } from "@/components/admin/related-offer-picker";
 import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
+import { AdminExternalSubmitButton, AdminSubmitButton } from "@/components/admin/admin-submit-button";
 import { HardLink } from "@/components/ui/hard-link";
 import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
 import { parseSalesPageConfig } from "@/lib/sales-pages/sales-page-config";
@@ -235,7 +236,11 @@ export default async function BundleDetailPage({
                 </>
               )}
             </ProductFormSection>
-            <div className="border-t border-[var(--border)] pt-6"><button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">Save bundle</button></div>
+            <div className="border-t border-[var(--border)] pt-6">
+              <AdminSubmitButton className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
+                Save bundle
+              </AdminSubmitButton>
+            </div>
           </form>
         </Card>
         <div className="space-y-4 xl:sticky xl:top-24 xl:self-start">
@@ -245,13 +250,12 @@ export default async function BundleDetailPage({
               <h3 className="text-lg font-semibold text-stone-950">Keep bundle editing here. Use the linked product for commerce.</h3>
             </div>
             <div className="grid gap-3 text-sm text-stone-700">
-              <button
+              <AdminExternalSubmitButton
                 className="w-full rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50"
-                type="submit"
-                form="bundle-details-form"
+                formId="bundle-details-form"
               >
                 Save bundle changes
-              </button>
+              </AdminExternalSubmitButton>
               {bundle.accessProduct ? (
                 <div className="rounded-[22px] border border-stone-200 bg-stone-50 px-4 py-4">
                   <span className="block text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-600">Linked product</span>

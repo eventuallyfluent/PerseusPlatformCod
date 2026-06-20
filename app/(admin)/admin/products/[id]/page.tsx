@@ -4,6 +4,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { HardLink } from "@/components/ui/hard-link";
 import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
+import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
 import { BooleanChoiceField } from "@/components/ui/boolean-choice-field";
 import { getPrimaryOffer } from "@/lib/offers/sync-product-offer";
 import { getActiveGatewayRecord } from "@/lib/payments/gateway-queries";
@@ -343,9 +344,9 @@ export default async function ProductDetailPage({
                           falseDescription="Keep below the main option."
                         />
                         <div className="flex flex-wrap items-end gap-3">
-                          <button className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50" type="submit">
+                          <AdminSubmitButton className="rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50">
                             Save option
-                          </button>
+                          </AdminSubmitButton>
                         </div>
                       </form>
                     </details>

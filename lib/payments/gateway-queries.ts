@@ -1,4 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
+import { UNSUPPORTED_PAYMENT_PROVIDERS } from "@/lib/payments/provider-policy";
+
+const supportedProviderWhere = { notIn: [...UNSUPPORTED_PAYMENT_PROVIDERS] };
 
 export type GatewayCompatRecord = {
   id: string;
@@ -87,6 +90,7 @@ function withGatewayDefaults<T extends { id: string; provider: string; displayNa
 export async function listGatewayRecords() {
   try {
     const gateways = await prisma.gateway.findMany({
+      where: { provider: supportedProviderWhere },
       include: { credentials: true, webhookEvents: true },
       orderBy: [{ isActive: "desc" }, { updatedAt: "desc" }],
     });
@@ -94,6 +98,7 @@ export async function listGatewayRecords() {
     return gateways.map((gateway) => withGatewayDefaults(gateway, "current"));
   } catch {
     const gateways = await prisma.gateway.findMany({
+      where: { provider: supportedProviderWhere },
       select: {
         id: true,
         provider: true,
@@ -113,15 +118,15 @@ export async function listGatewayRecords() {
 
 export async function getGatewayRecordById(id: string) {
   try {
-    const gateway = await prisma.gateway.findUnique({
-      where: { id },
+    const gateway = await prisma.gateway.findFirst({
+      where: { id, provider: supportedProviderWhere },
       include: { credentials: true, webhookEvents: true },
     });
 
     return gateway ? withGatewayDefaults(gateway, "current") : null;
   } catch {
-    const gateway = await prisma.gateway.findUnique({
-      where: { id },
+    const gateway = await prisma.gateway.findFirst({
+      where: { id, provider: supportedProviderWhere },
       select: {
         id: true,
         provider: true,
@@ -141,7 +146,7 @@ export async function getGatewayRecordById(id: string) {
 export async function getActiveGatewayRecord() {
   try {
     const gateway = await prisma.gateway.findFirst({
-      where: { isActive: true },
+      where: { isActive: true, provider: supportedProviderWhere },
       include: { credentials: true },
       orderBy: { updatedAt: "desc" },
     });
@@ -149,7 +154,7 @@ export async function getActiveGatewayRecord() {
     return gateway ? withGatewayDefaults({ ...gateway, webhookEvents: [] }, "current") : null;
   } catch {
     const gateway = await prisma.gateway.findFirst({
-      where: { isActive: true },
+      where: { isActive: true, provider: supportedProviderWhere },
       select: {
         id: true,
         provider: true,

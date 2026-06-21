@@ -1,4 +1,4 @@
-import { confirmManualPaymentAction, failManualPaymentAction } from "@/app/(admin)/admin/actions";
+import { completeManualContractWithdrawalAction, confirmManualPaymentAction, failManualPaymentAction } from "@/app/(admin)/admin/actions";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { AdminActionBar, AdminDataTable, AdminStatusBadge, adminButtonClass, adminSecondaryButtonClass } from "@/components/admin/admin-ui";
@@ -43,12 +43,39 @@ export default async function OrdersPage({
     },
     orderBy: { createdAt: "desc" },
   });
+  const openWithdrawals = await prisma.contractWithdrawal.findMany({
+    where: { status: { not: "REFUNDED" } },
+    include: {
+      order: {
+        select: {
+          id: true,
+          offer: {
+            select: {
+              name: true,
+              course: { select: { title: true } },
+              bundle: { select: { title: true } },
+            },
+          },
+          payments: {
+            select: { gateway: { select: { displayName: true } } },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+        },
+      },
+    },
+    orderBy: { refundDueAt: "asc" },
+  });
 
   const flash =
-    query.saved === "payment"
-      ? { tone: "emerald", text: "Payment state updated." }
-      : query.error === "payment"
-        ? { tone: "rose", text: "Payment update failed." }
+    query.saved === "withdrawal"
+      ? { tone: "emerald", text: "External refund reconciliation recorded." }
+      : query.saved === "payment"
+        ? { tone: "emerald", text: "Payment state updated." }
+        : query.error === "withdrawal"
+          ? { tone: "rose", text: "Withdrawal reconciliation failed." }
+          : query.error === "payment"
+            ? { tone: "rose", text: "Payment update failed." }
         : null;
 
   return (
@@ -58,6 +85,36 @@ export default async function OrdersPage({
           {flash.text}
         </p>
       ) : null}
+      <section className="mb-8 space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Withdrawal refund queue</h2>
+          <p className="text-sm text-[var(--text-secondary)]">Refunds remain queued until a trusted provider webhook confirms them or an operator confirms an external refund already completed.</p>
+        </div>
+        <AdminDataTable
+          columns={[{ header: "Due" }, { header: "Customer" }, { header: "Order" }, { header: "Product" }, { header: "Gateway" }, { header: "State" }, { header: "Reconcile" }]}
+          rows={openWithdrawals.map((withdrawal) => {
+            const overdue = withdrawal.refundDueAt < new Date();
+            const title = withdrawal.order.offer.course?.title ?? withdrawal.order.offer.bundle?.title ?? withdrawal.order.offer.name;
+
+            return {
+              key: withdrawal.id,
+              cells: [
+                <span key="due" className={overdue ? "font-semibold text-red-700" : "text-[var(--text-primary)]"}>{withdrawal.refundDueAt.toISOString()}</span>,
+                <div key="customer" className="space-y-1"><p>{withdrawal.consumerName}</p><p className="text-xs text-[var(--text-secondary)]">{withdrawal.acknowledgementEmail}</p></div>,
+                withdrawal.order.id.slice(0, 8),
+                title,
+                withdrawal.order.payments[0]?.gateway.displayName ?? "Unassigned",
+                <AdminStatusBadge key="status" tone={overdue || withdrawal.status === "REFUND_FAILED" ? "danger" : "warning"}>{withdrawal.status.replaceAll("_", " ")}</AdminStatusBadge>,
+                <form key="reconcile" action={completeManualContractWithdrawalAction}>
+                  <input type="hidden" name="withdrawalId" value={withdrawal.id} />
+                  <ConfirmSubmitButton confirmMessage="Confirm that the refund already completed outside Perseus? This action does not move money." className={adminSecondaryButtonClass}>Confirm external refund</ConfirmSubmitButton>
+                </form>,
+              ],
+            };
+          })}
+          empty="No withdrawal refunds are waiting."
+        />
+      </section>
       <AdminDataTable
         columns={[{ header: "Order" }, { header: "Customer" }, { header: "Product" }, { header: "Order status" }, { header: "Payment" }, { header: "Gateway" }, { header: "Action" }]}
         rows={orders.map((order) => {

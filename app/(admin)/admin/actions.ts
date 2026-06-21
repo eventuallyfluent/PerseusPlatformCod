@@ -19,7 +19,9 @@ import { encryptGatewayCredentialValue, isEncryptedGatewayCredentialValue } from
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
 import { resolveGatewayDefinition } from "@/lib/payments/gateway-definition";
 import { evaluateGatewayOperationalReadiness } from "@/lib/payments/readiness";
+import { isUnsupportedPaymentProvider } from "@/lib/payments/provider-policy";
 import { confirmManualPayment, failManualPayment } from "@/lib/payments/manual-payment";
+import { completeManualContractWithdrawal } from "@/lib/payments/contract-withdrawals";
 import { defaultHomepageSections, parseLinkLines, parseLines, type HomepageSectionPayloadMap } from "@/lib/homepage/sections";
 import { syncAccessProduct } from "@/lib/access-products/sync-access-product";
 import { syncProductOffer } from "@/lib/offers/sync-product-offer";
@@ -1281,6 +1283,10 @@ export async function createGatewayProfileAction(formData: FormData) {
     redirect("/admin/gateways?connection=failed&message=Gateway%20name%20and%20provider%20slug%20are%20required.");
   }
 
+  if (isUnsupportedPaymentProvider(provider)) {
+    redirect("/admin/gateways?connection=failed&message=This%20payment%20provider%20is%20not%20supported.");
+  }
+
   try {
     const existing = await prisma.gateway.findUnique({
       where: { provider },
@@ -1356,6 +1362,10 @@ export async function saveGatewayConfigurationAction(formData: FormData) {
   });
 
   if (!gateway) {
+    redirect("/admin/gateways?connection=missing");
+  }
+
+  if (isUnsupportedPaymentProvider(gateway.provider)) {
     redirect("/admin/gateways?connection=missing");
   }
 
@@ -1482,6 +1492,10 @@ export async function testGatewayConnectionAction(formData: FormData) {
     redirect("/admin/gateways?connection=missing");
   }
 
+  if (isUnsupportedPaymentProvider(gateway.provider)) {
+    redirect("/admin/gateways?connection=missing");
+  }
+
   const connector = findPaymentConnector(gateway.provider);
 
   if (!connector) {
@@ -1549,6 +1563,23 @@ export async function failManualPaymentAction(formData: FormData) {
   redirect("/admin/orders?saved=payment");
 }
 
+export async function completeManualContractWithdrawalAction(formData: FormData) {
+  const session = await requireAdmin();
+  const withdrawalId = String(formData.get("withdrawalId") ?? "").trim();
+
+  if (!withdrawalId) redirect("/admin/orders?error=withdrawal");
+
+  try {
+    await completeManualContractWithdrawal(withdrawalId, session.user.email!);
+  } catch {
+    redirect("/admin/orders?error=withdrawal");
+  }
+
+  revalidatePath("/admin/orders");
+  revalidatePath("/withdraw");
+  redirect("/admin/orders?saved=withdrawal");
+}
+
 export async function setGatewayActiveStateAction(formData: FormData) {
   await requireAdmin();
   const gatewayId = String(formData.get("gatewayId") ?? "").trim();
@@ -1564,6 +1595,10 @@ export async function setGatewayActiveStateAction(formData: FormData) {
   });
 
   if (!gateway) {
+    redirect("/admin/gateways?connection=failed&message=Gateway%20not%20found.");
+  }
+
+  if (isUnsupportedPaymentProvider(gateway.provider)) {
     redirect("/admin/gateways?connection=failed&message=Gateway%20not%20found.");
   }
 

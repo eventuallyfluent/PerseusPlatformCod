@@ -1,4 +1,4 @@
-import { OrderStatus, PaymentStatus, PrismaClient } from "@prisma/client";
+import { AccessGrantSourceType, ContractWithdrawalStatus, OrderStatus, PaymentStatus, PrismaClient } from "@prisma/client";
 import { createHmac } from "node:crypto";
 import { createOrder } from "../lib/orders/create-order";
 import { handleCanonicalEvent } from "../lib/payments/events/handle-canonical-event";
@@ -6,6 +6,8 @@ import { createCheckoutSession } from "../lib/payments/create-checkout-session";
 import { confirmManualPayment } from "../lib/payments/manual-payment";
 import { POST } from "../app/api/webhooks/[provider]/route";
 import { encryptGatewayCredentialValue } from "../lib/payments/gateway-credentials";
+import { grantCourseAccess } from "../lib/access/course-access-grants";
+import { getRefundDueDate, submitContractWithdrawal } from "../lib/payments/contract-withdrawals";
 
 const prisma = new PrismaClient();
 
@@ -821,11 +823,134 @@ async function verifyGenericHostedWebhook() {
   }
 }
 
+async function verifyContractWithdrawalQueue() {
+  const gateway = await prisma.gateway.upsert({
+    where: { provider: "withdrawal-queue-check" },
+    update: { displayName: "Withdrawal Queue Check", isActive: false, supportsRefunds: true },
+    create: {
+      provider: "withdrawal-queue-check",
+      displayName: "Withdrawal Queue Check",
+      kind: "generic_api",
+      isNativeAdapter: false,
+      isActive: false,
+      supportsRefunds: true,
+    },
+  });
+  const owner = await prisma.user.upsert({
+    where: { email: "withdrawal-owner@perseus.test" },
+    update: { name: "Withdrawal Owner" },
+    create: { email: "withdrawal-owner@perseus.test", name: "Withdrawal Owner" },
+  });
+  const otherUser = await prisma.user.upsert({
+    where: { email: "withdrawal-other@perseus.test" },
+    update: { name: "Other User" },
+    create: { email: "withdrawal-other@perseus.test", name: "Other User" },
+  });
+  const offer = await prisma.offer.findFirst({
+    where: { courseId: { not: null }, isPublished: true },
+    select: { id: true, courseId: true },
+  });
+
+  if (!offer?.courseId) throw new Error("Withdrawal verification failed: published course offer not found.");
+
+  const order = await createOrder({ offerId: offer.id, userId: owner.id });
+  const externalPaymentId = `withdrawal-payment-${Date.now()}`;
+  await prisma.$transaction([
+    prisma.order.update({ where: { id: order.id }, data: { status: OrderStatus.PAID } }),
+    prisma.payment.create({
+      data: {
+        orderId: order.id,
+        gatewayId: gateway.id,
+        status: PaymentStatus.SUCCEEDED,
+        amount: order.totalAmount,
+        currency: order.currency,
+        externalPaymentId,
+      },
+    }),
+  ]);
+  await grantCourseAccess({
+    userId: owner.id,
+    courseIds: [offer.courseId],
+    orderId: order.id,
+    sourceType: AccessGrantSourceType.ONE_TIME_PURCHASE,
+  });
+
+  let ownershipRejected = false;
+  try {
+    await submitContractWithdrawal({
+      orderId: order.id,
+      userId: otherUser.id,
+      consumerName: "Other User",
+      acknowledgementEmail: otherUser.email,
+    });
+  } catch {
+    ownershipRejected = true;
+  }
+
+  if (!ownershipRejected) throw new Error("Withdrawal verification failed: another user could withdraw the order.");
+
+  let acknowledged = false;
+  const withdrawal = await submitContractWithdrawal(
+    {
+      orderId: order.id,
+      userId: owner.id,
+      consumerName: "Withdrawal Owner",
+      acknowledgementEmail: owner.email,
+    },
+    {
+      sendAcknowledgement: async () => {
+        acknowledged = true;
+      },
+    },
+  );
+  const duplicate = await submitContractWithdrawal(
+    {
+      orderId: order.id,
+      userId: owner.id,
+      consumerName: "Withdrawal Owner",
+      acknowledgementEmail: owner.email,
+    },
+    { sendAcknowledgement: async () => undefined },
+  );
+  const expectedDueAt = getRefundDueDate(withdrawal.submittedAt);
+  const activeGrantCount = await prisma.courseAccessGrant.count({ where: { orderId: order.id, isActive: true } });
+
+  if (withdrawal.status !== ContractWithdrawalStatus.REFUND_QUEUED) throw new Error("Withdrawal verification failed: refund was not queued.");
+  if (!acknowledged || !withdrawal.acknowledgementSentAt) throw new Error("Withdrawal verification failed: acknowledgement evidence was not stored.");
+  if (withdrawal.refundDueAt.getTime() !== expectedDueAt.getTime()) throw new Error("Withdrawal verification failed: refund deadline is incorrect.");
+  if (duplicate.id !== withdrawal.id) throw new Error("Withdrawal verification failed: duplicate submission created another record.");
+  if (activeGrantCount !== 0) throw new Error("Withdrawal verification failed: order-derived access remained active.");
+
+  await handleCanonicalEvent({
+    canonicalEvent: "refund.created",
+    gatewayId: gateway.id,
+    orderId: order.id,
+    externalPaymentId,
+    payload: { source: "withdrawal-queue-verification", orderId: order.id },
+  });
+
+  const [refundedOrder, refundedWithdrawal, refundedPayment] = await Promise.all([
+    prisma.order.findUnique({ where: { id: order.id }, select: { status: true } }),
+    prisma.contractWithdrawal.findUnique({ where: { id: withdrawal.id }, select: { status: true, refundedAt: true } }),
+    prisma.payment.findFirst({ where: { orderId: order.id }, select: { status: true } }),
+  ]);
+
+  if (refundedOrder?.status !== OrderStatus.REFUNDED || refundedPayment?.status !== PaymentStatus.REFUNDED) {
+    throw new Error("Withdrawal verification failed: canonical refund did not finalize financial state.");
+  }
+  if (refundedWithdrawal?.status !== ContractWithdrawalStatus.REFUNDED || !refundedWithdrawal.refundedAt) {
+    throw new Error("Withdrawal verification failed: canonical refund did not complete the withdrawal.");
+  }
+
+  return { ok: true, withdrawalId: withdrawal.id, ownershipRejected, duplicateHandled: true };
+}
+
 async function main() {
   const bundlePayment = await verifyBundlePayment();
   const bankTransfer = await verifyBankTransfer();
   const nativeWebhook = await verifyNativeWebhook();
   const genericHostedWebhook = await verifyGenericHostedWebhook();
+  const contractWithdrawalQueue = await verifyContractWithdrawalQueue();
 
   console.log(
     JSON.stringify(
@@ -835,6 +960,7 @@ async function main() {
         bankTransfer,
         nativeWebhook,
         genericHostedWebhook,
+        contractWithdrawalQueue,
       },
       null,
       2,

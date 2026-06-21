@@ -21,6 +21,7 @@
     "imports:check:boundaries": "node --import tsx scripts/verify-import-boundaries.ts",
     "admin:check:auth": "node --import tsx scripts/verify-admin-auth-boundaries.ts",
     "admin:check:navigation": "node --import tsx scripts/verify-admin-navigation.ts",
+    "payments:check:providers": "node --import tsx scripts/verify-payment-provider-policy.ts",
     "images:backfill": "node --env-file=.env --import tsx scripts/backfill-image-assets.ts",
     "images:verify": "node --import tsx scripts/verify-image-assets.ts"
   },
@@ -36,7 +37,6 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^4.4.1",
-    "stripe": "^18.2.1",
     "tailwind-merge": "^3.3.0",
     "zod": "^3.25.42"
   },

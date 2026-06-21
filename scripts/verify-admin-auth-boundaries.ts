@@ -81,7 +81,7 @@ for (const file of adminActionFiles) {
     const functionStart = source.indexOf(match[0]);
     const guardWindow = source.slice(functionStart, functionStart + 260);
 
-    if (!/\{\s*await requireAdmin\(\);/.test(guardWindow)) {
+    if (!/\{\s*(?:const\s+[A-Za-z0-9_]+\s*=\s*)?await requireAdmin\(\);/.test(guardWindow)) {
       fail(`${file}: ${name} must call requireAdmin() before doing work.`);
     }
   }
@@ -92,7 +92,7 @@ for (const file of adminActionFiles) {
       const functionStart = source.indexOf(`export async function ${name}`);
       const guardWindow = source.slice(functionStart, functionStart + 320);
 
-      if (!/\{\s*await requireAdmin\(\);/.test(guardWindow)) {
+      if (!/\{\s*(?:const\s+[A-Za-z0-9_]+\s*=\s*)?await requireAdmin\(\);/.test(guardWindow)) {
         fail(`${file}: ${name} must call requireAdmin() before doing work.`);
       }
     }

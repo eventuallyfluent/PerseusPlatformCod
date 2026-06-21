@@ -1,5 +1,4 @@
 import { CourseStatus, LessonStatus, LessonType, OfferType, PrismaClient } from "@prisma/client";
-import { encryptGatewayCredentialValue } from "@/lib/payments/gateway-credentials";
 import { defaultHomepageSections } from "@/lib/homepage/sections";
 
 const prisma = new PrismaClient();
@@ -192,44 +191,10 @@ async function main() {
     },
   });
 
-  const gateway = await prisma.gateway.upsert({
-    where: { provider: "stripe" },
-    update: {
-      kind: "native",
-      isNativeAdapter: true,
-      checkoutModel: "hosted_redirect",
-      taxModel: "gateway_tax_engine",
-      settlementBehavior: "asynchronous",
-      supportsSubscriptions: true,
-      supportsRefunds: true,
-      supportsHostedCheckout: true,
-      supportsTaxCalculation: true,
-      supportsHostedTaxCollection: true,
-      taxRequiresExternalConfiguration: true,
-      requiresBillingAddress: true,
-    },
-    create: {
-      provider: "stripe",
-      displayName: "Stripe",
-      kind: "native",
-      isNativeAdapter: true,
-      isActive: true,
-      checkoutModel: "hosted_redirect",
-      taxModel: "gateway_tax_engine",
-      settlementBehavior: "asynchronous",
-      supportsSubscriptions: true,
-      supportsRefunds: true,
-      supportsHostedCheckout: true,
-      supportsTaxCalculation: true,
-      supportsHostedTaxCollection: true,
-      taxRequiresExternalConfiguration: true,
-      requiresBillingAddress: true,
-    },
-  });
-
   await prisma.gateway.upsert({
     where: { provider: "paypal" },
     update: {
+      isActive: false,
       kind: "native",
       isNativeAdapter: true,
       checkoutModel: "hosted_redirect",
@@ -261,6 +226,7 @@ async function main() {
   await prisma.gateway.upsert({
     where: { provider: "creem" },
     update: {
+      isActive: false,
       kind: "native",
       isNativeAdapter: true,
       checkoutModel: "hosted_redirect",
@@ -298,6 +264,7 @@ async function main() {
   await prisma.gateway.upsert({
     where: { provider: "bank-transfer" },
     update: {
+      isActive: false,
       kind: "bank_transfer",
       isNativeAdapter: false,
       checkoutModel: "manual_instructions",
@@ -439,23 +406,6 @@ async function main() {
         ],
         finalCta: { label: "Unlock the full bundle" },
       },
-    },
-  });
-
-  await prisma.gatewayCredential.upsert({
-    where: {
-      gatewayId_key: {
-        gatewayId: gateway.id,
-        key: "publishable_key",
-      },
-    },
-    update: {
-      valueEncrypted: encryptGatewayCredentialValue("pk_test_placeholder"),
-    },
-    create: {
-      gatewayId: gateway.id,
-      key: "publishable_key",
-      valueEncrypted: encryptGatewayCredentialValue("pk_test_placeholder"),
     },
   });
 

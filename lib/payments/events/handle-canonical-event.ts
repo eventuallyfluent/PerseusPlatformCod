@@ -2,6 +2,7 @@ import { OrderStatus, PaymentStatus, SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { fulfillPaidOrder } from "@/lib/payments/fulfill-paid-order";
 import { linkSubscriptionGrants, revokeSubscriptionAccess } from "@/lib/access/course-access-grants";
+import { finalizeOrderRefund } from "@/lib/payments/refunds";
 import type { CanonicalPaymentEvent } from "@/types";
 
 type EventContext = {
@@ -183,17 +184,6 @@ export async function handleCanonicalEvent(context: EventContext) {
   }
 
   if (context.canonicalEvent === "refund.created") {
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { status: OrderStatus.REFUNDED },
-    });
-
-    await prisma.payment.updateMany({
-      where: { orderId: order.id },
-      data: {
-        status: PaymentStatus.REFUNDED,
-        rawEvent: JSON.parse(JSON.stringify(context.payload)),
-      },
-    });
+    await finalizeOrderRefund(order.id, context.payload);
   }
 }

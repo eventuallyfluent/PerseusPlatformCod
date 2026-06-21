@@ -52,6 +52,13 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum ContractWithdrawalStatus {
+  REFUND_QUEUED
+  REFUND_PROCESSING
+  REFUNDED
+  REFUND_FAILED
+}
+
 enum SubscriptionStatus {
   ACTIVE
   PAST_DUE
@@ -146,6 +153,7 @@ model User {
   lessonCompletions LessonCompletion[]
   orders         Order[]
   accessGrants   CourseAccessGrant[]
+  contractWithdrawals ContractWithdrawal[]
   accounts       Account[]
   sessions       Session[]
   mailingListSubscriptions MailingListSubscription[]
@@ -463,11 +471,38 @@ model Order {
   subscription    Subscription?
   taxLines        OrderTaxLine[]
   accessGrants    CourseAccessGrant[]
+  contractWithdrawal ContractWithdrawal?
 
   @@index([createdAt])
   @@index([status, createdAt])
   @@index([userId])
   @@index([offerId])
+}
+
+model ContractWithdrawal {
+  id                       String                   @id @default(cuid())
+  orderId                  String                   @unique
+  userId                   String
+  status                   ContractWithdrawalStatus @default(REFUND_QUEUED)
+  consumerName             String
+  acknowledgementEmail     String
+  submittedAt              DateTime                 @default(now())
+  refundDueAt              DateTime
+  acknowledgementSentAt    DateTime?
+  acknowledgementError     String?
+  refundInitiatedAt        DateTime?
+  refundedAt               DateTime?
+  externalRefundId         String?
+  processingError          String?
+  reconciledAt             DateTime?
+  reconciledByEmail        String?
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  order                    Order                    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user                     User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, submittedAt])
+  @@index([status, submittedAt])
 }
 
 model OrderTaxLine {

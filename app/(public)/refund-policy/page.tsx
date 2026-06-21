@@ -15,9 +15,10 @@ export default function RefundPolicyPage() {
       summary={`${LEGAL_COMPANY.dbaName} sells digital educational products. This page explains how refund requests, duplicate charges, and payment disputes are handled.`}
       sections={[
         {
-          title: "Digital product policy",
+          title: "Right to withdraw",
           body: [
-            "Because courses and bundles are delivered digitally and access can begin immediately after payment, all sales should be treated as final unless a specific offer states a different refund window or applicable law requires otherwise.",
+            "Where applicable law provides a right to withdraw from an online contract, you may use the Withdraw from a contract function linked throughout this site. The function provides a review step, a separate confirmation step, and a timestamped acknowledgement.",
+            "For eligible EU distance contracts, the statutory withdrawal period is generally 14 days. The online function does not reduce a longer refund promise or another remedy available under applicable law.",
             "If a checkout page, sales page, or written offer includes a more specific refund promise, that more specific promise controls for that purchase.",
           ],
         },
@@ -32,7 +33,7 @@ export default function RefundPolicyPage() {
           title: "How approved refunds are processed",
           body: [
             "If a refund is approved, it is submitted back to the original payment method used at checkout. Timing after submission depends on the payment provider and the customer’s bank or card issuer.",
-            "If access was granted for the refunded purchase, that access may be removed once the refund is processed.",
+            "Access linked only to a withdrawn order is removed when the withdrawal is confirmed. Existing access supported by another active purchase or grant is preserved.",
           ],
         },
         {

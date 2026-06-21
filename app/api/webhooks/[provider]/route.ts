@@ -5,9 +5,13 @@ import { findPaymentConnector } from "@/lib/payments/adapter-registry";
 import { getGatewayCredentialMap } from "@/lib/payments/gateway-credential-map";
 import { handleCanonicalEvent } from "@/lib/payments/events/handle-canonical-event";
 import { parseGenericWebhookEvent, verifyGenericWebhookSignature } from "@/lib/payments/generic-webhook";
+import { isUnsupportedPaymentProvider } from "@/lib/payments/provider-policy";
 
 export async function POST(request: Request, { params }: { params: Promise<{ provider: string }> }) {
   const { provider } = await params;
+  if (isUnsupportedPaymentProvider(provider)) {
+    return NextResponse.json({ error: "Gateway not found" }, { status: 404 });
+  }
   const rawBody = await request.text();
   const gateway = await prisma.gateway.findUnique({
     where: { provider },

@@ -38,7 +38,7 @@ export default function TermsPage() {
         {
           title: "Refunds and disputes",
           body: [
-            "Refund treatment is governed by the published Refund Policy. Customers should contact support before initiating disputes or chargebacks so that access, duplicate charges, or payment issues can be reviewed directly.",
+            "Refund treatment is governed by the published Refund Policy. Where a statutory online withdrawal right applies, customers may use the Withdraw from a contract function without first contacting support.",
             "If a chargeback or payment reversal occurs, the business may suspend access to the affected product while the dispute is being investigated.",
           ],
         },

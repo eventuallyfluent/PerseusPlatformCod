@@ -42,45 +42,14 @@ export async function linkSubscriptionGrants(orderId: string, subscriptionId: st
   });
 }
 
-export async function revokeSubscriptionAccess(input: { orderId?: string | null; subscriptionId?: string | null }) {
-  const subscription = input.subscriptionId
-    ? await prisma.subscription.findUnique({ where: { id: input.subscriptionId } })
-    : input.orderId
-      ? await prisma.subscription.findUnique({ where: { orderId: input.orderId } })
-      : null;
-  const orderId = input.orderId ?? subscription?.orderId ?? null;
-  const subscriptionId = input.subscriptionId ?? subscription?.id ?? null;
-
-  if (!orderId && !subscriptionId) return;
+async function revokeAccessGrants(grants: Array<{ id: string; userId: string; courseId: string; createdEnrollment: boolean }>) {
+  if (grants.length === 0) return;
 
   const revokedAt = new Date();
-  const grants = await prisma.courseAccessGrant.findMany({
-    where: {
-      isActive: true,
-      OR: [
-        ...(orderId ? [{ orderId }] : []),
-        ...(subscriptionId ? [{ subscriptionId }] : []),
-      ],
-      sourceType: AccessGrantSourceType.SUBSCRIPTION,
-    },
-  });
-
   await prisma.courseAccessGrant.updateMany({
     where: { id: { in: grants.map((grant) => grant.id) } },
     data: { isActive: false, revokedAt },
   });
-
-  if (subscriptionId) {
-    await prisma.subscription.update({
-      where: { id: subscriptionId },
-      data: { status: SubscriptionStatus.CANCELED, endedAt: revokedAt },
-    });
-  } else if (orderId) {
-    await prisma.subscription.updateMany({
-      where: { orderId },
-      data: { status: SubscriptionStatus.CANCELED, endedAt: revokedAt },
-    });
-  }
 
   await Promise.all(
     grants.map(async (grant) => {
@@ -95,12 +64,62 @@ export async function revokeSubscriptionAccess(input: { orderId?: string | null;
 
       if (grant.createdEnrollment && !otherActiveGrant) {
         await prisma.enrollment.deleteMany({
-          where: {
-            userId: grant.userId,
-            courseId: grant.courseId,
-          },
+          where: { userId: grant.userId, courseId: grant.courseId },
         });
       }
     }),
   );
+}
+
+export async function revokeOrderAccess(orderId: string) {
+  const grants = await prisma.courseAccessGrant.findMany({
+    where: { orderId, isActive: true },
+    select: { id: true, userId: true, courseId: true, createdEnrollment: true },
+  });
+
+  await revokeAccessGrants(grants);
+  const endedAt = new Date();
+  await prisma.subscription.updateMany({
+    where: { orderId, status: { notIn: [SubscriptionStatus.CANCELED, SubscriptionStatus.EXPIRED] } },
+    data: { status: SubscriptionStatus.CANCELED, endedAt },
+  });
+}
+
+export async function revokeSubscriptionAccess(input: { orderId?: string | null; subscriptionId?: string | null }) {
+  const subscription = input.subscriptionId
+    ? await prisma.subscription.findUnique({ where: { id: input.subscriptionId } })
+    : input.orderId
+      ? await prisma.subscription.findUnique({ where: { orderId: input.orderId } })
+      : null;
+  const orderId = input.orderId ?? subscription?.orderId ?? null;
+  const subscriptionId = input.subscriptionId ?? subscription?.id ?? null;
+
+  if (!orderId && !subscriptionId) return;
+
+  const grants = await prisma.courseAccessGrant.findMany({
+    where: {
+      isActive: true,
+      OR: [
+        ...(orderId ? [{ orderId }] : []),
+        ...(subscriptionId ? [{ subscriptionId }] : []),
+      ],
+      sourceType: AccessGrantSourceType.SUBSCRIPTION,
+    },
+  });
+
+  await revokeAccessGrants(grants);
+  const revokedAt = new Date();
+
+  if (subscriptionId) {
+    await prisma.subscription.update({
+      where: { id: subscriptionId },
+      data: { status: SubscriptionStatus.CANCELED, endedAt: revokedAt },
+    });
+  } else if (orderId) {
+    await prisma.subscription.updateMany({
+      where: { orderId },
+      data: { status: SubscriptionStatus.CANCELED, endedAt: revokedAt },
+    });
+  }
+
 }

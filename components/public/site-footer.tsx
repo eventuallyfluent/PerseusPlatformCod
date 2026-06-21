@@ -22,7 +22,7 @@ export async function SiteFooter() {
           : link,
     )
     .filter((link, index, items) => items.findIndex((candidate) => candidate.label === link.label && candidate.href === link.href) === index);
-  const legalLinks = [...payload.legalLinks, ...LEGAL_PAGE_LINKS]
+  const legalLinks = [...payload.legalLinks, ...LEGAL_PAGE_LINKS, { label: "Withdraw from a contract", href: "/withdraw" }]
     .map((link) => ({
       ...link,
       href: resolveLegalLink(link.label, link.href),
